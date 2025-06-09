@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
+import 'package:finalsalesrep/total_history.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,62 +19,19 @@ class _HistorypageState extends State<Historypage> {
   @override
   void initState() {
     super.initState();
-    fetchCustomerForm();
+   // fetchCustomerForm();
+   loadTotalHistory();
   }
-
-  Future<void> fetchCustomerForm() async {
-    final prefs = await SharedPreferences.getInstance();
-    final apikey = prefs.getString('apikey');
-    final userid = prefs.getInt('id');
-
-    if (apikey == null || userid == null) {
-      print(apikey);
-      print(userid);
-      print("Missing user credentials");
-
-    }
-
-    // const url = "http://10.100.13.138:8099/api/customer_forms_info_id";
-
-    try {
-      final response = await http
-          .post(
-            Uri.parse("http://10.100.13.138:8099/api/customer_forms_info_id"),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              "params": {
-                "user_id": userid,
-                "token": apikey,
-              }
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final historyData = Historymodel.fromJson(jsonResponse);
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(
-            'record_count', historyData.result?.records?.length ?? 0);
-
-
-            print("ggggggggggggggggg${historyData.result?.records?.length}");
-        print("Response: $jsonResponse");
-
-        setState(() {
-          //  customerFormData=jsonResponse;
-          forms = historyData;
-          print("y1111111111111111111111111111111111111$forms");
-          print("History Data: ${historyData.result?.records}");
-          // Update the state with the fetched data
-        });
-      } else {
-        print("Error: ${response.statusCode}");
-      }
-    } catch (error) {
-      print("Fetch error: $error");
-    }
+void loadTotalHistory()async{
+  totalHistory historyFetcher=totalHistory();
+  Historymodel? historyData=await historyFetcher.fetchCustomerForm();
+  if(historyData!=null){
+    setState(() {
+      forms=historyData;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
