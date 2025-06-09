@@ -1,8 +1,6 @@
-import 'dart:convert';
-import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finalsalesrep/commonclasses/onedayagent.dart';
+import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 
 class Onedayhistory extends StatefulWidget {
   const Onedayhistory({super.key});
@@ -12,118 +10,52 @@ class Onedayhistory extends StatefulWidget {
 }
 
 class _OnedayhistoryState extends State<Onedayhistory> {
-  OneDayHistory? onedayforms;
+  List<Record> records = [];
   bool _isLoading = true;
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
 
+  final Onedayagent _onedayagent = Onedayagent();
+
   @override
   void initState() {
     super.initState();
-    fetchOnedayHistory();
+    loadOnedayHistory();
   }
 
-  Future<void> fetchOnedayHistory() async {
-    final prefs = await SharedPreferences.getInstance();
-    final apikey = prefs.getString('apikey');
-    final userid = prefs.getInt('id');
+Future<void> loadOnedayHistory() async {
+  setState(() {
+    _isLoading = true;
+  });
 
-    if (apikey == null || userid == null) {
-      print("Missing user credentials");
-      setState(() {
-        _isLoading = false;
-      });
-      return;
-    }
+  final result = await _onedayagent.fetchOnedayHistory();
 
-    try {
-      final response = await http
-          .post(
-            Uri.parse("http://10.100.13.138:8099/api/customer_forms_info_one_day"),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              "params": {
-                "user_id": userid,
-                "token": apikey,
-              }
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
+  setState(() {
+    records = (result['records'] as List<Record>?) ?? [];
 
-      if (response.statusCode == 200) {
-        print("Response: ${response.body}");
-        final jsonResponse = jsonDecode(response.body);
-        final historyoneday = OneDayHistory.fromJson(jsonResponse);
-        final records = historyoneday.result?.records ?? [];
-
-        int accepted = 0;
-        int rejected = 0;
-        int subscribed = 0;
-
-        for (var record in records) {
-          if (record.eenaduNewspaper == true) {
-            subscribed++;
-            continue; // Skip offer check if already subscribed
-          }
-
-          if (record.freeOffer15Days == true) {
-            accepted++;
-          }
-
-          if (record.reasonNotTakingOffer != null &&
-              record.reasonNotTakingOffer!.isNotEmpty) {
-            rejected++;
-          }
-        }
-
-        await prefs.setInt('today_count', records.length);
-        await prefs.setInt('offer_accepted', accepted);
-        await prefs.setInt('offer_rejected', rejected);
-        await prefs.setInt('already_subscribed', subscribed);
-
-        print("Saved today_count = ${records.length}");
-        print("Offer Accepted: $accepted, Rejected: $rejected, Subscribed: $subscribed");
-
-        setState(() {
-          onedayforms = historyoneday;
-          _isLoading = false;
-          offerAcceptedCount = accepted;
-          offerRejectedCount = rejected;
-          alreadySubscribedCount = subscribed;
-        });
-      } else {
-        print("Failed to fetch one-day history: ${response.statusCode}");
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } catch (error) {
-      print("Error fetching one-day history: $error");
-      setState(() {
-        _isLoading = false;
-      });
-    }
-  }
-
+    offerAcceptedCount = result['offer_accepted'] ?? 0;
+    offerRejectedCount = result['offer_rejected'] ?? 0;
+    alreadySubscribedCount = result['already_subscribed'] ?? 0;
+    _isLoading = false;
+  });
+}
   @override
   Widget build(BuildContext context) {
-    final ondayCustomerData = onedayforms?.result?.records ?? [];
-
     return Scaffold(
       appBar: AppBar(
         title: Row(
           children: [
             const Text("Houses Visited Today"),
             const Spacer(),
-            Text("count: ${ondayCustomerData.length}"),
+            Text("count: ${records.length}"),
           ],
         ),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ondayCustomerData.isEmpty
+          : records.isEmpty
               ? const Center(child: Text("No Houses Visited Today"))
               : Column(
                   children: [
@@ -132,18 +64,18 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(" Offer Accepted: $offerAcceptedCount"),
-                          Text(" Offer Rejected: $offerRejectedCount"),
-                          Text(" Already Subscribed: $alreadySubscribedCount"),
+                          Text("Offer Accepted: $offerAcceptedCount"),
+                          Text("Offer Rejected: $offerRejectedCount"),
+                          Text("Already Subscribed: $alreadySubscribedCount"),
                           const Divider(),
                         ],
                       ),
                     ),
                     Expanded(
                       child: ListView.builder(
-                        itemCount: ondayCustomerData.length,
+                        itemCount: records.length,
                         itemBuilder: (context, index) {
-                          final record = ondayCustomerData[index];
+                          final record = records[index];
                           return Card(
                             margin: const EdgeInsets.all(8),
                             child: ListTile(
@@ -153,8 +85,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
-                                    Text("Agent Name: ${record.agentName ?? 'N/A'}",
-                                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                                    Text("Agent Name: ${record.agentName ?? 'N/A'}", style: const TextStyle(fontWeight: FontWeight.bold)),
                                     Text("Agent Login: ${record.agentLogin ?? 'N/A'}"),
                                     Text("Date: ${record.date ?? 'N/A'}"),
                                     Text("Time: ${record.time ?? 'N/A'}"),
