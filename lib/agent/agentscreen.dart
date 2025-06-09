@@ -224,7 +224,7 @@ class _AgentscreenState extends State<Agentscreen> {
                         ),
                         //today Container
                         Container(
-                          height: 80,
+                          height: 59,
                           width: 200,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
@@ -248,8 +248,9 @@ class _AgentscreenState extends State<Agentscreen> {
                 ),
                 const Spacer(),
                 Container(
-                  height: MediaQuery.of(context).size.height / 6.33,
-                  width: 190,
+                  height: MediaQuery.of(context).size.height / 6.3,
+                  // width: double.infinity/2,
+                  width: MediaQuery.of(context).size.width / 2.2,
                   decoration: BoxDecoration(
                       border: Border.all(
                         width: 2.2,
@@ -267,9 +268,9 @@ class _AgentscreenState extends State<Agentscreen> {
                   child: Column(
                     children: [
                       //   2nd  House Visited Container
-
+ 
                       Container(
-                          height: 60,
+                          height: 59,
                           width: 200,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
@@ -291,7 +292,7 @@ class _AgentscreenState extends State<Agentscreen> {
                           )),
                       //today Container
                       Container(
-                        height: 80,
+                        height: 60.5,
                         width: 200,
                         decoration: const BoxDecoration(
                             borderRadius: BorderRadius.only(
