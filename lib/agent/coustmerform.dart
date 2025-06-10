@@ -1,7 +1,7 @@
 import 'dart:convert';
-// ignore: depend_on_referenced_packages
-// import 'package:geolocator/geolocator.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -25,9 +25,12 @@ class _CoustmerState extends State<Coustmer> {
   int offernotintresetedpeoplecount = 0;
   int count = 0;
   int addcount = 0;
-  String latitude="";
-  String longitude="";
-  
+  String latitude = "";
+  String longitude = "";
+  // String? locationAddress;
+  // Employment Dropdown Variables
+  String? _selectedJobType;
+  String? _selectedGovDepartment;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -43,87 +46,52 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController city = TextEditingController();
   TextEditingController pincode = TextEditingController();
   TextEditingController adddress = TextEditingController();
-
   TextEditingController mobile = TextEditingController();
   TextEditingController feedback_to_improve = TextEditingController();
   TextEditingController reason_for_not_reading = TextEditingController();
   TextEditingController current_newspaper = TextEditingController();
   TextEditingController reason_for_not_taking_eenadu = TextEditingController();
   TextEditingController reason_for_not_taking_offer = TextEditingController();
-
-  // TextEditingController central_designation = TextEditingController();
-  // TextEditingController central_department = TextEditingController();
-  // TextEditingController psu_designation = TextEditingController();
-  // TextEditingController psu_department = TextEditingController();
-  // TextEditingController statejob_role = TextEditingController();
-  // TextEditingController statejob_department = TextEditingController();
-
   TextEditingController job_designation = TextEditingController();
   TextEditingController job_proffesion = TextEditingController();
-
-  // Employment Dropdown Variables
-  String? _selectedJobType;
-  String? _selectedGovDepartment;
-
   TextEditingController privateCompanyController = TextEditingController();
   TextEditingController privatedesignationController = TextEditingController();
-
   TextEditingController privateProffesionController = TextEditingController();
 
+  Future<void> getCurrentLocation() async {
+    LocationPermission permission = await Geolocator.checkPermission();
 
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      print("Location Denied");
+      await Geolocator.requestPermission();
+      LocationPermission get = await Geolocator.requestPermission();
+    } else {
+      Position currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
 
+      print("latitude=${currentPosition.latitude.toString()}");
+      latitude = currentPosition.latitude.toString();
+      print("longitude=${currentPosition.longitude.toString()}");
+      longitude = currentPosition.longitude.toString();
 
+      // List<Placemark> placemarks = await placemarkFromCoordinates(
+      //     currentPosition.latitude, currentPosition.longitude);
+      // Placemark place = placemarks.first;
 
+      // locationAddress =
+      //     '${place.street},${place.locality},${place.administrativeArea}, ${place.country}';
+      // print("Address:$locationAddress");
 
+      setState(() {
+        latitude = currentPosition.latitude.toString();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  // getCurrentLocation() async {
-  //   LocationPermission permission = await Geolocator.checkPermission();
-  //   if (permission == LocationPermission.denied ||
-  //       permission == LocationPermission.deniedForever) {
-  //     print("Location Denied");
-  //      LocationPermission get = await Geolocator.requestPermission();
-  //   } else {
-  //     Position currentPosition = await Geolocator.getCurrentPosition(
-  //         desiredAccuracy: LocationAccuracy.high);
-
-  //     print("Lattitude=${currentPosition.latitude.toString()}");
-  //     latitude=currentPosition.latitude.toString();
-
-  //     print("Longitude=${currentPosition.longitude.toString()}");
-  //     longitude=currentPosition.longitude.toString();
-
-  //   }
-  // }
-
-
-
-
-
-
-
-
-
-
-
-
-
+        longitude = currentPosition.longitude.toString();
+        // locationAddress =
+        //     '${place.street},${place.locality},${place.administrativeArea}, ${place.country}';
+      });
+    }
+  }
 
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
@@ -139,7 +107,6 @@ class _CoustmerState extends State<Coustmer> {
   @override
   void initState() {
     super.initState();
-    // final SharedPreferences prefs = await SharedPreferences.getInstance();
 
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
@@ -155,115 +122,121 @@ class _CoustmerState extends State<Coustmer> {
     });
   }
 
- Future<void> uploaddata() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final String? agentapi = await prefs.getString('apikey');
-  final String? agentlog = await prefs.getString('agentlogin');
-  final String? unit = await prefs.getString('unit');
+  Future<void> uploaddata() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? agentapi = await prefs.getString('apikey');
+    final String? agentlog = await prefs.getString('agentlogin');
+    final String? unit = await prefs.getString('unit');
+    print("Sending Latitude: $latitude, Longitude:$longitude");
 
-  print("Rrddddddddddddddddddddd$agentapi");
+    print("Rrddddddddddddddddddddd$agentapi");
 
-  try {
-    const url = 'http://10.100.13.138:8099/api/customer_form';
-    final responsee = await http.post(
-      Uri.parse(url),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        "params": {
-          "token": agentapi,
-          "agent_name": agents,
-          "agent_login": agentlog,
-          "unit_name": unit,
-          "date": datecontroller.text,
-          "time": timecontroller.text,
-          "family_head_name": familyhead.text,
-          "father_name": fathersname.text,
-          "mother_name": mothername.text,
-          "spouse_name": spousename.text,
-          "house_number": hno.text,
-          "street_number": streetnumber.text,
-          "city": city.text,
-          "pin_code": pincode.text,
-          "address": adddress.text,
-          "mobile_number": mobile.text,
-          "eenadu_newspaper": _isYes, // Send boolean directly
-          "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
-          "read_newspaper": _isAnotherToggle, // Send boolean directly
-          "current_newspaper": current_newspaper.text,
-          "reason_for_not_taking_eenadu_newsPaper": reason_for_not_taking_eenadu.text,
-          "reason_not_reading": reason_for_not_reading.text,
-          "free_offer_15_days": _isofferTogle, // Send boolean directly
-          "reason_not_taking_offer": reason_for_not_taking_offer.text,
-          "employed": _isemployed, // Send boolean directly
-          "job_type": _selectedJobType,
-          "job_type_one": _selectedGovDepartment,
-          "job_profession": job_proffesion.text,
-          "job_designation": job_designation.text,
-          "company_name": privateCompanyController.text,
-          "profession": privateProffesionController.text,
-          "job_designation_one": privatedesignationController.text,
-          "latitude": latitude,
-          "longitude": longitude,
-        }
-      }),
-    );
+    try {
+      const url = 'http://10.100.13.138:8099/api/customer_form';
+      final responsee = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          "params": {
+            "token": agentapi,
+            "agent_name": agents,
+            "agent_login": agentlog,
+            "unit_name": unit,
+            "date": datecontroller.text,
+            "time": timecontroller.text,
+            "family_head_name": familyhead.text,
+            "father_name": fathersname.text,
+            "mother_name": mothername.text,
+            "spouse_name": spousename.text,
+            "house_number": hno.text,
+            "street_number": streetnumber.text,
+            "city": city.text,
+            "pin_code": pincode.text,
+            "address": adddress.text,
+            "mobile_number": mobile.text,
+            "eenadu_newspaper": _isYes, // Send boolean directly
+            "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
+            "read_newspaper": _isAnotherToggle, // Send boolean directly
+            "current_newspaper": current_newspaper.text,
+            "reason_for_not_taking_eenadu_newsPaper":
+                reason_for_not_taking_eenadu.text,
+            "reason_not_reading": reason_for_not_reading.text,
+            "free_offer_15_days": _isofferTogle, // Send boolean directly
+            "reason_not_taking_offer": reason_for_not_taking_offer.text,
+            "employed": _isemployed, // Send boolean directly
+            "job_type": _selectedJobType,
+            "job_type_one": _selectedGovDepartment,
+            "job_profession": job_proffesion.text,
+            "job_designation": job_designation.text,
+            "company_name": privateCompanyController.text,
+            "profession": privateProffesionController.text,
+            "job_designation_one": privatedesignationController.text,
+            "latitude": latitude,
+            "longitude": longitude,
+            // "location_address": locationAddress,
+          }
+        }),
+      );
 
-    if (responsee.statusCode == 200) {
-      print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww${responsee.statusCode}");
-      final jsonResponse = jsonDecode(responsee.body) as Map<String, dynamic>;
-      setState(() {
-        data = coustmerform.fromJson(jsonResponse);
-        print("ttttttttttttttttttttttttttttttttttt${data?.toJson().toString()}");
-      });
+      print(latitude);
+      print(longitude);
+      if (responsee.statusCode == 200) {
+        print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww${responsee.statusCode}");
+        final jsonResponse = jsonDecode(responsee.body) as Map<String, dynamic>;
+        setState(() {
+          data = coustmerform.fromJson(jsonResponse);
+          print(
+              "ttttttttttttttttttttttttttttttttttt${data?.toJson().toString()}");
+        });
 
-      if (data?.result?.code == "200") {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Data added successfully")),
-        );
+        if (data?.result?.code == "200") {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Data added successfully")),
+          );
 
-        // Load and update SharedPreferences values
-        int houseVisited = prefs.getInt("house_visited") ?? 0;
-        int targetLeft = prefs.getInt("target_left") ?? 0;
-        int alreadySubscribed = prefs.getInt("already_Subscribed") ?? 0;
-        int offerAccepted = prefs.getInt("offer_Accepted") ?? 0;
-        int offerRejected = prefs.getInt("offer_Rejected") ?? 0;
+          // Load and update SharedPreferences values
+          int houseVisited = prefs.getInt("house_visited") ?? 0;
+          int targetLeft = prefs.getInt("target_left") ?? 0;
+          int alreadySubscribed = prefs.getInt("already_Subscribed") ?? 0;
+          int offerAccepted = prefs.getInt("offer_Accepted") ?? 0;
+          int offerRejected = prefs.getInt("offer_Rejected") ?? 0;
 
-        // Update values
-        houseVisited += 1;
-        if (targetLeft > 0) {
-          targetLeft -= 1;
-        }
-        if (_isYes) {
-          alreadySubscribed += 1;
-        } else if (_isofferTogle) {
-          offerAccepted += 1;
+          // Update values
+          houseVisited += 1;
+          if (targetLeft > 0) {
+            targetLeft -= 1;
+          }
+          if (_isYes) {
+            alreadySubscribed += 1;
+          } else if (_isofferTogle) {
+            offerAccepted += 1;
+          } else {
+            offerRejected += 1;
+          }
+
+          // Save updated values
+          await prefs.setInt("house_visited", houseVisited);
+          await prefs.setInt("target_left", targetLeft);
+          await prefs.setInt("already_subscribed", alreadySubscribed);
+          await prefs.setInt("offer_accepted", offerAccepted);
+          await prefs.setInt("offer_rejected", offerRejected);
+
+          Navigator.pop(context);
         } else {
-          offerRejected += 1;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Data Not added")),
+          );
         }
-
-        // Save updated values
-        await prefs.setInt("house_visited", houseVisited);
-        await prefs.setInt("target_left", targetLeft);
-        await prefs.setInt("already_subscribed", alreadySubscribed);
-        await prefs.setInt("offer_accepted", offerAccepted);
-        await prefs.setInt("offer_rejected", offerRejected);
-
-        Navigator.pop(context);
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Data Not added")),
-        );
       }
+    } catch (error) {
+      print("Error fetching data: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $error")),
+      );
     }
-  } catch (error) {
-    print("Error fetching data: $error");
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $error")),
-    );
   }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -309,7 +282,7 @@ class _CoustmerState extends State<Coustmer> {
                   ],
                 ),
 
-                const SizedBox(height: 15), 
+                const SizedBox(height: 15),
                 const Text("Family Details",
                     style: TextStyle(
                         color: Colors.blue,
@@ -705,7 +678,7 @@ class _CoustmerState extends State<Coustmer> {
                           borderRadius: BorderRadius.circular(10)),
                     ),
                   ),
-                SizedBox(
+                const SizedBox(
                   height: 20,
                 ),
 
@@ -714,15 +687,13 @@ class _CoustmerState extends State<Coustmer> {
                     onTap: () async => {
                       if (_formKey.currentState?.validate() ?? false)
                         {
-                            
-                         // datasaved(),
-                          //  await  getCurrentLocation(),
+                          // datasaved(),
+                          await getCurrentLocation(),
                           await uploaddata(),
-                           
                         }
                     },
                     child: Container(
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                           color: Colors.blue,
                           borderRadius: BorderRadius.all(Radius.circular(50))),
                       height: MediaQuery.of(context).size.height / 18,
@@ -745,59 +716,7 @@ class _CoustmerState extends State<Coustmer> {
       ),
     );
   }
-
-  // datasaved() {
-  //   CollectionReference collref =
-  //       FirebaseFirestore.instance.collection("survey");
-  //   collref.add({
-  //     "agent_name": agents,
-  //     // "agent_login": "johndoe",
-  //     // "unit_name": "Sales Unit 1",
-  //     "date": datecontroller.text,
-  //     "time": timecontroller.text,
-  //     "family_head_name": familyhead.text,
-  //     "father_name": fathersname.text,
-  //     "mother_name": mothername.text,
-  //     "spouse_name": spousename.text,
-  //     "house_number": hno.text,
-  //     "street_number": streetnumber.text,
-  //     "city": city.text,
-  //     "pin_code": pincode.text,
-  //     "address": adddress.text,
-  //     "mobile_number": mobile.text,
-  //     "eenadu_newspaper": _isYes,
-  //     "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
-  //     "read_newspaper": _isAnotherToggle,
-  //     "current_newspaper": current_newspaper.text,
-  //     "reason_for_not_taking_eenadu_newsPaper":
-  //         reason_for_not_taking_eenadu.text,
-  //     "reason_not_reading": reason_for_not_reading.text,
-  //     "free_offer_15_days": _isofferTogle,
-  //     "reason_not_taking_offer": reason_for_not_taking_offer.text,
-  //     "employed": _isemployed,
-  //     "job_type": _selectedJobType,
-  //     "job_type_one": _selectedGovDepartment,
-  //     "job_profession": job_designation.text,
-  //     "job_designation": job_proffesion.text,
-  //     "company_name": privateCompanyController.text,
-  //     "profession": privateProffesionController.text,
-  //     // "job_designation_one": "Lead Developer",
-  //     "latitude": "40.7128",
-  //     "longitude": "-74.0060"
-  //   });
-  // }
 }
-
-//  ElevatedButton(
-//                 onPressed: () async {
-
-//                 },
-//                 child: const Center(
-//                     child: Text(
-//                   "submit Form",
-//                   style:
-//                       TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-//                 )))
 
 SizedBox date(
     {required TextEditingController Dcontroller,
