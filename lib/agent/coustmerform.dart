@@ -58,13 +58,29 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privatedesignationController = TextEditingController();
   TextEditingController privateProffesionController = TextEditingController();
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       print("Location Denied");
-   //   await Geolocator.requestPermission();
+      await Geolocator.requestPermission();
       LocationPermission get = await Geolocator.requestPermission();
     } else {
       Position currentPosition = await Geolocator.getCurrentPosition(
@@ -75,23 +91,23 @@ class _CoustmerState extends State<Coustmer> {
       print("longitude=${currentPosition.longitude.toString()}");
       longitude = currentPosition.longitude.toString();
 
-      // List<Placemark> placemarks = await placemarkFromCoordinates(
-      //     currentPosition.latitude, currentPosition.longitude);
-      // Placemark place = placemarks.first;
-
-      // locationAddress =
-      //     '${place.street},${place.locality},${place.administrativeArea}, ${place.country}';
-      // print("Address:$locationAddress");
-
       setState(() {
         latitude = currentPosition.latitude.toString();
-
         longitude = currentPosition.longitude.toString();
-        // locationAddress =
-        //     '${place.street},${place.locality},${place.administrativeArea}, ${place.country}';
       });
     }
   }
+
+
+
+
+
+
+
+
+
+
+
 
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
@@ -107,6 +123,7 @@ class _CoustmerState extends State<Coustmer> {
   @override
   void initState() {
     super.initState();
+   
 
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
