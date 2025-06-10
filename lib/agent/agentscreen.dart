@@ -19,7 +19,7 @@ class _AgentscreenState extends State<Agentscreen> {
   int alreadysubscribed = 0;
   int offeraccepted = 0;
   int offerrejected = 0;
-  String agentname="";
+  String agentname = "";
 
   void initState() {
     super.initState();
@@ -37,14 +37,14 @@ class _AgentscreenState extends State<Agentscreen> {
     final alreadysubsccribedd = prefs.getInt('already_subscribed');
     final offeracceptedd = prefs.getInt('offer_accepted');
     final offerrejectedd = prefs.getInt('offer_rejected');
-    final agent =prefs.getString("username");
+    final agent = prefs.getString("username");
 
     setState(() {
       todaycount = todaycounrt ?? 0;
       alreadysubscribed = alreadysubsccribedd ?? 0;
       offeraccepted = offeracceptedd ?? 0;
       offerrejected = offerrejectedd ?? 0;
-      agentname =agent??"";
+      agentname = agent ?? "";
     });
 
     print("Today Count: $todaycount");
@@ -62,7 +62,7 @@ class _AgentscreenState extends State<Agentscreen> {
                 Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => agentProfile(),
+                      builder: (context) => const agentProfile(),
                     ));
               },
               child: Icon(
@@ -80,7 +80,13 @@ class _AgentscreenState extends State<Agentscreen> {
                 fontWeight: FontWeight.w900,
               ),
             ),
-            Text("Welcome $agentname",style: TextStyle(color: Colors.black,fontSize: 30,fontWeight: FontWeight.bold),)
+            Text(
+              "Welcome $agentname",
+              style: const TextStyle(
+                  color: Colors.black,
+                  fontSize: 30,
+                  fontWeight: FontWeight.bold),
+            )
           ],
         ),
       ),
@@ -132,7 +138,7 @@ class _AgentscreenState extends State<Agentscreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
           Navigator.push(
-              context, MaterialPageRoute(builder: (_) => Coustmer()));
+              context, MaterialPageRoute(builder: (_) => const Coustmer()));
         },
         label: const Text(
           "Customer Form",
@@ -184,7 +190,7 @@ class _AgentscreenState extends State<Agentscreen> {
                     Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => Onedayhistory(),
+                          builder: (context) => const Onedayhistory(),
                         ));
                   },
                   child: Container(
@@ -194,13 +200,13 @@ class _AgentscreenState extends State<Agentscreen> {
                         border: Border.all(
                           width: 2.0,
                         ),
-                        boxShadow: [
+                        boxShadow: const [
                           BoxShadow(
                               color: Colors.black,
                               blurRadius: 10,
-                              offset: const Offset(3, 3))
+                              offset: Offset(3, 3))
                         ],
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                             topLeft: Radius.circular(20),
                             bottomLeft: Radius.circular(20)),
                         color: Colors.white),
@@ -208,8 +214,8 @@ class _AgentscreenState extends State<Agentscreen> {
                       children: [
                         //   2nd  House Visited Container
                         Container(
-                          height: 60,
-                          width: 200,
+                          height: MediaQuery.of(context).size.height * 0.063,
+                          width: MediaQuery.of(context).size.width * 0.5,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
                                 topLeft: Radius.circular(20),
@@ -223,9 +229,10 @@ class _AgentscreenState extends State<Agentscreen> {
                           )),
                         ),
                         //today Container
+
                         Container(
-                          height: 59,
-                          width: 200,
+                          height: MediaQuery.of(context).size.height * 0.09,
+                          width: MediaQuery.of(context).size.width * 0.5,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
 
@@ -255,45 +262,45 @@ class _AgentscreenState extends State<Agentscreen> {
                       border: Border.all(
                         width: 2.2,
                       ),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                             color: Colors.black,
                             blurRadius: 10,
-                            offset: const Offset(3, 3))
+                            offset: Offset(3, 3))
                       ],
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           topRight: Radius.circular(20),
                           bottomRight: Radius.circular(20)),
                       color: Colors.white),
                   child: Column(
                     children: [
                       //   2nd  House Visited Container
- 
+
                       Container(
-                          height: 59,
-                          width: 200,
+                        height: MediaQuery.of(context).size.height * 0.063,
+                          width: MediaQuery.of(context).size.width * 0.5,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
                                 topRight: Radius.circular(20),
                               ),
                               color: Colors.white),
-                          child: Row(
+                          child: const Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
                                 "Target Left",
-                                style: const TextStyle(
+                                style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 20),
                               ),
-                              const SizedBox(
+                              SizedBox(
                                 width: 10,
                               ),
                             ],
                           )),
                       //today Container
                       Container(
-                        height: 60.5,
-                        width: 200,
+                        height: MediaQuery.of(context).size.height * 0.09,
+                        width: MediaQuery.of(context).size.width * 0.5,
                         decoration: const BoxDecoration(
                             borderRadius: BorderRadius.only(
                               bottomRight: Radius.circular(20),
@@ -330,13 +337,13 @@ class _AgentscreenState extends State<Agentscreen> {
                   width: double.infinity,
                   decoration: BoxDecoration(
                       border: Border.all(width: 2.5),
-                      boxShadow: [
+                      boxShadow: const [
                         BoxShadow(
                             color: Colors.black,
                             blurRadius: 10,
                             offset: Offset(1, 1))
                       ],
-                      borderRadius: BorderRadius.only(
+                      borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(20),
                           topRight: Radius.circular(20)),
                       color: Colors.white),
@@ -406,13 +413,13 @@ class _AgentscreenState extends State<Agentscreen> {
                         width: double.infinity,
                         decoration: BoxDecoration(
                             border: Border.all(width: 2.5),
-                            boxShadow: [
+                            boxShadow: const [
                               BoxShadow(
                                   color: Colors.black,
                                   blurRadius: 10,
                                   offset: Offset(1, 1))
                             ],
-                            borderRadius: BorderRadius.only(
+                            borderRadius: const BorderRadius.only(
                                 topLeft: Radius.circular(20),
                                 topRight: Radius.circular(20)),
                             color: Colors.white),
@@ -427,7 +434,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       Container(
                         height: 120,
                         width: double.infinity,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                             boxShadow: [
                               BoxShadow(
                                   color: Colors.black,
@@ -451,6 +458,7 @@ class _AgentscreenState extends State<Agentscreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                         const     SizedBox(height: 10,),
                               Text(
                                 "Already Subscribed  : $alreadysubscribed   ",
                                 style: const TextStyle(
@@ -459,14 +467,14 @@ class _AgentscreenState extends State<Agentscreen> {
                                     color: Colors.white),
                               ),
                               Text(
-                                "Offer Accepted     : $offeraccepted ",
+                                "Offer Accepted          : $offeraccepted ",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Colors.white),
                               ),
                               Text(
-                                "Offer Rejected      :   $offerrejected ",
+                                "Offer Rejected           : $offerrejected ",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,

@@ -64,7 +64,7 @@ class _CoustmerState extends State<Coustmer> {
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       print("Location Denied");
-      await Geolocator.requestPermission();
+   //   await Geolocator.requestPermission();
       LocationPermission get = await Geolocator.requestPermission();
     } else {
       Position currentPosition = await Geolocator.getCurrentPosition(
