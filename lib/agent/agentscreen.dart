@@ -2,9 +2,10 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
+import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -20,35 +21,65 @@ class _AgentscreenState extends State<Agentscreen> {
   int offeraccepted = 0;
   int offerrejected = 0;
   String agentname = "";
+  List<Record> records = [];
+  bool _isLoading = true;
 
-  void initState() {
+  int offerAcceptedCount = 0;
+  int offerRejectedCount = 0;
+  int alreadySubscribedCount = 0;
+final Onedayagent _onedayagent = Onedayagent();
+ void initState() {
     super.initState();
+    
+    
     String formattedDate = DateFormat('EEE- MMMM d, y').format(DateTime.now());
     dateController.text = formattedDate;
-    count();
+    // count();
+    loadOnedayHistory();
   }
 
-  count() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    // await prefs.setInt('offer_accepted', accepted);
-    //     await prefs.setInt('offer_rejected', rejected);
-    //     await prefs.setInt('already_subscribed', subscribed);
-    final todaycounrt = prefs.getInt('today_count');
-    final alreadysubsccribedd = prefs.getInt('already_subscribed');
-    final offeracceptedd = prefs.getInt('offer_accepted');
-    final offerrejectedd = prefs.getInt('offer_rejected');
-    final agent = prefs.getString("username");
+Future<void> loadOnedayHistory() async {
+  // setState(() {
+  //   _isLoading = true;
+  // });
 
-    setState(() {
-      todaycount = todaycounrt ?? 0;
-      alreadysubscribed = alreadysubsccribedd ?? 0;
-      offeraccepted = offeracceptedd ?? 0;
-      offerrejected = offerrejectedd ?? 0;
-      agentname = agent ?? "";
-    });
+  final result = await _onedayagent.fetchOnedayHistory();
+  print("ssssssssssssssssssssssssssssssssssssssssssssssssssssssss${result.toString()}");
+  print("fhkdskjkslkdfkdfnldssssssssssssss${(result['records'] as List<Record>?) ?? []}");
+  setState(() {
+  
+records =  (result['records'] as List<Record>?) ?? [];
+print("length         ${records.length}");
+    offerAcceptedCount = result['offer_accepted'] ?? 0;
+    offerRejectedCount = result['offer_rejected'] ?? 0;
+    alreadySubscribedCount = result['already_subscribed'] ?? 0;
+    _isLoading = false;
+  });
+}
+ 
 
-    print("Today Count: $todaycount");
-  }
+  // count() async {
+  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
+  //   // await prefs.setInt('offer_accepted', accepted);
+  //   //     await prefs.setInt('offer_rejected', rejected);
+  //   //     await prefs.setInt('already_subscribed', subscribed);
+  //   final todaycounrt = prefs.getInt('today_count');
+  //   final alreadysubsccribedd = prefs.getInt('already_subscribed');
+  //   final offeracceptedd = prefs.getInt('offer_accepted');
+  //   final offerrejectedd = prefs.getInt('offer_rejected');
+  //   final agent = prefs.getString("username");
+  //    print("hhhhhhhhhhhhhhhh ${todaycounrt}  " );
+
+  //   setState(() {
+  //     todaycount = todaycounrt ?? 0;
+  //     alreadysubscribed = alreadysubsccribedd ?? 0;
+  //     offeraccepted = offeracceptedd ?? 0;
+  //     offerrejected = offerrejectedd ?? 0;
+  //     agentname = agent ?? "";
+  //   });
+
+  //   print("Today Count: $todaycount");
+  // }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -135,26 +166,28 @@ class _AgentscreenState extends State<Agentscreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
-              context, MaterialPageRoute(builder: (_) => const Coustmer()));
-        },
-        label: const Text(
-          "Customer Form",
-          style: TextStyle(color: Colors.white, fontSize: 18),
-        ),
-        icon: const Icon(
-          Icons.add_box_outlined,
-          color: Colors.white,
-        ),
-        backgroundColor: const Color.fromARGB(
-          255,
-          67,
-          138,
-          254,
-        ),
-      ),
+floatingActionButton: FloatingActionButton.extended(
+  onPressed: () async {
+    // Wait for the form screen to complete
+    await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => Coustmer()),
+    );
+
+    // Re-fetch the data when coming back
+    // count();
+  },
+  label: const Text(
+    "Customer Form",
+    style: TextStyle(color: Colors.white, fontSize: 18),
+  ),
+  icon: const Icon(
+    Icons.add_box_outlined,
+    color: Colors.white,
+  ),
+  backgroundColor: const Color.fromARGB(255, 67, 138, 254),
+),
+
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width / 50),
@@ -214,7 +247,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       children: [
                         //   2nd  House Visited Container
                         Container(
-                          height: MediaQuery.of(context).size.height * 0.063,
+                          height: MediaQuery.of(context).size.height * 0.06,
                           width: MediaQuery.of(context).size.width * 0.5,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
@@ -244,7 +277,7 @@ class _AgentscreenState extends State<Agentscreen> {
                               color: Color.fromARGB(255, 178, 255, 87)),
                           child: Center(
                               child: Text(
-                            "Today: ${todaycount}",
+                            "Today: ${records.length}",
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           )),
@@ -315,7 +348,7 @@ class _AgentscreenState extends State<Agentscreen> {
                             )),
                         child: Center(
                           child: Text(
-                            "Today:${40 - todaycount}",
+                            "Today:${40 - records.length}",
                             style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 20),
                           ),
@@ -460,21 +493,21 @@ class _AgentscreenState extends State<Agentscreen> {
                             children: [
                          const     SizedBox(height: 10,),
                               Text(
-                                "Already Subscribed  : $alreadysubscribed   ",
+                                "Already Subscribed  : ${alreadySubscribedCount}   ",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Colors.white),
                               ),
                               Text(
-                                "Offer Accepted          : $offeraccepted ",
+                                "Offer Accepted          : $offerAcceptedCount ",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,
                                     color: Colors.white),
                               ),
                               Text(
-                                "Offer Rejected           : $offerrejected ",
+                                "Offer Rejected           : $offerRejectedCount ",
                                 style: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 20,

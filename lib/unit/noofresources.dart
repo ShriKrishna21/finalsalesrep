@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
+import 'package:finalsalesrep/unit/circulationincharge/AgentDetailsScreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -88,7 +89,16 @@ class _NoofresourcesState extends State<Noofresources> {
                       margin: const EdgeInsets.all(8),
                       child: ListTile(
                         title: Text(user.name ?? 'N/A'),
-                        subtitle: Text(user.email ?? 'N/A'),
+                        subtitle: Text(user.id.toString() ),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                               AgentDetailsScreen   (user: user),
+                            ),
+                          );
+                        },
                       ),
                     );
                   },

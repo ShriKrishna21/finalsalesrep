@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -240,7 +241,7 @@ class _CoustmerState extends State<Coustmer> {
           await prefs.setInt("offer_accepted", offerAccepted);
           await prefs.setInt("offer_rejected", offerRejected);
 
-          Navigator.pop(context);
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Agentscreen(),));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Data Not added")),
