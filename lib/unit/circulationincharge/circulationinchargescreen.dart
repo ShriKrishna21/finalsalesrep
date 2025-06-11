@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'package:finalsalesrep/agent/agentprofie.dart';
+
 import 'package:finalsalesrep/unit/createagent.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -16,11 +18,19 @@ class Circulationinchargescreen extends StatefulWidget {
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   int agentCount = 0;
   bool isLoading = true;
+  String namee ="";
+  String unit="";
 
   Future<void> agentdata() async {
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
     final userId = prefs.getInt('id');
+    final name = prefs.getString('name');
+    final unitt = prefs.getString('unit');
+    setState(() {
+      namee=name!;
+      unit = unitt!;
+    });
 
     if (apiKey == null || userId == null) {
       print("❌ Missing API key or User ID");
@@ -78,7 +88,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         foregroundColor: Colors.white,
         actions: [
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => agentProfile(),));
+            },
             child: Container(
               width: MediaQuery.of(context).size.height / 10,
               decoration: BoxDecoration(
@@ -98,14 +110,14 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         ],
         title: RichText(
           text: TextSpan(
-            text: "RegionalHead  - ",
+            text: "circulation incharge - ",
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 40,
               fontWeight: FontWeight.bold,
             ),
             children: <TextSpan>[
               TextSpan(
-                text: "Puma\n",
+                text: "$namee  ",
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 40,
                   fontWeight: FontWeight.bold,
@@ -113,7 +125,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                 ),
               ),
               TextSpan(
-                text: "karimnagar",
+                text: "$unit",
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
