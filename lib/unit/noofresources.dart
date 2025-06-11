@@ -16,12 +16,11 @@ class _NoofresourcesState extends State<Noofresources> {
   List<User> users = [];
   bool isLoading = true;
 
-  // Function to fetch user data
   Future<void> agentdata() async {
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-    
+
     if (apiKey == null || userId == null) {
       print("❌ Missing API key or User ID");
       setState(() => isLoading = false);
@@ -48,17 +47,12 @@ class _NoofresourcesState extends State<Noofresources> {
           isLoading = false;
         });
 
-        await prefs.setInt('userCount', users.length);  // Save the count to SharedPreferences
+        await prefs.setInt('userCount', users.length);
         print("✅ Response: $jsonResponse");
 
-        // Print user details to console
-        users.forEach((user) {
-          print("count: ${users.length}");
-          print("User ID: ${user.id}");
-          print("User Name: ${user.name}");
-          print("User Email: ${user.email}");
-          print("-----");
-        });
+        for (var user in users) {
+          print("User: ${user.name}, ID: ${user.id}, Email: ${user.email}");
+        }
       } else {
         print("❌ Fetch error. Status: ${response.statusCode}");
       }
@@ -70,7 +64,7 @@ class _NoofresourcesState extends State<Noofresources> {
   @override
   void initState() {
     super.initState();
-    agentdata();  // Fetch agent data on initial load
+    agentdata();
   }
 
   @override
@@ -85,24 +79,76 @@ class _NoofresourcesState extends State<Noofresources> {
                   itemCount: users.length,
                   itemBuilder: (context, index) {
                     final user = users[index];
-                    return Card(
-                      margin: const EdgeInsets.all(8),
-                      child: ListTile(
-                        title: Text(user.name ?? 'N/A'),
-                        subtitle: Text(user.id.toString() ),
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      child: InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                               AgentDetailsScreen   (user: user),
+                              builder: (context) => AgentDetailsScreen(user: user),
                             ),
                           );
                         },
+                        child: Card(
+                          elevation: 4,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.person, color: Colors.blueAccent),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      user.name ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 8),
+                                InfoRow(label: "ID", value: user.id?.toString() ?? 'N/A'),
+                                InfoRow(label: "Email", value: user.email ?? 'N/A'),
+                                InfoRow(label: "Phone", value: user.phone ?? 'N/A'),
+                                InfoRow(label: "Role", value: user.role ?? 'N/A'),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   },
                 ),
+    );
+  }
+}
+
+class InfoRow extends StatelessWidget {
+  final String label;
+  final String value;
+
+  const InfoRow({required this.label, required this.value, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        children: [
+          Text(
+            "$label: ",
+            style: const TextStyle(fontWeight: FontWeight.bold),
+          ),
+          Expanded(child: Text(value)),
+        ],
+      ),
     );
   }
 }

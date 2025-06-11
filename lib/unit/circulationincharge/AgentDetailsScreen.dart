@@ -80,35 +80,54 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.user.name ?? "Agent Details")),
-      body: isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : records.isEmpty
-              ? const Center(child: Text("No forms submitted by this agent."))
-              : ListView.builder(
-                  itemCount: records.length,
-                  itemBuilder: (context, index) {
-                    final r = records[index];
-                    return Card(
-                      margin: const EdgeInsets.all(10),
-                      child: Padding(
-                        padding: const EdgeInsets.all(12.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text("Date: ${r.date ?? 'N/A'}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                            Text("Family Head: ${r.familyHeadName ?? 'N/A'}"),
-                            Text("Address: ${r.address ?? 'N/A'}"),
-                            Text("City: ${r.city ?? ''}, Pincode: ${r.pinCode ?? ''}"),
-                            Text("Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                            Text("Reads Eenadu: ${r.eenaduNewspaper == true ? 'Yes' : 'No'}"),
-                            Text("Employed: ${r.employed == true ? 'Yes' : 'No'}"),
-                          ],
-                        ),
+    appBar: AppBar(title: Text(widget.user.name ?? "Agent Details")),
+    body: isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : records.isEmpty
+            ? const Center(child: Text("No forms submitted by this agent."))
+            : Column(
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: Text(
+                      "Total Forms Submitted: ${records.length}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blueAccent,
                       ),
-                    );
-                  },
-                ),
-    );
+                    ),
+                  ),
+                  Expanded(
+                    child: ListView.builder(
+                      itemCount: records.length,
+                      itemBuilder: (context, index) {
+                        final r = records[index];
+                        return Card(
+                          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          elevation: 3,
+                          child: Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text("Date: ${r.date ?? 'N/A'}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                                Text("Family Head: ${r.familyHeadName ?? 'N/A'}"),
+                                Text("Address: ${r.address ?? 'N/A'}"),
+                                Text("City: ${r.city ?? ''}, Pincode: ${r.pinCode ?? ''}"),
+                                Text("Mobile: ${r.mobileNumber ?? 'N/A'}"),
+                                Text("Reads Eenadu: ${r.eenaduNewspaper == true ? 'Yes' : 'No'}"),
+                                Text("Employed: ${r.employed == true ? 'Yes' : 'No'}"),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                ],
+              ),
+  );
+    
   }
 }
