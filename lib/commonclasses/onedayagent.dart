@@ -42,12 +42,11 @@ class Onedayagent {
         print('--- Starting record processing ---');
 
         for (var record in records) {
-          // Assuming 'record' is a map or an object with relevant properties.
-          // For debugging, let's print the record's state.
+          
           print('\nProcessing record: $record');
 
           if (record.eenaduNewspaper == true) {
-            // If already subscribed to Eenadu Newspaper, just increment subscribed count
+        
             subscribed++;
             print(
                 '  -> eenaduNewspaper is TRUE. Incremented subscribed. Current subscribed: $subscribed');
@@ -62,7 +61,7 @@ class Onedayagent {
             }
 
             // Only count as rejected if a reason is present AND eenaduNewspaper is false (which is handled by the 'else' block)
-            if (record.freeOffer15Days == true&&record.eenaduNewspaper == false) {
+            if (record.freeOffer15Days == false&&record.eenaduNewspaper == false) {
               rejected++;
               print(
                   '    -> reasonNotTakingOffer is NOT empty. Incremented rejected. Current rejected: $rejected');
