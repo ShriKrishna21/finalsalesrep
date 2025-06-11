@@ -1,9 +1,13 @@
 import 'dart:async';
-import 'package:finalsalesrep/agent/agentscreen.dart';
-import 'package:finalsalesrep/login/loginscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart' show Circulationinchargescreen;
+import 'package:finalsalesrep/unit/segmentincharge/segmentinchargescreen.dart' show Segmentinchargescreen;
+import 'package:finalsalesrep/unit/unitmanager/unitmanagerscreen.dart' show Unitmanagerscreen;
 import 'package:flutter/material.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:finalsalesrep/agent/agentscreen.dart';
+
+import 'package:finalsalesrep/login/loginscreen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -14,31 +18,41 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  // initState runs when the widget is first created
-  //Initilize The App
   void initState() {
     super.initState();
-    Timer(const Duration(seconds: 3), _loginStatus);
+    _checkLoginStatus();
   }
 
-  // This function checks the login status from SharedPreferences
-  // _loginStatus====> is Method
-  Future<void> _loginStatus() async {
-    final prefs = await SharedPreferences
-        .getInstance(); // Get the SharedPreferences instance
-    // Condition=========>isLoggedIn
-    final bool isLoggedIn = prefs.getBool("isLoggedIn") ??
-        false; // Read the "isLoggedIn" flag, default to false if not set Also Condition
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
+    final String? role = prefs.getString("userRole"); // e.g., "agent", "circulation", "segment"
 
-    // If user is logged in, navigate to the dashboard
+    await Future.delayed(const Duration(seconds: 2));
+
+    if (!mounted) return;
+
     if (isLoggedIn) {
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const Agentscreen()));
+      switch (role) {
+        case 'agent':
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Agentscreen()));
+          break;
+        case 'circulation':
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Circulationinchargescreen()));
+          break;
+        case 'segmentincharge':
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Segmentinchargescreen()));
+          break;
+        case 'unitmanager':
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Unitmanagerscreen()));
+          break;
+        default:
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Loginscreen()));
+          break;
+          
+      }
     } else {
-      // If not logged in, go to login screen
-
-      Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (_) => const Loginscreen()));
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Loginscreen()));
     }
   }
 
@@ -46,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: Center(
-        child: Image.asset("assets/images/loginbackground.jpg"),
+        child: Image.asset("assets/images/loginbackground.jpg", fit: BoxFit.cover),
       ),
     );
   }
