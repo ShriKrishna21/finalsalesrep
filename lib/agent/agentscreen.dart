@@ -2,6 +2,7 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
+import 'package:finalsalesrep/circulation_head.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -27,36 +28,35 @@ class _AgentscreenState extends State<Agentscreen> {
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
-final Onedayagent _onedayagent = Onedayagent();
- void initState() {
+  final Onedayagent _onedayagent = Onedayagent();
+  void initState() {
     super.initState();
-    
-    
+
     String formattedDate = DateFormat('EEE- MMMM d, y').format(DateTime.now());
     dateController.text = formattedDate;
     // count();
     loadOnedayHistory();
   }
 
-Future<void> loadOnedayHistory() async {
-  // setState(() {
-  //   _isLoading = true;
-  // });
+  Future<void> loadOnedayHistory() async {
+    // setState(() {
+    //   _isLoading = true;
+    // });
 
-  final result = await _onedayagent.fetchOnedayHistory();
-  print("ssssssssssssssssssssssssssssssssssssssssssssssssssssssss${result.toString()}");
-  print("fhkdskjkslkdfkdfnldssssssssssssss${(result['records'] as List<Record>?) ?? []}");
-  setState(() {
-  
-records =  (result['records'] as List<Record>?) ?? [];
-print("length         ${records.length}");
-    offerAcceptedCount = result['offer_accepted'] ?? 0;
-    offerRejectedCount = result['offer_rejected'] ?? 0;
-    alreadySubscribedCount = result['already_subscribed'] ?? 0;
-    _isLoading = false;
-  });
-}
- 
+    final result = await _onedayagent.fetchOnedayHistory();
+    print(
+        "ssssssssssssssssssssssssssssssssssssssssssssssssssssssss${result.toString()}");
+    print(
+        "fhkdskjkslkdfkdfnldssssssssssssss${(result['records'] as List<Record>?) ?? []}");
+    setState(() {
+      records = (result['records'] as List<Record>?) ?? [];
+      print("length         ${records.length}");
+      offerAcceptedCount = result['offer_accepted'] ?? 0;
+      offerRejectedCount = result['offer_rejected'] ?? 0;
+      alreadySubscribedCount = result['already_subscribed'] ?? 0;
+      _isLoading = false;
+    });
+  }
 
   // count() async {
   //   final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -166,28 +166,27 @@ print("length         ${records.length}");
           ),
         ),
       ),
-floatingActionButton: FloatingActionButton.extended(
-  onPressed: () async {
-    // Wait for the form screen to complete
-    await Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => Coustmer()),
-    );
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          // Wait for the form screen to complete
+          await Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const Coustmer()),
+          );
 
-    // Re-fetch the data when coming back
-    // count();
-  },
-  label: const Text(
-    "Customer Form",
-    style: TextStyle(color: Colors.white, fontSize: 18),
-  ),
-  icon: const Icon(
-    Icons.add_box_outlined,
-    color: Colors.white,
-  ),
-  backgroundColor: const Color.fromARGB(255, 67, 138, 254),
-),
-
+          // Re-fetch the data when coming back
+          // count();
+        },
+        label: const Text(
+          "Customer Form",
+          style: TextStyle(color: Colors.white, fontSize: 18),
+        ),
+        icon: const Icon(
+          Icons.add_box_outlined,
+          color: Colors.white,
+        ),
+        backgroundColor: const Color.fromARGB(255, 67, 138, 254),
+      ),
       body: Padding(
         padding: EdgeInsets.symmetric(
             horizontal: MediaQuery.of(context).size.width / 50),
@@ -228,7 +227,7 @@ floatingActionButton: FloatingActionButton.extended(
                   },
                   child: Container(
                     height: MediaQuery.of(context).size.height / 6.33,
-                    width: 190,
+                    width:  MediaQuery.of(context).size.width / 2.1,
                     decoration: BoxDecoration(
                         border: Border.all(
                           width: 2.0,
@@ -263,24 +262,26 @@ floatingActionButton: FloatingActionButton.extended(
                         ),
                         //today Container
 
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.09,
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-
-                                  // topLeft: Radius.circular(20),
-                                  bottomLeft: Radius.circular(20)),
-                              border: Border(
-                                  top: BorderSide(
-                                      color: Colors.black, width: 2)),
-                              color: Color.fromARGB(255, 178, 255, 87)),
-                          child: Center(
-                              child: Text(
-                            "Today: ${records.length}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          )),
+                        Expanded(
+                          child: Container(
+                            height: MediaQuery.of(context).size.height * 0.09,
+                            width: MediaQuery.of(context).size.width * 0.5,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                          
+                                    // topLeft: Radius.circular(20),
+                                    bottomLeft: Radius.circular(20)),
+                                border: Border(
+                                    top: BorderSide(
+                                        color: Colors.black, width: 2)),
+                                color: Color.fromARGB(255, 178, 255, 87)),
+                            child: Center(
+                                child: Text(
+                              "Today: ${records.length}",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
+                            )),
+                          ),
                         ),
                       ],
                     ),
@@ -290,7 +291,7 @@ floatingActionButton: FloatingActionButton.extended(
                 Container(
                   height: MediaQuery.of(context).size.height / 6.3,
                   // width: double.infinity/2,
-                  width: MediaQuery.of(context).size.width / 2.2,
+                  width: MediaQuery.of(context).size.width / 2.1,
                   decoration: BoxDecoration(
                       border: Border.all(
                         width: 2.2,
@@ -310,7 +311,7 @@ floatingActionButton: FloatingActionButton.extended(
                       //   2nd  House Visited Container
 
                       Container(
-                        height: MediaQuery.of(context).size.height * 0.063,
+                          height: MediaQuery.of(context).size.height * 0.063,
                           width: MediaQuery.of(context).size.width * 0.5,
                           decoration: const BoxDecoration(
                               borderRadius: BorderRadius.only(
@@ -331,26 +332,28 @@ floatingActionButton: FloatingActionButton.extended(
                             ],
                           )),
                       //today Container
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.09,
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                              bottomRight: Radius.circular(20),
+                      Expanded(
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.09,
+                          width: MediaQuery.of(context).size.width * 0.5,
+                          decoration: const BoxDecoration(
+                              borderRadius: BorderRadius.only(
+                                bottomRight: Radius.circular(20),
+                              ),
+                              border: Border(
+                                  top: BorderSide(color: Colors.black, width: 2)),
+                              color: Color.fromARGB(
+                                255,
+                                252,
+                                83,
+                                80,
+                              )),
+                          child: Center(
+                            child: Text(
+                              "Today:${40 - records.length}",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 20),
                             ),
-                            border: Border(
-                                top: BorderSide(color: Colors.black, width: 2)),
-                            color: Color.fromARGB(
-                              255,
-                              252,
-                              83,
-                              80,
-                            )),
-                        child: Center(
-                          child: Text(
-                            "Today:${40 - records.length}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
                           ),
                         ),
                       ),
@@ -491,7 +494,9 @@ floatingActionButton: FloatingActionButton.extended(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                         const     SizedBox(height: 10,),
+                              const SizedBox(
+                                height: 10,
+                              ),
                               Text(
                                 "Already Subscribed  : ${alreadySubscribedCount}   ",
                                 style: const TextStyle(
