@@ -4,6 +4,7 @@ import 'package:finalsalesrep/admin/adminscreen.dart';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/modelclasses/loginmodel.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
+import 'package:finalsalesrep/unit/segmentincharge/segmentinchargescreen.dart';
 import 'package:finalsalesrep/unit/unitmanager/unitmanagerscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -113,6 +114,12 @@ Future<void> loginUser() async {
                 context,
                 MaterialPageRoute(
                     builder: (_) => Circulationinchargescreen()));
+            break;
+              case "segment_incharge":
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => Segmentinchargescreen()));
             break;
           default:
             ScaffoldMessenger.of(context).showSnackBar(
