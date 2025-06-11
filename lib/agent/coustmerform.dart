@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -124,11 +123,10 @@ class _CoustmerState extends State<Coustmer> {
   @override
   void initState() {
     super.initState();
-   
-
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
     _loadSavedData();
+    getCurrentLocation();
   }
 
   void _loadSavedData() async {
