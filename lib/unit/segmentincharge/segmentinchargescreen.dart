@@ -1,7 +1,9 @@
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/unit/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
-import 'package:finalsalesrep/unit/unitmanager/profilescreen.dart';
+import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Segmentinchargescreen extends StatefulWidget {
   const Segmentinchargescreen({super.key});
@@ -11,8 +13,27 @@ class Segmentinchargescreen extends StatefulWidget {
 }
 
 class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
+   String userName = '';
+   String unitt  ='';
+
   @override
+  void initState() {
+    super.initState();
+    _loadUserName();
+  }
+
+  Future<void> _loadUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      userName = prefs.getString('name') ?? 'Unknown';
+        unitt = prefs.getString('unit') ?? 'Unknown';
+
+
+    });
+  }
+  
   Widget build(BuildContext context) {
+    
     return   Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
@@ -21,7 +42,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              // Navigator.push(context, MaterialPageRoute(builder: (context) => (),));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => agentProfile(),));
             },
            child: Container(
               width: MediaQuery.of(context).size.height / 10,
@@ -38,18 +59,19 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
         ],
         title: RichText(
           text: TextSpan(
-              text: "Segment Manager - ",
+              text: "Segment incharge - \n",
               style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 40,
                   fontWeight: FontWeight.bold),
                     children:<TextSpan>[
-              //         TextSpan(
-              // text: "\n",
-              // style: TextStyle(
-              //     fontSize: MediaQuery.of(context).size.height / 40,
-              //     fontWeight: FontWeight.bold,color: Colors.black),),
+                      TextSpan(
+              text: "$userName\n",
+              style: TextStyle(
+                  fontSize: MediaQuery.of(context).size.height / 40,
+                  fontWeight: FontWeight.bold,color: Colors.black),),
                   TextSpan(
-              text: "karimnagar",
+              text: "$unitt",
+
               style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,color: Colors.white),)
@@ -118,10 +140,10 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
               ),
               onPressed: () {
                 
-                 Navigator.push(context, MaterialPageRoute(builder: (context) => createagent(),));
+              Navigator.push(context, MaterialPageRoute(builder: (context) => Approveagents(),));
               },
               child: const Text(
-                "Create User",
+                "Approve agents screen",
                 style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white),
               ),
             ),
