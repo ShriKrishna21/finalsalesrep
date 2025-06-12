@@ -1,3 +1,4 @@
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/regionalhead/unitscreen.dart';
 import 'package:flutter/material.dart';
 
@@ -26,7 +27,9 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         foregroundColor: Colors.white,
         actions: [
           GestureDetector(
-            onTap: () {},
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => agentProfile(),));
+            },
             child: Container(
               width: MediaQuery.of(context).size.height / 10,
               decoration: BoxDecoration(
@@ -83,14 +86,11 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
             margin: const EdgeInsets.symmetric(vertical: 8),
             child: ListTile(
               leading: const Icon(Icons.location_city, color: Colors.blue),
-              title: GestureDetector(
-                onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Unitscreen(),));
-                },
-                child: Text(unit['name'] ?? '')),
+              title: Text(unit['name'] ?? ''),
               subtitle: Text(unit['location'] ?? ''),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) => Unitscreen(),));
                 // Navigate to unit-specific screen
               },
             ),

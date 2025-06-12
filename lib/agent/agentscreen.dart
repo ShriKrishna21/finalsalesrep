@@ -2,7 +2,7 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-import 'package:finalsalesrep/circulation_head.dart';
+import 'package:finalsalesrep/circulationhead/circulation_head.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
