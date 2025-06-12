@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:finalsalesrep/regionalhead/reginoalheadscreen.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart' show Circulationinchargescreen;
 import 'package:finalsalesrep/unit/segmentincharge/segmentinchargescreen.dart' show Segmentinchargescreen;
 import 'package:finalsalesrep/unit/unitmanager/unitmanagerscreen.dart' show Unitmanagerscreen;
@@ -45,6 +46,9 @@ class _SplashScreenState extends State<SplashScreen> {
           break;
         case 'unitmanager':
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Unitmanagerscreen()));
+          break;
+           case 'region_head':
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Reginoalheadscreen()));
           break;
         default:
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => const Loginscreen()));

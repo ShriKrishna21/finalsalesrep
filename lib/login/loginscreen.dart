@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:finalsalesrep/admin/adminscreen.dart';
 import 'package:finalsalesrep/agent/agentscreen.dart';
+import 'package:finalsalesrep/circulationhead/circulation_head.dart' show CirculationHead;
 import 'package:finalsalesrep/modelclasses/loginmodel.dart';
 import 'package:finalsalesrep/regionalhead/reginoalheadscreen.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
@@ -121,6 +122,18 @@ Future<void> loginUser() async {
                 context,
                 MaterialPageRoute(
                     builder: (_) => Segmentinchargescreen()));
+            break;
+            case "region_head":
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => Reginoalheadscreen()));
+            break;
+             case "circulation_head":
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => CirculationHead()));
             break;
           default:
             ScaffoldMessenger.of(context).showSnackBar(
