@@ -194,7 +194,7 @@ class _HistorypageState extends State<Historypage> {
           data: Theme.of(context).copyWith(dividerColor: Colors.transparent),
           child: ExpansionTile(
             title: Text(
-              "Record ID: ${record.id ?? "N/A"}",
+              "Family Head Name : ${record.familyHeadName ?? "N/A"}",
               style: const TextStyle(
                 fontWeight: FontWeight.w700,
                 fontSize: 18,

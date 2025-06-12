@@ -91,37 +91,55 @@ class _NoofresourcesState extends State<Noofresources> {
                           );
                         },
                         child: Card(
-                          elevation: 4,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const Icon(Icons.person, color: Colors.blueAccent),
-                                    const SizedBox(width: 8),
-                                    Text(
-                                      user.name ?? 'Unknown',
-                                      style: const TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                const SizedBox(height: 8),
-                                InfoRow(label: "ID", value: user.id?.toString() ?? 'N/A'),
-                                InfoRow(label: "Email", value: user.email ?? 'N/A'),
-                                InfoRow(label: "Phone", value: user.phone ?? 'N/A'),
-                                InfoRow(label: "Role", value: user.role ?? 'N/A'),
-                              ],
-                            ),
-                          ),
-                        ),
+  elevation: 6,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+  ),
+  shadowColor: Colors.black.withOpacity(0.1),
+  child: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.white, Colors.pink.shade50],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    padding: const EdgeInsets.all(20),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const CircleAvatar(
+              backgroundColor: Colors.blueAccent,
+              child: Icon(Icons.person, color: Colors.white),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                user.name ?? 'Unknown',
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Divider(color: Colors.grey.shade300),
+        const SizedBox(height: 8),
+        InfoRow(label: "ID", value: user.id?.toString() ?? 'N/A'),
+        InfoRow(label: "Email", value: user.email ?? 'N/A'),
+        InfoRow(label: "Phone", value: user.phone ?? 'N/A'),
+        InfoRow(label: "Role", value: user.role ?? 'N/A'),
+      ],
+    ),
+  ),
+),
+
                       ),
                     );
                   },
