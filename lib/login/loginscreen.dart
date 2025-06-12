@@ -2,7 +2,7 @@ import 'dart:convert';
 
 import 'package:finalsalesrep/admin/adminscreen.dart';
 import 'package:finalsalesrep/agent/agentscreen.dart';
-import 'package:finalsalesrep/circulationhead/circulation_head.dart' show CirculationHead;
+import 'package:finalsalesrep/circulationhead/circulationhead.dart' show CirculationHead;
 import 'package:finalsalesrep/modelclasses/loginmodel.dart';
 import 'package:finalsalesrep/regionalhead/reginoalheadscreen.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
@@ -84,7 +84,9 @@ Future<void> loginUser() async {
       _loginData = loginmodel.fromJson(jsonResponse);
 
       if (_loginData!.result!.code == "200") {
+        print("ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt==================${_loginData!.result!.apiKey ?? ''}");
         await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
+      
         await prefs.setString('name', _loginData!.result!.name ?? '');
         await prefs.setString('unit', _loginData!.result!.unit ?? '');
         await prefs.setString('role', _loginData!.result!.role ?? '');

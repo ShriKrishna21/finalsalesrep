@@ -117,24 +117,24 @@ class _HistorypageState extends State<Historypage> {
                   )
                 : Column(
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildStatRow(
-                                "Offer Accepted:", offerAcceptedCount),
-                            const SizedBox(height: 8),
-                            _buildStatRow(
-                                "Offer Rejected:", offerRejectedCount),
-                            const SizedBox(height: 8),
-                            _buildStatRow(
-                                "Already Subscribed:", alreadySubscribedCount),
-                            const SizedBox(height: 16),
-                            Divider(color: Colors.grey[400]),
-                          ],
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.all(16.0),
+                      //   child: Column(
+                      //     crossAxisAlignment: CrossAxisAlignment.start,
+                      //     children: [
+                      //       _buildStatRow(
+                      //           "Offer Accepted:", offerAcceptedCount),
+                      //       const SizedBox(height: 8),
+                      //       _buildStatRow(
+                      //           "Offer Rejected:", offerRejectedCount),
+                      //       const SizedBox(height: 8),
+                      //       _buildStatRow(
+                      //           "Already Subscribed:", alreadySubscribedCount),
+                      //       const SizedBox(height: 16),
+                      //       Divider(color: Colors.grey[400]),
+                      //     ],
+                      //   ),
+                      // ),
                       Expanded(
                         child: ListView.builder(
                           itemCount: customerData.length,
