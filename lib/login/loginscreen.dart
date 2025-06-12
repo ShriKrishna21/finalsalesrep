@@ -139,7 +139,7 @@ Future<void> loginUser() async {
             break;
           default:
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Unknown user role")),
+              const SnackBar(content: Text("Unknown user rolee")),
             );
         }
       } else {
