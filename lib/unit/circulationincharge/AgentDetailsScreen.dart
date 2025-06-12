@@ -104,24 +104,54 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                       itemBuilder: (context, index) {
                         final r = records[index];
                         return Card(
-                          margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                          elevation: 3,
-                          child: Padding(
-                            padding: const EdgeInsets.all(12.0),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text("Date: ${r.date ?? 'N/A'}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                                Text("Family Head: ${r.familyHeadName ?? 'N/A'}"),
-                                Text("Address: ${r.address ?? 'N/A'}"),
-                                Text("City: ${r.city ?? ''}, Pincode: ${r.pinCode ?? ''}"),
-                                Text("Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                                Text("Reads Eenadu: ${r.eenaduNewspaper == true ? 'Yes' : 'No'}"),
-                                Text("Employed: ${r.employed == true ? 'Yes' : 'No'}"),
-                              ],
-                            ),
-                          ),
-                        );
+  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+  elevation: 6,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(20),
+    side: BorderSide(color: Colors.teal.shade300.withOpacity(0.4)),
+  ),
+  child: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.teal.shade50, Colors.cyan.shade50],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+      borderRadius: BorderRadius.circular(20),
+    ),
+    padding: const EdgeInsets.all(16),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            const Icon( Icons.person, color: Colors.teal),
+            const SizedBox(width: 8),
+            Text(
+              "Family Head: ${r.familyHeadName ?? 'N/A'}",
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: Colors.teal,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Divider(color: Colors.teal.shade100),
+        const SizedBox(height: 8),
+        InfoItem(icon: Icons.date_range, label: "Date", value: r.date),
+        InfoItem(icon: Icons.location_on, label: "Address", value: r.address),
+        InfoItem(icon: Icons.map, label: "City & Pincode", value: "${r.city ?? ''}, ${r.pinCode ?? ''}"),
+        InfoItem(icon: Icons.phone_android, label: "Mobile", value: r.mobileNumber),
+        InfoItem(icon: Icons.menu_book, label: "Reads Eenadu", value: r.eenaduNewspaper == true ? 'Yes' : 'No'),
+        InfoItem(icon: Icons.work, label: "Employed", value: r.employed == true ? 'Yes' : 'No'),
+      ],
+    ),
+  ),
+);
+
+
                       },
                     ),
                   ),
@@ -129,5 +159,46 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
               ),
   );
     
+  }
+}
+class InfoItem extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final String? value;
+
+  const InfoItem({
+    super.key,
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.teal.shade600, size: 20),
+          const SizedBox(width: 10),
+          Text(
+            "$label: ",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value ?? 'N/A',
+              style: const TextStyle(
+                fontWeight: FontWeight.w500,
+                color: Colors.black87,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
