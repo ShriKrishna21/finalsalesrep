@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
-import 'package:finalsalesrep/unit/circulationincharge/AgentDetailsScreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/agentdetailsscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
