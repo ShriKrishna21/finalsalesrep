@@ -1,16 +1,23 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/l10n/app_localization_en.dart';
+import 'package:finalsalesrep/l10n/l10n.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/splashacreen.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
 
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-// await Firebase.initializeApp(
-//   options:DefaultFirebaseOptions.currentPlatform);
 
 
 
-  runApp(MyApp());
+  runApp(ChangeNotifierProvider
+(
+  create: (_) {
+  return LocalizationProvider();
+  },
+  child: MyApp()));
 }
 
 class MyApp extends StatelessWidget {
@@ -20,9 +27,22 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+       final provider = Provider.of<LocalizationProvider>(context);
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
-      home:  SplashScreen(),
+   
+    locale: provider.locale,
+      supportedLocales: const [
+        Locale('en'),
+        Locale('te'),
+      ],
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      home:  const SplashScreen(),
       //  isLoggedIn ? const AgentDashBoardScreen() :
     );
   }

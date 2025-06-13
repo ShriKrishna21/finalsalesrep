@@ -4,9 +4,13 @@ import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
 import 'package:finalsalesrep/circulationhead/circulationhead.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/l10n/app_localization_en.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
+import 'package:provider/provider.dart';
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -16,6 +20,10 @@ class Agentscreen extends StatefulWidget {
 }
 
 class _AgentscreenState extends State<Agentscreen> {
+  
+
+
+  
   TextEditingController dateController = TextEditingController();
   int todaycount = 0;
   int alreadysubscribed = 0;
@@ -29,8 +37,12 @@ class _AgentscreenState extends State<Agentscreen> {
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
   final Onedayagent _onedayagent = Onedayagent();
+
+
+  
   void initState() {
     super.initState();
+    
 
     String formattedDate = DateFormat('EEE- MMMM d, y').format(DateTime.now());
     dateController.text = formattedDate;
@@ -61,6 +73,9 @@ class _AgentscreenState extends State<Agentscreen> {
   
 
   Widget build(BuildContext context) {
+       final localeProvider = Provider.of<LocalizationProvider>(context);
+        final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
@@ -83,13 +98,7 @@ class _AgentscreenState extends State<Agentscreen> {
         centerTitle: true,
         title: Column(
           children: [
-            Text(
-              "Sales Rep",
-              style: TextStyle(
-                fontSize: MediaQuery.of(context).size.height / 30,
-                fontWeight: FontWeight.w900,
-              ),
-            ),
+            Text(AppLocalizations.of(context)!.salesrep),
             Text(
               "Welcome $agentname",
               style: const TextStyle(
@@ -105,6 +114,13 @@ class _AgentscreenState extends State<Agentscreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+          SwitchListTile(
+      title: Text(localizations.salesrep), // Localized string
+      value: localeProvider.locale.languageCode == 'te',
+      onChanged: (val) {
+        localeProvider.toggleLocale();
+      },
+    ),
               const SizedBox(
                 height: 100,
                 child: Image(
@@ -511,5 +527,11 @@ class _AgentscreenState extends State<Agentscreen> {
         ),
       ),
     );
+  }
+  void _setlocale(String value){
+    if(value==null)return;
+    if (value=="en"){
+
+    }
   }
 }
