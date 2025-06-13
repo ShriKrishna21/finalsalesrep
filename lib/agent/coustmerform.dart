@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
@@ -27,6 +28,10 @@ class _CoustmerState extends State<Coustmer> {
   int addcount = 0;
   String latitude = "";
   String longitude = "";
+  String street = "";
+  String place = "";
+  String landmark = "";
+
   // String? locationAddress;
   // Employment Dropdown Variables
   String? _selectedJobType;
@@ -58,22 +63,6 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privatedesignationController = TextEditingController();
   TextEditingController privateProffesionController = TextEditingController();
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
 
@@ -86,6 +75,36 @@ class _CoustmerState extends State<Coustmer> {
       Position currentPosition = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
 
+      print("latitude=================>${currentPosition.latitude.toString()}");
+      print(
+          "longitude================>${currentPosition.longitude.toString()}");
+
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+            currentPosition.latitude, currentPosition.longitude);
+        Placemark placemark = placemarks[0];
+        String? fetchedStreet = placemark.street ?? "";
+        String? fetchedPlace = placemark.locality ?? "";
+        String? fetchedLandmark = placemark.name ?? "";
+        setState(() {
+          latitude = currentPosition.latitude.toString();
+          longitude = currentPosition.longitude.toString();
+          street = fetchedStreet;
+          place = fetchedPlace;
+          landmark = fetchedLandmark;
+          adddress.text = "$fetchedStreet,$fetchedPlace";
+          city.text = placemark.locality ?? "";
+          pincode.text = placemark.postalCode ?? "";
+        });
+        print("Street: $street");
+        print("Place : $place");
+        print("LandMark: $landmark");
+      } catch (e) {
+        print("Error fetching addresss======>:$e");
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error fetching address: $e")));
+      }
+
       print("latitude=${currentPosition.latitude.toString()}");
       latitude = currentPosition.latitude.toString();
       print("longitude=${currentPosition.longitude.toString()}");
@@ -97,17 +116,6 @@ class _CoustmerState extends State<Coustmer> {
       });
     }
   }
-
-
-
-
-
-
-
-
-
-
-
 
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
@@ -144,6 +152,7 @@ class _CoustmerState extends State<Coustmer> {
     final String? agentlog = await prefs.getString('agentlogin');
     final String? unit = await prefs.getString('unit');
     print("Sending Latitude: $latitude, Longitude:$longitude");
+    print("Street: $street, place: $place, Landmark: $landmark");
 
     print("Rrddddddddddddddddddddd$agentapi");
 
@@ -191,7 +200,10 @@ class _CoustmerState extends State<Coustmer> {
             "job_designation_one": privatedesignationController.text,
             "latitude": latitude,
             "longitude": longitude,
-            // "location_address": locationAddress,
+            "street": street,
+            "place": place,
+            // "LandMark": landmark,
+            "location_address": landmark,
           }
         }),
       );
@@ -239,7 +251,11 @@ class _CoustmerState extends State<Coustmer> {
           await prefs.setInt("offer_accepted", offerAccepted);
           await prefs.setInt("offer_rejected", offerRejected);
 
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Agentscreen(),));
+          Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const Agentscreen(),
+              ));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Data Not added")),
@@ -369,13 +385,36 @@ class _CoustmerState extends State<Coustmer> {
                             hunttext: "pincode cannot be empty",
                             maxvalue: 6,
                             controller: pincode,
-                            textForCounter: "",
+                            // textForCounter: "",
                             label: "pincode",
                             keyboardType: TextInputType.number)),
                   ],
                 ),
-                const SizedBox(height: 10),
+
+                const SizedBox(
+                  height: 10,
+                ),
                 textformfeild(controller: adddress, label: "Address"),
+                const SizedBox(
+                  height: 10,
+                ),
+                textformfeild(
+                  controller: TextEditingController(text: street),
+                  label: "street",
+                  hunttext: "Place Cannot Be Empty",
+                  need: true,
+                ),
+                const SizedBox(
+                  height: 10,
+                ),
+                textformfeild(
+                    controller: TextEditingController(text: landmark),
+                    label: "LandMark",
+                    hunttext: "LandMark Cannot Be Empty",
+                    need: true),
+
+                // const SizedBox(height: 10),
+                // textformfeild(controller: adddress, label: "Address"),
                 const SizedBox(height: 10),
                 textformfeild(
                     hunttext: "mobile number cannot empty",
@@ -614,7 +653,7 @@ class _CoustmerState extends State<Coustmer> {
                         label: " Job Department"),
                   ],
 
-                  if (_selectedGovDepartment == "pSU") ...[
+                  if (_selectedGovDepartment == "PSU") ...[
                     const SizedBox(
                       height: 10,
                     ),
@@ -649,7 +688,7 @@ class _CoustmerState extends State<Coustmer> {
                   ],
                 ],
 
-// Private job details
+                // Private job details
 
                 if (_selectedJobType == "private_job") ...[
                   const SizedBox(
