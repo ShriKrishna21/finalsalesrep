@@ -216,15 +216,7 @@ class _HistorypageState extends State<Historypage> {
                     _buildDetailRow("Father Name", record.fatherName ?? 'N/A'),
                     _buildDetailRow("Mother Name", record.motherName ?? 'N/A'),
                     _buildDetailRow("Spouse Name", record.spouseName ?? 'N/A'),
-                    _buildDetailRow(
-                        "House Number", record.houseNumber ?? 'N/A'),
-                    _buildDetailRow(
-                        "Street Number", record.streetNumber ?? 'N/A'),
-                    _buildDetailRow("City", record.city ?? 'N/A'),
-                    _buildDetailRow("Pin Code", record.pinCode ?? 'N/A'),
-                    _buildDetailRow("Address", record.address ?? 'N/A'),
-                    _buildDetailRow(
-                        "Mobile Number", record.mobileNumber ?? 'N/A'),
+                   
                     _buildDetailRow("Eenadu Newspaper",
                         "${record.eenaduNewspaper ?? 'N/A'}"),
                     _buildDetailRow("Feedback to Improve",
@@ -260,6 +252,15 @@ class _HistorypageState extends State<Historypage> {
                         record.jobDesignationOne ?? 'N/A'),
                     _buildDetailRow("Latitude", record.latitude ?? 'N/A'),
                     _buildDetailRow("Longitude", record.longitude ?? 'N/A'),
+                     _buildDetailRow(
+                        "House Number", record.houseNumber ?? 'N/A'),
+                    _buildDetailRow(
+                        "Street Number", record.streetNumber ?? 'N/A'),
+                    _buildDetailRow("City", record.city ?? 'N/A'),
+                    _buildDetailRow("Pin Code", record.pinCode ?? 'N/A'),
+                    _buildDetailRow("Address", record.address ?? 'N/A'),
+                    _buildDetailRow(
+                        "Mobile Number", record.mobileNumber ?? 'N/A'),
                   ],
                 ),
               ),

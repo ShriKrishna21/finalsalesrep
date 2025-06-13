@@ -58,28 +58,7 @@ class _AgentscreenState extends State<Agentscreen> {
     });
   }
 
-  // count() async {
-  //   final SharedPreferences prefs = await SharedPreferences.getInstance();
-  //   // await prefs.setInt('offer_accepted', accepted);
-  //   //     await prefs.setInt('offer_rejected', rejected);
-  //   //     await prefs.setInt('already_subscribed', subscribed);
-  //   final todaycounrt = prefs.getInt('today_count');
-  //   final alreadysubsccribedd = prefs.getInt('already_subscribed');
-  //   final offeracceptedd = prefs.getInt('offer_accepted');
-  //   final offerrejectedd = prefs.getInt('offer_rejected');
-  //   final agent = prefs.getString("username");
-  //    print("hhhhhhhhhhhhhhhh ${todaycounrt}  " );
-
-  //   setState(() {
-  //     todaycount = todaycounrt ?? 0;
-  //     alreadysubscribed = alreadysubsccribedd ?? 0;
-  //     offeraccepted = offeracceptedd ?? 0;
-  //     offerrejected = offerrejectedd ?? 0;
-  //     agentname = agent ?? "";
-  //   });
-
-  //   print("Today Count: $todaycount");
-  // }
+  
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -227,7 +206,7 @@ class _AgentscreenState extends State<Agentscreen> {
                   },
                   child: Container(
                     height: MediaQuery.of(context).size.height / 6.33,
-                    width:  MediaQuery.of(context).size.width / 2.1,
+                    width: MediaQuery.of(context).size.width / 2.1,
                     decoration: BoxDecoration(
                         border: Border.all(
                           width: 2.0,
@@ -268,7 +247,7 @@ class _AgentscreenState extends State<Agentscreen> {
                             width: MediaQuery.of(context).size.width * 0.5,
                             decoration: const BoxDecoration(
                                 borderRadius: BorderRadius.only(
-                          
+
                                     // topLeft: Radius.circular(20),
                                     bottomLeft: Radius.circular(20)),
                                 border: Border(
@@ -341,7 +320,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                 bottomRight: Radius.circular(20),
                               ),
                               border: Border(
-                                  top: BorderSide(color: Colors.black, width: 2)),
+                                  top: BorderSide(
+                                      color: Colors.black, width: 2)),
                               color: Color.fromARGB(
                                 255,
                                 252,
