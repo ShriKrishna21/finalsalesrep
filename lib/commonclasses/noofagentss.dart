@@ -1,5 +1,7 @@
 import 'dart:convert';
-import 'package:finalsalesrep/modelclasses/noofagents.dart' show NofAgents, User;
+import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/modelclasses/noofagents.dart'
+    show NofAgents, User;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,13 +17,15 @@ class noofagents {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse("http://10.100.13.138:8099/api/users_you_created"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {"token": apiKey},
-        }),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(CommonApiClass.noOfAgents),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "params": {"token": apiKey},
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);

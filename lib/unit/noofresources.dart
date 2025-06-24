@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agentdetailsscreen.dart';
 import 'package:flutter/material.dart';
@@ -28,15 +29,17 @@ class _NoofresourcesState extends State<Noofresources> {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse("http://10.100.13.138:8099/api/users_you_created"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {
-            "token": apiKey,
-          }
-        }),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(CommonApiClass.Noofresources),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "params": {
+                "token": apiKey,
+              }
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
@@ -80,66 +83,73 @@ class _NoofresourcesState extends State<Noofresources> {
                   itemBuilder: (context, index) {
                     final user = users[index];
                     return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 6),
                       child: InkWell(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => AgentDetailsScreen(user: user),
+                              builder: (context) =>
+                                  AgentDetailsScreen(user: user),
                             ),
                           );
                         },
                         child: Card(
-  elevation: 6,
-  shape: RoundedRectangleBorder(
-    borderRadius: BorderRadius.circular(20),
-  ),
-  shadowColor: Colors.black.withOpacity(0.1),
-  child: Container(
-    decoration: BoxDecoration(
-      gradient: LinearGradient(
-        colors: [Colors.white, Colors.pink.shade50],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ),
-      borderRadius: BorderRadius.circular(20),
-    ),
-    padding: const EdgeInsets.all(20),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const CircleAvatar(
-              backgroundColor: Colors.blueAccent,
-              child: Icon(Icons.person, color: Colors.white),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                user.name ?? 'Unknown',
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.black87,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 16),
-        Divider(color: Colors.grey.shade300),
-        const SizedBox(height: 8),
-        InfoRow(label: "ID", value: user.id?.toString() ?? 'N/A'),
-        InfoRow(label: "Email", value: user.email ?? 'N/A'),
-        InfoRow(label: "Phone", value: user.phone ?? 'N/A'),
-        InfoRow(label: "Role", value: user.role ?? 'N/A'),
-      ],
-    ),
-  ),
-),
-
+                          elevation: 6,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                          shadowColor: Colors.black.withOpacity(0.1),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                colors: [Colors.white, Colors.pink.shade50],
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                              ),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const CircleAvatar(
+                                      backgroundColor: Colors.blueAccent,
+                                      child: Icon(Icons.person,
+                                          color: Colors.white),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: Text(
+                                        user.name ?? 'Unknown',
+                                        style: const TextStyle(
+                                          fontSize: 20,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.black87,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 16),
+                                Divider(color: Colors.grey.shade300),
+                                const SizedBox(height: 8),
+                                InfoRow(
+                                    label: "ID",
+                                    value: user.id?.toString() ?? 'N/A'),
+                                InfoRow(
+                                    label: "Email", value: user.email ?? 'N/A'),
+                                InfoRow(
+                                    label: "Phone", value: user.phone ?? 'N/A'),
+                                InfoRow(
+                                    label: "Role", value: user.role ?? 'N/A'),
+                              ],
+                            ),
+                          ),
+                        ),
                       ),
                     );
                   },

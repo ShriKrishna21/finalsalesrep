@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
 import 'package:flutter/material.dart';
@@ -22,10 +22,10 @@ class _agentProfileState extends State<agentProfile> {
   userlogout? logoutt;
   Future<void> agentLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? apiKey =  prefs.getString('apikey');
+    final String? apiKey = prefs.getString('apikey');
     print(" nnnnnnnnnnnnnnnnnnnnnnnn${apiKey}");
     try {
-      const url = 'http://10.100.13.138:8099/token_validation';
+      final url = CommonApiClass.agentProfile;
       final respond = await http.post(
         Uri.parse(url),
         headers: {
@@ -38,7 +38,6 @@ class _agentProfileState extends State<agentProfile> {
         }),
       );
 
-      
       if (respond.statusCode == 200) {
         final jsonResponse = jsonDecode(respond.body) as Map<String, dynamic>;
         setState(() {
@@ -47,7 +46,7 @@ class _agentProfileState extends State<agentProfile> {
 
         print(" hashhhhhhhhhhhhhhhhhhhhhhhhhhhhhh${respond.statusCode}");
       }
-      if (logoutt!=null && logoutt!.result!.code == "200") {
+      if (logoutt != null && logoutt!.result!.code == "200") {
         await prefs.clear();
         Navigator.pushReplacement(
             context,
@@ -151,30 +150,31 @@ class _agentProfileState extends State<agentProfile> {
               child: ElevatedButton(
                 onPressed: () {
                   // agentLogout();
-                   showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Confirm Logout"),
-        content: Text("Are you sure you want to logout?"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-          ),
-          TextButton(
-            child: Text("Logout", style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-              agentLogout(); // Proceed with logout
-            },
-          ),
-        ],
-      );
-    },
-  );
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        title: Text("Confirm Logout"),
+                        content: Text("Are you sure you want to logout?"),
+                        actions: [
+                          TextButton(
+                            child: Text("Cancel"),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                            },
+                          ),
+                          TextButton(
+                            child: Text("Logout",
+                                style: TextStyle(color: Colors.red)),
+                            onPressed: () {
+                              Navigator.of(context).pop(); // Close the dialog
+                              agentLogout(); // Proceed with logout
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.redAccent,
@@ -218,7 +218,7 @@ class profileitem extends StatelessWidget {
             child: Text(
               value,
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

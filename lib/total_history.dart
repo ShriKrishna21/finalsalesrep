@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -15,16 +16,18 @@ class totalHistory {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse("http://10.100.13.138:8099/api/customer_forms_info_id"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {
-            "user_id": userid,
-            "token": apikey,
-          }
-        }),
-      ).timeout(const Duration(seconds: 30));
+      final response = await http
+          .post(
+            Uri.parse(CommonApiClass.totalHistory),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "params": {
+                "user_id": userid,
+                "token": apikey,
+              }
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);

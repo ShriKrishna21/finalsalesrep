@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -18,8 +19,7 @@ class Onedayagent {
     try {
       final response = await http
           .post(
-            Uri.parse(
-                "http://10.100.13.138:8099/api/customer_forms_info_one_day"),
+            Uri.parse(CommonApiClass.oneDayAgent),
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               "params": {
@@ -42,11 +42,9 @@ class Onedayagent {
         print('--- Starting record processing ---');
 
         for (var record in records) {
-          
           print('\nProcessing record: $record');
 
           if (record.eenaduNewspaper == true) {
-        
             subscribed++;
             print(
                 '  -> eenaduNewspaper is TRUE. Incremented subscribed. Current subscribed: $subscribed');
@@ -61,7 +59,8 @@ class Onedayagent {
             }
 
             // Only count as rejected if a reason is present AND eenaduNewspaper is false (which is handled by the 'else' block)
-            if (record.freeOffer15Days == false&&record.eenaduNewspaper == false) {
+            if (record.freeOffer15Days == false &&
+                record.eenaduNewspaper == false) {
               rejected++;
               print(
                   '    -> reasonNotTakingOffer is NOT empty. Incremented rejected. Current rejected: $rejected');

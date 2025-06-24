@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentprofie.dart';
+import 'package:finalsalesrep/common_api_class.dart';
 
 import 'package:finalsalesrep/unit/createagent.dart';
 import 'package:flutter/material.dart';
@@ -12,14 +13,15 @@ class Circulationinchargescreen extends StatefulWidget {
   const Circulationinchargescreen({super.key});
 
   @override
-  State<Circulationinchargescreen> createState() => _CirculationinchargescreenState();
+  State<Circulationinchargescreen> createState() =>
+      _CirculationinchargescreenState();
 }
 
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   int agentCount = 0;
   bool isLoading = true;
-  String namee ="";
-  String unit="";
+  String namee = "";
+  String unit = "";
 
   Future<void> agentdata() async {
     final prefs = await SharedPreferences.getInstance();
@@ -28,7 +30,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     final name = prefs.getString('name');
     final unitt = prefs.getString('unit');
     setState(() {
-      namee=name!;
+      namee = name!;
       unit = unitt!;
     });
 
@@ -42,15 +44,17 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     }
 
     try {
-      final response = await http.post(
-        Uri.parse("http://10.100.13.138:8099/api/users_you_created"),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {
-            "token": apiKey,
-          }
-        }),
-      ).timeout(const Duration(seconds: 20));
+      final response = await http
+          .post(
+            Uri.parse(CommonApiClass.Circulationinchargescreen),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "params": {
+                "token": apiKey,
+              }
+            }),
+          )
+          .timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
@@ -89,7 +93,11 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => agentProfile(),));
+              Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => agentProfile(),
+                  ));
             },
             child: Container(
               width: MediaQuery.of(context).size.height / 10,
@@ -147,14 +155,17 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => const Noofresources()),
+                      MaterialPageRoute(
+                          builder: (context) => const Noofresources()),
                     );
                   },
                   child: _buildCard(
                     title: "Number of resources",
                     gradientColors: [Colors.white, Colors.redAccent],
                     rows: [
-                      _InfoRow(label: "Agents", value: isLoading ? "..." : agentCount.toString()),
+                      _InfoRow(
+                          label: "Agents",
+                          value: isLoading ? "..." : agentCount.toString()),
                     ],
                   ),
                 ),
@@ -187,18 +198,26 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
             child: ElevatedButton(
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.blue,
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
                 elevation: 6,
               ),
               onPressed: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => createagent(),));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => createagent(),
+                    ));
               },
               child: const Text(
                 "Create User",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Colors.white),
+                style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16,
+                    color: Colors.white),
               ),
             ),
           )
@@ -219,7 +238,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
         boxShadow: const [
-          BoxShadow(color: Colors.black45, offset: Offset(2, 2), blurRadius: 15),
+          BoxShadow(
+              color: Colors.black45, offset: Offset(2, 2), blurRadius: 15),
         ],
       ),
       child: Column(

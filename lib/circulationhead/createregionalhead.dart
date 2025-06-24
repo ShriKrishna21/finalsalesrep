@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 
 import 'package:shared_preferences/shared_preferences.dart';
-
 
 class createregionalhead extends StatefulWidget {
   const createregionalhead({super.key});
@@ -31,7 +31,6 @@ class _createregionalheadState extends State<createregionalhead> {
   final TextEditingController phone = TextEditingController();
   final TextEditingController state = TextEditingController();
 
-  
   // Aadhaar and PAN images
   File? aadhaarImage;
   File? pancardImage;
@@ -67,22 +66,19 @@ class _createregionalheadState extends State<createregionalhead> {
     // }
 
     try {
-      const url = "http://10.100.13.138:8099/sales_rep_user_creation";
+      final url = CommonApiClass.createregionalhead;
 
-    final String aadhaarBase64 = aadhaarImage != null
-        ? base64Encode(await aadhaarImage!.readAsBytes())
-        : "";
+      final String aadhaarBase64 = aadhaarImage != null
+          ? base64Encode(await aadhaarImage!.readAsBytes())
+          : "";
 
-    final String panBase64 = pancardImage != null
-        ? base64Encode(await pancardImage!.readAsBytes())
-        : "";
+      final String panBase64 = pancardImage != null
+          ? base64Encode(await pancardImage!.readAsBytes())
+          : "";
 
       print("Aadhaar Base64: ${aadhaarBase64.substring(0, 100)}...");
       print("PAN Base64: ${panBase64.substring(0, 100)}...");
       print("Token: $userlog");
-
-
-
 
       final response = await http.post(
         Uri.parse(url),
@@ -100,9 +96,8 @@ class _createregionalheadState extends State<createregionalhead> {
             "status": "active",
             "phone": phone.text,
             "unit_name": unit.text,
-              "aadhar_base64": aadhaarBase64,
-              "Pan_base64": panBase64,
-          
+            "aadhar_base64": aadhaarBase64,
+            "Pan_base64": panBase64,
           }
         }),
       );
@@ -169,7 +164,6 @@ class _createregionalheadState extends State<createregionalhead> {
             key: _formKey,
             child: Column(
               children: [
-              
                 const SizedBox(height: 10),
                 usercredentials(
                   controller: name,
@@ -292,11 +286,12 @@ class _createregionalheadState extends State<createregionalhead> {
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
                       // createduser();
-                      await createuser(
-                         
-
-                        );
-                      Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Circulationinchargescreen(),));
+                      await createuser();
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => Circulationinchargescreen(),
+                          ));
                     }
                   },
                   child: Container(
