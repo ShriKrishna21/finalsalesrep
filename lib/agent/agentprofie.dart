@@ -20,6 +20,7 @@ class _agentProfileState extends State<agentProfile> {
   String? jobrole;
   String? userid;
   userlogout? logoutt;
+
   Future<void> agentLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? apiKey = prefs.getString('apikey');
@@ -54,8 +55,7 @@ class _agentProfileState extends State<agentProfile> {
               builder: (context) => Loginscreen(),
             ));
 
-        print(
-            "sucessssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+        print("Logout Success");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Log out failed")),
@@ -89,10 +89,13 @@ class _agentProfileState extends State<agentProfile> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFDF7FF),
+      backgroundColor: Colors.white, // Black background
       appBar: AppBar(
-        backgroundColor: Color(0xFF4A90E2),
-        title: Text('My Profile'),
+        backgroundColor: Colors.white, // White app bar
+        title: Text(
+          'My Profile',
+          style: TextStyle(color: Colors.black), // Black text
+        ),
       ),
       body: Column(
         children: [
@@ -109,7 +112,7 @@ class _agentProfileState extends State<agentProfile> {
                 bottom: 8,
                 right: 8,
                 child: CircleAvatar(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.black,
                   radius: 14,
                   child: Icon(Icons.edit, color: Colors.white, size: 14),
                 ),
@@ -121,7 +124,7 @@ class _agentProfileState extends State<agentProfile> {
             margin: EdgeInsets.symmetric(horizontal: 20),
             padding: EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Color(0xFFF4F7F2),
+              color: Colors.white, // White background for the card
               borderRadius: BorderRadius.circular(10),
               boxShadow: [
                 BoxShadow(
@@ -137,7 +140,7 @@ class _agentProfileState extends State<agentProfile> {
                 profileitem(title: "Name", value: agentname.toString()),
                 profileitem(title: "User Name", value: userid.toString()),
                 profileitem(title: "Job role", value: jobrole.toString()),
-                profileitem(title: "unit name", value: unitname.toString()),
+                profileitem(title: "Unit name", value: unitname.toString()),
               ],
             ),
           ),
@@ -149,23 +152,34 @@ class _agentProfileState extends State<agentProfile> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // agentLogout();
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text("Confirm Logout"),
-                        content: Text("Are you sure you want to logout?"),
+                        title: Text(
+                          "Confirm Logout",
+                          style: TextStyle(
+                              color: Colors.black), // Black title text
+                        ),
+                        content: Text("Are you sure you want to logout?",
+                            style: TextStyle(
+                                color: Colors.black)), // Black content text
                         actions: [
                           TextButton(
-                            child: Text("Cancel"),
+                            child: Text("Cancel",
+                                style: TextStyle(
+                                    color: Colors.black)), // Black text
                             onPressed: () {
                               Navigator.of(context).pop(); // Close the dialog
                             },
                           ),
                           TextButton(
-                            child: Text("Logout",
-                                style: TextStyle(color: Colors.red)),
+                            child: Text(
+                              "Logout",
+                              style: TextStyle(
+                                  color: Colors
+                                      .red), // Red colored text for logout
+                            ),
                             onPressed: () {
                               Navigator.of(context).pop(); // Close the dialog
                               agentLogout(); // Proceed with logout
@@ -177,14 +191,17 @@ class _agentProfileState extends State<agentProfile> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor:
+                      Colors.red, // Red background for logout button
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
                 child: Text(
                   'Logout',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white), // White text for the button
                 ),
               ),
             ),
@@ -211,13 +228,21 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text("$title", style: TextStyle(fontSize: 16))),
-          Text(":", style: TextStyle(fontSize: 16)),
+          Expanded(
+              child: Text("$title",
+                  style: TextStyle(
+                      fontSize: 16, color: Colors.black))), // Black text
+          Text(":",
+              style:
+                  TextStyle(fontSize: 16, color: Colors.black)), // Black text
           SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black), // Black text
               overflow: TextOverflow.ellipsis,
             ),
           ),

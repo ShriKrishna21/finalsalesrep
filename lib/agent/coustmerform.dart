@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentscreen.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Coustmer extends StatefulWidget {
@@ -148,9 +151,9 @@ class _CoustmerState extends State<Coustmer> {
 
   Future<void> uploaddata() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? agentapi = await prefs.getString('apikey');
-    final String? agentlog = await prefs.getString('agentlogin');
-    final String? unit = await prefs.getString('unit');
+    final String? agentapi = prefs.getString('apikey');
+    final String? agentlog = prefs.getString('agentlogin');
+    final String? unit = prefs.getString('unit');
     print("Sending Latitude: $latitude, Longitude:$longitude");
     print("Street: $street, place: $place, Landmark: $landmark");
 
@@ -272,13 +275,19 @@ class _CoustmerState extends State<Coustmer> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
-        foregroundColor: Colors.white,
-        backgroundColor: Colors.blue,
-        title: const Text(
-          "Customer Form",
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+        foregroundColor: Colors.black,
+        backgroundColor: Colors.white,
+        title: Text(
+          localizations.customerform,
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 30,
+          ),
         ),
       ),
       body: Padding(
@@ -290,7 +299,9 @@ class _CoustmerState extends State<Coustmer> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 textformfeild(
-                    controller: agency, label: "Agency Name", need: true),
+                    controller: agency,
+                    label: localizations.agencyname,
+                    need: true),
                 const SizedBox(height: 20),
 
                 // Date & Time Fields
@@ -300,7 +311,7 @@ class _CoustmerState extends State<Coustmer> {
                         child: date(
                             needed: true,
                             Dcontroller: datecontroller,
-                            date: "Date",
+                            date: localizations.date,
                             inputType: TextInputType.datetime)),
                     const SizedBox(
                       width: 10,
@@ -309,43 +320,43 @@ class _CoustmerState extends State<Coustmer> {
                         child: date(
                             needed: true,
                             Dcontroller: timecontroller,
-                            date: "Time",
+                            date: localizations.time,
                             inputType: TextInputType.datetime)),
                   ],
                 ),
 
                 const SizedBox(height: 15),
-                const Text("Family Details",
+                Text(localizations.familyDetails,
                     style: TextStyle(
-                        color: Colors.blue,
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: familyhead,
-                    label: "Family Head Name",
+                    label: localizations.name,
                     hunttext: "family head name cannot be empty"),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: fathersname,
-                    label: "Father's Name",
+                    label: localizations.fathersname,
                     hunttext: "fathers name cannot be empty"),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: mothername,
-                    label: "Mother's Name",
+                    label: localizations.mothername,
                     hunttext: "mothers name cannot be empty"),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: spousename,
-                    label: "Spouse Name",
+                    label: localizations.spousename,
                     hunttext: "spouse name cannot be empty "),
                 const SizedBox(height: 10),
 
                 const SizedBox(height: 15),
-                const Text("Address Details",
+                Text(localizations.addressDetails,
                     style: TextStyle(
-                        color: Colors.blue,
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
                 const SizedBox(height: 10),
@@ -354,7 +365,7 @@ class _CoustmerState extends State<Coustmer> {
                     Expanded(
                         child: textformfeild(
                             controller: hno,
-                            label: "House number",
+                            label: localizations.houseNumber,
                             hunttext: "house number   cannot be empty",
                             keyboardType: TextInputType.text)),
                     const SizedBox(
@@ -364,7 +375,7 @@ class _CoustmerState extends State<Coustmer> {
                         child: textformfeild(
                             controller: streetnumber,
                             hunttext: "street number cannot be empty",
-                            label: "street number",
+                            label: localizations.streetNo,
                             keyboardType: TextInputType.number)),
                   ],
                 ),
@@ -375,7 +386,7 @@ class _CoustmerState extends State<Coustmer> {
                         child: textformfeild(
                             hunttext: "city cannot be empty",
                             controller: city,
-                            label: "city",
+                            label: localizations.city,
                             keyboardType: TextInputType.text)),
                     const SizedBox(
                       width: 10,
@@ -386,7 +397,7 @@ class _CoustmerState extends State<Coustmer> {
                             maxvalue: 6,
                             controller: pincode,
                             // textForCounter: "",
-                            label: "pincode",
+                            label: localizations.pinCode,
                             keyboardType: TextInputType.number)),
                   ],
                 ),
@@ -394,13 +405,14 @@ class _CoustmerState extends State<Coustmer> {
                 const SizedBox(
                   height: 10,
                 ),
-                textformfeild(controller: adddress, label: "Address"),
+                textformfeild(
+                    controller: adddress, label: localizations.address),
                 const SizedBox(
                   height: 10,
                 ),
                 textformfeild(
                   controller: TextEditingController(text: street),
-                  label: "street",
+                  label: localizations.streetNo,
                   hunttext: "Place Cannot Be Empty",
                   need: true,
                 ),
@@ -420,21 +432,21 @@ class _CoustmerState extends State<Coustmer> {
                     hunttext: "mobile number cannot empty",
                     controller: mobile,
                     maxvalue: 10,
-                    label: "mobile number",
+                    label: localizations.mobilenumber,
                     keyboardType: TextInputType.phone),
 
                 const SizedBox(height: 15),
-                const Text("Newspaper Details",
+                Text(localizations.newsPaperDetails,
                     style: TextStyle(
-                        color: Colors.blue,
+                        color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
 
                 // Eenadu Newspaper Toggle
                 Row(
                   children: [
-                    const Expanded(
-                      child: Text("Eenadu Newspaper:",
+                    Expanded(
+                      child: Text(localizations.eenadunewspaper,
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
@@ -464,13 +476,13 @@ class _CoustmerState extends State<Coustmer> {
                   textformfeild(
                       hunttext: "feedback cannot be empty",
                       controller: feedback_to_improve,
-                      label: "Feedback to improve Eenadu"),
+                      label: localizations.feedbacktoimprovepaper),
 
                 if (!_isYes) ...[
                   Row(
                     children: [
-                      const Expanded(
-                        child: Text("Reads Newspaper:",
+                      Expanded(
+                        child: Text(localizations.readnewspaper,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
@@ -497,21 +509,21 @@ class _CoustmerState extends State<Coustmer> {
                     textformfeild(
                         hunttext: "current news paper cannot be empty",
                         controller: current_newspaper,
-                        label: "Current Newspaper"),
+                        label: localizations.currentnewpaper),
                   if (_isAnotherToggle)
                     textformfeild(
                         hunttext: "reason for not talking cannot be empty",
                         controller: reason_for_not_taking_eenadu,
-                        label: "reason for not talking eenadu Newspaper"),
+                        label: localizations.reasonfornottakingeenadunewspaper),
                   if (!_isAnotherToggle)
                     textformfeild(
                         hunttext: "reason for not reading cannot be empty",
                         controller: reason_for_not_reading,
-                        label: "Reason for not Reading Newspaper"),
+                        label: localizations.reasonfornotreadingnewspaper),
                   Row(
                     children: [
-                      const Expanded(
-                        child: Text("15 days  free Eenadu   offer:",
+                      Expanded(
+                        child: Text(localizations.daysOfferRejected15,
                             style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
@@ -538,7 +550,7 @@ class _CoustmerState extends State<Coustmer> {
                     textformfeild(
                         hunttext: "feild cannot be empty",
                         controller: reason_for_not_taking_offer,
-                        label: "reason for not taking offer"),
+                        label: localizations.reasonfornottakingoffer),
                   const SizedBox(
                     height: 15,
                   ),
@@ -550,8 +562,8 @@ class _CoustmerState extends State<Coustmer> {
                 // Employment Status Toggle
                 Row(
                   children: [
-                    const Expanded(
-                      child: Text("Employed:",
+                    Expanded(
+                      child: Text(localizations.employed,
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
@@ -586,7 +598,7 @@ class _CoustmerState extends State<Coustmer> {
                 if (_isemployed)
                   DropdownButtonFormField<String>(
                     value: _selectedJobType,
-                    hint: const Text("Select Job Type"),
+                    hint: Text(localizations.jobtype),
                     isExpanded: true,
                     items: jobTypes.map((String job) {
                       return DropdownMenuItem<String>(
@@ -603,7 +615,7 @@ class _CoustmerState extends State<Coustmer> {
                       });
                     },
                     decoration: InputDecoration(
-                      labelText: "Job Type",
+                      labelText: localizations.jobtype,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
@@ -629,7 +641,7 @@ class _CoustmerState extends State<Coustmer> {
                       });
                     },
                     decoration: InputDecoration(
-                      labelText: "Government Department",
+                      labelText: localizations.governmentjob,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
@@ -697,7 +709,7 @@ class _CoustmerState extends State<Coustmer> {
                   textformfeild(
                       hunttext: "feild cannot be empty",
                       controller: privateCompanyController,
-                      label: "Company Name"),
+                      label: localizations.companyname),
                   const SizedBox(height: 10),
                   textformfeild(
                       hunttext: "feild cannot be empty",
@@ -707,14 +719,14 @@ class _CoustmerState extends State<Coustmer> {
                   textformfeild(
                       hunttext: "feild cannot be empty",
                       controller: privateProffesionController,
-                      label: "profession"),
+                      label: localizations.profession),
                 ],
 
 // If NOT employed, show Profession Dropdown
                 if (!_isemployed)
                   DropdownButtonFormField<String>(
                     value: _selectedproffesion,
-                    hint: const Text("Select Profession"),
+                    hint: Text(localizations.profession),
                     isExpanded: true,
                     items: proffesion.map((String item) {
                       return DropdownMenuItem<String>(
@@ -728,7 +740,7 @@ class _CoustmerState extends State<Coustmer> {
                       });
                     },
                     decoration: InputDecoration(
-                      labelText: "Profession",
+                      labelText: localizations.profession,
                       border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10)),
                     ),
@@ -749,13 +761,13 @@ class _CoustmerState extends State<Coustmer> {
                     },
                     child: Container(
                       decoration: const BoxDecoration(
-                          color: Colors.blue,
+                          color: Colors.grey,
                           borderRadius: BorderRadius.all(Radius.circular(50))),
                       height: MediaQuery.of(context).size.height / 18,
                       width: MediaQuery.of(context).size.height / 5,
                       child: Center(
                           child: Text(
-                        "Submit Form",
+                        localizations.submit,
                         style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,

@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
-
 import 'package:finalsalesrep/unit/createagent.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -68,7 +67,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 
         print("✅ Agent count fetched: $agentCount");
       } else {
-        print("❌ Failed to fetch agents. Status code: \${response.statusCode}");
+        print("❌ Failed to fetch agents. Status code: ${response.statusCode}");
         setState(() => isLoading = false);
       }
     } catch (e) {
@@ -86,10 +85,11 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white, // White background
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.black, // Black app bar
+        foregroundColor: Colors.white, // White icons
         actions: [
           GestureDetector(
             onTap: () {
@@ -100,28 +100,30 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                   ));
             },
             child: Container(
-              width: MediaQuery.of(context).size.height / 10,
+              width: MediaQuery.of(context).size.height / 12,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
                   width: 2,
-                  color: Colors.white,
+                  color: Colors.white, // White border
                   style: BorderStyle.solid,
                 ),
               ),
               child: Icon(
                 Icons.person,
                 size: MediaQuery.of(context).size.height / 16,
+                color: Colors.white, // White icon
               ),
             ),
           )
         ],
         title: RichText(
           text: TextSpan(
-            text: "circulation incharge - ",
+            text: "Circulation Incharge - ",
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 40,
               fontWeight: FontWeight.bold,
+              color: Colors.white, // White text
             ),
             children: <TextSpan>[
               TextSpan(
@@ -129,7 +131,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 40,
                   fontWeight: FontWeight.bold,
-                  color: Colors.black,
+                  color: Colors.white, // White text
                 ),
               ),
               TextSpan(
@@ -137,7 +139,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
-                  color: Colors.white,
+                  color: Colors.white, // White text
                 ),
               )
             ],
@@ -145,129 +147,106 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         ),
         automaticallyImplyLeading: false,
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(12.0),
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Noofresources()),
-                    );
-                  },
-                  child: _buildCard(
-                    title: "Number of resources",
-                    gradientColors: [Colors.white, Colors.redAccent],
-                    rows: [
-                      _InfoRow(
-                          label: "Agents",
-                          value: isLoading ? "..." : agentCount.toString()),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 20),
-                _buildCard(
-                  title: "Subscription Details",
-                  gradientColors: [Colors.white, Colors.green],
-                  rows: const [
-                    _InfoRow(label: "Houses Count", value: "  ", bold: true),
-                    _InfoRow(label: "Houses Visited", value: "0"),
-                    _InfoRow(label: "Eenadu subscription", value: "0"),
-                    _InfoRow(label: "Willing to change", value: "0"),
-                    _InfoRow(label: "Not Interested", value: "0"),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                _buildCard(
-                  title: "Route Map",
-                  gradientColors: [Colors.white, Colors.redAccent],
-                  rows: const [
-                    _InfoRow(label: "Routes", value: "0"),
-                  ],
-                ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const Noofresources()),
+                );
+              },
+              child: _buildSimpleCard(
+                title: "Number of Resources",
+                rows: [
+                  _InfoRow(
+                      label: "Agents",
+                      value: isLoading ? "..." : agentCount.toString()),
+                ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildSimpleCard(
+              title: "Subscription Details",
+              rows: const [
+                _InfoRow(label: "Houses Count", value: "0", bold: true),
+                _InfoRow(label: "Houses Visited", value: "0"),
+                _InfoRow(label: "Eenadu Subscription", value: "0"),
+                _InfoRow(label: "Willing to Change", value: "0"),
+                _InfoRow(label: "Not Interested", value: "0"),
               ],
             ),
-          ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 6,
-              ),
-              onPressed: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => createagent(),
-                    ));
-              },
-              child: const Text(
-                "Create User",
-                style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                    color: Colors.white),
-              ),
+            const SizedBox(height: 20),
+            _buildSimpleCard(
+              title: "Route Map",
+              rows: const [
+                _InfoRow(label: "Routes", value: "0"),
+              ],
             ),
-          )
-        ],
+            const SizedBox(height: 20),
+            Center(
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.black, // Black button
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18), // Rounded corners
+                  ),
+                  elevation: 5,
+                ),
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => createagent(),
+                      ));
+                },
+                child: const Text(
+                  "Create User",
+                  style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: Colors.white), // White text
+                ),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildCard({
+  Widget _buildSimpleCard({
     required String title,
-    required List<Color> gradientColors,
     required List<_InfoRow> rows,
   }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        border: Border.all(width: 2),
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: const [
-          BoxShadow(
-              color: Colors.black45, offset: Offset(2, 2), blurRadius: 15),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(colors: gradientColors),
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(14),
-                topRight: Radius.circular(14),
-              ),
-            ),
-            child: Text(
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      elevation: 4,
+      color: Colors.white, // White background for the card
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
               title,
               style: const TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 17,
-                color: Colors.black,
+                fontSize: 18,
+                color: Colors.black, // Black text
               ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            child: Column(children: rows),
-          )
-        ],
+            const SizedBox(height: 8),
+            Column(children: rows),
+          ],
+        ),
       ),
     );
   }
@@ -287,24 +266,26 @@ class _InfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: const EdgeInsets.symmetric(vertical: 5),
       child: Row(
         children: [
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 15),
+              style: const TextStyle(
+                  fontSize: 16, color: Colors.black), // Black text
             ),
           ),
-          const Text(":", style: TextStyle(fontSize: 15)),
-          const SizedBox(width: 6),
+          const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
+          const SizedBox(width: 8),
           Text(
             value,
             style: TextStyle(
               fontWeight: bold ? FontWeight.bold : FontWeight.normal,
-              fontSize: 15,
+              fontSize: 16,
+              color: Colors.black, // Black text
             ),
-          )
+          ),
         ],
       ),
     );

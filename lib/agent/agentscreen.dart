@@ -71,7 +71,7 @@ class _AgentscreenState extends State<Agentscreen> {
           children: [
             Text(localizations.salesrep),
             Text(
-              "Welcome $agentname",
+              "${localizations.welcome} $agentname",
               style: const TextStyle(fontSize: 16),
             ),
           ],
@@ -128,9 +128,9 @@ class _AgentscreenState extends State<Agentscreen> {
             MaterialPageRoute(builder: (_) => const Coustmer()),
           );
         },
-        label: const Text(
-          "Customer Form",
-          style: TextStyle(color: Colors.black),
+        label: Text(
+          localizations.customerform,
+          style: const TextStyle(color: Colors.black),
         ),
         icon: const Icon(Icons.add_box_outlined, color: Colors.black),
       ),
@@ -152,24 +152,30 @@ class _AgentscreenState extends State<Agentscreen> {
                   const SizedBox(height: 20),
 
                   // Daily Summary Section
-                  _buildSectionTitle("Daily Summary"),
-                  _buildInfoRow("Total Houses Assigned", "40"),
-                 GestureDetector(
-  onTap: () {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const Onedayhistory()),
-    );
-  },
-  child: _buildInfoRow("Total Houses Visited", "${records.length}"),
-),
+                  Center(child: _buildSectionTitle(localizations.houseVisited)),
+                  SizedBox(
+                    height: 20,
+                  ),
+                  _buildInfoRow(localizations.todaysHouseCount, "40"),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const Onedayhistory()),
+                      );
+                    },
+                    child: _buildInfoRow(
+                        localizations.houseVisited, "${records.length}"),
+                  ),
 
-                  _buildInfoRow("Pending Visits", "${40 - records.length}"),
+                  _buildInfoRow(
+                      localizations.todaysTargetLeft, "${40 - records.length}"),
 
                   const SizedBox(height: 30),
 
                   // Route Detail Section
-                  _buildSectionTitle("Route Detail"),
+                  Center(child: _buildSectionTitle(localizations.myRouteMap)),
                   GestureDetector(
                       onTap: () {
                         Navigator.push(
@@ -185,10 +191,13 @@ class _AgentscreenState extends State<Agentscreen> {
                   const SizedBox(height: 30),
 
                   // Survey Results Section
-                  _buildSectionTitle("Result of the Survey"),
-                  _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
-                  _buildBulletPoint("Offer Accepted: $offerAcceptedCount"),
-                  _buildBulletPoint("Offer Rejected: $offerRejectedCount"),
+                  Center(child: _buildSectionTitle(localizations.reports)),
+                  _buildBulletPoint(
+                      "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
+                  _buildBulletPoint(
+                      "${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
+                  _buildBulletPoint(
+                      "${localizations.daysOfferRejected15}: $offerRejectedCount"),
                 ],
               ),
             ),
