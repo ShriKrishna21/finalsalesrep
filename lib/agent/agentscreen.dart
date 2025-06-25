@@ -2,15 +2,14 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-import 'package:finalsalesrep/circulationhead/circulationhead.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
 import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/l10n/app_localization_en.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -20,15 +19,7 @@ class Agentscreen extends StatefulWidget {
 }
 
 class _AgentscreenState extends State<Agentscreen> {
-  
-
-
-  
   TextEditingController dateController = TextEditingController();
-  int todaycount = 0;
-  int alreadysubscribed = 0;
-  int offeraccepted = 0;
-  int offerrejected = 0;
   String agentname = "";
   List<Record> records = [];
   bool _isLoading = true;
@@ -36,33 +27,29 @@ class _AgentscreenState extends State<Agentscreen> {
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
+
   final Onedayagent _onedayagent = Onedayagent();
 
-
-  
+  @override
   void initState() {
     super.initState();
-    
-
-    String formattedDate = DateFormat('EEE- MMMM d, y').format(DateTime.now());
+    String formattedDate = DateFormat('EEE, MMM d, y').format(DateTime.now());
     dateController.text = formattedDate;
-    // count();
+    loadAgentName();
     loadOnedayHistory();
   }
 
-  Future<void> loadOnedayHistory() async {
-    // setState(() {
-    //   _isLoading = true;
-    // });
+  Future<void> loadAgentName() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      agentname = prefs.getString('agentname') ?? '';
+    });
+  }
 
+  Future<void> loadOnedayHistory() async {
     final result = await _onedayagent.fetchOnedayHistory();
-    print(
-        "ssssssssssssssssssssssssssssssssssssssssssssssssssssssss${result.toString()}");
-    print(
-        "fhkdskjkslkdfkdfnldssssssssssssss${(result['records'] as List<Record>?) ?? []}");
     setState(() {
       records = (result['records'] as List<Record>?) ?? [];
-      print("length         ${records.length}");
       offerAcceptedCount = result['offer_accepted'] ?? 0;
       offerRejectedCount = result['offer_rejected'] ?? 0;
       alreadySubscribedCount = result['already_subscribed'] ?? 0;
@@ -70,468 +57,178 @@ class _AgentscreenState extends State<Agentscreen> {
     });
   }
 
-  
-
+  @override
   Widget build(BuildContext context) {
-       final localeProvider = Provider.of<LocalizationProvider>(context);
-        final localizations = AppLocalizations.of(context)!;
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       appBar: AppBar(
-        toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
-        actions: [
-          GestureDetector(
-              onTap: () {
-                Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const agentProfile(),
-                    ));
-              },
-              child: Icon(
-                Icons.person,
-                size: MediaQuery.of(context).size.height / 16,
-              ))
-        ],
-        centerTitle: true,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(AppLocalizations.of(context)!.salesrep),
+            Text(localizations.salesrep),
             Text(
               "Welcome $agentname",
-              style: const TextStyle(
-                  color: Colors.black,
-                  fontSize: 30,
-                  fontWeight: FontWeight.bold),
-            )
+              style: const TextStyle(fontSize: 16),
+            ),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const agentProfile()),
+              );
+            },
+          )
+        ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(localizations.salesrep),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text("Switch Language"),
+              onTap: () {
+                localeProvider.toggleLocale();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: Text(localizations.historyPage),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const historypage()),
+                );
+              },
+            ),
           ],
         ),
       ),
-      drawer: Drawer(
-        child: DrawerHeader(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-          SwitchListTile(
-      title: Text(localizations.salesrep), // Localized string
-      value: localeProvider.locale.languageCode == 'te',
-      onChanged: (val) {
-        localeProvider.toggleLocale();
-      },
-    ),
-              const SizedBox(
-                height: 100,
-                child: Image(
-                  image: AssetImage("assets/images/logo.jpg"),
-                  fit: BoxFit.cover,
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const Historypage(),
-                      ));
-                },
-                child: Row(
-                  children: [
-                    IconButton(
-                      onPressed: () {},
-                      icon: const Icon(
-                        Icons.stacked_bar_chart,
-                        color: Color.fromARGB(
-                          255,
-                          67,
-                          138,
-                          254,
-                        ),
-                      ),
-                    ),
-                    const Text(
-                      "History Page",
-                      style: TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.white,
         onPressed: () async {
-          // Wait for the form screen to complete
           await Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => const Coustmer()),
           );
-
-          // Re-fetch the data when coming back
-          // count();
         },
         label: const Text(
           "Customer Form",
-          style: TextStyle(color: Colors.white, fontSize: 18),
+          style: TextStyle(color: Colors.black),
         ),
-        icon: const Icon(
-          Icons.add_box_outlined,
-          color: Colors.white,
-        ),
-        backgroundColor: const Color.fromARGB(255, 67, 138, 254),
+        icon: const Icon(Icons.add_box_outlined, color: Colors.black),
       ),
-      body: Padding(
-        padding: EdgeInsets.symmetric(
-            horizontal: MediaQuery.of(context).size.width / 50),
-        child: Column(
-          children: [
-            SizedBox(
-              height: MediaQuery.of(context).size.height / 50,
-            ),
-            Container(
-              height: 55,
-              width: 400,
-              decoration: BoxDecoration(
-                  border: Border.all(width: 1.8),
-                  borderRadius: BorderRadius.circular(15),
-                  color: Colors.grey.shade500),
-              child: Center(
-                child: Text(
-                  dateController.text,
-                  style: const TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black),
-                ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: [
+                  Center(
+                    child: Text(
+                      dateController.text,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Daily Summary Section
+                  _buildSectionTitle("Daily Summary"),
+                  _buildInfoRow("Total Houses Assigned", "40"),
+                 GestureDetector(
+  onTap: () {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (_) => const Onedayhistory()),
+    );
+  },
+  child: _buildInfoRow("Total Houses Visited", "${records.length}"),
+),
+
+                  _buildInfoRow("Pending Visits", "${40 - records.length}"),
+
+                  const SizedBox(height: 30),
+
+                  // Route Detail Section
+                  _buildSectionTitle("Route Detail"),
+                  GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const Onedayhistory()),
+                        );
+                      },
+                      child: _buildBulletPoint("Route 1")),
+                  _buildBulletPoint("Route 2"),
+                  _buildBulletPoint("Route 3"),
+
+                  const SizedBox(height: 30),
+
+                  // Survey Results Section
+                  _buildSectionTitle("Result of the Survey"),
+                  _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
+                  _buildBulletPoint("Offer Accepted: $offerAcceptedCount"),
+                  _buildBulletPoint("Offer Rejected: $offerRejectedCount"),
+                ],
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const Onedayhistory(),
-                        ));
-                  },
-                  child: Container(
-                    height: MediaQuery.of(context).size.height / 6.33,
-                    width: MediaQuery.of(context).size.width / 2.1,
-                    decoration: BoxDecoration(
-                        border: Border.all(
-                          width: 2.0,
-                        ),
-                        boxShadow: const [
-                          BoxShadow(
-                              color: Colors.black,
-                              blurRadius: 10,
-                              offset: Offset(3, 3))
-                        ],
-                        borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(20),
-                            bottomLeft: Radius.circular(20)),
-                        color: Colors.white),
-                    child: Column(
-                      children: [
-                        //   2nd  House Visited Container
-                        Container(
-                          height: MediaQuery.of(context).size.height * 0.06,
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                              ),
-                              color: Colors.white),
-                          child: const Center(
-                              child: Text(
-                            "HouseVisited",
-                            style: TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 20),
-                          )),
-                        ),
-                        //today Container
+    );
+  }
 
-                        Expanded(
-                          child: Container(
-                            height: MediaQuery.of(context).size.height * 0.09,
-                            width: MediaQuery.of(context).size.width * 0.5,
-                            decoration: const BoxDecoration(
-                                borderRadius: BorderRadius.only(
-
-                                    // topLeft: Radius.circular(20),
-                                    bottomLeft: Radius.circular(20)),
-                                border: Border(
-                                    top: BorderSide(
-                                        color: Colors.black, width: 2)),
-                                color: Color.fromARGB(255, 178, 255, 87)),
-                            child: Center(
-                                child: Text(
-                              "Today: ${records.length}",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
-                            )),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const Spacer(),
-                Container(
-                  height: MediaQuery.of(context).size.height / 6.3,
-                  // width: double.infinity/2,
-                  width: MediaQuery.of(context).size.width / 2.1,
-                  decoration: BoxDecoration(
-                      border: Border.all(
-                        width: 2.2,
-                      ),
-                      boxShadow: const [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(3, 3))
-                      ],
-                      borderRadius: const BorderRadius.only(
-                          topRight: Radius.circular(20),
-                          bottomRight: Radius.circular(20)),
-                      color: Colors.white),
-                  child: Column(
-                    children: [
-                      //   2nd  House Visited Container
-
-                      Container(
-                          height: MediaQuery.of(context).size.height * 0.063,
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                topRight: Radius.circular(20),
-                              ),
-                              color: Colors.white),
-                          child: const Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Target Left",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 20),
-                              ),
-                              SizedBox(
-                                width: 10,
-                              ),
-                            ],
-                          )),
-                      //today Container
-                      Expanded(
-                        child: Container(
-                          height: MediaQuery.of(context).size.height * 0.09,
-                          width: MediaQuery.of(context).size.width * 0.5,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                bottomRight: Radius.circular(20),
-                              ),
-                              border: Border(
-                                  top: BorderSide(
-                                      color: Colors.black, width: 2)),
-                              color: Color.fromARGB(
-                                255,
-                                252,
-                                83,
-                                80,
-                              )),
-                          child: Center(
-                            child: Text(
-                              "Today:${40 - records.length}",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 20),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(
-              height: 30,
-            ),
-            Column(
-              children: [
-                //   2nd  House Visited Container
-                Container(
-                  height: 60,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                      border: Border.all(width: 2.5),
-                      boxShadow: const [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(1, 1))
-                      ],
-                      borderRadius: const BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          topRight: Radius.circular(20)),
-                      color: Colors.white),
-                  child: const Center(
-                      child: Text(
-                    "My Route Map",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
-                  )),
-                ),
-                //today Container
-                Container(
-                  height: 80,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(1, 1))
-                      ],
-                      borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
-                      ),
-                      border: Border(
-                          top: BorderSide(color: Colors.black, width: 2)),
-                      color: Color.fromARGB(
-                        255,
-                        82,
-                        64,
-                        112,
-                      )),
-                  child: const Center(
-                    child: Text(
-                      "NA",
-                      style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                          color: Colors.white),
-                    ),
-                  ),
-                ),
-                const SizedBox(
-                  height: 40,
-                ),
-                Container(
-                  height: 180,
-                  width: double.infinity,
-                  decoration: const BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black,
-                            blurRadius: 10,
-                            offset: Offset(5, 5))
-                      ],
-                      borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20),
-                          bottomLeft: Radius.circular(20),
-                          topRight: Radius.circular(20),
-                          bottomRight: Radius.circular(20)),
-                      color: Colors.white),
-                  child: Column(
-                    children: [
-                      //   2nd  House Visited Container
-                      Container(
-                        height: 60,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                            border: Border.all(width: 2.5),
-                            boxShadow: const [
-                              BoxShadow(
-                                  color: Colors.black,
-                                  blurRadius: 10,
-                                  offset: Offset(1, 1))
-                            ],
-                            borderRadius: const BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                topRight: Radius.circular(20)),
-                            color: Colors.white),
-                        child: const Center(
-                            child: Text(
-                          "Reports",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 20),
-                        )),
-                      ),
-                      //today Container
-                      Container(
-                        height: 120,
-                        width: double.infinity,
-                        decoration: const BoxDecoration(
-                            boxShadow: [
-                              BoxShadow(
-                                  color: Colors.black,
-                                  blurRadius: 10,
-                                  offset: Offset(1, 1))
-                            ],
-                            borderRadius: BorderRadius.only(
-                              bottomLeft: Radius.circular(20),
-                              bottomRight: Radius.circular(20),
-                            ),
-                            border: Border(
-                                top: BorderSide(color: Colors.black, width: 2)),
-                            color: Color.fromARGB(
-                              255,
-                              92,
-                              29,
-                              74,
-                            )),
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 20),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              Text(
-                                "Already Subscribed  : ${alreadySubscribedCount}   ",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.white),
-                              ),
-                              Text(
-                                "Offer Accepted          : $offerAcceptedCount ",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.white),
-                              ),
-                              Text(
-                                "Offer Rejected           : $offerRejectedCount ",
-                                style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20,
-                                    color: Colors.white),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+        decoration: TextDecoration.underline,
       ),
     );
   }
-  void _setlocale(String value){
-    if(value==null)return;
-    if (value=="en"){
 
-    }
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: const TextStyle(fontSize: 16)),
+          Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildBulletPoint(String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 4),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text("• ", style: TextStyle(fontSize: 18)),
+          Expanded(child: Text(text, style: const TextStyle(fontSize: 16))),
+        ],
+      ),
+    );
   }
 }

@@ -3,7 +3,7 @@ import 'package:flutter/widgets.dart';
 
 class CommonApiClass {
   static String subDomain =
-      "https://salesrep.esanchaya.com/api"; // SubDomain For All Api's
+      "https://salesrep.esanchaya.com/"; // SubDomain For All Api's
 
 //Agent Total History Api To See The Of Agent Collected Data
   static String totalHistory = "$subDomain/customer_forms_info_id  ";

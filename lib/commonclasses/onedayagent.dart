@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:http/http.dart' as http;
@@ -12,26 +11,38 @@ class Onedayagent {
     final userid = prefs.getInt('id');
 
     if (apikey == null || userid == null) {
-      print("Missing user credentials");
-      return {};
+      print("❌ Missing user credentials: apikey or id is null");
+      return {'error': 'Missing credentials'};
     }
 
+    final apiUrl = CommonApiClass.oneDayAgent;
+
+    print("📡 Hitting API: $apiUrl");
+    print("📦 Payload: ${jsonEncode({
+      "params": {
+        "user_id": userid,
+        "token": apikey,
+      }
+    })}");
+
     try {
-      final response = await http
-          .post(
-            Uri.parse(CommonApiClass.oneDayAgent),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              "params": {
-                "user_id": userid,
-                "token": apikey,
-              }
-            }),
-          )
-          .timeout(const Duration(seconds: 30));
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {
+            "user_id": userid,
+            "token": apikey,
+          }
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      print("🔁 Status Code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
+        print("✅ Response: $jsonResponse");
+
         final historyoneday = OneDayHistory.fromJson(jsonResponse);
         final records = historyoneday.result?.records ?? [];
 
@@ -39,56 +50,28 @@ class Onedayagent {
         int accepted = 0;
         int rejected = 0;
 
-        print('--- Starting record processing ---');
-
         for (var record in records) {
-          print('\nProcessing record: $record');
+          final isSubscribed = record.eenaduNewspaper == true;
+          final isAccepted = record.freeOffer15Days == true;
+          final isRejected = record.freeOffer15Days == false;
 
-          if (record.eenaduNewspaper == true) {
+          if (isSubscribed) {
             subscribed++;
-            print(
-                '  -> eenaduNewspaper is TRUE. Incremented subscribed. Current subscribed: $subscribed');
           } else {
-            // If not subscribed to Eenadu Newspaper, then evaluate offer acceptance/rejection
-            print('  -> eenaduNewspaper is FALSE. Checking offer status...');
-
-            if (record.freeOffer15Days == true) {
-              accepted++;
-              print(
-                  '    -> freeOffer15Days is TRUE. Incremented accepted. Current accepted: $accepted');
-            }
-
-            // Only count as rejected if a reason is present AND eenaduNewspaper is false (which is handled by the 'else' block)
-            if (record.freeOffer15Days == false &&
-                record.eenaduNewspaper == false) {
-              rejected++;
-              print(
-                  '    -> reasonNotTakingOffer is NOT empty. Incremented rejected. Current rejected: $rejected');
-            } else {
-              print('    -> reasonNotTakingOffer is empty or null.');
-            }
+            if (isAccepted) accepted++;
+            if (isRejected) rejected++;
           }
-          print(
-              '  --- Current Counts: Subscribed: $subscribed, Accepted: $accepted, Rejected: $rejected ---');
         }
 
-        print('\n--- Processing complete ---');
+        print("📊 Final Counts → Subscribed: $subscribed, Accepted: $accepted, Rejected: $rejected");
+
+        // Save locally
         await prefs.setInt('today_count', records.length);
-        print('Saved today_count: ${records.length}');
-
         await prefs.setInt('offer_accepted', accepted);
-        print('Saved offer_accepted: $accepted');
-
         await prefs.setInt('offer_rejected', rejected);
-        print('Saved offer_rejected: $rejected');
-
         await prefs.setInt('already_subscribed', subscribed);
-        print('Saved already_subscribed: $subscribed');
 
-        print('--- All counts saved to SharedPreferences ---');
-
-        print(
-            "Offer Accepted: $accepted, Rejected: $rejected, Subscribed: $subscribed");
+        print("✅ Saved all counts to SharedPreferences");
 
         return {
           'records': records,
@@ -97,13 +80,13 @@ class Onedayagent {
           'already_subscribed': subscribed,
         };
       } else {
-        print("Failed with status code: ${response.statusCode}");
-        print("Body: ${response.body}");
-        return {};
+        print("❌ Server returned error: ${response.statusCode}");
+        print("❌ Body: ${response.body}");
+        return {'error': 'Server error: ${response.statusCode}'};
       }
-    } catch (error) {
-      print("Error: $error");
-      return {};
+    } catch (e) {
+      print("❌ Network/Parsing error: $e");
+      return {'error': 'Network or unexpected error'};
     }
   }
 }

@@ -37,119 +37,120 @@ class _LoginscreenState extends State<Loginscreen> {
 //bool _isCheckingLogin =true;
   Future<void> _checkAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
-    //Condition
+  //Condition
     final isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
 
     if (isLoggedIn) {
       usernameController.text = prefs.getString("username") ?? "";
       passwordController.text = prefs.getString("password") ?? "";
-      await loginUser();
-    }
+    await loginUser();
+  }
 // setState(() {
 //   _isCheckingLogin=false;
 // });
-  }
+}
 
-  Future<void> loginUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+Future<void> loginUser() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
     final url = CommonApiClass.Loginscreen;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'jsonrpc': "2.0",
+        'method': "call",
+        'params': {
+          "db": "your_db_name", 
+          "login": usernameController.text,
+          "password": passwordController.text,
+        }
+      }),
     );
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'jsonrpc': "2.0",
-          'method': "call",
-          'params': {
-            "db": "your_db_name",
-            "login": usernameController.text,
-            "password": passwordController.text,
-          }
-        }),
-      );
+    Navigator.pop(context); 
+ 
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+      _loginData = loginmodel.fromJson(jsonResponse);
 
-      Navigator.pop(context);
-
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        _loginData = loginmodel.fromJson(jsonResponse);
-
-        if (_loginData!.result!.code == "200") {
+      if (_loginData!.result!.code == "200") {
           print(
               "ttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt==================${_loginData!.result!.apiKey ?? ''}");
-          await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
+        await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
+      
+        await prefs.setString('name', _loginData!.result!.name ?? '');
+        await prefs.setString('unit', _loginData!.result!.unit ?? '');
+        await prefs.setString('role', _loginData!.result!.role ?? '');
+        await prefs.setInt('id', _loginData!.result!.userId ?? 0);
+        await prefs.setString('agentlogin', usernameController.text);
+        await prefs.setBool("isLoggedIn", true);
+        await prefs.setString("username", usernameController.text);
+        await prefs.setString("password", passwordController.text);
 
-          await prefs.setString('name', _loginData!.result!.name ?? '');
-          await prefs.setString('unit', _loginData!.result!.unit ?? '');
-          await prefs.setString('role', _loginData!.result!.role ?? '');
-          await prefs.setInt('id', _loginData!.result!.userId ?? 0);
-          await prefs.setString('agentlogin', usernameController.text);
-          await prefs.setBool("isLoggedIn", true);
-          await prefs.setString("username", usernameController.text);
-          await prefs.setString("password", passwordController.text);
-
-          switch (_loginData!.result!.role) {
-            case "admin":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const Adminscreen()));
-              break;
-            case "agent":
-              Navigator.pushReplacement(
+        switch (_loginData!.result!.role) {
+          case "admin":
+            Navigator.pushReplacement(context,
+                MaterialPageRoute(builder: (_) => const Adminscreen()));
+            break;
+          case "agent":
+            Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (_) => Agentscreen()));
-              break;
-            case "unit_manager":
+            break;
+          case "unit_manager":
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => const Unitmanagerscreen()));
-              break;
-            case "circulation_incharge":
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => Circulationinchargescreen()));
-              break;
-            case "segment_incharge":
+            break;
+              case "circulation_incharge":
+            Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(
+                    builder: (_) => Circulationinchargescreen()));
+            break;
+              case "segment_incharge":
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => Segmentinchargescreen()));
-              break;
+            break;
             case "region_head":
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => Reginoalheadscreen()));
-              break;
-            case "circulation_head":
+            break;
+             case "circulation_head":
               Navigator.pushReplacement(context,
                   MaterialPageRoute(builder: (_) => CirculationHead()));
-              break;
-            default:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Unknown user rolee")),
-              );
-          }
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    "Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}")),
-          );
+            break;
+          default:
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Unknown user rolee")),
+            );
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Server error: ${response.statusCode}")),
+          SnackBar(
+              content: Text(
+                  "Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}")),
         );
       }
-    } catch (error) {
-      Navigator.pop(context);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $error")),
+        SnackBar(content: Text("Server error: ${response.statusCode}")),
       );
     }
+  } catch (error) {
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $error")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
