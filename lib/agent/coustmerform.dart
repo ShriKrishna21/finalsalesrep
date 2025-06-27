@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentscreen.dart';
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
@@ -160,7 +161,7 @@ class _CoustmerState extends State<Coustmer> {
     print("Rrddddddddddddddddddddd$agentapi");
 
     try {
-      const url = 'http://10.100.13.138:8099/api/customer_form';
+      final url = CommonApiClass.customerform;
       final responsee = await http.post(
         Uri.parse(url),
         headers: {

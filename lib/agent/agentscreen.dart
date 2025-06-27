@@ -113,7 +113,7 @@ class _AgentscreenState extends State<Agentscreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const historypage()),
+                  MaterialPageRoute(builder: (_) => const Historypage()),
                 );
               },
             ),

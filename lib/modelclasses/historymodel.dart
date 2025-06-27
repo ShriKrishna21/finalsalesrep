@@ -51,6 +51,7 @@ class Result {
     return data;
   }
 }
+
 class Records {
   int? id;
   String? agentName;
