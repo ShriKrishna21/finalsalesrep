@@ -37,14 +37,6 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
 
     try {
       final uri = Uri.parse(CommonApiClass.AgentDetailsScreen);
-      print("📤 Sending request to: $uri");
-      print("📨 Payload: ${jsonEncode({
-            "params": {
-              "token": apiKey,
-              "user_id": widget.user.id,
-            }
-          })}");
-
       final response = await http
           .post(
             uri,
@@ -58,8 +50,6 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
           )
           .timeout(const Duration(seconds: 20));
 
-      print("📥 Response status: ${response.statusCode}");
-
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final formData = ParticularAgentCustomerForms.fromJson(jsonResponse);
@@ -68,9 +58,6 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
           records = formData.result?.records ?? [];
           isLoading = false;
         });
-
-        print(
-            "✅ Loaded ${records.length} records for agent: ${widget.user.name}");
       } else {
         print("❌ Error: ${response.statusCode} | ${response.body}");
         setState(() => isLoading = false);
@@ -84,7 +71,11 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text(widget.user.name ?? "Agent Details")),
+      appBar: AppBar(
+        title: Text(widget.user.name ?? "Agent Details"),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : records.isEmpty
@@ -98,7 +89,7 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blueAccent,
+                          color: Colors.black,
                         ),
                       ),
                     ),
@@ -110,23 +101,15 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                           return Card(
                             margin: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 8),
-                            elevation: 6,
+                            elevation: 2,
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(20),
-                              side: BorderSide(
-                                  color: Colors.teal.shade300.withOpacity(0.4)),
+                              borderRadius: BorderRadius.circular(10),
+                              side: BorderSide(color: Colors.grey.shade300),
                             ),
                             child: Container(
                               decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  colors: [
-                                    Colors.teal.shade50,
-                                    Colors.cyan.shade50
-                                  ],
-                                  begin: Alignment.topLeft,
-                                  end: Alignment.bottomRight,
-                                ),
-                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
                               ),
                               padding: const EdgeInsets.all(16),
                               child: Column(
@@ -135,20 +118,22 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                                   Row(
                                     children: [
                                       const Icon(Icons.person,
-                                          color: Colors.teal),
+                                          color: Colors.black),
                                       const SizedBox(width: 8),
-                                      Text(
-                                        "Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                        style: const TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 16,
-                                          color: Colors.teal,
+                                      Expanded(
+                                        child: Text(
+                                          "Family Head: ${r.familyHeadName ?? 'N/A'}",
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                          ),
                                         ),
                                       ),
                                     ],
                                   ),
                                   const SizedBox(height: 12),
-                                  Divider(color: Colors.teal.shade100),
+                                  const Divider(color: Colors.grey),
                                   const SizedBox(height: 8),
                                   InfoItem(
                                       icon: Icons.date_range,
@@ -207,14 +192,15 @@ class InfoItem extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: Colors.teal.shade600, size: 20),
+          Icon(icon, color: Colors.grey.shade700, size: 20),
           const SizedBox(width: 10),
           Text(
             "$label: ",
             style: const TextStyle(
               fontWeight: FontWeight.w600,
-              color: Colors.black87,
+              color: Colors.black,
             ),
           ),
           Expanded(

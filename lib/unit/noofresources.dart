@@ -73,11 +73,17 @@ class _NoofresourcesState extends State<Noofresources> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Number of Resources")),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        title: const Text("Number of Resources"),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : users.isEmpty
-              ? const Center(child: Text("No users found"))
+              ? const Center(
+                  child: Text("No users found", style: TextStyle(fontSize: 16)))
               : ListView.builder(
                   itemCount: users.length,
                   itemBuilder: (context, index) {
@@ -95,59 +101,44 @@ class _NoofresourcesState extends State<Noofresources> {
                             ),
                           );
                         },
-                        child: Card(
-                          elevation: 6,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(20),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade300),
+                            borderRadius: BorderRadius.circular(10),
+                            color: Colors.white,
                           ),
-                          shadowColor: Colors.black.withOpacity(0.1),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(
-                                colors: [Colors.white, Colors.pink.shade50],
-                                begin: Alignment.topLeft,
-                                end: Alignment.bottomRight,
-                              ),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Row(
-                                  children: [
-                                    const CircleAvatar(
-                                      backgroundColor: Colors.blueAccent,
-                                      child: Icon(Icons.person,
-                                          color: Colors.white),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: Text(
-                                        user.name ?? 'Unknown',
-                                        style: const TextStyle(
-                                          fontSize: 20,
-                                          fontWeight: FontWeight.w600,
-                                          color: Colors.black87,
-                                        ),
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.person,
+                                      color: Colors.black54),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      user.name ?? 'Unknown',
+                                      style: const TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black,
                                       ),
                                     ),
-                                  ],
-                                ),
-                                const SizedBox(height: 16),
-                                Divider(color: Colors.grey.shade300),
-                                const SizedBox(height: 8),
-                                InfoRow(
-                                    label: "ID",
-                                    value: user.id?.toString() ?? 'N/A'),
-                                InfoRow(
-                                    label: "Email", value: user.email ?? 'N/A'),
-                                InfoRow(
-                                    label: "Phone", value: user.phone ?? 'N/A'),
-                                InfoRow(
-                                    label: "Role", value: user.role ?? 'N/A'),
-                              ],
-                            ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 10),
+                              const Divider(color: Colors.grey),
+                              InfoRow(
+                                  label: "ID",
+                                  value: user.id?.toString() ?? 'N/A'),
+                              InfoRow(
+                                  label: "Email", value: user.email ?? 'N/A'),
+                              InfoRow(
+                                  label: "Phone", value: user.phone ?? 'N/A'),
+                              InfoRow(label: "Role", value: user.role ?? 'N/A'),
+                            ],
                           ),
                         ),
                       ),
@@ -170,11 +161,12 @@ class InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
         children: [
-          Text(
-            "$label: ",
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-          Expanded(child: Text(value)),
+          Text("$label: ",
+              style: const TextStyle(
+                  fontWeight: FontWeight.w500, color: Colors.black87)),
+          Expanded(
+              child:
+                  Text(value, style: const TextStyle(color: Colors.black54))),
         ],
       ),
     );
