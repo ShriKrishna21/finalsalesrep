@@ -1,5 +1,5 @@
 import 'package:finalsalesrep/agent/agentprofie.dart';
-import 'package:finalsalesrep/unit/createagent.dart';
+import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:flutter/material.dart';

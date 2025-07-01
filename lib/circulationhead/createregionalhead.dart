@@ -105,7 +105,7 @@ class _createregionalheadState extends State<createregionalhead> {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
 
-        if (userdata!.result?.code == "200") {
+        if (userdata!.result?.success == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("User created successfully")),
           );
