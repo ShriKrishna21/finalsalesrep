@@ -1,3 +1,4 @@
+import 'package:finalsalesrep/circulationhead/createregionalhead.dart';
 import 'package:flutter/material.dart';
 
 class Adminscreen extends StatefulWidget {
@@ -10,6 +11,13 @@ class Adminscreen extends StatefulWidget {
 class _AdminscreenState extends State<Adminscreen> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return  Scaffold(
+      appBar: AppBar(
+        title: Text("admin dashboard"),
+      ),
+      body: Column(
+        
+      ),
+    );
   }
 }

@@ -41,6 +41,10 @@ class _NoofresourcesState extends State<Noofresources> {
           )
           .timeout(const Duration(seconds: 20));
 
+      print("📤 Request sent to: ${CommonApiClass.Noofresources}");
+      print("📥 Status Code: ${response.statusCode}");
+      print("📥 Response Body: ${response.body}");
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final data = NofAgents.fromJson(jsonResponse);
@@ -51,16 +55,14 @@ class _NoofresourcesState extends State<Noofresources> {
         });
 
         await prefs.setInt('userCount', users.length);
-        print("✅ Response: $jsonResponse");
-
-        for (var user in users) {
-          print("User: ${user.name}, ID: ${user.id}, Email: ${user.email}");
-        }
+        print("✅ Total agents fetched: ${users.length}");
       } else {
-        print("❌ Fetch error. Status: ${response.statusCode}");
+        print("❌ Error fetching agents. Status: ${response.statusCode}");
+        setState(() => isLoading = false);
       }
     } catch (e) {
-      print("❌ API not implemented: $e");
+      print("❌ Exception during API call: $e");
+      setState(() => isLoading = false);
     }
   }
 
@@ -83,7 +85,8 @@ class _NoofresourcesState extends State<Noofresources> {
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : users.isEmpty
               ? const Center(
-                  child: Text("No users found", style: TextStyle(fontSize: 16)))
+                  child: Text("No users found",
+                      style: TextStyle(fontSize: 16)))
               : ListView.builder(
                   itemCount: users.length,
                   itemBuilder: (context, index) {
@@ -137,7 +140,11 @@ class _NoofresourcesState extends State<Noofresources> {
                                   label: "Email", value: user.email ?? 'N/A'),
                               InfoRow(
                                   label: "Phone", value: user.phone ?? 'N/A'),
-                              InfoRow(label: "Role", value: user.role ?? 'N/A'),
+                              InfoRow(
+                                  label: "Role", value: user.role ?? 'N/A'),
+                                   InfoRow(
+                                  label: "unit", value: user.unitName ?? 'N/A'),
+
                             ],
                           ),
                         ),

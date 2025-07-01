@@ -8,14 +8,14 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class createregionalhead extends StatefulWidget {
-  const createregionalhead({super.key});
+class createunits extends StatefulWidget {
+  const createunits({super.key});
 
   @override
-  State<createregionalhead> createState() => _createregionalheadState();
+  State<createunits> createState() => _createunitsState();
 }
 
-class _createregionalheadState extends State<createregionalhead> {
+class _createunitsState extends State<createunits> {
   createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
 
@@ -38,7 +38,7 @@ class _createregionalheadState extends State<createregionalhead> {
     {'value': 'segment_incharge', 'label': 'Segment Incharge'},
     {'value': 'circulation_incharge', 'label': 'Circulation Incharge'},
     {'value': 'region_head', 'label': 'Regional Head'},
-    {'value': 'circulation_head', 'label': 'Circulation Head'},
+   
   ];
 
   // Images

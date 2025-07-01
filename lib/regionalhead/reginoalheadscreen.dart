@@ -1,6 +1,8 @@
 import 'package:finalsalesrep/agent/agentprofie.dart';
+import 'package:finalsalesrep/regionalhead/createunits.dart';
 import 'package:finalsalesrep/regionalhead/unitscreen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Reginoalheadscreen extends StatefulWidget {
   const Reginoalheadscreen({super.key});
@@ -10,13 +12,22 @@ class Reginoalheadscreen extends StatefulWidget {
 }
 
 class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
-  final List<Map<String, String>> units = [
-    {'name': 'Unit 1', 'location': 'Karimnagar'},
-    {'name': 'Unit 2', 'location': 'Warangal'},
-    {'name': 'Unit 3', 'location': 'Hyderabad'},
-    {'name': 'Unit 4', 'location': 'Nizamabad'},
-    {'name': 'Unit 5', 'location': 'Adilabad'},
-  ];
+  String? username;
+  String? unit;
+  @override
+void initState() {
+  super.initState();
+  loadUserData();
+}
+
+Future<void> loadUserData() async {
+  final prefs = await SharedPreferences.getInstance();
+  setState(() {
+    username = prefs.getString('name') ?? 'Unknown';
+    unit = prefs.getString('unit') ?? 'Unknown';
+  });
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -47,56 +58,51 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
             ),
           )
         ],
-        title: RichText(
-          text: TextSpan(
-            text: "RegionalHead  - ",
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.height / 40,
-              fontWeight: FontWeight.bold,
-            ),
-            children: <TextSpan>[
-              TextSpan(
-                text: "Puma\n",
-                style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.height / 40,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black,
-                ),
-              ),
-              TextSpan(
-                text: "karimnagar",
-                style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.height / 44,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              )
-            ],
-          ),
+      title: RichText(
+  text: TextSpan(
+    text: "RegionalHead  - ",
+    style: TextStyle(
+      fontSize: MediaQuery.of(context).size.height / 40,
+      fontWeight: FontWeight.bold,
+    ),
+    children: <TextSpan>[
+      TextSpan(
+        text: "${username ?? ''}\n",
+        style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height / 40,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
         ),
+      ),
+      TextSpan(
+        text: unit ?? '',
+        style: TextStyle(
+          fontSize: MediaQuery.of(context).size.height / 44,
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+    ],
+  ),
+),
+
         automaticallyImplyLeading: false,
       ),
-      body: ListView.builder(
-        padding: const EdgeInsets.all(12),
-        itemCount: units.length,
-        itemBuilder: (context, index) {
-          final unit = units[index];
-          return Card(
-            elevation: 4,
-            margin: const EdgeInsets.symmetric(vertical: 8),
-            child: ListTile(
-              leading: const Icon(Icons.location_city, color: Colors.blue),
-              title: Text(unit['name'] ?? ''),
-              subtitle: Text(unit['location'] ?? ''),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => Unitscreen(),));
-                // Navigate to unit-specific screen
-              },
-            ),
-          );
-        },
-      ),
+      body:Column(
+       children: [
+  FloatingActionButton.extended(
+    onPressed: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => createunits()),
+      );
+    },
+    icon: Icon(Icons.add),
+    label: Text("Create User"),
+  )
+],
+
+      )
     );
   }
 }

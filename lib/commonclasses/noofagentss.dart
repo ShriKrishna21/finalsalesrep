@@ -1,56 +1,49 @@
 import 'dart:convert';
-import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/modelclasses/noofagents.dart'
-    show NofAgents, User;
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/modelclasses/noofagents.dart' show NofAgents, User;
 
-class noofagents {
+class NoOfAgentsService {
   Future<List<User>> fetchAgents() async {
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
-    final userId = prefs.getInt('id');
 
-    if (apiKey == null || userId == null) {
-      print("❌ Missing API key or User ID");
+    if (apiKey == null || apiKey.isEmpty) {
+      print("❌ API key is missing in SharedPreferences.");
       return [];
     }
 
     try {
-      final response = await http
-          .post(
-            Uri.parse(CommonApiClass.noOfAgents),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              "params": {"token": apiKey},
-            }),
-          )
-          .timeout(const Duration(seconds: 20));
+      final uri = Uri.parse(CommonApiClass.noOfAgents);
+      final response = await http.post(
+        uri,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {"token": apiKey},
+        }),
+      ).timeout(const Duration(seconds: 20));
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        final data = NofAgents.fromJson(jsonResponse);
+        final Map<String, dynamic> jsonResponse = jsonDecode(response.body);
+        final nofAgents = NofAgents.fromJson(jsonResponse);
+        final users = nofAgents.result?.users ?? [];
 
-        final users = data.result?.users ?? [];
+        // Save user count locally
+        await prefs.setInt('userCount', users.length);
 
-        await prefs.setInt('userCount', users.length); // Save count
-        print("✅ Response received. Total users: ${users.length}");
-
-        // Optional: print user details
+        print("✅ Fetched ${users.length} users.");
         for (var user in users) {
-          print("User ID: ${user.id}");
-          print("User Name: ${user.name}");
-          print("User Email: ${user.email}");
-          print("-----");
+          print("🧑 ID: ${user.id}, Name: ${user.name}, Email: ${user.email}");
         }
 
         return users;
       } else {
-        print("❌ Server error: ${response.statusCode}");
+        print("❌ Failed with status code: ${response.statusCode}");
         return [];
       }
     } catch (e) {
-      print("❌ Exception during API call: $e");
+      print("❌ Error during API request: $e");
       return [];
     }
   }
