@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'dart:io';
-
-import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 
 class createstaff extends StatefulWidget {
   const createstaff({super.key});
@@ -16,8 +16,8 @@ class createstaff extends StatefulWidget {
 }
 
 class _createstaffState extends State<createstaff> {
-  createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
+  createUserModel? userdata;
 
   // Controllers
   final TextEditingController name = TextEditingController();
@@ -44,24 +44,27 @@ class _createstaffState extends State<createstaff> {
   Future<void> pickAadhaarImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() {
-        aadhaarImage = File(image.path);
-      });
+      setState(() => aadhaarImage = File(image.path));
     }
   }
 
   Future<void> pickPancardImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
-      setState(() {
-        pancardImage = File(image.path);
-      });
+      setState(() => pancardImage = File(image.path));
     }
   }
 
   Future<void> createuser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userlog = prefs.getString('apikey');
+
+    if (userlog == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("API key not found. Please login again.")),
+      );
+      return;
+    }
 
     try {
       final url = CommonApiClass.createregionalhead;
@@ -74,44 +77,59 @@ class _createstaffState extends State<createstaff> {
           ? base64Encode(await pancardImage!.readAsBytes())
           : "";
 
+      final body = {
+        "params": {
+          "token": userlog,
+          "name": name.text.trim(),
+          "email": mail.text.trim(),
+          "password": password.text.trim(),
+          "role": selectedRole,
+          "aadhar_number": adhar.text.trim(),
+          "pan_number": pan.text.trim(),
+          "state": state.text.trim(),
+          "status": "active",
+          "phone": phone.text.trim(),
+          "unit_name": unit.text.trim(),
+          "aadhar_base64": aadhaarBase64,
+          "Pan_base64": panBase64,
+        }
+      };
+
       final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {
-            "token": userlog.toString(),
-            "name": name.text,
-            "email": mail.text,
-            "password": password.text,
-            "role": selectedRole,
-            "aadhar_number": adhar.text,
-            "pan_number": pan.text,
-            "state": state.text,
-            "status": "active",
-            "phone": phone.text,
-            "unit_name": unit.text,
-            "aadhar_base64": aadhaarBase64,
-            "Pan_base64": panBase64,
-          }
-        }),
+        body: jsonEncode(body),
       );
+
+      print("📡 Response: ${response.body}");
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
 
-        if (userdata!.result?.code == "200") {
+        if (userdata?.result?.code == "200") {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User created successfully")),
+            const SnackBar(content: Text("✅ User created successfully")),
           );
+          Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User creation failed")),
+            SnackBar(
+                content: Text(
+                    "❌ Failed: ${userdata?.result?.code ?? 'Unknown error'}")),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("❌ Server error: ${response.statusCode}")),
+        );
       }
     } catch (error) {
-      print("Error in creating user: $error");
+      print("❌ Error in creating user: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Something went wrong. Please try again.")),
+      );
     }
   }
 
@@ -137,43 +155,36 @@ class _createstaffState extends State<createstaff> {
             key: _formKey,
             child: Column(
               children: [
-                const SizedBox(height: 10),
                 usercredentials(
-                  controller: name,
-                  hintText: "Name",
-                  errorText: "Please enter a valid name",
-                ),
+                    controller: name,
+                    hintText: "Name",
+                    errorText: "Please enter a valid name"),
                 usercredentials(
-                  controller: unit,
-                  hintText: "Unit Name",
-                  errorText: "Please enter a valid unit name",
-                ),
+                    controller: unit,
+                    hintText: "Unit Name",
+                    errorText: "Please enter a valid unit"),
                 usercredentials(
-                  keyboardType: TextInputType.phone,
-                  maxvalue: 10,
-                  controller: phone,
-                  hintText: "Phone",
-                  errorText: "Please enter a valid phone number",
-                ),
+                    controller: phone,
+                    hintText: "Phone",
+                    errorText: "Enter valid phone",
+                    keyboardType: TextInputType.phone,
+                    maxvalue: 10),
                 usercredentials(
-                  controller: mail,
-                  hintText: "Email/User ID",
-                  errorText: "Please enter a valid email",
-                  keyboardType: TextInputType.emailAddress,
-                ),
+                    controller: mail,
+                    hintText: "Email/User ID",
+                    errorText: "Enter valid email",
+                    keyboardType: TextInputType.emailAddress),
                 usercredentials(
-                  controller: password,
-                  hintText: "Password",
-                  errorText: "Please enter a valid password",
-                  keyboardType: TextInputType.visiblePassword,
-                ),
+                    controller: password,
+                    hintText: "Password",
+                    errorText: "Password required",
+                    keyboardType: TextInputType.visiblePassword),
                 usercredentials(
-                  controller: state,
-                  hintText: "Address",
-                  errorText: "Address cannot be empty",
-                ),
+                    controller: state,
+                    hintText: "Address",
+                    errorText: "Address required"),
 
-                // ✅ Role dropdown
+                // Role Dropdown
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: DropdownButtonFormField<String>(
@@ -186,9 +197,7 @@ class _createstaffState extends State<createstaff> {
                         .toList(),
                     onChanged: (value) {
                       if (value != null) {
-                        setState(() {
-                          selectedRole = value;
-                        });
+                        setState(() => selectedRole = value);
                       }
                     },
                     decoration: InputDecoration(
@@ -196,17 +205,17 @@ class _createstaffState extends State<createstaff> {
                       filled: true,
                       fillColor: Colors.blueGrey[200],
                       contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20.0, horizontal: 16.0),
+                          vertical: 20, horizontal: 16),
                       enabledBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black),
-                      ),
+                          borderSide: BorderSide(color: Colors.black)),
                       focusedBorder: const OutlineInputBorder(
-                        borderSide: BorderSide(color: Colors.black, width: 2),
-                      ),
+                          borderSide:
+                              BorderSide(color: Colors.black, width: 2)),
                     ),
                   ),
                 ),
 
+                // Aadhaar
                 usercredentials(
                   controller: adhar,
                   hintText: "Aadhaar Number",
@@ -214,24 +223,19 @@ class _createstaffState extends State<createstaff> {
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter Aadhaar number";
-                    }
-                    final aadhaarRegex = RegExp(r'^\d{12}$');
-                    if (!aadhaarRegex.hasMatch(value)) {
-                      return "Aadhaar must be exactly 12 digits";
-                    }
+                    if (value == null || value.isEmpty)
+                      return "Enter Aadhaar number";
+                    if (!RegExp(r'^\d{12}$').hasMatch(value))
+                      return "Must be 12 digits";
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 10),
                 Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text("Upload Aadhaar Photo",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
+                    alignment: Alignment.centerLeft,
+                    child: Text("Upload Aadhaar Photo",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16))),
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: pickAadhaarImage,
@@ -239,9 +243,8 @@ class _createstaffState extends State<createstaff> {
                     height: 150,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(color: Colors.black),
-                    ),
+                        color: Colors.grey[300],
+                        border: Border.all(color: Colors.black)),
                     child: aadhaarImage != null
                         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
                         : const Center(
@@ -249,6 +252,7 @@ class _createstaffState extends State<createstaff> {
                   ),
                 ),
 
+                // PAN
                 const SizedBox(height: 16),
                 usercredentials(
                   controller: pan,
@@ -256,24 +260,20 @@ class _createstaffState extends State<createstaff> {
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Please enter PAN number";
-                    }
-                    final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
-                    if (!panRegex.hasMatch(value.toUpperCase())) {
-                      return "PAN format: ABCDE1234F";
-                    }
+                    if (value == null || value.isEmpty)
+                      return "Enter PAN number";
+                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
+                        .hasMatch(value.toUpperCase()))
+                      return "Format: ABCDE1234F";
                     return null;
                   },
                 ),
-
                 const SizedBox(height: 10),
                 Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text("Upload PAN Card Photo",
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
+                    alignment: Alignment.centerLeft,
+                    child: Text("Upload PAN Card Photo",
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16))),
                 const SizedBox(height: 8),
                 GestureDetector(
                   onTap: pickPancardImage,
@@ -281,9 +281,8 @@ class _createstaffState extends State<createstaff> {
                     height: 150,
                     width: double.infinity,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(color: Colors.black),
-                    ),
+                        color: Colors.grey[300],
+                        border: Border.all(color: Colors.black)),
                     child: pancardImage != null
                         ? Image.file(pancardImage!, fit: BoxFit.cover)
                         : const Center(
@@ -296,25 +295,20 @@ class _createstaffState extends State<createstaff> {
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
                       await createuser();
-                      Navigator.pop(context);
                     }
                   },
                   child: Container(
                     height: MediaQuery.of(context).size.height / 18,
                     width: MediaQuery.of(context).size.width / 2.5,
                     decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+                        color: Colors.blue,
+                        borderRadius: BorderRadius.circular(8)),
                     child: const Center(
-                      child: Text(
-                        "Create User",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
+                      child: Text("Create User",
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16)),
                     ),
                   ),
                 ),
@@ -327,7 +321,7 @@ class _createstaffState extends State<createstaff> {
   }
 }
 
-// 🔁 Reusable Input Field Widget
+// Reusable Input Field Widget
 class usercredentials extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -350,32 +344,25 @@ class usercredentials extends StatelessWidget {
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 8),
       child: TextFormField(
-        maxLength: maxvalue,
+        controller: controller,
         keyboardType: keyboardType ?? TextInputType.text,
+        maxLength: maxvalue,
         validator: validator ??
             (value) {
-              if (value == null || value.isEmpty) {
-                return errorText;
-              }
+              if (value == null || value.isEmpty) return errorText;
               return null;
             },
-        controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          hintStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           filled: true,
           fillColor: Colors.blueGrey[200],
           contentPadding:
-              const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
           enabledBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black),
-          ),
+              borderSide: BorderSide(color: Colors.black)),
           focusedBorder: const OutlineInputBorder(
-            borderSide: BorderSide(color: Colors.black, width: 2),
-          ),
+              borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );
