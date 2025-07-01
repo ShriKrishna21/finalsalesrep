@@ -6,7 +6,6 @@ import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 
 class createstaff extends StatefulWidget {
   const createstaff({super.key});
@@ -17,7 +16,6 @@ class createstaff extends StatefulWidget {
 
 class _createstaffState extends State<createstaff> {
   final _formKey = GlobalKey<FormState>();
-  createUserModel? userdata;
 
   // Controllers
   final TextEditingController name = TextEditingController();
@@ -33,7 +31,7 @@ class _createstaffState extends State<createstaff> {
   String selectedRole = 'agent';
   final List<Map<String, String>> roles = [
     {'value': 'agent', 'label': 'Agent'},
-    {'value': 'office_staff', 'label': 'Office Staff'},
+    {'value': 'Office_staff', 'label': 'Office Staff'},
   ];
 
   // Images
@@ -101,34 +99,27 @@ class _createstaffState extends State<createstaff> {
         body: jsonEncode(body),
       );
 
-      print("📡 Response: ${response.body}");
+      final jsonResponse = jsonDecode(response.body);
+      print("📡 Response: $jsonResponse");
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        userdata = createUserModel.fromJson(jsonResponse);
+      final result = jsonResponse['result'];
+      final bool success = result['success'] == true;
+      final String message = result['message'] ?? "Unknown response";
 
-        if (userdata?.result?.code == "200") {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("✅ User created successfully")),
-          );
-          Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    "❌ Failed: ${userdata?.result?.code ?? 'Unknown error'}")),
-          );
-        }
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("✅ $message")),
+        );
+        Navigator.pop(context); // pop on success
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("❌ Server error: ${response.statusCode}")),
+          SnackBar(content: Text("❌ Failed: $message")),
         );
       }
     } catch (error) {
       print("❌ Error in creating user: $error");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Something went wrong. Please try again.")),
+        const SnackBar(content: Text("Something went wrong. Please try again.")),
       );
     }
   }
@@ -155,34 +146,12 @@ class _createstaffState extends State<createstaff> {
             key: _formKey,
             child: Column(
               children: [
-                usercredentials(
-                    controller: name,
-                    hintText: "Name",
-                    errorText: "Please enter a valid name"),
-                usercredentials(
-                    controller: unit,
-                    hintText: "Unit Name",
-                    errorText: "Please enter a valid unit"),
-                usercredentials(
-                    controller: phone,
-                    hintText: "Phone",
-                    errorText: "Enter valid phone",
-                    keyboardType: TextInputType.phone,
-                    maxvalue: 10),
-                usercredentials(
-                    controller: mail,
-                    hintText: "Email/User ID",
-                    errorText: "Enter valid email",
-                    keyboardType: TextInputType.emailAddress),
-                usercredentials(
-                    controller: password,
-                    hintText: "Password",
-                    errorText: "Password required",
-                    keyboardType: TextInputType.visiblePassword),
-                usercredentials(
-                    controller: state,
-                    hintText: "Address",
-                    errorText: "Address required"),
+                usercredentials(controller: name, hintText: "Name", errorText: "Please enter a valid name"),
+                usercredentials(controller: unit, hintText: "Unit Name", errorText: "Please enter a valid unit"),
+                usercredentials(controller: phone, hintText: "Phone", errorText: "Enter valid phone", keyboardType: TextInputType.phone, maxvalue: 10),
+                usercredentials(controller: mail, hintText: "Email/User ID", errorText: "Enter valid email", keyboardType: TextInputType.emailAddress),
+                usercredentials(controller: password, hintText: "Password", errorText: "Password required", keyboardType: TextInputType.visiblePassword),
+                usercredentials(controller: state, hintText: "Address", errorText: "Address required"),
 
                 // Role Dropdown
                 Padding(
@@ -204,18 +173,13 @@ class _createstaffState extends State<createstaff> {
                       labelText: "Select Role",
                       filled: true,
                       fillColor: Colors.blueGrey[200],
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 20, horizontal: 16),
-                      enabledBorder: const OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.black)),
-                      focusedBorder: const OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.black, width: 2)),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+                      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
                     ),
                   ),
                 ),
 
-                // Aadhaar
                 usercredentials(
                   controller: adhar,
                   hintText: "Aadhaar Number",
@@ -223,36 +187,16 @@ class _createstaffState extends State<createstaff> {
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Enter Aadhaar number";
-                    if (!RegExp(r'^\d{12}$').hasMatch(value))
-                      return "Must be 12 digits";
+                    if (value == null || value.isEmpty) return "Enter Aadhaar number";
+                    if (!RegExp(r'^\d{12}$').hasMatch(value)) return "Must be 12 digits";
                     return null;
                   },
                 ),
-                const SizedBox(height: 10),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Upload Aadhaar Photo",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16))),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: pickAadhaarImage,
-                  child: Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        border: Border.all(color: Colors.black)),
-                    child: aadhaarImage != null
-                        ? Image.file(aadhaarImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select Aadhaar image")),
-                  ),
-                ),
 
-                // PAN
+                const SizedBox(height: 10),
+                _uploadLabel("Upload Aadhaar Photo"),
+                _imageSelector(aadhaarImage, pickAadhaarImage),
+
                 const SizedBox(height: 16),
                 usercredentials(
                   controller: pan,
@@ -260,35 +204,14 @@ class _createstaffState extends State<createstaff> {
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
-                      return "Enter PAN number";
-                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
-                        .hasMatch(value.toUpperCase()))
-                      return "Format: ABCDE1234F";
+                    if (value == null || value.isEmpty) return "Enter PAN number";
+                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(value.toUpperCase())) return "Format: ABCDE1234F";
                     return null;
                   },
                 ),
                 const SizedBox(height: 10),
-                Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text("Upload PAN Card Photo",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16))),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: pickPancardImage,
-                  child: Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                        color: Colors.grey[300],
-                        border: Border.all(color: Colors.black)),
-                    child: pancardImage != null
-                        ? Image.file(pancardImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select PAN card image")),
-                  ),
-                ),
+                _uploadLabel("Upload PAN Card Photo"),
+                _imageSelector(pancardImage, pickPancardImage),
 
                 const SizedBox(height: 25),
                 GestureDetector(
@@ -316,6 +239,28 @@ class _createstaffState extends State<createstaff> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _uploadLabel(String text) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+    );
+  }
+
+  Widget _imageSelector(File? imageFile, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 150,
+        width: double.infinity,
+        decoration: BoxDecoration(
+            color: Colors.grey[300], border: Border.all(color: Colors.black)),
+        child: imageFile != null
+            ? Image.file(imageFile, fit: BoxFit.cover)
+            : const Center(child: Text("Tap to select image")),
       ),
     );
   }
@@ -347,22 +292,18 @@ class usercredentials extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType ?? TextInputType.text,
         maxLength: maxvalue,
-        validator: validator ??
-            (value) {
-              if (value == null || value.isEmpty) return errorText;
-              return null;
-            },
+        validator: validator ?? (value) {
+          if (value == null || value.isEmpty) return errorText;
+          return null;
+        },
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           filled: true,
           fillColor: Colors.blueGrey[200],
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black)),
-          focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black, width: 2)),
+          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );

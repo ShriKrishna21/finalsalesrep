@@ -3,11 +3,9 @@ import 'dart:io';
 
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
-import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
-
 import 'package:shared_preferences/shared_preferences.dart';
 
 class createagent extends StatefulWidget {
@@ -21,7 +19,6 @@ class _createagentState extends State<createagent> {
   createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
   final TextEditingController name = TextEditingController();
   final TextEditingController unit = TextEditingController();
   final TextEditingController mail = TextEditingController();
@@ -31,7 +28,6 @@ class _createagentState extends State<createagent> {
   final TextEditingController phone = TextEditingController();
   final TextEditingController state = TextEditingController();
 
-  // Aadhaar and PAN images
   File? aadhaarImage;
   File? pancardImage;
   final ImagePicker _picker = ImagePicker();
@@ -55,15 +51,10 @@ class _createagentState extends State<createagent> {
   }
 
   Future<void> createuser() async {
+    print("🚀 createuser() called");
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userlog = prefs.getString('apikey');
-
-    // Optional: Encode Aadhaar and PAN images
-    // String? base64AadhaarImage;
-    // if (aadhaarImage != null) {
-    //   final bytes = await aadhaarImage!.readAsBytes();
-    //   base64AadhaarImage = base64Encode(bytes);
-    // }
 
     try {
       final url = CommonApiClass.CreateAgent;
@@ -76,9 +67,7 @@ class _createagentState extends State<createagent> {
           ? base64Encode(await pancardImage!.readAsBytes())
           : "";
 
-      print("Aadhaar Base64: ${aadhaarBase64.substring(0, 100)}...");
-      print("PAN Base64: ${panBase64.substring(0, 100)}...");
-      print("Token: $userlog");
+      print("📤 Token: $userlog");
 
       final response = await http.post(
         Uri.parse(url),
@@ -102,45 +91,33 @@ class _createagentState extends State<createagent> {
         }),
       );
 
-      print(response.statusCode);
+      print("📡 Status Code: ${response.statusCode}");
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
-        print(userdata!.result?.code);
-        // print(userdata!.result?.)
+        print("✅ Response Code: ${userdata!.result?.code}");
 
         if (userdata!.result?.code == "200") {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("User created successfully")),
           );
+          Navigator.pop(context); // Navigate back to previous screen
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("User creation failed")),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Server error: ${response.statusCode}")),
+        );
       }
-    } catch (error) {
-      print("Error in creating user: $error");
+    } catch (error, stackTrace) {
+      print("❌ Error: $error");
+      print("📛 StackTrace: $stackTrace");
     }
   }
-
-  // void createduser() {
-  //   CollectionReference collref =
-  //       FirebaseFirestore.instance.collection("created_users");
-
-  //   collref.add({
-  //     "params": {
-  //       "name": name.text,
-  //       "email": mail.text,
-  //       "password": password.text,
-  //       "role": 'agent',
-  //       "aadhar_number": adhar.text,
-  //       "pan_number": pan.text,
-  //       "state": state.text,
-  //     }
-  //   });
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -179,8 +156,8 @@ class _createagentState extends State<createagent> {
                   keyboardType: TextInputType.phone,
                   maxvalue: 10,
                   controller: phone,
-                  hintText: "phone",
-                  errorText: "Please enter a valid phone number ",
+                  hintText: "Phone",
+                  errorText: "Please enter a valid phone number",
                 ),
                 usercredentials(
                   controller: mail,
@@ -216,13 +193,10 @@ class _createagentState extends State<createagent> {
                     return null;
                   },
                 ),
-                SizedBox(height: 10),
+                const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Upload Aadhaar Photo",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                  child: Text("Upload Aadhaar Photo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
@@ -236,8 +210,7 @@ class _createagentState extends State<createagent> {
                     ),
                     child: aadhaarImage != null
                         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select Aadhaar image")),
+                        : const Center(child: Text("Tap to select Aadhaar image")),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -260,10 +233,7 @@ class _createagentState extends State<createagent> {
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text(
-                    "Upload PAN Card Photo",
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                  ),
+                  child: Text("Upload PAN Card Photo", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
                 const SizedBox(height: 8),
                 GestureDetector(
@@ -277,21 +247,17 @@ class _createagentState extends State<createagent> {
                     ),
                     child: pancardImage != null
                         ? Image.file(pancardImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select PAN card image")),
+                        : const Center(child: Text("Tap to select PAN card image")),
                   ),
                 ),
                 const SizedBox(height: 25),
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
-                      // createduser();
+                      print("✅ Form is valid");
                       await createuser();
-                      Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => Circulationinchargescreen(),
-                          ));
+                    } else {
+                      print("❌ Form is invalid");
                     }
                   },
                   child: Container(
@@ -322,7 +288,6 @@ class _createagentState extends State<createagent> {
   }
 }
 
-// Reusable input widget
 class usercredentials extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
@@ -347,24 +312,19 @@ class usercredentials extends StatelessWidget {
       child: TextFormField(
         maxLength: maxvalue,
         keyboardType: keyboardType ?? TextInputType.text,
-        validator: validator ??
-            (value) {
-              if (value == null || value.isEmpty) {
-                return errorText;
-              }
-              return null;
-            },
+        validator: validator ?? (value) {
+          if (value == null || value.isEmpty) {
+            return errorText;
+          }
+          return null;
+        },
         controller: controller,
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          hintStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           filled: true,
           fillColor: Colors.blueGrey[200],
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+          contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
           enabledBorder: const OutlineInputBorder(
             borderSide: BorderSide(color: Colors.black),
           ),

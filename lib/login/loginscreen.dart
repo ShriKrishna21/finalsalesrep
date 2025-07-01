@@ -1,12 +1,12 @@
 import 'dart:convert';
 import 'package:finalsalesrep/admin/adminscreen.dart';
 import 'package:finalsalesrep/agent/agentscreen.dart';
-import 'package:finalsalesrep/circulationhead/circulationhead.dart'
-    show CirculationHead;
+import 'package:finalsalesrep/circulationhead/circulationhead.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/loginmodel.dart';
 import 'package:finalsalesrep/regionalhead/reginoalheadscreen.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
+import 'package:finalsalesrep/unit/officestaff.dart/officestaffscreen.dart';
 import 'package:finalsalesrep/unit/segmentincharge/segmentinchargescreen.dart';
 import 'package:finalsalesrep/unit/unitmanager/unitmanagerscreen.dart';
 import 'package:flutter/material.dart';
@@ -24,22 +24,18 @@ class _LoginscreenState extends State<Loginscreen> {
   TextEditingController usernameController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
-
-  bool _isPasswordVisible =
-      false; // This will control the visibility of the password field
-
-  loginmodel? _loginData; //// Model to store login response
+  bool _isPasswordVisible = false;
+  loginmodel? _loginData;
 
   @override
   void initState() {
     super.initState();
-    _checkAutoLogin(); //// Call function to check if user already logged in
+    _checkAutoLogin();
   }
 
   Future<void> _checkAutoLogin() async {
     final prefs = await SharedPreferences.getInstance();
     final isLoggedIn = prefs.getBool("isLoggedIn") ?? false;
-
     if (isLoggedIn) {
       usernameController.text = prefs.getString("username") ?? "";
       passwordController.text = prefs.getString("password") ?? "";
@@ -89,47 +85,49 @@ class _LoginscreenState extends State<Loginscreen> {
           await prefs.setString("username", usernameController.text);
           await prefs.setString("password", passwordController.text);
 
+          Widget screen;
           switch (_loginData!.result!.role) {
             case "admin":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const Adminscreen()));
+              screen = const Adminscreen();
+              break;
+            case "Office_staff":
+              screen = OfficeStaffScreen();
               break;
             case "agent":
-              Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (_) => Agentscreen()));
+              screen = Agentscreen();
               break;
             case "unit_manager":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => const Unitmanagerscreen()));
+              screen = const Unitmanagerscreen();
               break;
             case "circulation_incharge":
-              Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(
-                      builder: (_) => Circulationinchargescreen()));
+              screen = Circulationinchargescreen();
               break;
             case "segment_incharge":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => Segmentinchargescreen()));
+              screen = Segmentinchargescreen();
               break;
             case "region_head":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => Reginoalheadscreen()));
+              screen = Reginoalheadscreen();
               break;
             case "circulation_head":
-              Navigator.pushReplacement(context,
-                  MaterialPageRoute(builder: (_) => CirculationHead()));
+              screen = CirculationHead();
               break;
             default:
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(content: Text("Unknown user role")),
               );
+              return;
           }
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => screen),
+            (route) => false,
+          );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(
-                    "Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}")),
+              content: Text("Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
+            ),
           );
         }
       } else {
@@ -177,8 +175,7 @@ class _LoginscreenState extends State<Loginscreen> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: usernameController,
-                      validator: (value) =>
-                          value!.isEmpty ? "Username cannot be empty" : null,
+                      validator: (value) => value!.isEmpty ? "Username cannot be empty" : null,
                       decoration: InputDecoration(
                         labelText: "Username",
                         border: OutlineInputBorder(
@@ -189,22 +186,15 @@ class _LoginscreenState extends State<Loginscreen> {
                     const SizedBox(height: 15),
                     TextFormField(
                       controller: passwordController,
-                      obscureText:
-                          !_isPasswordVisible, // Toggle password visibility
-                      validator: (value) =>
-                          value!.isEmpty ? "Password cannot be empty" : null,
+                      obscureText: !_isPasswordVisible,
+                      validator: (value) => value!.isEmpty ? "Password cannot be empty" : null,
                       decoration: InputDecoration(
                         labelText: "Password",
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility_off
-                                : Icons.visibility,
-                          ),
+                          icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
                           onPressed: () {
                             setState(() {
-                              _isPasswordVisible =
-                                  !_isPasswordVisible; // Toggle password visibility
+                              _isPasswordVisible = !_isPasswordVisible;
                             });
                           },
                         ),
@@ -227,8 +217,7 @@ class _LoginscreenState extends State<Loginscreen> {
                           await loginUser();
                         }
                       },
-                      child:
-                          const Text("LOGIN", style: TextStyle(fontSize: 18)),
+                      child: const Text("LOGIN", style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),
