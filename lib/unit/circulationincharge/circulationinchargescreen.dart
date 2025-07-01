@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -14,7 +15,8 @@ class Circulationinchargescreen extends StatefulWidget {
   const Circulationinchargescreen({super.key});
 
   @override
-  State<Circulationinchargescreen> createState() => _CirculationinchargescreenState();
+  State<Circulationinchargescreen> createState() =>
+      _CirculationinchargescreenState();
 }
 
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
@@ -56,7 +58,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       final resp = await http.post(
         Uri.parse(CommonApiClass.Circulationinchargescreen),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"params": {"token": apiKey}}),
+        body: jsonEncode({
+          "params": {"token": apiKey}
+        }),
       );
 
       if (resp.statusCode == 200) {
@@ -135,7 +139,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     title: "Subscription Details",
                     rows: [
                       _InfoRow(label: "Houses Count", value: "0", bold: true),
-                      _InfoRow(label: "Houses Visited", value: houseVisited.toString()),
+                      _InfoRow(
+                          label: "Houses Visited",
+                          value: houseVisited.toString()),
                       _InfoRow(label: "Eenadu Subscription", value: "0"),
                       _InfoRow(label: "Willing to Change", value: "0"),
                       _InfoRow(label: "Not Interested", value: "0"),
@@ -144,25 +150,27 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                   const SizedBox(height: 20),
                   _buildCard(
                     title: "Route Map",
-                    rows: const [ _InfoRow(label: "Routes", value: "0") ],
+                    rows: const [_InfoRow(label: "Routes", value: "0")],
                   ),
                   const SizedBox(height: 20),
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18),
                         ),
                       ),
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const createagent()),
+                        MaterialPageRoute(builder: (_) => createstaff()),
                       ),
                       child: const Text(
                         "Create User",
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   )
@@ -181,7 +189,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Column(children: rows),
           ],
@@ -202,9 +212,13 @@ class _InfoRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
         children: [
-          Expanded(child: Text("$label:", style: const TextStyle(fontWeight: FontWeight.w500))),
+          Expanded(
+              child: Text("$label:",
+                  style: const TextStyle(fontWeight: FontWeight.w500))),
           const SizedBox(width: 8),
-          Text(value, style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
+          Text(value,
+              style: TextStyle(
+                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
         ],
       ),
     );
