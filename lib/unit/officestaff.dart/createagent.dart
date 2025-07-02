@@ -82,7 +82,7 @@ class _createagentState extends State<createagent> {
             "aadhar_number": adhar.text,
             "pan_number": pan.text,
             "state": state.text,
-            "status": "active",
+            "status": "un_activ",
             "phone": phone.text,
             "unit_name": unit.text,
             "aadhar_base64": aadhaarBase64,
@@ -96,9 +96,9 @@ class _createagentState extends State<createagent> {
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
-        print("✅ Response Code: ${userdata!.result?.code}");
+        print("✅ Response Code: ${userdata!.result?.success}");
 
-        if (userdata!.result?.code == "200") {
+        if (userdata!.result?.success == true) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("User created successfully")),
           );
