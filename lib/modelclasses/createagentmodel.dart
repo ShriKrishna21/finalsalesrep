@@ -1,6 +1,6 @@
 class createUserModel {
   String? jsonrpc;
-  Null? id;
+  dynamic id;
   Result? result;
 
   createUserModel({this.jsonrpc, this.id, this.result});
@@ -8,12 +8,11 @@ class createUserModel {
   createUserModel.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = {};
     data['jsonrpc'] = this.jsonrpc;
     data['id'] = this.id;
     if (this.result != null) {
@@ -24,20 +23,20 @@ class createUserModel {
 }
 
 class Result {
-  String? success;
-  String? code;
+  bool? success;
+  String? message; // assuming message or any additional info
 
-  Result({this.success, this.code});
+  Result({this.success, this.message});
 
   Result.fromJson(Map<String, dynamic> json) {
     success = json['success'];
-    code = json['code'];
+    message = json['message']; // optional field
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = {};
     data['success'] = this.success;
-    data['code'] = this.code;
+    data['message'] = this.message;
     return data;
   }
 }
