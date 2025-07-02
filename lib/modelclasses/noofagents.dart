@@ -30,7 +30,9 @@ class Result {
 
   factory Result.fromJson(Map<String, dynamic> json) {
     return Result(
-      status: json['status'],
+      status: json['status'] is int
+          ? json['status']
+          : int.tryParse(json['status']?.toString() ?? ''),
       users: (json['users'] as List?)?.map((e) => User.fromJson(e)).toList(),
     );
   }
@@ -74,11 +76,15 @@ class User {
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['id'],
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id']?.toString() ?? ''),
       name: json['name'],
       email: json['email'],
       login: json['login'],
-      createUid: json['create_uid'],
+      createUid: json['create_uid'] is int
+          ? json['create_uid']
+          : int.tryParse(json['create_uid']?.toString() ?? ''),
       unitName: json['unit_name'],
       phone: json['phone'],
       state: json['state'],

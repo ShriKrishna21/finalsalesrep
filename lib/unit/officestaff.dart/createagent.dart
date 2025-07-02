@@ -71,8 +71,12 @@ class _CreateAgentState extends State<CreateAgent> {
 
     try {
       final url = CommonApiClass.CreateAgent;
-      final String aadhaarBase64 = aadhaarImage != null ? base64Encode(await aadhaarImage!.readAsBytes()) : "";
-      final String panBase64 = pancardImage != null ? base64Encode(await pancardImage!.readAsBytes()) : "";
+      final String aadhaarBase64 = aadhaarImage != null
+          ? base64Encode(await aadhaarImage!.readAsBytes())
+          : "";
+      final String panBase64 = pancardImage != null
+          ? base64Encode(await pancardImage!.readAsBytes())
+          : "";
 
       final response = await http.post(
         Uri.parse(url),
@@ -123,10 +127,12 @@ class _CreateAgentState extends State<CreateAgent> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text("Create Agent"),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
       ),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
@@ -135,12 +141,35 @@ class _CreateAgentState extends State<CreateAgent> {
             key: _formKey,
             child: Column(
               children: [
-                usercredentials(controller: name, hintText: "Name", errorText: "Enter a valid name"),
-                usercredentials(controller: unit, hintText: "Unit Name", errorText: "Unit not found", readOnly: true),
-                usercredentials(controller: phone, hintText: "Phone", errorText: "Enter valid phone", keyboardType: TextInputType.phone, maxvalue: 10),
-                usercredentials(controller: mail, hintText: "Email", errorText: "Enter valid email", keyboardType: TextInputType.emailAddress),
-                usercredentials(controller: password, hintText: "Password", errorText: "Enter valid password", keyboardType: TextInputType.visiblePassword),
-                usercredentials(controller: state, hintText: "Address", errorText: "Address can't be empty"),
+                usercredentials(
+                    controller: name,
+                    hintText: "Name",
+                    errorText: "Enter a valid name"),
+                usercredentials(
+                    controller: unit,
+                    hintText: "Unit Name",
+                    errorText: "Unit not found",
+                    readOnly: true),
+                usercredentials(
+                    controller: phone,
+                    hintText: "Phone",
+                    errorText: "Enter valid phone",
+                    keyboardType: TextInputType.phone,
+                    maxvalue: 10),
+                usercredentials(
+                    controller: mail,
+                    hintText: "Email",
+                    errorText: "Enter valid email",
+                    keyboardType: TextInputType.emailAddress),
+                usercredentials(
+                    controller: password,
+                    hintText: "Password",
+                    errorText: "Enter valid password",
+                    keyboardType: TextInputType.visiblePassword),
+                usercredentials(
+                    controller: state,
+                    hintText: "Address",
+                    errorText: "Address can't be empty"),
                 usercredentials(
                   controller: adhar,
                   hintText: "Aadhaar Number",
@@ -148,8 +177,11 @@ class _CreateAgentState extends State<CreateAgent> {
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty) return "Enter Aadhaar number";
-                    return RegExp(r'^\d{12}\$').hasMatch(value) ? null : "Aadhaar must be 12 digits";
+                    if (value == null || value.isEmpty)
+                      return "Enter Aadhaar number";
+                    return RegExp(r'^\d{12}$').hasMatch(value)
+                        ? null
+                        : "Aadhaar must be 12 digits";
                   },
                 ),
                 const SizedBox(height: 10),
@@ -162,20 +194,33 @@ class _CreateAgentState extends State<CreateAgent> {
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty) return "Enter PAN number";
-                    return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]\$').hasMatch(value.toUpperCase()) ? null : "PAN must be like ABCDE1234F";
+                    if (value == null || value.isEmpty)
+                      return "Enter PAN number";
+                    return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
+                            .hasMatch(value.toUpperCase())
+                        ? null
+                        : "PAN must be like ABCDE1234F";
                   },
                 ),
                 uploadImageLabel("Upload PAN Card Photo"),
                 imagePickerBox(pancardImage, pickPancardImage),
                 const SizedBox(height: 25),
-                ElevatedButton(
-                  onPressed: () async {
-                    if (_formKey.currentState!.validate()) {
-                      await createuser();
-                    }
-                  },
-                  child: const Text("Create User", style: TextStyle(fontWeight: FontWeight.bold)),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.black,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    onPressed: () async {
+                      if (_formKey.currentState!.validate()) {
+                        await createuser();
+                      }
+                    },
+                    child: const Text("Create User"),
+                  ),
                 ),
               ],
             ),
@@ -188,7 +233,9 @@ class _CreateAgentState extends State<CreateAgent> {
   Widget uploadImageLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(text,
+          style: const TextStyle(
+              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
@@ -198,8 +245,16 @@ class _CreateAgentState extends State<CreateAgent> {
       child: Container(
         height: 150,
         width: double.infinity,
-        decoration: BoxDecoration(color: Colors.grey[300], border: Border.all(color: Colors.black)),
-        child: image != null ? Image.file(image, fit: BoxFit.cover) : const Center(child: Text("Tap to select image")),
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          border: Border.all(color: Colors.black),
+        ),
+        child: image != null
+            ? Image.file(image, fit: BoxFit.cover)
+            : const Center(
+                child: Text("Tap to select image",
+                    style: TextStyle(color: Colors.black)),
+              ),
       ),
     );
   }
@@ -233,15 +288,21 @@ class usercredentials extends StatelessWidget {
         maxLength: maxvalue,
         keyboardType: keyboardType ?? TextInputType.text,
         readOnly: readOnly,
-        validator: validator ?? (value) => (value == null || value.isEmpty) ? errorText : null,
+        validator: validator ??
+            (value) => (value == null || value.isEmpty) ? errorText : null,
+        style: const TextStyle(color: Colors.black),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          hintStyle: const TextStyle(color: Colors.black54),
           filled: true,
-          fillColor: Colors.blueGrey[200],
-          contentPadding: const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
+          fillColor: Colors.grey[100],
+          counterStyle: const TextStyle(color: Colors.black54),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
+          enabledBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.black)),
+          focusedBorder: OutlineInputBorder(
+              borderSide: const BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );
