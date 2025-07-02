@@ -1,5 +1,6 @@
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
+import 'package:finalsalesrep/unit/officestaff.dart/viewcreatedagents.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -24,7 +25,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
       staffName = prefs.getString('name') ?? 'Office Staff';
-      unitName = prefs.getString('unit_name') ?? '';
+      unitName = prefs.getString('unit') ?? '';
     });
   }
 
@@ -66,7 +67,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
             FloatingActionButton.extended(
               onPressed: () {
                 Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => createagent()));
+                    MaterialPageRoute(builder: (context) => CreateAgent()));
               },
               label: const Text('Create Agent'),
               icon: const Icon(Icons.person_add),
@@ -82,7 +83,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
                 leading: const Icon(Icons.assignment),
                 title: const Text("View created agents"),
                 onTap: () {
-                  // Navigate to forms
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => Viewcreatedagents(),));
                 },
               ),
             ),
