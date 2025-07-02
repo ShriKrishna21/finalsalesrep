@@ -80,7 +80,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.assignment),
-                title: const Text("View Submitted Forms"),
+                title: const Text("View created agents"),
                 onTap: () {
                   // Navigate to forms
                 },
