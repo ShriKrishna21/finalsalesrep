@@ -45,7 +45,10 @@ dependencies:
 
   # Loading spinners
   flutter_spinkit: ^5.2.0
-  intl: ^0.20.2
+  intl: any
+  flutter_localizations:
+    sdk: flutter
+  geocoding: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -55,6 +58,7 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  generate: true
 
   assets:
     - assets/images/

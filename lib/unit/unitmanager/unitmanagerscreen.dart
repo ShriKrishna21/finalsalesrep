@@ -13,22 +13,23 @@ class Unitmanagerscreen extends StatefulWidget {
 class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
   @override
   Widget build(BuildContext context) {
-    return   Scaffold(
+    return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         actions: [
           GestureDetector(
             onTap: () {
-               Navigator.push(context, MaterialPageRoute(builder: (context) => Profilescreen(),));
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => Profilescreen()));
             },
-           child: Container(
+            child: Container(
               width: MediaQuery.of(context).size.height / 10,
               decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  border: Border.all(
-                      width: 2, color: Colors.white, style: BorderStyle.solid)),
+                shape: BoxShape.circle,
+                border: Border.all(width: 2, color: Colors.white),
+              ),
               child: Icon(
                 Icons.person,
                 size: MediaQuery.of(context).size.height / 16,
@@ -38,31 +39,27 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         ],
         title: RichText(
           text: TextSpan(
-              text: "Unit Manager - ",
-              style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.height / 40,
-                  fontWeight: FontWeight.bold),
-                    children:<TextSpan>[
-              //         TextSpan(
-              // text: "\n",
-              // style: TextStyle(
-              //     fontSize: MediaQuery.of(context).size.height / 40,
-              //     fontWeight: FontWeight.bold,color: Colors.black),),
-                  TextSpan(
-              text: "karimnagar",
-              style: TextStyle(
+            text: "Unit Manager - ",
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.height / 40,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            children: <TextSpan>[
+              TextSpan(
+                text: "karimnagar",
+                style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
-                  fontWeight: FontWeight.bold,color: Colors.white),)
-                      
-                    ]),
-                  
-                  
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              )
+            ],
+          ),
         ),
-      
         automaticallyImplyLeading: false,
-
       ),
-       body: Stack(
+      body: Stack(
         children: [
           Padding(
             padding: const EdgeInsets.all(12.0),
@@ -70,11 +67,17 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               children: [
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(context, MaterialPageRoute(builder: (context) => Noofresources(),));
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => Noofresources()));
                   },
                   child: _buildCard(
                     title: "Number of resources",
-                    gradientColors: [Colors.white, Colors.redAccent],
+                    gradientColors: [
+                      Colors.grey.shade200,
+                      Colors.grey.shade400
+                    ],
                     rows: [
                       _InfoRow(label: "Agents", value: ""),
                     ],
@@ -83,7 +86,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                 const SizedBox(height: 20),
                 _buildCard(
                   title: "Subscription Details",
-                  gradientColors: [Colors.white, Colors.green],
+                  gradientColors: [Colors.grey.shade200, Colors.grey.shade400],
                   rows: const [
                     _InfoRow(label: "Houses Count", value: "  ", bold: true),
                     _InfoRow(label: "Houses Visited", value: "0"),
@@ -95,7 +98,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                 const SizedBox(height: 20),
                 _buildCard(
                   title: "Route Map",
-                  gradientColors: [Colors.white, Colors.redAccent],
+                  gradientColors: [Colors.grey.shade200, Colors.grey.shade400],
                   rows: const [
                     _InfoRow(label: "Routes", value: "0"),
                   ],
@@ -103,29 +106,32 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               ],
             ),
           ),
-          Positioned(
-            bottom: 20,
-            right: 20,
-            child: ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                elevation: 6,
-              ),
-              onPressed: () {
-                
-          
-              },
-              child: const Text(
-                "Create User",
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16,color: Colors.white),
-              ),
-            ),
-          )
+          // Positioned(
+          //   bottom: 20,
+          //   right: 20,
+          //   child: ElevatedButton(
+          //     style: ElevatedButton.styleFrom(
+          //       backgroundColor: Colors.black,
+          //       padding:
+          //           const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+          //       shape: RoundedRectangleBorder(
+          //         borderRadius: BorderRadius.circular(16),
+          //       ),
+          //       elevation: 4,
+          //     ),
+          //     onPressed: () {
+          //       Navigator.push(context,
+          //           MaterialPageRoute(builder: (context) => Createagent()));
+          //     },
+          //     child: const Text(
+          //       "Create User",
+          //       style: TextStyle(
+          //           fontWeight: FontWeight.bold,
+          //           fontSize: 16,
+          //           color: Colors.white),
+          //     ),
+          //   ),
+          // )
         ],
       ),
     );
@@ -139,16 +145,15 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        
-        border: Border.all(
-          width: 2
-        ),
+        border: Border.all(width: 1.5, color: Colors.black),
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        
         boxShadow: const [
           BoxShadow(
-              color: Colors.black45, offset: Offset(2, 2), blurRadius: 15),
+            color: Colors.black12,
+            offset: Offset(2, 2),
+            blurRadius: 10,
+          ),
         ],
       ),
       child: Column(
@@ -202,20 +207,21 @@ class _InfoRow extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: const TextStyle(fontSize: 15),
+              style: const TextStyle(fontSize: 15, color: Colors.black),
             ),
           ),
-          const Text(":", style: TextStyle(fontSize: 15)),
+          const Text(":", style: TextStyle(fontSize: 15, color: Colors.black)),
           const SizedBox(width: 6),
           Text(
             value,
             style: TextStyle(
               fontWeight: bold ? FontWeight.bold : FontWeight.normal,
               fontSize: 15,
+              color: Colors.black,
             ),
           )
         ],
       ),
-    );;
+    );
   }
 }
