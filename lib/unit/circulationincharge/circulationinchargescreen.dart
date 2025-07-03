@@ -1,12 +1,15 @@
 import 'dart:convert';
+import 'package:finalsalesrep/agent/historypage.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart' show AppLocalizations;
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseforms.dart';
@@ -98,14 +101,17 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text("Circulation Incharge - $namee  $unit"),
-        automaticallyImplyLeading: false,
+        title: Text("${Localizations.circulationIncharge} - $namee  $unit"),
+        automaticallyImplyLeading: true,
         actions: [
           IconButton(
             icon: Icon(Icons.person, color: Colors.white),
@@ -115,6 +121,38 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
             ),
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(Localizations.salesrep),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text("Switch Language"),
+              onTap: () {
+                localeProvider.toggleLocale();
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.history),
+              title: Text(Localizations.historyPage),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const Historypage()),
+                );
+              },
+            ),
+          ],
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
@@ -128,29 +166,38 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       MaterialPageRoute(builder: (_) => const Noofresources()),
                     ),
                     child: _buildCard(
-                      title: "Number of Resources",
+                      title: Localizations.numberOfResources,
                       rows: [
-                        _InfoRow(label: "Agents", value: agentCount.toString()),
+                        _InfoRow(
+                            label: Localizations.agents,
+                            value: agentCount.toString()),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   _buildCard(
-                    title: "Subscription Details",
+                    title: localeProvider.locale.languageCode == "en"
+                        ? "Subscription Details"
+                        : Localizations.subscriptionDetails,
                     rows: [
-                      _InfoRow(label: "Houses Count", value: "0", bold: true),
                       _InfoRow(
-                          label: "Houses Visited",
+                          label: Localizations.housesCount,
+                          value: "0",
+                          bold: true),
+                      _InfoRow(
+                          label: Localizations.housesVisited,
                           value: houseVisited.toString()),
-                      _InfoRow(label: "Eenadu Subscription", value: "0"),
-                      _InfoRow(label: "Willing to Change", value: "0"),
-                      _InfoRow(label: "Not Interested", value: "0"),
+                      _InfoRow(
+                          label: Localizations.eenaduSubscription, value: "0"),
+                      _InfoRow(
+                          label: Localizations.willingToChange, value: "0"),
+                      _InfoRow(label: Localizations.notInterested, value: "0"),
                     ],
                   ),
                   const SizedBox(height: 20),
                   _buildCard(
-                    title: "Route Map",
-                    rows: const [_InfoRow(label: "Routes", value: "0")],
+                    title: Localizations.routeMap,
+                    rows: [_InfoRow(label: Localizations.routeMap, value: "0")],
                   ),
                   const SizedBox(height: 20),
                   Center(
@@ -167,8 +214,10 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         context,
                         MaterialPageRoute(builder: (_) => createstaff()),
                       ),
-                      child: const Text(
-                        "Create User",
+                      child: Text(
+                        localeProvider.locale.languageCode == "en"
+                            ? "Create User"
+                            : AppLocalizations.of(context)!.createUser,
                         style: TextStyle(
                             fontWeight: FontWeight.bold, fontSize: 16),
                       ),

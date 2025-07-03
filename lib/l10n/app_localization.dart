@@ -425,7 +425,7 @@ abstract class AppLocalizations {
   /// No description provided for @dob.
   ///
   /// In en, this message translates to:
-  /// **' \',\n DOB: '**
+  /// **'\',\\n DOB: '**
   String get dob;
 
   /// No description provided for @withmobileno.
@@ -437,19 +437,19 @@ abstract class AppLocalizations {
   /// No description provided for @herebystate.
   ///
   /// In en, this message translates to:
-  /// **' ,hereby state that I have read the notice for consent issued by Eenadu  u/s 5 r/s 6(3) of DPDP Act, as I intended to subscribe to Eenadu Pellipandiri services. \n'**
+  /// **' ,hereby state that I have read the notice for consent issued by Eenadu  u/s 5 r/s 6(3) of DPDP Act, as I intended to subscribe to Eenadu Pellipandiri services. \\n'**
   String get herebystate;
 
   /// No description provided for @dpdptext2.
   ///
   /// In en, this message translates to:
-  /// **'2. The purpose of my subscription to Eenadui services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\n\n'**
+  /// **'2. The purpose of my subscription to Eenadui services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\\n\\n'**
   String get dpdptext2;
 
   /// No description provided for @twothreefourfive.
   ///
   /// In en, this message translates to:
-  /// **'2. The purpose of my subscription to Eenadu  services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\n\n3. I hereby agree to process my personal data digitally and to display the same on the website and to share with prospective brides/grooms.\n\n4. I hereby affirm that I am giving my consent for digital processing of my personal data by Eenadu Pellipandiri out of my free will for the specified purpose of seeking alliances and I state there is neither coercion nor misrepresentation nor I was forced to give consent.\n\n5. I am hereby giving my consent by clicking on the below tab hereunder.\n\n'**
+  /// **'2. The purpose of my subscription to Eenadu  services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\\n\\n3. I hereby agree to process my personal data digitally and to display the same on the website and to share with prospective brides/grooms.\\n\\n4. I hereby affirm that I am giving my consent for digital processing of my personal data by Eenadu Pellipandiri out of my free will for the specified purpose of seeking alliances and I state there is neither coercion nor misrepresentation nor I was forced to give consent.\\n\\n5. I am hereby giving my consent by clicking on the below tab hereunder.\\n\\n'**
   String get twothreefourfive;
 
   /// No description provided for @sectiontext.
@@ -577,6 +577,204 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Welcome'**
   String get welcome;
+
+  /// No description provided for @circulationInchargeScreen.
+  ///
+  /// In en, this message translates to:
+  /// **'Circulation Incharge Screen'**
+  String get circulationInchargeScreen;
+
+  /// No description provided for @circulationIncharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Circulation Incharge'**
+  String get circulationIncharge;
+
+  /// No description provided for @numberOfResources.
+  ///
+  /// In en, this message translates to:
+  /// **'Number Of Resources'**
+  String get numberOfResources;
+
+  /// No description provided for @agents.
+  ///
+  /// In en, this message translates to:
+  /// **'Agents'**
+  String get agents;
+
+  /// No description provided for @subscriptionDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscription Details'**
+  String get subscriptionDetails;
+
+  /// No description provided for @housesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Houses Count'**
+  String get housesCount;
+
+  /// No description provided for @housesVisited.
+  ///
+  /// In en, this message translates to:
+  /// **'Houses Visited'**
+  String get housesVisited;
+
+  /// No description provided for @eenaduSubscription.
+  ///
+  /// In en, this message translates to:
+  /// **'Eenadu Subscription'**
+  String get eenaduSubscription;
+
+  /// No description provided for @willingToChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Willing To Change'**
+  String get willingToChange;
+
+  /// No description provided for @notInterested.
+  ///
+  /// In en, this message translates to:
+  /// **'Not Interested'**
+  String get notInterested;
+
+  /// No description provided for @routeMap.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Map'**
+  String get routeMap;
+
+  /// No description provided for @routes.
+  ///
+  /// In en, this message translates to:
+  /// **'Routes'**
+  String get routes;
+
+  /// No description provided for @createUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Create User'**
+  String get createUser;
+
+  /// No description provided for @emailOrUserId.
+  ///
+  /// In en, this message translates to:
+  /// **'Email / User Id'**
+  String get emailOrUserId;
+
+  /// No description provided for @aadharNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar Number'**
+  String get aadharNumber;
+
+  /// No description provided for @uploadAadharPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload Aadhar Photo'**
+  String get uploadAadharPhoto;
+
+  /// No description provided for @tapToSelectAadharImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap To Select Aadhar Image'**
+  String get tapToSelectAadharImage;
+
+  /// No description provided for @panNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'PAN Number'**
+  String get panNumber;
+
+  /// No description provided for @uploadPanCardPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Upload PAN Card Photo'**
+  String get uploadPanCardPhoto;
+
+  /// No description provided for @tapToSelectPanCardImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap To Select Pan Card Image'**
+  String get tapToSelectPanCardImage;
+
+  /// No description provided for @myProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'My Profile'**
+  String get myProfile;
+
+  /// No description provided for @userName.
+  ///
+  /// In en, this message translates to:
+  /// **'User Name'**
+  String get userName;
+
+  /// No description provided for @jobRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Role'**
+  String get jobRole;
+
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'LogOut'**
+  String get logout;
+
+  /// No description provided for @regionalHead.
+  ///
+  /// In en, this message translates to:
+  /// **'Regional Head'**
+  String get regionalHead;
+
+  /// No description provided for @karimnagar.
+  ///
+  /// In en, this message translates to:
+  /// **'KarimNagar'**
+  String get karimnagar;
+
+  /// No description provided for @unit1.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit 1'**
+  String get unit1;
+
+  /// No description provided for @unitName.
+  ///
+  /// In en, this message translates to:
+  /// **'Unitname'**
+  String get unitName;
+
+  /// No description provided for @password.
+  ///
+  /// In en, this message translates to:
+  /// **' Password'**
+  String get password;
+
+  /// No description provided for @phone.
+  ///
+  /// In en, this message translates to:
+  /// **'   Phone'**
+  String get phone;
+
+  /// No description provided for @selectrole.
+  ///
+  /// In en, this message translates to:
+  /// **' Selectrole'**
+  String get selectrole;
+
+  /// No description provided for @userid.
+  ///
+  /// In en, this message translates to:
+  /// **' Userid'**
+  String get userid;
+
+  /// No description provided for @taptoselectimage.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to select image'**
+  String get taptoselectimage;
 }
 
 class _AppLocalizationsDelegate

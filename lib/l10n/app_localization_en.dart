@@ -173,22 +173,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get i => '1.I ';
 
   @override
-  String get dob => ' \',\n DOB: ';
+  String get dob => '\',\\n DOB: ';
 
   @override
   String get withmobileno => ': ,  with the Mobile no. ';
 
   @override
   String get herebystate =>
-      ' ,hereby state that I have read the notice for consent issued by Eenadu  u/s 5 r/s 6(3) of DPDP Act, as I intended to subscribe to Eenadu Pellipandiri services. \n';
+      ' ,hereby state that I have read the notice for consent issued by Eenadu  u/s 5 r/s 6(3) of DPDP Act, as I intended to subscribe to Eenadu Pellipandiri services. \\n';
 
   @override
   String get dpdptext2 =>
-      '2. The purpose of my subscription to Eenadui services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\n\n';
+      '2. The purpose of my subscription to Eenadui services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\\n\\n';
 
   @override
   String get twothreefourfive =>
-      '2. The purpose of my subscription to Eenadu  services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\n\n3. I hereby agree to process my personal data digitally and to display the same on the website and to share with prospective brides/grooms.\n\n4. I hereby affirm that I am giving my consent for digital processing of my personal data by Eenadu Pellipandiri out of my free will for the specified purpose of seeking alliances and I state there is neither coercion nor misrepresentation nor I was forced to give consent.\n\n5. I am hereby giving my consent by clicking on the below tab hereunder.\n\n';
+      '2. The purpose of my subscription to Eenadu  services is to search for suitable alliances for marriage. Therefore I am providing my personal data like name, father\'s name, date of birth, place of birth, religion, caste, sect, sub-sect, gothram, educational qualifications, career information, salary/income to Eenadu Pellipandiri.\\n\\n3. I hereby agree to process my personal data digitally and to display the same on the website and to share with prospective brides/grooms.\\n\\n4. I hereby affirm that I am giving my consent for digital processing of my personal data by Eenadu Pellipandiri out of my free will for the specified purpose of seeking alliances and I state there is neither coercion nor misrepresentation nor I was forced to give consent.\\n\\n5. I am hereby giving my consent by clicking on the below tab hereunder.\\n\\n';
 
   @override
   String get sectiontext =>
@@ -253,4 +253,103 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get welcome => 'Welcome';
+
+  @override
+  String get circulationInchargeScreen => 'Circulation Incharge Screen';
+
+  @override
+  String get circulationIncharge => 'Circulation Incharge';
+
+  @override
+  String get numberOfResources => 'Number Of Resources';
+
+  @override
+  String get agents => 'Agents';
+
+  @override
+  String get subscriptionDetails => 'Subscription Details';
+
+  @override
+  String get housesCount => 'Houses Count';
+
+  @override
+  String get housesVisited => 'Houses Visited';
+
+  @override
+  String get eenaduSubscription => 'Eenadu Subscription';
+
+  @override
+  String get willingToChange => 'Willing To Change';
+
+  @override
+  String get notInterested => 'Not Interested';
+
+  @override
+  String get routeMap => 'Route Map';
+
+  @override
+  String get routes => 'Routes';
+
+  @override
+  String get createUser => 'Create User';
+
+  @override
+  String get emailOrUserId => 'Email / User Id';
+
+  @override
+  String get aadharNumber => 'Aadhar Number';
+
+  @override
+  String get uploadAadharPhoto => 'Upload Aadhar Photo';
+
+  @override
+  String get tapToSelectAadharImage => 'Tap To Select Aadhar Image';
+
+  @override
+  String get panNumber => 'PAN Number';
+
+  @override
+  String get uploadPanCardPhoto => 'Upload PAN Card Photo';
+
+  @override
+  String get tapToSelectPanCardImage => 'Tap To Select Pan Card Image';
+
+  @override
+  String get myProfile => 'My Profile';
+
+  @override
+  String get userName => 'User Name';
+
+  @override
+  String get jobRole => 'Job Role';
+
+  @override
+  String get logout => 'LogOut';
+
+  @override
+  String get regionalHead => 'Regional Head';
+
+  @override
+  String get karimnagar => 'KarimNagar';
+
+  @override
+  String get unit1 => 'Unit 1';
+
+  @override
+  String get unitName => 'Unitname';
+
+  @override
+  String get password => ' Password';
+
+  @override
+  String get phone => '   Phone';
+
+  @override
+  String get selectrole => ' Selectrole';
+
+  @override
+  String get userid => ' Userid';
+
+  @override
+  String get taptoselectimage => 'Tap to select image';
 }
