@@ -32,7 +32,11 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 1,
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
@@ -46,70 +50,102 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
         ],
         title: RichText(
           text: TextSpan(
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
             children: [
               TextSpan(text: "$staffName\n"),
               TextSpan(
                 text: unitName,
-                style: const TextStyle(fontSize: 14, color: Colors.white70),
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey,
+                  fontWeight: FontWeight.normal,
+                ),
               ),
             ],
           ),
         ),
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            FloatingActionButton.extended(
-              onPressed: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => CreateAgent()));
-              },
-              label: const Text('Create Agent'),
-              icon: const Icon(Icons.person_add),
-             
-            ),
-            Text(
+            const Text(
               "Office Staff Dashboard",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
             ),
             const SizedBox(height: 20),
             Card(
+              color: Colors.grey[100],
+              elevation: 2,
               child: ListTile(
-                leading: const Icon(Icons.assignment),
-                title: const Text("View created agents"),
+                leading: const Icon(Icons.assignment, color: Colors.black),
+                title: const Text("View created agents",
+                    style: TextStyle(color: Colors.black)),
+                trailing: const Icon(Icons.arrow_forward_ios,
+                    size: 16, color: Colors.grey),
                 onTap: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => Viewcreatedagents(),));
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => Viewcreatedagents()),
+                  );
                 },
               ),
             ),
-            Card(
-              child: ListTile(
-                leading: const Icon(Icons.settings),
-                title: const Text("Manage Unit Info"),
-                onTap: () {
-                  // Navigate to manage unit
+            // Card(
+            //   color: Colors.grey[100],
+            //   elevation: 2,
+            //   child: ListTile(
+            //     leading: const Icon(Icons.settings, color: Colors.black),
+            //     title: const Text("Manage Unit Info",
+            //         style: TextStyle(color: Colors.black)),
+            //     trailing: const Icon(Icons.arrow_forward_ios,
+            //         size: 16, color: Colors.grey),
+            //     onTap: () {
+            //       // Navigate to manage unit
+            //     },
+            //   ),
+            // ),
+            const SizedBox(height: 24),
+            Center(
+              child: FloatingActionButton.extended(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const CreateAgent()));
                 },
+                backgroundColor: Colors.black,
+                foregroundColor: Colors.white,
+                icon: const Icon(Icons.person_add),
+                label: const Text('Create Agent'),
               ),
             ),
             const Spacer(),
-            Center(
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  // Implement logout
-                },
-                style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 24, vertical: 12)),
-                icon: const Icon(Icons.logout),
-                label: const Text("Logout"),
-              ),
-            )
+            // Center(
+            //   child: ElevatedButton.icon(
+            //     onPressed: () {
+            //       // Implement logout
+            //     },
+            //     style: ElevatedButton.styleFrom(
+            //       backgroundColor: Colors.red,
+            //       foregroundColor: Colors.white,
+            //       padding:
+            //           const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+            //     ),
+            //     icon: const Icon(Icons.logout),
+            //     label: const Text("Logout"),
+            //   ),
+            // ),
           ],
         ),
       ),

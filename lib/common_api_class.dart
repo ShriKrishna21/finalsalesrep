@@ -45,7 +45,7 @@ class CommonApiClass {
   static String Circulationinchargescreen = "$subDomain/api/users_you_created";
 
   
-  static String  agentUnitWiseForms = "$subDomain/api/agents_info_based_on_the_unit";
+  static String  agentUnitWise = "$subDomain/api/agents_info_based_on_the_unit";
 }
 
 
