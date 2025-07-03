@@ -46,6 +46,8 @@ class CommonApiClass {
 
   
   static String  agentUnitWise = "$subDomain/api/agents_info_based_on_the_unit";
+
+  static String  approveagent = "$subDomain/update/status";
 }
 
 

@@ -46,6 +46,7 @@ class _LoginscreenState extends State<Loginscreen> {
   Future<void> loginUser() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final url = CommonApiClass.Loginscreen;
+    print(url);
 
     showDialog(
       context: context,
