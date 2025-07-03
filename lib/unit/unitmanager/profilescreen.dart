@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
@@ -20,10 +19,11 @@ class _agentProfileState extends State<Profilescreen> {
   String? jobrole;
   String? userid;
   userlogout? logoutt;
+
   Future<void> agentLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? apiKey = prefs.getString('apikey');
-    print(" nnnnnnnnnnnnnnnnnnnnnnnn${apiKey}");
+
     try {
       final url = CommonApiClass.Profilescreen;
       final respond = await http.post(
@@ -43,19 +43,14 @@ class _agentProfileState extends State<Profilescreen> {
         setState(() {
           logoutt = userlogout.fromJson(jsonResponse);
         });
-
-        print(" hashhhhhhhhhhhhhhhhhhhhhhhhhhhhhh${respond.statusCode}");
       }
+
       if (logoutt != null && logoutt!.result!.code == "200") {
         await prefs.clear();
         Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) => Loginscreen(),
-            ));
-
-        print(
-            "sucessssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
+          context,
+          MaterialPageRoute(builder: (context) => Loginscreen()),
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Log out failed")),
@@ -89,10 +84,11 @@ class _agentProfileState extends State<Profilescreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFDF7FF),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF4A90E2),
-        title: Text('My Profile'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: const Text('My Profile'),
       ),
       body: Column(
         children: [
@@ -103,45 +99,39 @@ class _agentProfileState extends State<Profilescreen> {
               CircleAvatar(
                 radius: 60,
                 backgroundColor: Colors.black12,
-                child: Icon(Icons.person, size: 60, color: Colors.black54),
+                child: Icon(Icons.person, size: 60, color: Colors.black),
               ),
               Positioned(
                 bottom: 8,
                 right: 8,
                 child: CircleAvatar(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.black,
                   radius: 14,
                   child: Icon(Icons.edit, color: Colors.white, size: 14),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Color(0xFFF4F7F2),
+              color: Colors.white,
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: Offset(2, 2),
-                  blurRadius: 4,
-                ),
-              ],
+              border: Border.all(color: Colors.black),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileitem(title: "Name", value: agentname.toString()),
-                profileitem(title: "User Name", value: userid.toString()),
-                profileitem(title: "Job role", value: jobrole.toString()),
-                profileitem(title: "unit name", value: unitname.toString()),
+                profileitem(title: "Name", value: agentname ?? ""),
+                profileitem(title: "User Name", value: userid ?? ""),
+                profileitem(title: "Job role", value: jobrole ?? ""),
+                profileitem(title: "Unit name", value: unitname ?? ""),
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: SizedBox(
@@ -149,26 +139,25 @@ class _agentProfileState extends State<Profilescreen> {
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // agentLogout();
                   showDialog(
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: Text("Confirm Logout"),
-                        content: Text("Are you sure you want to logout?"),
+                        title: const Text("Confirm Logout"),
+                        content: const Text("Are you sure you want to logout?"),
                         actions: [
                           TextButton(
-                            child: Text("Cancel"),
+                            child: const Text("Cancel"),
                             onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
+                              Navigator.of(context).pop();
                             },
                           ),
                           TextButton(
-                            child: Text("Logout",
+                            child: const Text("Logout",
                                 style: TextStyle(color: Colors.red)),
                             onPressed: () {
-                              Navigator.of(context).pop(); // Close the dialog
-                              agentLogout(); // Proceed with logout
+                              Navigator.of(context).pop();
+                              agentLogout();
                             },
                           ),
                         ],
@@ -177,14 +166,14 @@ class _agentProfileState extends State<Profilescreen> {
                   );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: Colors.red,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Logout',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -211,13 +200,19 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text("$title", style: TextStyle(fontSize: 16))),
-          Text(":", style: TextStyle(fontSize: 16)),
-          SizedBox(width: 8),
+          Expanded(
+              child: Text(title,
+                  style: const TextStyle(fontSize: 16, color: Colors.black))),
+          const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
               overflow: TextOverflow.ellipsis,
             ),
           ),
