@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -83,12 +86,15 @@ class _agentProfileState extends State<agentProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'My Profile',
+        title: Text(
+          Localizations.myProfile,
           style: TextStyle(color: Colors.black),
         ),
       ),
@@ -132,10 +138,12 @@ class _agentProfileState extends State<agentProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileitem(title: "Name", value: agentname ?? "-"),
-                profileitem(title: "User ID", value: userid ?? "-"),
-                profileitem(title: "Job Role", value: jobrole ?? "-"),
-                profileitem(title: "Unit Name", value: unitname ?? "-"),
+                profileitem(title: Localizations.name, value: agentname ?? "-"),
+                profileitem(title: Localizations.userid, value: userid ?? "-"),
+                profileitem(
+                    title: Localizations.jobRole, value: jobrole ?? "-"),
+                profileitem(
+                    title: Localizations.jobRole, value: unitname ?? "-"),
               ],
             ),
           ),
@@ -151,15 +159,19 @@ class _agentProfileState extends State<agentProfile> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Confirm Logout", style: TextStyle(color: Colors.black)),
-                        content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.black)),
+                        title: const Text("Confirm Logout",
+                            style: TextStyle(color: Colors.black)),
+                        content: const Text("Are you sure you want to logout?",
+                            style: TextStyle(color: Colors.black)),
                         actions: [
                           TextButton(
-                            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                            child: const Text("Cancel",
+                                style: TextStyle(color: Colors.black)),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+                            child: const Text("Logout",
+                                style: TextStyle(color: Colors.red)),
                             onPressed: () {
                               Navigator.of(context).pop(); // Close dialog
                               agentLogout(); // Proceed with logout
@@ -176,7 +188,8 @@ class _agentProfileState extends State<agentProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Logout', style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: Text(Localizations.logout,
+                    style: const TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
           )
@@ -202,13 +215,18 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 16, color: Colors.black))),
+          Expanded(
+              child: Text(title,
+                  style: const TextStyle(fontSize: 16, color: Colors.black))),
           const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
               overflow: TextOverflow.ellipsis,
             ),
           ),
