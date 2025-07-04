@@ -1,7 +1,12 @@
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
+import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/unitmanager/profilescreen.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class Unitmanagerscreen extends StatefulWidget {
   const Unitmanagerscreen({super.key});
@@ -11,6 +16,92 @@ class Unitmanagerscreen extends StatefulWidget {
 }
 
 class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
+  int agentCount = 0;
+  int customerFormCount = 0;
+  int eenaduSubscriptionCount = 0;
+  int offerAcceptedCount = 0;
+  int offerRejectedCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchAgentCount();
+    fetchCustomerFormCount();
+  }
+
+  Future<void> fetchAgentCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiKey = prefs.getString('apikey');
+    final unitName = prefs.getString('unit_name');
+
+    if (apiKey == null || unitName == null || unitName.isEmpty) {
+      print("❌ Missing API key or unit name");
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(CommonApiClass.agentUnitWise),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {"token": apiKey, "unit_name": unitName}
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final result = data['result'];
+        if (result != null && result['users'] is List) {
+          final users = result['users'] as List;
+          setState(() {
+            agentCount = users.length;
+          });
+        }
+      } else {
+        print("❌ Error fetching agent count: ${response.statusCode}");
+      }
+    } catch (e) {
+      print("❌ Exception in fetchAgentCount: $e");
+    }
+  }
+
+  Future<void> fetchCustomerFormCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final unitName = prefs.getString('unit_name');
+
+    if (token == null || unitName == null) return;
+
+    final response = await http.post(
+      Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "params": {
+          "token": token,
+          "from_date": "",
+          "to_date": "",
+          "unit_name": unitName,
+          "agent_name": "",
+          "order": "asc",
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final records = data['result']['records'] as List?;
+      setState(() {
+        customerFormCount = records?.length ?? 0;
+        eenaduSubscriptionCount =
+            records?.where((r) => r['eenadunewspaper'] == true).length ?? 0;
+        offerAcceptedCount =
+            records?.where((r) => r['offeraccepted'] == true).length ?? 0;
+        offerRejectedCount =
+            records?.where((r) => r['offeraccepted'] == false).length ?? 0;
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -68,37 +159,73 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Noofresources()));
+                      context,
+                      MaterialPageRoute(builder: (context) => Noofresources()),
+                    );
                   },
                   child: _buildCard(
-                    title: "Number of resources",
+                    title: "Number of Resources",
                     gradientColors: [
                       Colors.grey.shade200,
-                      Colors.grey.shade400
+                      Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(label: "Agents", value: ""),
+                      _InfoRow(label: "Agents", value: agentCount.toString()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Allcustomerforms()),
+                    );
+                  },
+                  child: _buildCard(
+                    title: "View All CustomerForms",
+                    gradientColors: [
+                      Colors.grey.shade200,
+                      Colors.grey.shade400,
+                    ],
+                    rows: [
+                      _InfoRow(
+                          label: "CustomerForms",
+                          value: customerFormCount.toString()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
                   title: "Subscription Details",
-                  gradientColors: [Colors.grey.shade200, Colors.grey.shade400],
-                  rows: const [
+                  gradientColors: [
+                    Colors.grey.shade200,
+                    Colors.grey.shade400,
+                  ],
+                  rows: [
                     _InfoRow(label: "Houses Count", value: "  ", bold: true),
-                    _InfoRow(label: "Houses Visited", value: "0"),
-                    _InfoRow(label: "Eenadu subscription", value: "0"),
-                    _InfoRow(label: "Willing to change", value: "0"),
-                    _InfoRow(label: "Not Interested", value: "0"),
+                    _InfoRow(
+                        label: "Houses Visited",
+                        value: customerFormCount.toString()),
+                    _InfoRow(
+                        label: "Eenadu subscription",
+                        value: eenaduSubscriptionCount.toString()),
+                    _InfoRow(
+                        label: "Willing to change",
+                        value: offerAcceptedCount.toString()),
+                    _InfoRow(
+                        label: "Not Interested",
+                        value: offerRejectedCount.toString()),
                   ],
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
                   title: "Route Map",
-                  gradientColors: [Colors.grey.shade200, Colors.grey.shade400],
+                  gradientColors: [
+                    Colors.grey.shade200,
+                    Colors.grey.shade400,
+                  ],
                   rows: const [
                     _InfoRow(label: "Routes", value: "0"),
                   ],
@@ -106,32 +233,6 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               ],
             ),
           ),
-          // Positioned(
-          //   bottom: 20,
-          //   right: 20,
-          //   child: ElevatedButton(
-          //     style: ElevatedButton.styleFrom(
-          //       backgroundColor: Colors.black,
-          //       padding:
-          //           const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-          //       shape: RoundedRectangleBorder(
-          //         borderRadius: BorderRadius.circular(16),
-          //       ),
-          //       elevation: 4,
-          //     ),
-          //     onPressed: () {
-          //       Navigator.push(context,
-          //           MaterialPageRoute(builder: (context) => Createagent()));
-          //     },
-          //     child: const Text(
-          //       "Create User",
-          //       style: TextStyle(
-          //           fontWeight: FontWeight.bold,
-          //           fontSize: 16,
-          //           color: Colors.white),
-          //     ),
-          //   ),
-          // )
         ],
       ),
     );
@@ -180,7 +281,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
             child: Column(children: rows),
-          )
+          ),
         ],
       ),
     );
@@ -219,7 +320,7 @@ class _InfoRow extends StatelessWidget {
               fontSize: 15,
               color: Colors.black,
             ),
-          )
+          ),
         ],
       ),
     );

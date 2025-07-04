@@ -77,7 +77,7 @@ class _agentProfileState extends State<agentProfile> {
       agentname = prefs.getString('name');
       userid = prefs.getInt('id')?.toString();
       jobrole = prefs.getString('role');
-      unitname = prefs.getString('unit');
+      unitname = prefs.getString('unit_name'); // ✅
     });
   }
 
@@ -151,15 +151,19 @@ class _agentProfileState extends State<agentProfile> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Confirm Logout", style: TextStyle(color: Colors.black)),
-                        content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.black)),
+                        title: const Text("Confirm Logout",
+                            style: TextStyle(color: Colors.black)),
+                        content: const Text("Are you sure you want to logout?",
+                            style: TextStyle(color: Colors.black)),
                         actions: [
                           TextButton(
-                            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                            child: const Text("Cancel",
+                                style: TextStyle(color: Colors.black)),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: const Text("Logout", style: TextStyle(color: Colors.red)),
+                            child: const Text("Logout",
+                                style: TextStyle(color: Colors.red)),
                             onPressed: () {
                               Navigator.of(context).pop(); // Close dialog
                               agentLogout(); // Proceed with logout
@@ -176,7 +180,8 @@ class _agentProfileState extends State<agentProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Logout', style: TextStyle(fontSize: 16, color: Colors.white)),
+                child: const Text('Logout',
+                    style: TextStyle(fontSize: 16, color: Colors.white)),
               ),
             ),
           )
@@ -202,13 +207,18 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 16, color: Colors.black))),
+          Expanded(
+              child: Text(title,
+                  style: const TextStyle(fontSize: 16, color: Colors.black))),
           const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
               overflow: TextOverflow.ellipsis,
             ),
           ),
