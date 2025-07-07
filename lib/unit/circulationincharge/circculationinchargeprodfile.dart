@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
 import 'package:flutter/material.dart';
@@ -20,10 +19,10 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
   String? jobrole;
   String? userid;
   userlogout? logoutt;
+
   Future<void> agentLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? apiKey =  prefs.getString('apikey');
-    print(" nnnnnnnnnnnnnnnnnnnnnnnn${apiKey}");
+    final String? apiKey = prefs.getString('apikey');
     try {
       const url = 'http://10.100.13.138:8099/token_validation';
       final respond = await http.post(
@@ -38,25 +37,19 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
         }),
       );
 
-      
       if (respond.statusCode == 200) {
         final jsonResponse = jsonDecode(respond.body) as Map<String, dynamic>;
         setState(() {
           logoutt = userlogout.fromJson(jsonResponse);
         });
-
-        print(" hashhhhhhhhhhhhhhhhhhhhhhhhhhhhhh${respond.statusCode}");
       }
-      if (logoutt!=null && logoutt!.result!.code == "200") {
+      if (logoutt != null && logoutt!.result!.code == "200") {
         await prefs.clear();
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
               builder: (context) => Loginscreen(),
             ));
-
-        print(
-            "sucessssssssssssssssssssssssssssssssssssssssssssssssssssssssssssssss");
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Log out failed")),
@@ -90,10 +83,11 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFDF7FF),
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        backgroundColor: Color(0xFF4A90E2),
-        title: Text('My Profile'),
+        backgroundColor: Colors.black,
+        title: const Text('My Profile', style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
       ),
       body: Column(
         children: [
@@ -110,27 +104,21 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
                 bottom: 8,
                 right: 8,
                 child: CircleAvatar(
-                  backgroundColor: Colors.green,
+                  backgroundColor: Colors.black54,
                   radius: 14,
                   child: Icon(Icons.edit, color: Colors.white, size: 14),
                 ),
               ),
             ],
           ),
-          SizedBox(height: 30),
+          const SizedBox(height: 30),
           Container(
-            margin: EdgeInsets.symmetric(horizontal: 20),
-            padding: EdgeInsets.all(16),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: Color(0xFFF4F7F2),
+              color: Colors.white,
+              border: Border.all(color: Colors.black, width: 1),
               borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  offset: Offset(2, 2),
-                  blurRadius: 4,
-                ),
-              ],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -138,11 +126,11 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
                 profileitem(title: "Name", value: agentname.toString()),
                 profileitem(title: "User Name", value: userid.toString()),
                 profileitem(title: "Job role", value: jobrole.toString()),
-                profileitem(title: "unit name", value: unitname.toString()),
+                profileitem(title: "Unit name", value: unitname.toString()),
               ],
             ),
           ),
-          Spacer(),
+          const Spacer(),
           Padding(
             padding: const EdgeInsets.all(20.0),
             child: SizedBox(
@@ -150,41 +138,42 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
               height: 50,
               child: ElevatedButton(
                 onPressed: () {
-                  // agentLogout();
-                   showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: Text("Confirm Logout"),
-        content: Text("Are you sure you want to logout?"),
-        actions: [
-          TextButton(
-            child: Text("Cancel"),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-            },
-          ),
-          TextButton(
-            child: Text("Logout", style: TextStyle(color: Colors.red)),
-            onPressed: () {
-              Navigator.of(context).pop(); // Close the dialog
-              agentLogout(); // Proceed with logout
-            },
-          ),
-        ],
-      );
-    },
-  );
+                  showDialog(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return AlertDialog(
+                        backgroundColor: Colors.white,
+                        title: const Text("Confirm Logout", style: TextStyle(color: Colors.black)),
+                        content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.black)),
+                        actions: [
+                          TextButton(
+                            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          ),
+                          TextButton(
+                            child: const Text("Logout", style: TextStyle(color: Colors.black)),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                              agentLogout();
+                            },
+                          ),
+                        ],
+                      );
+                    },
+                  );
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
+                  backgroundColor: Colors.black,
+                  foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: Text(
+                child: const Text(
                   'Logout',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),
@@ -211,14 +200,14 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text("$title", style: TextStyle(fontSize: 16))),
-          Text(":", style: TextStyle(fontSize: 16)),
-          SizedBox(width: 8),
+          Expanded(child: Text(title, style: const TextStyle(fontSize: 16, color: Colors.black))),
+          const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],
