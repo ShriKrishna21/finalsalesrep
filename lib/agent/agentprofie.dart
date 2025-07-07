@@ -1,9 +1,12 @@
 import 'dart:convert';
 
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -83,12 +86,15 @@ class _agentProfileState extends State<agentProfile> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          'My Profile',
+        title: Text(
+          Localizations.myProfile,
           style: TextStyle(color: Colors.black),
         ),
       ),
@@ -132,10 +138,12 @@ class _agentProfileState extends State<agentProfile> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileitem(title: "Name", value: agentname ?? "-"),
-                profileitem(title: "User ID", value: userid ?? "-"),
-                profileitem(title: "Job Role", value: jobrole ?? "-"),
-                profileitem(title: "Unit Name", value: unitname ?? "-"),
+                profileitem(title: Localizations.name, value: agentname ?? "-"),
+                profileitem(title: Localizations.userid, value: userid ?? "-"),
+                profileitem(
+                    title: Localizations.jobRole, value: jobrole ?? "-"),
+                profileitem(
+                    title: Localizations.jobRole, value: unitname ?? "-"),
               ],
             ),
           ),
@@ -180,8 +188,10 @@ class _agentProfileState extends State<agentProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text('Logout',
-                    style: TextStyle(fontSize: 16, color: Colors.white)),
+
+                child: Text(Localizations.logout,
+                    style: const TextStyle(fontSize: 16, color: Colors.white)),
+
               ),
             ),
           )

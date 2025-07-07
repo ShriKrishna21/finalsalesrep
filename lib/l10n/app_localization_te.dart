@@ -67,7 +67,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get employed => 'ఉద్యోగం :';
 
   @override
-  String get jobtype => 'ప్రభుత్వ ఉద్యోగ రకం';
+  String get jobtype => 'ఉద్యోగ రకం';
 
   @override
   String get governmentjob => 'ప్రభుత్వ ఉద్యోగం';
@@ -79,7 +79,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get profession => 'వృత్తి';
 
   @override
-  String get govtjobtype => 'Govt Job Type';
+  String get govtjobtype => 'ప్రభుత్వ ఉద్యోగ రకం';
 
   @override
   String get centraljob => 'కేంద్ర ఉద్యోగం';
@@ -175,7 +175,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get i => '1. నేను ';
 
   @override
-  String get dob => ' \',\n పుట్టిన తేదీ: \'';
+  String get dob => ' ,\n పుట్టిన తేదీ: ';
 
   @override
   String get withmobileno => ': , నా మొబైల్ నంబర్‌. ';
@@ -186,7 +186,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get dpdptext2 =>
-      ' ఈనాడు పెళ్లిపందిరి సేవలకు నా సబ్‌స్క్రిప్షన్ ఉద్దేశ్యం పెళ్లికి తగిన భాగస్వామిని వెతకడం కోసం. అందుచేత నా పేరు, నా తండ్రి పేరు, పుట్టిన తేదీ, పుట్టిన ఊరు, మతం, కులం, శాఖ, ఉపవిభాగం, గోత్రం, విద్యార్హతలు, కెరీర్ సమాచారం, జీతం/ఆదాయం వంటి నా వ్యక్తిగత డేటాను ఈనాడు పెళ్లిపందిరికి అందిస్తున్నాను.';
+      'ఈనాడు పెళ్లిపందిరి సేవలకు నా సబ్‌స్క్రిప్షన్ ఉద్దేశ్యం పెళ్లికి తగిన భాగస్వామిని వెతకడం కోసం. అందుచేత నా పేరు, నా తండ్రి పేరు, పుట్టిన తేదీ, పుట్టిన ఊరు, మతం, కులం, శాఖ, ఉపవిభాగం, గోత్రం, విద్యార్హతలు, కెరీర్ సమాచారం, జీతం/ఆదాయం వంటి నా వ్యక్తిగత డేటాను ఈనాడు పెళ్లిపందిరికి అందిస్తున్నాను.';
 
   @override
   String get twothreefourfive =>
@@ -255,4 +255,105 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get welcome => 'స్వాగతం';
+
+  @override
+  String get circulationInchargeScreen => 'ప్రచారంఇంచార్జి స్క్రీన్';
+
+  @override
+  String get circulationIncharge => 'ప్రచారం ఇంచార్జి';
+
+  @override
+  String get numberOfResources => 'వనరుల సంఖ్య';
+
+  @override
+  String get agents => 'ఏజెంట్లు';
+
+  @override
+  String get subscriptionDetails => 'సభ్యత్వ వివరాలు';
+
+  @override
+  String get housesCount => 'ఇళ్ల సంఖ్య';
+
+  @override
+  String get housesVisited => 'సందర్శించిన ఇళ్ళు';
+
+  @override
+  String get eenaduSubscription => 'ఈనాడు సభ్యత్వం';
+
+  @override
+  String get willingToChange => 'మారేందుకు సిద్ధం';
+
+  @override
+  String get notInterested => 'ఆసక్తి లేదు';
+
+  @override
+  String get routeMap => 'రూట్ మ్యాప్';
+
+  @override
+  String get routes => 'మార్గాలు / రూట్స్';
+
+  @override
+  String get createUser => 'వినియోగదారుని సృష్టించండి';
+
+  @override
+  String get emailOrUserId => 'ఇమెయిల్ / వినియోగదారు ఐడి';
+
+  @override
+  String get aadharNumber => 'ఆధార్ సంఖ్య';
+
+  @override
+  String get uploadAadharPhoto => 'ఆధార్ ఫోటో అప్‌లోడ్ చేయండి';
+
+  @override
+  String get tapToSelectAadharImage =>
+      'ఆధార్ చిత్రం ఎంచుకోవడానికి ట్యాప్ చేయండి';
+
+  @override
+  String get panNumber => 'పాన్ సంఖ్య';
+
+  @override
+  String get uploadPanCardPhoto => 'పాన్ కార్డ్ ఫోటో అప్‌లోడ్ చేయండి';
+
+  @override
+  String get tapToSelectPanCardImage =>
+      'పాన్ కార్డ్ చిత్రం ఎంచుకోవడానికి ట్యాప్ చేయండి';
+
+  @override
+  String get myProfile => 'నా ప్రొఫైల్';
+
+  @override
+  String get userName => 'వినియోగదారు';
+
+  @override
+  String get jobRole => 'ఉద్యోగ పాత్ర';
+
+  @override
+  String get logout => 'లాగ్ అవుట్';
+
+  @override
+  String get regionalHead => 'రీజినల్ హెడ్';
+
+  @override
+  String get karimnagar => 'కరీంనగర్';
+
+  @override
+  String get unit1 => 'యూనిట్ 1';
+
+  @override
+  String get unitName => '  యూనిట్ పేరు';
+
+  @override
+  String get password => ' పాస్వర్డ్';
+
+  @override
+  String get phone => '   ఫోన్';
+
+  @override
+  String get selectrole => ' పాత్రను ఎంచుకోండి';
+
+  @override
+  String get userid => ' వినియోగదారు ఐడి';
+
+  @override
+  String get taptoselectimage => 'చిత్రాన్ని ఎంచుకోవడానికి నొక్కండి';
 }

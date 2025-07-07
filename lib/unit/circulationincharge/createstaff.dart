@@ -1,8 +1,12 @@
+import 'package:flutter_localization/flutter_localization.dart';
 import 'dart:convert';
 import 'dart:io';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:finalsalesrep/common_api_class.dart';
@@ -119,20 +123,23 @@ class _createstaffState extends State<createstaff> {
     } catch (error) {
       print("❌ Error in creating user: $error");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Something went wrong. Please try again.")),
+        const SnackBar(
+            content: Text("Something went wrong. Please try again.")),
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         title: Text(
-          "Create User",
+          Localizations.createUser,
           style: TextStyle(
             fontSize: MediaQuery.of(context).size.height / 34,
             fontWeight: FontWeight.bold,
@@ -146,12 +153,34 @@ class _createstaffState extends State<createstaff> {
             key: _formKey,
             child: Column(
               children: [
-                usercredentials(controller: name, hintText: "Name", errorText: "Please enter a valid name"),
-                usercredentials(controller: unit, hintText: "Unit Name", errorText: "Please enter a valid unit"),
-                usercredentials(controller: phone, hintText: "Phone", errorText: "Enter valid phone", keyboardType: TextInputType.phone, maxvalue: 10),
-                usercredentials(controller: mail, hintText: "Email/User ID", errorText: "Enter valid email", keyboardType: TextInputType.emailAddress),
-                usercredentials(controller: password, hintText: "Password", errorText: "Password required", keyboardType: TextInputType.visiblePassword),
-                usercredentials(controller: state, hintText: "Address", errorText: "Address required"),
+                usercredentials(
+                    controller: name,
+                    hintText: Localizations.name,
+                    errorText: "Please enter a valid name"),
+                usercredentials(
+                    controller: unit,
+                    hintText: Localizations.unitName,
+                    errorText: "Please enter a valid unit"),
+                usercredentials(
+                    controller: phone,
+                    hintText: Localizations.phone,
+                    errorText: "Enter valid phone",
+                    keyboardType: TextInputType.phone,
+                    maxvalue: 10),
+                usercredentials(
+                    controller: mail,
+                    hintText: Localizations.emailOrUserId,
+                    errorText: "Enter valid email",
+                    keyboardType: TextInputType.emailAddress),
+                usercredentials(
+                    controller: password,
+                    hintText: Localizations.password,
+                    errorText: "Password required",
+                    keyboardType: TextInputType.visiblePassword),
+                usercredentials(
+                    controller: state,
+                    hintText: Localizations.address,
+                    errorText: "Address required"),
 
                 // Role Dropdown
                 Padding(
@@ -170,47 +199,56 @@ class _createstaffState extends State<createstaff> {
                       }
                     },
                     decoration: InputDecoration(
-                      labelText: "Select Role",
+                      labelText: Localizations.selectrole,
                       filled: true,
                       fillColor: Colors.blueGrey[200],
-                      contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-                      enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-                      focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 20, horizontal: 16),
+                      enabledBorder: const OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.black)),
+                      focusedBorder: const OutlineInputBorder(
+                          borderSide:
+                              BorderSide(color: Colors.black, width: 2)),
                     ),
                   ),
                 ),
 
                 usercredentials(
                   controller: adhar,
-                  hintText: "Aadhaar Number",
+                  hintText: Localizations.aadharNumber,
                   errorText: "Invalid Aadhaar Number",
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty) return "Enter Aadhaar number";
-                    if (!RegExp(r'^\d{12}$').hasMatch(value)) return "Must be 12 digits";
+                    if (value == null || value.isEmpty)
+                      return "Enter Aadhaar number";
+                    if (!RegExp(r'^\d{12}$').hasMatch(value))
+                      return "Must be 12 digits";
                     return null;
                   },
                 ),
 
                 const SizedBox(height: 10),
-                _uploadLabel("Upload Aadhaar Photo"),
+                _uploadLabel(Localizations.uploadAadharPhoto),
                 _imageSelector(aadhaarImage, pickAadhaarImage),
 
                 const SizedBox(height: 16),
                 usercredentials(
                   controller: pan,
-                  hintText: "PAN Number",
+                  hintText: Localizations.panNumber,
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty) return "Enter PAN number";
-                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$').hasMatch(value.toUpperCase())) return "Format: ABCDE1234F";
+                    if (value == null || value.isEmpty)
+                      return "Enter PAN number";
+                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
+                        .hasMatch(value.toUpperCase()))
+                      return "Format: ABCDE1234F";
                     return null;
                   },
                 ),
                 const SizedBox(height: 10),
-                _uploadLabel("Upload PAN Card Photo"),
+                _uploadLabel(Localizations.uploadPanCardPhoto),
                 _imageSelector(pancardImage, pickPancardImage),
 
                 const SizedBox(height: 25),
@@ -226,12 +264,15 @@ class _createstaffState extends State<createstaff> {
                     decoration: BoxDecoration(
                         color: Colors.blue,
                         borderRadius: BorderRadius.circular(8)),
-                    child: const Center(
-                      child: Text("Create User",
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16)),
+                    child: Center(
+                      child: Text(
+                        Localizations.createUser,
+                        style: TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize:
+                                10 + MediaQuery.of(context).size.height / 500),
+                      ),
                     ),
                   ),
                 ),
@@ -246,7 +287,8 @@ class _createstaffState extends State<createstaff> {
   Widget _uploadLabel(String text) {
     return Align(
       alignment: Alignment.centerLeft,
-      child: Text(text, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+      child: Text(text,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
     );
   }
 
@@ -260,7 +302,8 @@ class _createstaffState extends State<createstaff> {
             color: Colors.grey[300], border: Border.all(color: Colors.black)),
         child: imageFile != null
             ? Image.file(imageFile, fit: BoxFit.cover)
-            : const Center(child: Text("Tap to select image")),
+            : Center(
+                child: Text(AppLocalizations.of(context)!.taptoselectimage)),
       ),
     );
   }
@@ -292,18 +335,22 @@ class usercredentials extends StatelessWidget {
         controller: controller,
         keyboardType: keyboardType ?? TextInputType.text,
         maxLength: maxvalue,
-        validator: validator ?? (value) {
-          if (value == null || value.isEmpty) return errorText;
-          return null;
-        },
+        validator: validator ??
+            (value) {
+              if (value == null || value.isEmpty) return errorText;
+              return null;
+            },
         decoration: InputDecoration(
           hintText: hintText,
           hintStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           filled: true,
           fillColor: Colors.blueGrey[200],
-          contentPadding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-          enabledBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
-          focusedBorder: const OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
+          contentPadding:
+              const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+          enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black)),
+          focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );
