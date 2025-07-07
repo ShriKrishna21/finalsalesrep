@@ -25,7 +25,7 @@ class _LoginscreenState extends State<Loginscreen> {
   TextEditingController passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
   bool _isPasswordVisible = false;
-  loginmodel? _loginData;
+  LoginModel? _loginData;
 
   @override
   void initState() {
@@ -43,108 +43,122 @@ class _LoginscreenState extends State<Loginscreen> {
     }
   }
 
-  Future<void> loginUser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final url = CommonApiClass.Loginscreen;
-    print(url);
+ Future<void> loginUser() async {
+  final SharedPreferences prefs = await SharedPreferences.getInstance();
+  final url = CommonApiClass.Loginscreen;
 
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (_) => const Center(child: CircularProgressIndicator()),
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => const Center(child: CircularProgressIndicator()),
+  );
+
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'jsonrpc': "2.0",
+        'method': "call",
+        'params': {
+          "db": "your_db_name",
+          "login": usernameController.text,
+          "password": passwordController.text,
+        }
+      }),
     );
 
-    try {
-      final response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'jsonrpc': "2.0",
-          'method': "call",
-          'params': {
-            "db": "your_db_name",
-            "login": usernameController.text,
-            "password": passwordController.text,
-          }
-        }),
-      );
+    Navigator.pop(context);
 
-      Navigator.pop(context);
+    if (response.statusCode == 200) {
+      final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+      _loginData = LoginModel.fromJson(jsonResponse);
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        _loginData = loginmodel.fromJson(jsonResponse);
+      // 🔍 Print headers for debugging
+      print("Response Headers: ${response.headers}");
 
-        if (_loginData!.result!.code == "200") {
-          await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
-          await prefs.setString('name', _loginData!.result!.name ?? '');
-          await prefs.setString(
-              'unit_name', _loginData!.result!.unit ?? ''); // ✅ Correct key
-          await prefs.setString('role', _loginData!.result!.role ?? '');
-          await prefs.setInt('id', _loginData!.result!.userId ?? 0);
-          await prefs.setString('agentlogin', usernameController.text);
-          await prefs.setBool("isLoggedIn", true);
-          await prefs.setString("username", usernameController.text);
-          await prefs.setString("password", passwordController.text);
+      // ✅ Extract session_id from cookie
+      final setCookie = response.headers['set-cookie'];
+      if (setCookie != null) {
+        final sessionId = RegExp(r'session_id=([^;]+)')
+            .firstMatch(setCookie)
+            ?.group(1);
 
-          Widget screen;
-          switch (_loginData!.result!.role) {
-            case "admin":
-              screen = const Adminscreen();
-              break;
-            case "Office_staff":
-              screen = OfficeStaffScreen();
-              break;
-            case "agent":
-              screen = Agentscreen();
-              break;
-            case "unit_manager":
-              screen = const Unitmanagerscreen();
-              break;
-            case "circulation_incharge":
-              screen = Circulationinchargescreen();
-              break;
-            case "segment_incharge":
-              screen = Segmentinchargescreen();
-              break;
-            case "region_head":
-              screen = Reginoalheadscreen();
-              break;
-            case "circulation_head":
-              screen = CirculationHead();
-              break;
-            default:
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("Unknown user role")),
-              );
-              return;
-          }
-
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => screen),
-            (route) => false,
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                  "Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
-            ),
-          );
+        if (sessionId != null) {
+          await prefs.setString('session_id', sessionId);
+          print('✅ Saved session_id: $sessionId');
         }
+      }
+
+      if (_loginData!.result!.code == "200") {
+        await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
+        await prefs.setString('name', _loginData!.result!.name ?? '');
+        await prefs.setString('unit', _loginData!.result!.unit ?? '');
+        await prefs.setString('role', _loginData!.result!.role ?? '');
+        await prefs.setInt('id', _loginData!.result!.userId ?? 0);
+        await prefs.setString('agentlogin', usernameController.text);
+        await prefs.setBool("isLoggedIn", true);
+        await prefs.setString("username", usernameController.text);
+        await prefs.setString("password", passwordController.text);
+
+        Widget screen;
+        switch (_loginData!.result!.role) {
+          case "admin":
+            screen = const Adminscreen();
+            break;
+          case "Office_staff":
+            screen = OfficeStaffScreen();
+            break;
+          case "agent":
+            screen = Agentscreen();
+            break;
+          case "unit_manager":
+            screen = const Unitmanagerscreen();
+            break;
+          case "circulation_incharge":
+            screen = Circulationinchargescreen();
+            break;
+          case "segment_incharge":
+            screen = Segmentinchargescreen();
+            break;
+          case "region_head":
+            screen = Reginoalheadscreen();
+            break;
+          case "circulation_head":
+            screen = CirculationHead();
+            break;
+          default:
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Unknown user role")),
+            );
+            return;
+        }
+
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => screen),
+          (route) => false,
+        );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Server error: ${response.statusCode}")),
+          SnackBar(
+            content: Text("Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
+          ),
         );
       }
-    } catch (error) {
-      Navigator.pop(context);
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $error")),
+        SnackBar(content: Text("Server error: ${response.statusCode}")),
       );
     }
+  } catch (error) {
+    Navigator.pop(context);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error: $error")),
+    );
   }
+}
+
 
   @override
   Widget build(BuildContext context) {

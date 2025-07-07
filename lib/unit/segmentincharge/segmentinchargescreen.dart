@@ -1,3 +1,4 @@
+import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
@@ -91,7 +92,22 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                 _InfoRow(label: "Routes", value: "0"),
               ],
             ),
-            const Spacer(),
+            Spacer(),
+              SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const approvedagents()));
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.black),
+                ),
+                
+                child: const Text("Approved Agents", style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            SizedBox(height: 20,),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(

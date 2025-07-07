@@ -1,23 +1,22 @@
-class loginmodel {
+class LoginModel {
   String? jsonrpc;
-  Null id;
+  dynamic id;
   Result? result;
 
-  loginmodel({this.jsonrpc, this.id, this.result});
+  LoginModel({this.jsonrpc, this.id, this.result});
 
-  loginmodel.fromJson(Map<String, dynamic> json) {
+  LoginModel.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -33,17 +32,26 @@ class Result {
   String? unit;
   String? expiration;
   String? code;
+  String? state;
+  String? aadharNumber;
+  String? panNumber;
+  String? phone;
 
-  Result(
-      {this.status,
-      this.userId,
-      this.name,
-      this.apiKey,
-      this.roleLeGr,
-      this.role,
-      this.unit,
-      this.expiration,
-      this.code});
+  Result({
+    this.status,
+    this.userId,
+    this.name,
+    this.apiKey,
+    this.roleLeGr,
+    this.role,
+    this.unit,
+    this.expiration,
+    this.code,
+    this.state,
+    this.aadharNumber,
+    this.panNumber,
+    this.phone,
+  });
 
   Result.fromJson(Map<String, dynamic> json) {
     status = json['status'];
@@ -55,19 +63,27 @@ class Result {
     unit = json['unit'];
     expiration = json['expiration'];
     code = json['code'];
+    state = json['state'];
+    aadharNumber = json['aadhar_number'];
+    panNumber = json['pan_number'];
+    phone = json['phone'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['user_id'] = this.userId;
-    data['name'] = this.name;
-    data['api_key'] = this.apiKey;
-    data['role_Le_gr'] = this.roleLeGr;
-    data['role'] = this.role;
-    data['unit'] = this.unit;
-    data['expiration'] = this.expiration;
-    data['code'] = this.code;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['user_id'] = userId;
+    data['name'] = name;
+    data['api_key'] = apiKey;
+    data['role_Le_gr'] = roleLeGr;
+    data['role'] = role;
+    data['unit'] = unit;
+    data['expiration'] = expiration;
+    data['code'] = code;
+    data['state'] = state;
+    data['aadhar_number'] = aadharNumber;
+    data['pan_number'] = panNumber;
+    data['phone'] = phone;
     return data;
   }
 }
