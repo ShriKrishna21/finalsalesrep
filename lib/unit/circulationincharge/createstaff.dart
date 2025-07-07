@@ -1,4 +1,3 @@
-import 'package:flutter_localization/flutter_localization.dart';
 import 'dart:convert';
 import 'dart:io';
 import 'package:finalsalesrep/l10n/app_localization.dart';
