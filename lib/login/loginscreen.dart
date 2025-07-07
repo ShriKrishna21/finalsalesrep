@@ -78,7 +78,8 @@ class _LoginscreenState extends State<Loginscreen> {
         if (_loginData!.result!.code == "200") {
           await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
           await prefs.setString('name', _loginData!.result!.name ?? '');
-          await prefs.setString('unit', _loginData!.result!.unit ?? '');
+          await prefs.setString(
+              'unit_name', _loginData!.result!.unit ?? ''); // ✅ Correct key
           await prefs.setString('role', _loginData!.result!.role ?? '');
           await prefs.setInt('id', _loginData!.result!.userId ?? 0);
           await prefs.setString('agentlogin', usernameController.text);
@@ -127,7 +128,8 @@ class _LoginscreenState extends State<Loginscreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text("Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
+              content: Text(
+                  "Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
             ),
           );
         }
@@ -176,7 +178,8 @@ class _LoginscreenState extends State<Loginscreen> {
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: usernameController,
-                      validator: (value) => value!.isEmpty ? "Username cannot be empty" : null,
+                      validator: (value) =>
+                          value!.isEmpty ? "Username cannot be empty" : null,
                       decoration: InputDecoration(
                         labelText: "Username",
                         border: OutlineInputBorder(
@@ -188,11 +191,14 @@ class _LoginscreenState extends State<Loginscreen> {
                     TextFormField(
                       controller: passwordController,
                       obscureText: !_isPasswordVisible,
-                      validator: (value) => value!.isEmpty ? "Password cannot be empty" : null,
+                      validator: (value) =>
+                          value!.isEmpty ? "Password cannot be empty" : null,
                       decoration: InputDecoration(
                         labelText: "Password",
                         suffixIcon: IconButton(
-                          icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
+                          icon: Icon(_isPasswordVisible
+                              ? Icons.visibility_off
+                              : Icons.visibility),
                           onPressed: () {
                             setState(() {
                               _isPasswordVisible = !_isPasswordVisible;
@@ -218,7 +224,8 @@ class _LoginscreenState extends State<Loginscreen> {
                           await loginUser();
                         }
                       },
-                      child: const Text("LOGIN", style: TextStyle(fontSize: 18)),
+                      child:
+                          const Text("LOGIN", style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),

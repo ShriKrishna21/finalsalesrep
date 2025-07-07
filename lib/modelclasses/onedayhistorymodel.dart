@@ -31,7 +31,8 @@ class Result {
 
   factory Result.fromJson(Map<String, dynamic> json) {
     return Result(
-      records: (json['records'] as List?)?.map((e) => Record.fromJson(e)).toList(),
+      records:
+          (json['records'] as List?)?.map((e) => Record.fromJson(e)).toList(),
       count: json['count'],
       code: json['code'],
     );
@@ -128,42 +129,44 @@ class Record {
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record(
       id: json['id'],
-      agentName: json['agent_name'],
-      agentLogin: json['agent_login'],
-      unitName: json['unit_name'],
-      date: json['date'],
-      time: json['time'],
-      familyHeadName: json['family_head_name'],
-      fatherName: json['father_name'],
-      motherName: json['mother_name'],
-      spouseName: json['spouse_name'],
-      houseNumber: json['house_number'],
-      streetNumber: json['street_number'],
-      city: json['city'],
-      pinCode: json['pin_code'],
-      address: json['address'],
-      mobileNumber: json['mobile_number'],
+      agentName: _parseString(json['agent_name']),
+      agentLogin: _parseString(json['agent_login']),
+      unitName: _parseString(json['unit_name']),
+      date: _parseString(json['date']),
+      time: _parseString(json['time']),
+      familyHeadName: _parseString(json['family_head_name']),
+      fatherName: _parseString(json['father_name']),
+      motherName: _parseString(json['mother_name']),
+      spouseName: _parseString(json['spouse_name']),
+      houseNumber: _parseString(json['house_number']),
+      streetNumber: _parseString(json['street_number']),
+      city: _parseString(json['city']),
+      pinCode: _parseString(json['pin_code']),
+      address: _parseString(json['address']),
+      mobileNumber: _parseString(json['mobile_number']),
       eenaduNewspaper: _parseBool(json['eenadu_newspaper']),
-      feedbackToImproveEenaduPaper: json['feedback_to_improve_eenadu_paper'],
+      feedbackToImproveEenaduPaper:
+          _parseString(json['feedback_to_improve_eenadu_paper']),
       readNewspaper: _parseBool(json['read_newspaper']),
-      currentNewspaper: json['current_newspaper'],
-      reasonForNotTakingEenaduNewsPaper: json['reason_for_not_taking_eenadu_newsPaper'],
-      reasonNotReading: json['reason_not_reading'],
+      currentNewspaper: _parseString(json['current_newspaper']),
+      reasonForNotTakingEenaduNewsPaper:
+          _parseString(json['reason_for_not_taking_eenadu_newsPaper']),
+      reasonNotReading: _parseString(json['reason_not_reading']),
       freeOffer15Days: _parseBool(json['free_offer_15_days']),
-      reasonNotTakingOffer: json['reason_not_taking_offer'],
+      reasonNotTakingOffer: _parseString(json['reason_not_taking_offer']),
       employed: _parseBool(json['employed']),
       jobType: json['job_type'],
       jobTypeOne: json['job_type_one'],
-      jobProfession: json['job_profession'],
-      jobDesignation: json['job_designation'],
-      companyName: json['company_name'],
-      profession: json['profession'],
+      jobProfession: _parseString(json['job_profession']),
+      jobDesignation: _parseString(json['job_designation']),
+      companyName: _parseString(json['company_name']),
+      profession: _parseString(json['profession']),
       jobWorkingState: json['job_working_state'],
       jobWorkingLocation: json['job_working_location'],
-      jobDesignationOne: json['job_designation_one'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      locationAddress: json['location_address'],
+      jobDesignationOne: _parseString(json['job_designation_one']),
+      latitude: _parseString(json['latitude']),
+      longitude: _parseString(json['longitude']),
+      locationAddress: _parseString(json['location_address']),
     );
   }
 
@@ -189,7 +192,8 @@ class Record {
       'feedback_to_improve_eenadu_paper': feedbackToImproveEenaduPaper,
       'read_newspaper': readNewspaper,
       'current_newspaper': currentNewspaper,
-      'reason_for_not_taking_eenadu_newsPaper': reasonForNotTakingEenaduNewsPaper,
+      'reason_for_not_taking_eenadu_newsPaper':
+          reasonForNotTakingEenaduNewsPaper,
       'reason_not_reading': reasonNotReading,
       'free_offer_15_days': freeOffer15Days,
       'reason_not_taking_offer': reasonNotTakingOffer,
@@ -213,5 +217,9 @@ class Record {
     if (value is bool) return value;
     if (value is String) return value.toLowerCase() == 'true';
     return null;
+  }
+
+  static String? _parseString(dynamic value) {
+    return value is String ? value : null;
   }
 }
