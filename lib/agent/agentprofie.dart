@@ -80,7 +80,7 @@ class _agentProfileState extends State<agentProfile> {
       agentname = prefs.getString('name');
       userid = prefs.getInt('id')?.toString();
       jobrole = prefs.getString('role');
-      unitname = prefs.getString('unit_name'); // ✅
+      unitname = prefs.getString('unit');
     });
   }
 
