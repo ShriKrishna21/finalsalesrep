@@ -20,7 +20,7 @@ class _NoofresourcesState extends State<Noofresources> {
   Future<void> agentdata() async {
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
-    final unitName = prefs.getString('unit_name'); // ✅ Correct key used
+    final unitName = prefs.getString('unit'); // ✅ Correct key used
 
     if (apiKey == null || unitName == null || unitName.isEmpty) {
       print("❌ Missing API key or unit name");
