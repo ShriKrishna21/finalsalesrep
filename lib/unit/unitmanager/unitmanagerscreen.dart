@@ -1,12 +1,13 @@
+import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
+import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
 import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/unitmanager/profilescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class Unitmanagerscreen extends StatefulWidget {
   const Unitmanagerscreen({super.key});
@@ -30,45 +31,16 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
   }
 
   Future<void> fetchAgentCount() async {
-    final prefs = await SharedPreferences.getInstance();
-    final apiKey = prefs.getString('apikey');
-    final unitName = prefs.getString('unit_name');
-
-    if (apiKey == null || unitName == null || unitName.isEmpty) {
-      print("❌ Missing API key or unit name");
-      return;
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse(CommonApiClass.agentUnitWise),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {"token": apiKey, "unit_name": unitName}
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final result = data['result'];
-        if (result != null && result['users'] is List) {
-          final users = result['users'] as List;
-          setState(() {
-            agentCount = users.length;
-          });
-        }
-      } else {
-        print("❌ Error fetching agent count: ${response.statusCode}");
-      }
-    } catch (e) {
-      print("❌ Exception in fetchAgentCount: $e");
-    }
+    final count = await AgentService.fetchAgentCountFromApi();
+    setState(() {
+      agentCount = count;
+    });
   }
 
   Future<void> fetchCustomerFormCount() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
-    final unitName = prefs.getString('unit_name');
+    final unitName = prefs.getString('unit');
 
     if (token == null || unitName == null) return;
 
@@ -90,16 +62,30 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final records = data['result']['records'] as List?;
+
       setState(() {
         customerFormCount = records?.length ?? 0;
-        eenaduSubscriptionCount =
-            records?.where((r) => r['eenadunewspaper'] == true).length ?? 0;
-        offerAcceptedCount =
-            records?.where((r) => r['offeraccepted'] == true).length ?? 0;
-        offerRejectedCount =
-            records?.where((r) => r['offeraccepted'] == false).length ?? 0;
+        eenaduSubscriptionCount = records
+                ?.where((r) => _parseBool(r['eenadu_newspaper']) == true)
+                .length ??
+            0;
+        offerAcceptedCount = records
+                ?.where((r) => _parseBool(r['free_offer_15_days']) == true)
+                .length ??
+            0;
+        offerRejectedCount = records
+                ?.where((r) => _parseBool(r['free_offer_15_days']) == false)
+                .length ??
+            0;
       });
     }
+  }
+
+  bool? _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.toLowerCase() == 'true';
+    if (value is num) return value == 1;
+    return null;
   }
 
   @override
@@ -112,8 +98,10 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         actions: [
           GestureDetector(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => Profilescreen()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => Profilescreen()),
+              );
             },
             child: Container(
               width: MediaQuery.of(context).size.height / 10,
@@ -157,11 +145,12 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             child: Column(
               children: [
                 GestureDetector(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    await Navigator.push(
                       context,
                       MaterialPageRoute(builder: (context) => Noofresources()),
                     );
+                    fetchAgentCount(); // Refresh after return
                   },
                   child: _buildCard(
                     title: "Number of Resources",
@@ -204,7 +193,6 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     Colors.grey.shade400,
                   ],
                   rows: [
-                    _InfoRow(label: "Houses Count", value: "  ", bold: true),
                     _InfoRow(
                         label: "Houses Visited",
                         value: customerFormCount.toString()),
