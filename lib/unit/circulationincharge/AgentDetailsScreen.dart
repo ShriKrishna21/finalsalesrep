@@ -68,6 +68,11 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
     }
   }
 
+  String _boolToText(bool? value) {
+    if (value == null) return 'N/A';
+    return value ? 'Yes' : 'No';
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -153,15 +158,25 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                                       label: "Mobile",
                                       value: r.mobileNumber),
                                   InfoItem(
-                                      icon: Icons.menu_book,
-                                      label: "Reads Eenadu",
-                                      value: r.eenaduNewspaper == true
-                                          ? 'Yes'
-                                          : 'No'),
+                                    icon: Icons.newspaper,
+                                    label: "Reads Any Newspaper",
+                                    value: _boolToText(r.readNewspaper),
+                                  ),
                                   InfoItem(
-                                      icon: Icons.work,
-                                      label: "Employed",
-                                      value: r.employed == true ? 'Yes' : 'No'),
+                                    icon: Icons.menu_book,
+                                    label: "Reads Eenadu",
+                                    value: _boolToText(r.eenaduNewspaper),
+                                  ),
+                                  InfoItem(
+                                    icon: Icons.card_giftcard,
+                                    label: "15 Days Free Offer",
+                                    value: _boolToText(r.freeOffer15Days),
+                                  ),
+                                  InfoItem(
+                                    icon: Icons.work,
+                                    label: "Employed",
+                                    value: _boolToText(r.employed),
+                                  ),
                                 ],
                               ),
                             ),
