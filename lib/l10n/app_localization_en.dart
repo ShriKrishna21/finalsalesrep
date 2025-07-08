@@ -352,4 +352,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get taptoselectimage => 'Tap to select image';
+
+  @override
+  String get segmentincharge => 'Segment Incharge';
+
+  @override
+  String get approvedagents => 'Approved Agents';
+
+  @override
+  String get inprogressagents => 'In-progress Agents';
+
+  @override
+  String get office1staff => 'Office1Staff';
+
+  @override
+  String get officestaffdashboard => 'Office Staff Dashboard';
+
+  @override
+  String get viewcreatedagents => 'ViewCreatedAgents';
+
+  @override
+  String get createagent => 'Create Agent';
+
+  @override
+  String get email => 'Email';
+
+  @override
+  String get aadhar => 'Aadhar';
+
+  @override
+  String get enteravalidname => 'Enter a valid name ';
+
+  @override
+  String get unitnotfound => 'Unit not found';
+
+  @override
+  String get entervalidphone => 'Enter valid phone';
+
+  @override
+  String get entervalidemail => 'Enter valid email';
+
+  @override
+  String get entervalidpassword => 'Enter valid password';
+
+  @override
+  String get addressCantBeEmpty => 'Address can\'t be empty';
+
+  @override
+  String get invalidAadhaar => 'Invalid Aadhaar';
 }

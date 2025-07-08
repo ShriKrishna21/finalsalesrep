@@ -112,10 +112,34 @@
   "karimnagar": "కరీంనగర్",
   "unit1": "యూనిట్ 1",
   "myProfile":"నా ప్రొఫైల్",
-  "unitName":"  యూనిట్ పేరు",
+  "unitName":"యూనిట్ పేరు",
   "password":" పాస్వర్డ్",
   "phone":"   ఫోన్",
   "selectrole":" పాత్రను ఎంచుకోండి",
   "userid":" వినియోగదారు ఐడి",
-  "taptoselectimage": "చిత్రాన్ని ఎంచుకోవడానికి నొక్కండి"
+  "taptoselectimage": "చిత్రాన్ని ఎంచుకోవడానికి నొక్కండి",
+  "segmentincharge":"విభాగ ఇన్‌చార్జ్",
+  "approvedagents":"ఆమోదించబడిన ఏజెంట్లు",
+  "inprogressagents":"ప్రగతిలో ఉన్న ఏజెంట్లు",
+  "office1staff":"ఆఫీస్1 ఉద్యోగులు",
+  "officestaffdashboard":"ఆఫీస్ సిబ్బంది డాష్‌బోర్డ్",
+  "viewcreatedagents":"సృష్టించిన ఏజెంట్లను చూడండి",
+    "createagent":"ఏజెంట్‌ను సృష్టించండి",
+  "email": "ఇమెయిల్",
+  "aadhar": "ఆధార్",
+   "enteravalidname":"సరైన పేరును నమోదు చేయండి",
+   "unitnotfound":"యూనిట్ కనుగొనబడలేదు",
+   "entervalidphone":"సరైన ఫోన్ నంబర్‌ను నమోదు చేయండి",
+   "entervalidemail":"సరైన ఇమెయిల్‌ను నమోదు చేయండి",
+   "entervalidpassword":"సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి",
+   "addressCantBeEmpty":"చిరునామా ఖాళీగా ఉండకూడదు",
+   "invalidAadhaar":" చెల్లని ఆధార్"
+
+
+
+
+
+
+
+
 }

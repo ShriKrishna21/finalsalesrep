@@ -340,7 +340,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get unit1 => 'యూనిట్ 1';
 
   @override
-  String get unitName => '  యూనిట్ పేరు';
+  String get unitName => 'యూనిట్ పేరు';
 
   @override
   String get password => ' పాస్వర్డ్';
@@ -356,4 +356,52 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get taptoselectimage => 'చిత్రాన్ని ఎంచుకోవడానికి నొక్కండి';
+
+  @override
+  String get segmentincharge => 'విభాగ ఇన్‌చార్జ్';
+
+  @override
+  String get approvedagents => 'ఆమోదించబడిన ఏజెంట్లు';
+
+  @override
+  String get inprogressagents => 'ప్రగతిలో ఉన్న ఏజెంట్లు';
+
+  @override
+  String get office1staff => 'ఆఫీస్1 ఉద్యోగులు';
+
+  @override
+  String get officestaffdashboard => 'ఆఫీస్ సిబ్బంది డాష్‌బోర్డ్';
+
+  @override
+  String get viewcreatedagents => 'సృష్టించిన ఏజెంట్లను చూడండి';
+
+  @override
+  String get createagent => 'ఏజెంట్‌ను సృష్టించండి';
+
+  @override
+  String get email => 'ఇమెయిల్';
+
+  @override
+  String get aadhar => 'ఆధార్';
+
+  @override
+  String get enteravalidname => 'సరైన పేరును నమోదు చేయండి';
+
+  @override
+  String get unitnotfound => 'యూనిట్ కనుగొనబడలేదు';
+
+  @override
+  String get entervalidphone => 'సరైన ఫోన్ నంబర్‌ను నమోదు చేయండి';
+
+  @override
+  String get entervalidemail => 'సరైన ఇమెయిల్‌ను నమోదు చేయండి';
+
+  @override
+  String get entervalidpassword => 'సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి';
+
+  @override
+  String get addressCantBeEmpty => 'చిరునామా ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get invalidAadhaar => ' చెల్లని ఆధార్';
 }

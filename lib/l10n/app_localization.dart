@@ -775,6 +775,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Tap to select image'**
   String get taptoselectimage;
+
+  /// No description provided for @segmentincharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Segment Incharge'**
+  String get segmentincharge;
+
+  /// No description provided for @approvedagents.
+  ///
+  /// In en, this message translates to:
+  /// **'Approved Agents'**
+  String get approvedagents;
+
+  /// No description provided for @inprogressagents.
+  ///
+  /// In en, this message translates to:
+  /// **'In-progress Agents'**
+  String get inprogressagents;
+
+  /// No description provided for @office1staff.
+  ///
+  /// In en, this message translates to:
+  /// **'Office1Staff'**
+  String get office1staff;
+
+  /// No description provided for @officestaffdashboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Office Staff Dashboard'**
+  String get officestaffdashboard;
+
+  /// No description provided for @viewcreatedagents.
+  ///
+  /// In en, this message translates to:
+  /// **'ViewCreatedAgents'**
+  String get viewcreatedagents;
+
+  /// No description provided for @createagent.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Agent'**
+  String get createagent;
+
+  /// No description provided for @email.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get email;
+
+  /// No description provided for @aadhar.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhar'**
+  String get aadhar;
+
+  /// No description provided for @enteravalidname.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid name '**
+  String get enteravalidname;
+
+  /// No description provided for @unitnotfound.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit not found'**
+  String get unitnotfound;
+
+  /// No description provided for @entervalidphone.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid phone'**
+  String get entervalidphone;
+
+  /// No description provided for @entervalidemail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid email'**
+  String get entervalidemail;
+
+  /// No description provided for @entervalidpassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter valid password'**
+  String get entervalidpassword;
+
+  /// No description provided for @addressCantBeEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Address can\'t be empty'**
+  String get addressCantBeEmpty;
+
+  /// No description provided for @invalidAadhaar.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid Aadhaar'**
+  String get invalidAadhaar;
 }
 
 class _AppLocalizationsDelegate
