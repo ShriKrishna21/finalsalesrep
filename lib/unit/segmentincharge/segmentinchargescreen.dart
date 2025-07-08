@@ -1,8 +1,10 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
-import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 
@@ -33,12 +35,14 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
         actions: [
           IconButton(
             icon: const Icon(Icons.person, size: 28),
@@ -53,9 +57,32 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Segment Incharge", style: TextStyle(fontWeight: FontWeight.bold)),
+            Text(localizations.segmentincharge,
+                style: TextStyle(fontWeight: FontWeight.bold)),
             Text(userName, style: const TextStyle(fontSize: 14)),
             Text(unitt, style: const TextStyle(fontSize: 12)),
+          ],
+        ),
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(localizations.salesrep),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text("Switch Language"),
+              onTap: () {
+                localeProvider.toggleLocale();
+              },
+            ),
           ],
         ),
       ),
@@ -65,60 +92,73 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
           children: [
             GestureDetector(
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => const Noofresources()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const Noofresources()));
               },
               child: _buildCard(
-                title: "Number of Resources",
-                rows: const [
-                  _InfoRow(label: "Agents", value: ""),
+                title: localizations.numberOfResources,
+                rows: [
+                  _InfoRow(label: localizations.agents, value: ""),
                 ],
               ),
             ),
             const SizedBox(height: 16),
             _buildCard(
-              title: "Subscription Details",
-              rows: const [
-                _InfoRow(label: "Houses Count", value: "", bold: true),
-                _InfoRow(label: "Houses Visited", value: "0"),
-                _InfoRow(label: "Eenadu subscription", value: "0"),
-                _InfoRow(label: "Willing to change", value: "0"),
-                _InfoRow(label: "Not Interested", value: "0"),
+              title: localizations.subscriptionDetails,
+              rows: [
+                _InfoRow(
+                    label: localizations.housesCount, value: "", bold: true),
+                _InfoRow(label: localizations.housesVisited, value: "0"),
+                _InfoRow(label: localizations.eenaduSubscription, value: "0"),
+                _InfoRow(label: localizations.willingToChange, value: "0"),
+                _InfoRow(label: localizations.notInterested, value: "0"),
               ],
             ),
             const SizedBox(height: 16),
             _buildCard(
-              title: "Route Map",
-              rows: const [
-                _InfoRow(label: "Routes", value: "0"),
+              title: localizations.routeMap,
+              rows: [
+                _InfoRow(label: localizations.routes, value: "0"),
               ],
             ),
             Spacer(),
-              SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const approvedagents()));
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Colors.black),
-                ),
-                
-                child: const Text("Approved Agents", style: TextStyle(fontSize: 16)),
-              ),
-            ),
-            SizedBox(height: 20,),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
                 onPressed: () {
-                  Navigator.push(context, MaterialPageRoute(builder: (context) => const Approveagents()));
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => approvedagents()));
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(vertical: 16),
+                  side: BorderSide(color: Colors.black),
+                ),
+                child: Text(localizations.approvedagents,
+                    style: TextStyle(fontSize: 16)),
+              ),
+            ),
+            SizedBox(
+              height: 20,
+            ),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Approveagents()));
                 },
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   side: const BorderSide(color: Colors.black),
                 ),
-                child: const Text("In-progress Agents", style: TextStyle(fontSize: 16)),
+                child: Text(localizations.inprogressagents,
+                    style: TextStyle(fontSize: 16)),
               ),
             ),
           ],
@@ -176,7 +216,8 @@ class _InfoRow extends StatelessWidget {
           const Text(": "),
           Text(
             value,
-            style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+            style: TextStyle(
+                fontWeight: bold ? FontWeight.bold : FontWeight.normal),
           ),
         ],
       ),

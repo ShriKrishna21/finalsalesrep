@@ -1,4 +1,7 @@
 import 'dart:convert';
+import 'package:finalsalesrep/agent/historypage.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +9,7 @@ import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
-    import 'package:finalsalesrep/agent/agentprofie.dart';
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseforms.dart';
@@ -167,7 +170,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
                   _buildCard(
                     title: "Number of Resources",
                     rows: [
@@ -175,7 +177,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
                   _buildCard(
                     title: localeProvider.locale.languageCode == "en"
                         ? "Subscription Details"
@@ -196,7 +197,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     ],
                   ),
                   const SizedBox(height: 20),
-
                   _buildCard(
                     title: "Assign Route Map and Target",
                     rows: const [
@@ -204,7 +204,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     ],
                   ),
                   const SizedBox(height: 10),
-
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -224,13 +223,12 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       },
                       child: const Text(
                         "Assign Now",
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   ),
                   const SizedBox(height: 30),
-
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
@@ -244,13 +242,14 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const createstaff()),
+                          MaterialPageRoute(
+                              builder: (_) => const createstaff()),
                         );
                       },
                       child: const Text(
                         "Create User",
-                        style:
-                            TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                     ),
                   )

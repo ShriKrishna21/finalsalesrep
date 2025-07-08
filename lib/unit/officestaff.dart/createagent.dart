@@ -1,7 +1,10 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -126,10 +129,13 @@ class _CreateAgentState extends State<CreateAgent> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Create Agent"),
+        title: Text(localizations.createagent),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,
@@ -143,36 +149,36 @@ class _CreateAgentState extends State<CreateAgent> {
               children: [
                 usercredentials(
                     controller: name,
-                    hintText: "Name",
+                    hintText: localizations.name,
                     errorText: "Enter a valid name"),
                 usercredentials(
                     controller: unit,
-                    hintText: "Unit Name",
+                    hintText: localizations.unit1,
                     errorText: "Unit not found",
                     readOnly: true),
                 usercredentials(
                     controller: phone,
-                    hintText: "Phone",
+                    hintText: localizations.phone,
                     errorText: "Enter valid phone",
                     keyboardType: TextInputType.phone,
                     maxvalue: 10),
                 usercredentials(
                     controller: mail,
-                    hintText: "Email",
+                    hintText: localizations.email,
                     errorText: "Enter valid email",
                     keyboardType: TextInputType.emailAddress),
                 usercredentials(
                     controller: password,
-                    hintText: "Password",
+                    hintText: localizations.password,
                     errorText: "Enter valid password",
                     keyboardType: TextInputType.visiblePassword),
                 usercredentials(
                     controller: state,
-                    hintText: "Address",
+                    hintText: localizations.address,
                     errorText: "Address can't be empty"),
                 usercredentials(
                   controller: adhar,
-                  hintText: "Aadhaar Number",
+                  hintText: localizations.aadhar,
                   errorText: "Invalid Aadhaar",
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
@@ -185,12 +191,12 @@ class _CreateAgentState extends State<CreateAgent> {
                   },
                 ),
                 const SizedBox(height: 10),
-                uploadImageLabel("Upload Aadhaar Photo"),
+                uploadImageLabel(localizations.uploadAadharPhoto),
                 imagePickerBox(aadhaarImage, pickAadhaarImage),
                 const SizedBox(height: 16),
                 usercredentials(
                   controller: pan,
-                  hintText: "PAN Number",
+                  hintText: localizations.panNumber,
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
@@ -202,7 +208,7 @@ class _CreateAgentState extends State<CreateAgent> {
                         : "PAN must be like ABCDE1234F";
                   },
                 ),
-                uploadImageLabel("Upload PAN Card Photo"),
+                uploadImageLabel(localizations.uploadPanCardPhoto),
                 imagePickerBox(pancardImage, pickPancardImage),
                 const SizedBox(height: 25),
                 SizedBox(
@@ -219,7 +225,7 @@ class _CreateAgentState extends State<CreateAgent> {
                         await createuser();
                       }
                     },
-                    child: const Text("Create User"),
+                    child: Text(localizations.createUser),
                   ),
                 ),
               ],
@@ -251,8 +257,8 @@ class _CreateAgentState extends State<CreateAgent> {
         ),
         child: image != null
             ? Image.file(image, fit: BoxFit.cover)
-            : const Center(
-                child: Text("Tap to select image",
+            : Center(
+                child: Text(AppLocalizations.of(context)!.taptoselectimage,
                     style: TextStyle(color: Colors.black)),
               ),
       ),

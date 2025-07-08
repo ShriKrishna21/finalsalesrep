@@ -112,7 +112,26 @@
   "phone":"   Phone",
   "selectrole":" Selectrole",
   "userid":" Userid",
-  "taptoselectimage": "Tap to select image"
+  "taptoselectimage": "Tap to select image",
+  "segmentincharge":"Segment Incharge",
+  "approvedagents":"Approved Agents",
+  "inprogressagents":"In-progress Agents",
+  "office1staff":"Office1Staff",
+  "officestaffdashboard":"Office Staff Dashboard",
+  "viewcreatedagents":"ViewCreatedAgents",
+  "createagent":"Create Agent",
+    "email": "Email",
+    "aadhar": "Aadhar",
+    "enteravalidname":"Enter a valid name ",
+    "unitnotfound":"Unit not found",
+    "entervalidphone":"Enter valid phone",
+    "entervalidemail":"Enter valid email",
+    "entervalidpassword":"Enter valid password",
+    "addressCantBeEmpty":"Address can't be empty",
+    "invalidAadhaar":"Invalid Aadhaar"
+
+
+
  
 }
 
