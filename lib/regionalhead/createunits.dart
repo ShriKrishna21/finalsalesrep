@@ -8,14 +8,14 @@ import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class createunits extends StatefulWidget {
-  const createunits({super.key});
+class Createincharge extends StatefulWidget {
+  const Createincharge({super.key});
 
   @override
-  State<createunits> createState() => _createunitsState();
+  State<Createincharge> createState() => _createunitsState();
 }
 
-class _createunitsState extends State<createunits> {
+class _createunitsState extends State<Createincharge> {
   createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
 
@@ -38,7 +38,6 @@ class _createunitsState extends State<createunits> {
     {'value': 'segment_incharge', 'label': 'Segment Incharge'},
     {'value': 'circulation_incharge', 'label': 'Circulation Incharge'},
     {'value': 'region_head', 'label': 'Regional Head'},
-   
   ];
 
   // Images
@@ -128,7 +127,7 @@ class _createunitsState extends State<createunits> {
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
         title: Text(
-          "Create User",
+          "Create Incharge",
           style: TextStyle(
             fontSize: MediaQuery.of(context).size.height / 34,
             fontWeight: FontWeight.bold,

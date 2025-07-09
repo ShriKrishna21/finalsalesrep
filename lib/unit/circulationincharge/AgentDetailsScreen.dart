@@ -141,22 +141,26 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                                   const Divider(color: Colors.grey),
                                   const SizedBox(height: 8),
                                   InfoItem(
-                                      icon: Icons.date_range,
-                                      label: "Date",
-                                      value: r.date),
+                                    icon: Icons.date_range,
+                                    label: "Date",
+                                    value: r.date ?? 'N/A',
+                                  ),
                                   InfoItem(
-                                      icon: Icons.location_on,
-                                      label: "Address",
-                                      value: r.address),
+                                    icon: Icons.location_on,
+                                    label: "Address",
+                                    value: r.address ?? 'N/A',
+                                  ),
                                   InfoItem(
-                                      icon: Icons.map,
-                                      label: "City & Pincode",
-                                      value:
-                                          "${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                    icon: Icons.map,
+                                    label: "City & Pincode",
+                                    value:
+                                        "${r.city ?? 'N/A'}, ${r.pinCode ?? 'N/A'}",
+                                  ),
                                   InfoItem(
-                                      icon: Icons.phone_android,
-                                      label: "Mobile",
-                                      value: r.mobileNumber),
+                                    icon: Icons.phone_android,
+                                    label: "Mobile",
+                                    value: r.mobileNumber ?? 'N/A',
+                                  ),
                                   InfoItem(
                                     icon: Icons.newspaper,
                                     label: "Reads Any Newspaper",
@@ -193,7 +197,7 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
 class InfoItem extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String? value;
+  final String value; // was: String?
 
   const InfoItem({
     super.key,
@@ -220,7 +224,7 @@ class InfoItem extends StatelessWidget {
           ),
           Expanded(
             child: Text(
-              value ?? 'N/A',
+              value,
               style: const TextStyle(
                 fontWeight: FontWeight.w500,
                 color: Colors.black87,
