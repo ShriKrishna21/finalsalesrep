@@ -116,10 +116,16 @@ abstract class AppLocalizations {
   /// **'Customer Form'**
   String get customerform;
 
-  /// No description provided for @name.
+  /// No description provided for @familyheadname.
   ///
   /// In en, this message translates to:
   /// **'Family Head Name'**
+  String get familyheadname;
+
+  /// No description provided for @name.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
   String get name;
 
   /// No description provided for @date.
@@ -215,13 +221,13 @@ abstract class AppLocalizations {
   /// No description provided for @governmentjob.
   ///
   /// In en, this message translates to:
-  /// **'Government Job'**
+  /// **'Government job'**
   String get governmentjob;
 
   /// No description provided for @privatejob.
   ///
   /// In en, this message translates to:
-  /// **'Private Job'**
+  /// **'Private job'**
   String get privatejob;
 
   /// No description provided for @profession.
@@ -239,13 +245,13 @@ abstract class AppLocalizations {
   /// No description provided for @centraljob.
   ///
   /// In en, this message translates to:
-  /// **'Central Job'**
+  /// **'Central job'**
   String get centraljob;
 
   /// No description provided for @statejob.
   ///
   /// In en, this message translates to:
-  /// **'State Job'**
+  /// **'State job'**
   String get statejob;
 
   /// No description provided for @jobprofession.
@@ -293,7 +299,7 @@ abstract class AppLocalizations {
   /// No description provided for @mobilenumber.
   ///
   /// In en, this message translates to:
-  /// **'Mobile number'**
+  /// **'Mobile Number'**
   String get mobilenumber;
 
   /// No description provided for @submit.
@@ -871,6 +877,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid Aadhaar'**
   String get invalidAadhaar;
+
+  /// No description provided for @enterpannumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter PAN Number'**
+  String get enterpannumber;
+
+  /// No description provided for @aadhaarmustbe12digits.
+  ///
+  /// In en, this message translates to:
+  /// **'Aadhaar must be 12 digits'**
+  String get aadhaarmustbe12digits;
+
+  /// No description provided for @invalidpannumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid PAN Number'**
+  String get invalidpannumber;
+
+  /// No description provided for @panmustbelikeABCDE1234F.
+  ///
+  /// In en, this message translates to:
+  /// **'PAN Must Be Like ABCDE1234F'**
+  String get panmustbelikeABCDE1234F;
+
+  /// No description provided for @fathersnamecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Father\'s Name Cannot Be Empty'**
+  String get fathersnamecannotbeempty;
+
+  /// No description provided for @mothersnamecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Mother\'s Name Cannot Be Empty'**
+  String get mothersnamecannotbeempty;
+
+  /// No description provided for @spousenamecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Spouse Name Cannot Be Empty '**
+  String get spousenamecannotbeempty;
+
+  /// No description provided for @housenumbercannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'House Number Cannot Be Empty'**
+  String get housenumbercannotbeempty;
+
+  /// No description provided for @streetnumbercannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Street Number Cannot Be Empty'**
+  String get streetnumbercannotbeempty;
+
+  /// No description provided for @citycannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **' City Cannot Be Empty '**
+  String get citycannotbeempty;
+
+  /// No description provided for @pincodecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'PinCode Cannot Be Empty'**
+  String get pincodecannotbeempty;
+
+  /// No description provided for @placecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Place Cannot Be Empty'**
+  String get placecannotbeempty;
+
+  /// No description provided for @landmark.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark '**
+  String get landmark;
+
+  /// No description provided for @landmarkcannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'landMarkCannotBeEmpty'**
+  String get landmarkcannotbeempty;
+
+  /// No description provided for @mobilenumbercannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Mobile Number Cannot Be Empty'**
+  String get mobilenumbercannotbeempty;
+
+  /// No description provided for @feedbackcannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Feedback Cannot Be Empty'**
+  String get feedbackcannotbeempty;
+
+  /// No description provided for @currentnewspapercannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Newspaper Cannot Be Empty'**
+  String get currentnewspapercannotbeempty;
+
+  /// No description provided for @reasonfornottakingcannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason For Not Taking Cannot Be Empty'**
+  String get reasonfornottakingcannotbeempty;
+
+  /// No description provided for @reasonfornotreadingcannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason For Not Reading Cannot Be Empty'**
+  String get reasonfornotreadingcannotbeempty;
+
+  /// No description provided for @fieldcannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Field cannot be empty'**
+  String get fieldcannotbeempty;
+
+  /// No description provided for @selectdepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Department'**
+  String get selectdepartment;
+
+  /// No description provided for @jobdepartment.
+  ///
+  /// In en, this message translates to:
+  /// **'Job Department'**
+  String get jobdepartment;
+
+  /// No description provided for @psupublicsectorundertaking.
+  ///
+  /// In en, this message translates to:
+  /// **'PSU / Public Sector Undertaking'**
+  String get psupublicsectorundertaking;
+
+  /// No description provided for @designation.
+  ///
+  /// In en, this message translates to:
+  /// **'Designation'**
+  String get designation;
 }
 
 class _AppLocalizationsDelegate

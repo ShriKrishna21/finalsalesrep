@@ -18,6 +18,9 @@ class AppLocalizationsTe extends AppLocalizations {
   String get customerform => 'కస్టమర్ ఫారం';
 
   @override
+  String get familyheadname => ' కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
+
+  @override
   String get name => 'పేరు';
 
   @override
@@ -82,16 +85,16 @@ class AppLocalizationsTe extends AppLocalizations {
   String get govtjobtype => 'ప్రభుత్వ ఉద్యోగ రకం';
 
   @override
-  String get centraljob => 'కేంద్ర ఉద్యోగం';
+  String get centraljob => 'కేంద్ర ప్రభుత్వ ఉద్యోగం';
 
   @override
-  String get statejob => 'రాష్ట్ర ఉద్యోగం';
+  String get statejob => 'స్టేట్ ప్రభుత్వ ఉద్యోగం';
 
   @override
   String get jobprofession => 'ఉద్యోగ వృత్తి';
 
   @override
-  String get jobdesignation => 'ఉద్యోగ హోదా';
+  String get jobdesignation => 'ఉద్యోగ పదవి';
 
   @override
   String get companyname => 'కంపెనీ పేరు';
@@ -109,7 +112,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get address => 'చిరునామా';
 
   @override
-  String get mobilenumber => 'మొబైల్ నంబర్';
+  String get mobilenumber => '  మొబైల్ నంబర్';
 
   @override
   String get submit => 'సబ్మిట్';
@@ -404,4 +407,81 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get invalidAadhaar => ' చెల్లని ఆధార్';
+
+  @override
+  String get enterpannumber => 'పాన్ నంబర్‌ను నమోదు చేయండి';
+
+  @override
+  String get aadhaarmustbe12digits => 'ఆధార్ సంఖ్య 12 అంకెలు ఉండాలి';
+
+  @override
+  String get invalidpannumber => 'చెల్లని పాన్ నంబర్';
+
+  @override
+  String get panmustbelikeABCDE1234F => 'పాన్ ఫార్మాట్ ABCDE1234F లాగా ఉండాలి';
+
+  @override
+  String get fathersnamecannotbeempty => 'తండ్రి పేరు ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get mothersnamecannotbeempty => 'తల్లి పేరు ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get spousenamecannotbeempty =>
+      ' భర్త లేదా భార్య పేరు ఖాళీగా ఉండకూడదు ';
+
+  @override
+  String get housenumbercannotbeempty => ' ఇల్లు నంబర్ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get streetnumbercannotbeempty => 'వీధి నంబర్ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get citycannotbeempty => 'నగరం ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get pincodecannotbeempty => 'పిన్‌కోడ్ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get placecannotbeempty => '   ప్రదేశం ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get landmark => ' ల్యాండ్‌మార్క్/సూచిక ప్రదేశం';
+
+  @override
+  String get landmarkcannotbeempty =>
+      '  ల్యాండ్‌మార్క్/సూచిక ప్రదేశం ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get mobilenumbercannotbeempty => 'మొబైల్ నంబర్ ఖాళీగా ఉండకూడదు ';
+
+  @override
+  String get feedbackcannotbeempty => 'ఫీడ్‌బ్యాక్ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get currentnewspapercannotbeempty =>
+      '  ప్రస్తుత పత్రిక ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get reasonfornottakingcannotbeempty =>
+      '  తీసుకోకపోవడానికి కారణం ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get reasonfornotreadingcannotbeempty =>
+      'చదవకపోవడానికి  కారణం ఖాళీగా  ఉండకూడదు';
+
+  @override
+  String get fieldcannotbeempty => 'ఫీల్డ్ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get selectdepartment => 'శాఖను ఎంచుకోండి';
+
+  @override
+  String get jobdepartment => 'ఉద్యోగ శాఖ ';
+
+  @override
+  String get psupublicsectorundertaking => 'ప్రభుత్వ రంగ సంస్థ';
+
+  @override
+  String get designation => 'పదవి';
 }
