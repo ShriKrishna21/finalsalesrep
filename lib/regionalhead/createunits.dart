@@ -230,7 +230,7 @@ class _createunitsState extends State<Createincharge> {
                 ),
 
                 const SizedBox(height: 10),
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text("Upload Aadhaar Photo",
                       style:
@@ -272,7 +272,7 @@ class _createunitsState extends State<Createincharge> {
                 ),
 
                 const SizedBox(height: 10),
-                Align(
+                const Align(
                   alignment: Alignment.centerLeft,
                   child: Text("Upload PAN Card Photo",
                       style:
@@ -341,6 +341,7 @@ class usercredentials extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const usercredentials({
+    super.key,
     required this.controller,
     required this.hintText,
     required this.errorText,

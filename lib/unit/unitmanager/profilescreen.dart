@@ -49,7 +49,7 @@ class _agentProfileState extends State<Profilescreen> {
         await prefs.clear();
         Navigator.pushReplacement(
           context,
-          MaterialPageRoute(builder: (context) => Loginscreen()),
+          MaterialPageRoute(builder: (context) => const Loginscreen()),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(

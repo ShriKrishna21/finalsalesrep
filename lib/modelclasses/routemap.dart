@@ -1,6 +1,6 @@
 class routemap {
   String? jsonrpc;
-  Null? id;
+  Null id;
   Result? result;
 
   routemap({this.jsonrpc, this.id, this.result});
@@ -8,16 +8,15 @@ class routemap {
   routemap.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -37,19 +36,18 @@ class Result {
     message = json['message'];
     status = json['status'];
     agentId = json['agent_id'];
-    rootMap = json['root_map'] != null
-        ? new RootMap.fromJson(json['root_map'])
-        : null;
+    rootMap =
+        json['root_map'] != null ? RootMap.fromJson(json['root_map']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    data['status'] = this.status;
-    data['agent_id'] = this.agentId;
-    if (this.rootMap != null) {
-      data['root_map'] = this.rootMap!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['message'] = message;
+    data['status'] = status;
+    data['agent_id'] = agentId;
+    if (rootMap != null) {
+      data['root_map'] = rootMap!.toJson();
     }
     return data;
   }
@@ -67,9 +65,9 @@ class RootMap {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
     return data;
   }
 }

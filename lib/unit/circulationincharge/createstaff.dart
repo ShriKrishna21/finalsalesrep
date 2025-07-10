@@ -219,10 +219,12 @@ class _createstaffState extends State<createstaff> {
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return "Enter Aadhaar number";
-                    if (!RegExp(r'^\d{12}$').hasMatch(value))
+                    }
+                    if (!RegExp(r'^\d{12}$').hasMatch(value)) {
                       return "Must be 12 digits";
+                    }
                     return null;
                   },
                 ),
@@ -238,11 +240,13 @@ class _createstaffState extends State<createstaff> {
                   errorText: "Invalid PAN Number",
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return "Enter PAN number";
+                    }
                     if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
-                        .hasMatch(value.toUpperCase()))
+                        .hasMatch(value.toUpperCase())) {
                       return "Format: ABCDE1234F";
+                    }
                     return null;
                   },
                 ),
@@ -318,6 +322,7 @@ class usercredentials extends StatelessWidget {
   final String? Function(String?)? validator;
 
   const usercredentials({
+    super.key,
     required this.controller,
     required this.hintText,
     required this.errorText,

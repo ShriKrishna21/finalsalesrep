@@ -58,7 +58,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(localizations.segmentincharge,
-                style: TextStyle(fontWeight: FontWeight.bold)),
+                style: const TextStyle(fontWeight: FontWeight.bold)),
             Text(userName, style: const TextStyle(fontSize: 14)),
             Text(unitt, style: const TextStyle(fontSize: 12)),
           ],
@@ -123,7 +123,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                 _InfoRow(label: localizations.routes, value: "0"),
               ],
             ),
-            Spacer(),
+            const Spacer(),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
@@ -131,17 +131,17 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   Navigator.push(
                       context,
                       MaterialPageRoute(
-                          builder: (context) => approvedagents()));
+                          builder: (context) => const approvedagents()));
                 },
                 style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  side: BorderSide(color: Colors.black),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  side: const BorderSide(color: Colors.black),
                 ),
                 child: Text(localizations.approvedagents,
-                    style: TextStyle(fontSize: 16)),
+                    style: const TextStyle(fontSize: 16)),
               ),
             ),
-            SizedBox(
+            const SizedBox(
               height: 20,
             ),
             SizedBox(
@@ -158,7 +158,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   side: const BorderSide(color: Colors.black),
                 ),
                 child: Text(localizations.inprogressagents,
-                    style: TextStyle(fontSize: 16)),
+                    style: const TextStyle(fontSize: 16)),
               ),
             ),
           ],

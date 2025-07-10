@@ -1,10 +1,9 @@
-import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:flutter/material.dart';
+import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
-import 'package:finalsalesrep/total_history.dart';
 
 class Historypage extends StatefulWidget {
-  const Historypage({Key? key}) : super(key: key);
+  const Historypage({super.key});
 
   @override
   State<Historypage> createState() => _HistorypageState();
@@ -48,10 +47,9 @@ class _HistorypageState extends State<Historypage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Total History (${_records.length})"),
-       flexibleSpace: Container(
-  color: Colors.white,
-),
-
+        flexibleSpace: Container(
+          color: Colors.white,
+        ),
       ),
       body: _isLoading
           ? const Center(
@@ -60,31 +58,33 @@ class _HistorypageState extends State<Historypage> {
               ? const Center(
                   child:
                       Text("No Records Found", style: TextStyle(fontSize: 18)))
-              : Column(children: [
-                  Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                      children: [
-                        _buildStatEntity(
-                            "Accepted", offerAcceptedCount, Colors.green),
-                        _buildStatEntity(
-                            "Rejected", offerRejectedCount, Colors.red),
-                        _buildStatEntity(
-                            "Subscribed", alreadySubscribedCount, Colors.blue),
-                      ],
+              : Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                        children: [
+                          _buildStatEntity(
+                              "Accepted", offerAcceptedCount, Colors.green),
+                          _buildStatEntity(
+                              "Rejected", offerRejectedCount, Colors.red),
+                          _buildStatEntity("Subscribed", alreadySubscribedCount,
+                              Colors.blue),
+                        ],
+                      ),
                     ),
-                  ),
-                  const Divider(),
-                  Expanded(
-                    child: ListView.builder(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      itemCount: _records.length,
-                      itemBuilder: (c, i) => _buildRecordCard(_records[i]),
+                    const Divider(),
+                    Expanded(
+                      child: ListView.builder(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        itemCount: _records.length,
+                        itemBuilder: (c, i) => _buildRecordCard(_records[i]),
+                      ),
                     ),
-                  ),
-                ]),
+                  ],
+                ),
     );
   }
 
@@ -92,7 +92,7 @@ class _HistorypageState extends State<Historypage> {
     return Column(
       children: [
         Text(label,
-            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
         const SizedBox(height: 4),
         Text("$count",
             style: TextStyle(
@@ -116,11 +116,17 @@ class _HistorypageState extends State<Historypage> {
               children: [
                 _detailRow("Agent", r.agentName),
                 _detailRow("Date", r.date),
-                _detailRow("Eenadu Subscribed", r.eenaduNewspaper.toString()),
-                _detailRow("Free Offer", r.freeOffer15Days.toString()),
-                _detailRow("Reject Reason", r.reasonNotTakingOffer ?? "-"),
+                _detailRow("Eenadu Subscribed", _formatBool(r.eenaduNewspaper)),
+                _detailRow("Free Offer", _formatBool(r.freeOffer15Days)),
+                _detailRow("Read Newspaper", _formatBool(r.readNewspaper)),
+                _detailRow("Reject Reason", r.reasonNotTakingOffer),
                 _detailRow("City", r.city),
-                // Add more rows as necessary...
+                _detailRow("Mobile", r.mobileNumber),
+                _detailRow("Address", r.address),
+                _detailRow("Employed", _formatBool(r.employed)),
+                _detailRow("Job Type", _formatBool(r.jobType)),
+                _detailRow("Working in State", _formatBool(r.jobWorkingState)),
+                // Add more fields if needed...
               ],
             ),
           )
@@ -139,5 +145,12 @@ class _HistorypageState extends State<Historypage> {
         ],
       ),
     );
+  }
+
+  /// Helper to convert bool? to "Yes", "No", or "N/A"
+  String _formatBool(bool? value) {
+    if (value == true) return 'Yes';
+    if (value == false) return 'No';
+    return 'N/A';
   }
 }

@@ -1,6 +1,6 @@
 class usersinunit {
   String? jsonrpc;
-  Null? id;
+  Null id;
   Result? result;
 
   usersinunit({this.jsonrpc, this.id, this.result});
@@ -8,16 +8,15 @@ class usersinunit {
   usersinunit.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -37,20 +36,20 @@ class Result {
     if (json['data'] != null) {
       data = <Data>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        data!.add(Data.fromJson(v));
       });
     }
     code = json['code'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['message'] = message;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
-    data['code'] = this.code;
+    data['code'] = code;
     return data;
   }
 }
@@ -75,13 +74,13 @@ class Data {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['login'] = this.login;
-    data['unit_name'] = this.unitName;
-    data['role'] = this.role;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['email'] = email;
+    data['login'] = login;
+    data['unit_name'] = unitName;
+    data['role'] = role;
     return data;
   }
 }
