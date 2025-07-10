@@ -43,122 +43,116 @@ class _LoginscreenState extends State<Loginscreen> {
     }
   }
 
- Future<void> loginUser() async {
-  final SharedPreferences prefs = await SharedPreferences.getInstance();
-  final url = CommonApiClass.Loginscreen;
+  Future<void> loginUser() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final url = CommonApiClass.Loginscreen;
 
-  showDialog(
-    context: context,
-    barrierDismissible: false,
-    builder: (_) => const Center(child: CircularProgressIndicator()),
-  );
-
-  try {
-    final response = await http.post(
-      Uri.parse(url),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'jsonrpc': "2.0",
-        'method': "call",
-        'params': {
-          "db": "your_db_name",
-          "login": usernameController.text,
-          "password": passwordController.text,
-        }
-      }),
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    Navigator.pop(context);
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'jsonrpc': "2.0",
+          'method': "call",
+          'params': {
+            "db": "your_db_name",
+            "login": usernameController.text,
+            "password": passwordController.text,
+          }
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-      _loginData = LoginModel.fromJson(jsonResponse);
+      Navigator.pop(context);
 
-      // 🔍 Print headers for debugging
-      print("Response Headers: ${response.headers}");
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
+        _loginData = LoginModel.fromJson(jsonResponse);
 
-      // ✅ Extract session_id from cookie
-      final setCookie = response.headers['set-cookie'];
-      if (setCookie != null) {
-        final sessionId = RegExp(r'session_id=([^;]+)')
-            .firstMatch(setCookie)
-            ?.group(1);
-
-        if (sessionId != null) {
-          await prefs.setString('session_id', sessionId);
-          print('✅ Saved session_id: $sessionId');
-        }
-      }
-
-      if (_loginData!.result!.code == "200") {
-        await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
-        await prefs.setString('name', _loginData!.result!.name ?? '');
-        await prefs.setString('unit', _loginData!.result!.unit ?? '');
-        await prefs.setString('role', _loginData!.result!.role ?? '');
-        await prefs.setInt('id', _loginData!.result!.userId ?? 0);
-        await prefs.setString('agentlogin', usernameController.text);
-        await prefs.setBool("isLoggedIn", true);
-        await prefs.setString("username", usernameController.text);
-        await prefs.setString("password", passwordController.text);
-
-        Widget screen;
-        switch (_loginData!.result!.role) {
-          case "admin":
-            screen = const Adminscreen();
-            break;
-          case "Office_staff":
-            screen = OfficeStaffScreen();
-            break;
-          case "agent":
-            screen = Agentscreen();
-            break;
-          case "unit_manager":
-            screen = const Unitmanagerscreen();
-            break;
-          case "circulation_incharge":
-            screen = Circulationinchargescreen();
-            break;
-          case "segment_incharge":
-            screen = Segmentinchargescreen();
-            break;
-          case "region_head":
-            screen = Reginoalheadscreen();
-            break;
-          case "circulation_head":
-            screen = CirculationHead();
-            break;
-          default:
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Unknown user role")),
-            );
-            return;
+        final setCookie = response.headers['set-cookie'];
+        if (setCookie != null) {
+          final sessionId = RegExp(r'session_id=([^;]+)')
+              .firstMatch(setCookie)
+              ?.group(1);
+          if (sessionId != null) {
+            await prefs.setString('session_id', sessionId);
+            print('✅ Saved session_id: $sessionId');
+          }
         }
 
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => screen),
-          (route) => false,
-        );
+        if (_loginData!.result!.code == "200") {
+          print("${_loginData!.result!.target ?? "0"}");
+          await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
+          await prefs.setString('name', _loginData!.result!.name ?? '');
+          await prefs.setString('unit', _loginData!.result!.unit ?? '');
+          await prefs.setString('role', _loginData!.result!.role ?? '');
+          await prefs.setInt('id', _loginData!.result!.userId ?? 0);
+          await prefs.setString('agentlogin', usernameController.text);
+          await prefs.setString("target", _loginData!.result!.target ?? "0");
+          await prefs.setBool("isLoggedIn", true);
+          await prefs.setString("username", usernameController.text);
+          await prefs.setString("password", passwordController.text);
+
+          Widget screen;
+          switch (_loginData!.result!.role) {
+            case "admin":
+              screen = const Adminscreen();
+              break;
+            case "Office_staff":
+              screen = OfficeStaffScreen();
+              break;
+            case "agent":
+              screen = Agentscreen();
+              break;
+            case "unit_manager":
+              screen = const Unitmanagerscreen();
+              break;
+            case "circulation_incharge":
+              screen = Circulationinchargescreen();
+              break;
+            case "segment_incharge":
+              screen = Segmentinchargescreen();
+              break;
+            case "region_head":
+              screen = Reginoalheadscreen();
+              break;
+            case "circulation_head":
+              screen = CirculationHead();
+              break;
+            default:
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("Unknown user role")),
+              );
+              return;
+          }
+
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => screen),
+            (route) => false,
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Login failed: ${_loginData!.result!.code}")),
+          );
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Login failed: ${_loginData!.result!.code ?? 'Invalid credentials'}"),
-          ),
+          SnackBar(content: Text("Server error: ${response.statusCode}")),
         );
       }
-    } else {
+    } catch (error) {
+      Navigator.pop(context);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Server error: ${response.statusCode}")),
+        SnackBar(content: Text("Error: $error")),
       );
     }
-  } catch (error) {
-    Navigator.pop(context);
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text("Error: $error")),
-    );
   }
-}
-
 
   @override
   Widget build(BuildContext context) {
@@ -238,8 +232,7 @@ class _LoginscreenState extends State<Loginscreen> {
                           await loginUser();
                         }
                       },
-                      child:
-                          const Text("LOGIN", style: TextStyle(fontSize: 18)),
+                      child: const Text("LOGIN", style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),

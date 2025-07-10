@@ -36,6 +36,7 @@ class Result {
   String? aadharNumber;
   String? panNumber;
   String? phone;
+  String? target; // Changed from int? to String?
 
   Result({
     this.status,
@@ -51,6 +52,7 @@ class Result {
     this.aadharNumber,
     this.panNumber,
     this.phone,
+    this.target,
   });
 
   Result.fromJson(Map<String, dynamic> json) {
@@ -67,6 +69,7 @@ class Result {
     aadharNumber = json['aadhar_number'];
     panNumber = json['pan_number'];
     phone = json['phone'];
+    target = json['target']?.toString(); // Safely convert any type to String
   }
 
   Map<String, dynamic> toJson() {
@@ -84,6 +87,7 @@ class Result {
     data['aadhar_number'] = aadharNumber;
     data['pan_number'] = panNumber;
     data['phone'] = phone;
+    data['target'] = target;
     return data;
   }
 }

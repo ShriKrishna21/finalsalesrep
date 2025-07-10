@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
@@ -6,6 +7,7 @@ import 'package:finalsalesrep/commonclasses/onedayagent.dart' show Onedayagent;
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:provider/provider.dart';
@@ -21,6 +23,9 @@ class Agentscreen extends StatefulWidget {
 class _AgentscreenState extends State<Agentscreen> {
   TextEditingController dateController = TextEditingController();
   String agentname = "";
+  String? target;
+  String? routeName;
+
   List<Record> records = [];
   bool _isLoading = true;
 
@@ -37,12 +42,47 @@ class _AgentscreenState extends State<Agentscreen> {
     dateController.text = formattedDate;
     loadAgentName();
     loadOnedayHistory();
+    fetchRoute();
+  }
+
+  Future<void> fetchRoute() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apiKey = prefs.getString('apikey');
+    final userid = prefs.getInt('id');
+
+    try {
+      final response = await http.post(
+        Uri.parse('https://salesrep.esanchaya.com/api/for_agent_root_map_name'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {
+            "token": apiKey,
+            "agent_id": userid.toString(),
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final route = data['result']?['root_map']?['name'];
+        if (route != null) {
+          setState(() {
+            routeName = route;
+          });
+        }
+      } else {
+        print("Failed to fetch route map: ${response.statusCode}");
+      }
+    } catch (error) {
+      print("Error fetching route map: $error");
+    }
   }
 
   Future<void> loadAgentName() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       agentname = prefs.getString('agentname') ?? '';
+      target = prefs.getString('target') ?? "0";
     });
   }
 
@@ -151,46 +191,32 @@ class _AgentscreenState extends State<Agentscreen> {
                   ),
                   const SizedBox(height: 20),
 
-                  // Daily Summary Section
                   Center(child: _buildSectionTitle(localizations.houseVisited)),
-                  SizedBox(
-                    height: 20,
-                  ),
-                  _buildInfoRow(localizations.todaysHouseCount, "40"),
+                  const SizedBox(height: 20),
+                  _buildInfoRow(localizations.todaysHouseCount, target ?? "0"),
                   GestureDetector(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => const Onedayhistory()),
+                        MaterialPageRoute(builder: (_) => const Onedayhistory()),
                       );
                     },
                     child: _buildInfoRow(
                         localizations.houseVisited, "${records.length}"),
                   ),
-
                   _buildInfoRow(
-                      localizations.todaysTargetLeft, "${40 - records.length}"),
+                      localizations.todaysTargetLeft,
+                      "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
 
                   const SizedBox(height: 30),
 
-                  // Route Detail Section
                   Center(child: _buildSectionTitle(localizations.myRouteMap)),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const Onedayhistory()),
-                        );
-                      },
-                      child: _buildBulletPoint("Route 1")),
-                  _buildBulletPoint("Route 2"),
-                  _buildBulletPoint("Route 3"),
+                  routeName != null
+                      ? _buildBulletPoint(routeName!)
+                      : _buildBulletPoint("No route assigned"),
 
                   const SizedBox(height: 30),
 
-                  // Survey Results Section
                   Center(child: _buildSectionTitle(localizations.reports)),
                   _buildBulletPoint(
                       "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
