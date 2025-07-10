@@ -159,18 +159,18 @@ class _agentProfileState extends State<agentProfile> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Confirm Logout",
+                        title: Text(Localizations.confirmlogout,
                             style: TextStyle(color: Colors.black)),
-                        content: const Text("Are you sure you want to logout?",
+                        content: Text(Localizations.areyousureyouwanttologout,
                             style: TextStyle(color: Colors.black)),
                         actions: [
                           TextButton(
-                            child: const Text("Cancel",
+                            child: Text(Localizations.cancel,
                                 style: TextStyle(color: Colors.black)),
                             onPressed: () => Navigator.of(context).pop(),
                           ),
                           TextButton(
-                            child: const Text("Logout",
+                            child: Text(Localizations.logout,
                                 style: TextStyle(color: Colors.red)),
                             onPressed: () {
                               Navigator.of(context).pop(); // Close dialog
@@ -188,10 +188,8 @@ class _agentProfileState extends State<agentProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-
                 child: Text(Localizations.logout,
                     style: const TextStyle(fontSize: 16, color: Colors.white)),
-
               ),
             ),
           )

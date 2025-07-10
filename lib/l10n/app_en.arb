@@ -161,7 +161,25 @@
   "statejob":"State job",
   "privatejob":"Private job",
   "designation":"Designation",
-  "mobilenumber":"Mobile Number"
+  "mobilenumber":"Mobile Number",
+  "regionalHead":"Regional Head   ",
+  "confirmlogout":"Confirm Logout",
+  "areyousureyouwanttologout":"Are You Sure You Want To Logout?",
+  "cancel":"Cancel",
+  "logout":"Logout",
+  "createincharge":"Create Incharge",
+  "nousersfoundinthisunit":"No Users Found In This Unit",
+  "ustomerformsofunit":"Customer Forms of Unit",
+  "aadhaarnumber":"AadhaarNumber",
+  "invalidaadhaarnumber":"InvalidAadhaarNumber",
+  "pleaseenteraadhaarnumber":"Please Enter Aadhaar Number",
+  "enteravalidunitname":"Enter A Valid Unit Name",
+  "enteravalidphonenumber":"Enter A Valid Phone Number",
+  "enteravalidemail":"Enter A Valid Email",
+  "pleaseenteravalidpassword":"Please Enter A Valid Password",
+   "enteravalidunitname":"Please Enter A Valid Unitname",
+   "unitnamecantbeempty":"Unit Name Can't Be Empty"
+
 
 
 

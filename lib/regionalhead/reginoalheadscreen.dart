@@ -1,8 +1,10 @@
-// regionalheadscreen.dart
 import 'dart:convert';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/regionalhead/unitwisescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseusers.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
@@ -51,7 +53,6 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         final data = jsonDecode(response.body);
         final unitData = unitwiseusers.fromJson(data);
         final users = unitData.result?.users ?? [];
-
         final units = users
             .map((user) => user.unitName ?? '')
             .where((unit) => unit.isNotEmpty)
@@ -74,17 +75,21 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
+        automaticallyImplyLeading: true,
         actions: [
           GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => agentProfile()),
+                MaterialPageRoute(builder: (context) => const agentProfile()),
               );
             },
             child: Container(
@@ -100,39 +105,51 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
             ),
           ),
         ],
-        title: RichText(
-          text: TextSpan(
-            text: "RegionalHead - ",
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.height / 40,
-              fontWeight: FontWeight.bold,
+        title: Center(
+          child: RichText(
+            text: TextSpan(
+              text: localizations.regionalHead,
+              style: TextStyle(
+                fontSize: MediaQuery.of(context).size.height / 40,
+                fontWeight: FontWeight.bold,
+              ),
+              children: <TextSpan>[
+                TextSpan(
+                    text: "$username\n",
+                    style: const TextStyle(color: Colors.black))
+              ],
             ),
-            children: <TextSpan>[
-              TextSpan(
-                  text: "$username\n",
-                  style: const TextStyle(color: Colors.black))
-            ],
           ),
         ),
-        automaticallyImplyLeading: false,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(localizations.salesrep),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text("Switch Language"),
+              onTap: () {
+                localeProvider.toggleLocale();
+              },
+            ),
+          ],
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: FloatingActionButton.extended(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => Createincharge()),
-                      );
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text("Create Incharge"),
-                  ),
+                SizedBox(
+                  height: 10,
                 ),
                 Expanded(
                   child: unitNames.isEmpty
@@ -164,6 +181,16 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
                 ),
               ],
             ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => const Createincharge()),
+          );
+        },
+        icon: const Icon(Icons.add),
+        label: Text(localizations.createincharge),
+      ),
     );
   }
 }

@@ -2,10 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Createincharge extends StatefulWidget {
@@ -121,16 +124,21 @@ class _createunitsState extends State<Createincharge> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         backgroundColor: Colors.blue,
         foregroundColor: Colors.white,
-        title: Text(
-          "Create Incharge",
-          style: TextStyle(
-            fontSize: MediaQuery.of(context).size.height / 34,
-            fontWeight: FontWeight.bold,
+        title: Center(
+          child: Text(
+            localizations.createincharge,
+            style: TextStyle(
+              fontSize: MediaQuery.of(context).size.height / 34,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),
@@ -144,37 +152,37 @@ class _createunitsState extends State<Createincharge> {
                 const SizedBox(height: 10),
                 usercredentials(
                   controller: name,
-                  hintText: "Name",
-                  errorText: "Please enter a valid name",
+                  hintText: localizations.name,
+                  errorText: localizations.enteravalidname,
                 ),
                 usercredentials(
                   controller: unit,
-                  hintText: "Unit Name",
-                  errorText: "Please enter a valid unit name",
+                  hintText: localizations.unitName,
+                  errorText: localizations.unitnamecantbeempty,
                 ),
                 usercredentials(
                   keyboardType: TextInputType.phone,
                   maxvalue: 10,
                   controller: phone,
-                  hintText: "Phone",
-                  errorText: "Please enter a valid phone number",
+                  hintText: localizations.phone,
+                  errorText: localizations.enteravalidphonenumber,
                 ),
                 usercredentials(
                   controller: mail,
-                  hintText: "Email/User ID",
-                  errorText: "Please enter a valid email",
+                  hintText: localizations.emailOrUserId,
+                  errorText: localizations.enteravalidemail,
                   keyboardType: TextInputType.emailAddress,
                 ),
                 usercredentials(
                   controller: password,
-                  hintText: "Password",
-                  errorText: "Please enter a valid password",
+                  hintText: localizations.password,
+                  errorText: localizations.pleaseenteravalidpassword,
                   keyboardType: TextInputType.visiblePassword,
                 ),
                 usercredentials(
                   controller: state,
-                  hintText: "Address",
-                  errorText: "Address cannot be empty",
+                  hintText: localizations.address,
+                  errorText: localizations.addressCantBeEmpty,
                 ),
 
                 // ✅ Role dropdown
@@ -196,7 +204,7 @@ class _createunitsState extends State<Createincharge> {
                       }
                     },
                     decoration: InputDecoration(
-                      labelText: "Select Role",
+                      labelText: localizations.selectrole,
                       filled: true,
                       fillColor: Colors.blueGrey[200],
                       contentPadding: const EdgeInsets.symmetric(
@@ -213,17 +221,17 @@ class _createunitsState extends State<Createincharge> {
 
                 usercredentials(
                   controller: adhar,
-                  hintText: "Aadhaar Number",
-                  errorText: "Invalid Aadhaar Number",
+                  hintText: localizations.aadhaarnumber,
+                  errorText: localizations.invalidaadhaarnumber,
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Please enter Aadhaar number";
+                      return localizations.pleaseenteraadhaarnumber;
                     }
                     final aadhaarRegex = RegExp(r'^\d{12}$');
                     if (!aadhaarRegex.hasMatch(value)) {
-                      return "Aadhaar must be exactly 12 digits";
+                      return localizations.aadhaarmustbe12digits;
                     }
                     return null;
                   },
@@ -232,7 +240,7 @@ class _createunitsState extends State<Createincharge> {
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Upload Aadhaar Photo",
+                  child: Text(localizations.uploadAadharPhoto,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
@@ -248,24 +256,25 @@ class _createunitsState extends State<Createincharge> {
                     ),
                     child: aadhaarImage != null
                         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select Aadhaar image")),
+                        : Center(
+                            child: Text(localizations.tapToSelectAadharImage),
+                          ),
                   ),
                 ),
 
                 const SizedBox(height: 16),
                 usercredentials(
                   controller: pan,
-                  hintText: "PAN Number",
-                  errorText: "Invalid PAN Number",
+                  hintText: localizations.panNumber,
+                  errorText: localizations.invalidpannumber,
                   maxvalue: 10,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Please enter PAN number";
+                      return localizations.enterpannumber;
                     }
                     final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
                     if (!panRegex.hasMatch(value.toUpperCase())) {
-                      return "PAN format: ABCDE1234F";
+                      return localizations.panmustbelikeABCDE1234F;
                     }
                     return null;
                   },
@@ -274,7 +283,7 @@ class _createunitsState extends State<Createincharge> {
                 const SizedBox(height: 10),
                 Align(
                   alignment: Alignment.centerLeft,
-                  child: Text("Upload PAN Card Photo",
+                  child: Text(localizations.uploadPanCardPhoto,
                       style:
                           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
@@ -290,8 +299,9 @@ class _createunitsState extends State<Createincharge> {
                     ),
                     child: pancardImage != null
                         ? Image.file(pancardImage!, fit: BoxFit.cover)
-                        : const Center(
-                            child: Text("Tap to select PAN card image")),
+                        : Center(
+                            child: Text(localizations.tapToSelectPanCardImage),
+                          ),
                   ),
                 ),
 
@@ -310,9 +320,10 @@ class _createunitsState extends State<Createincharge> {
                       color: Colors.blue,
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Center(
+                    child: Center(
                       child: Text(
-                        "Create User",
+                        localizations.createUser,
+                        textAlign: TextAlign.center,
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,

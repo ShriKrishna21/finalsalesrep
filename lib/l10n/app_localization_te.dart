@@ -331,10 +331,10 @@ class AppLocalizationsTe extends AppLocalizations {
   String get jobRole => 'ఉద్యోగ పాత్ర';
 
   @override
-  String get logout => 'లాగ్ అవుట్';
+  String get logout => 'లాగౌట్';
 
   @override
-  String get regionalHead => 'రీజినల్ హెడ్';
+  String get regionalHead => 'రీజినల్ హెడ్   ';
 
   @override
   String get karimnagar => 'కరీంనగర్';
@@ -484,4 +484,48 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get designation => 'పదవి';
+
+  @override
+  String get confirmlogout => 'లాగౌట్ చేయడం కొనసాగించాలా';
+
+  @override
+  String get areyousureyouwanttologout =>
+      'మీరు ఖచ్చితంగా లాగౌట్ కావాలనుకుంటున్నారా?';
+
+  @override
+  String get cancel => 'క్యాన్సల్';
+
+  @override
+  String get createincharge => 'ఇన్‌చార్జ్‌ను సృష్టించండి ';
+
+  @override
+  String get nousersfoundinthisunit => 'ఈ యూనిట్‌లో యూజర్లు లేరు';
+
+  @override
+  String get ustomerformsofunit => 'యూనిట్ కస్టమర్ ఫారాలు';
+
+  @override
+  String get aadhaarnumber => 'ఆధార్ సంఖ్య';
+
+  @override
+  String get invalidaadhaarnumber => 'సరైన ఆధార్ సంఖ్యను నమోదు చేయండి';
+
+  @override
+  String get pleaseenteraadhaarnumber => 'దయచేసి ఆధార్ సంఖ్యను నమోదు చేయండి';
+
+  @override
+  String get enteravalidunitname => '  సరైన యూనిట్ పేరును నమోదు చేయండి';
+
+  @override
+  String get enteravalidphonenumber => '  సరైన ఫోన్ నంబరును నమోదు చేయండి';
+
+  @override
+  String get enteravalidemail => ' సరైన ఇమెయిల్‌ను నమోదు చేయండి';
+
+  @override
+  String get pleaseenteravalidpassword =>
+      'దయచేసి సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి';
+
+  @override
+  String get unitnamecantbeempty => 'యూనిట్ పేరు ఖాళీగా ఉండకూడదు';
 }

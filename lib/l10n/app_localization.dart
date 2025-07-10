@@ -725,13 +725,13 @@ abstract class AppLocalizations {
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'LogOut'**
+  /// **'Logout'**
   String get logout;
 
   /// No description provided for @regionalHead.
   ///
   /// In en, this message translates to:
-  /// **'Regional Head'**
+  /// **'Regional Head   '**
   String get regionalHead;
 
   /// No description provided for @karimnagar.
@@ -1021,6 +1021,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Designation'**
   String get designation;
+
+  /// No description provided for @confirmlogout.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Logout'**
+  String get confirmlogout;
+
+  /// No description provided for @areyousureyouwanttologout.
+  ///
+  /// In en, this message translates to:
+  /// **'Are You Sure You Want To Logout?'**
+  String get areyousureyouwanttologout;
+
+  /// No description provided for @cancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancel;
+
+  /// No description provided for @createincharge.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Incharge'**
+  String get createincharge;
+
+  /// No description provided for @nousersfoundinthisunit.
+  ///
+  /// In en, this message translates to:
+  /// **'No Users Found In This Unit'**
+  String get nousersfoundinthisunit;
+
+  /// No description provided for @ustomerformsofunit.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Forms of Unit'**
+  String get ustomerformsofunit;
+
+  /// No description provided for @aadhaarnumber.
+  ///
+  /// In en, this message translates to:
+  /// **'AadhaarNumber'**
+  String get aadhaarnumber;
+
+  /// No description provided for @invalidaadhaarnumber.
+  ///
+  /// In en, this message translates to:
+  /// **'InvalidAadhaarNumber'**
+  String get invalidaadhaarnumber;
+
+  /// No description provided for @pleaseenteraadhaarnumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter Aadhaar Number'**
+  String get pleaseenteraadhaarnumber;
+
+  /// No description provided for @enteravalidunitname.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter A Valid Unitname'**
+  String get enteravalidunitname;
+
+  /// No description provided for @enteravalidphonenumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter A Valid Phone Number'**
+  String get enteravalidphonenumber;
+
+  /// No description provided for @enteravalidemail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter A Valid Email'**
+  String get enteravalidemail;
+
+  /// No description provided for @pleaseenteravalidpassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter A Valid Password'**
+  String get pleaseenteravalidpassword;
+
+  /// No description provided for @unitnamecantbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit Name Can\'t Be Empty'**
+  String get unitnamecantbeempty;
 }
 
 class _AppLocalizationsDelegate
