@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:finalsalesrep/circulationhead/regionheadunits.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -65,19 +66,23 @@ class _CirculationHeadState extends State<CirculationHead> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         actions: [
           GestureDetector(
             onTap: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => const agentProfile()));
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const agentProfile()),
+              );
             },
             child: Icon(
               Icons.person,
               size: MediaQuery.of(context).size.height / 16,
+              color: Colors.white,
             ),
           )
         ],
@@ -87,60 +92,86 @@ class _CirculationHeadState extends State<CirculationHead> {
           style: TextStyle(
             fontSize: MediaQuery.of(context).size.height / 30,
             fontWeight: FontWeight.w900,
+            color: Colors.white,
           ),
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : regionalHeads.isEmpty
-              ? const Center(child: Text("No regional heads found"))
+              ? const Center(
+                  child: Text(
+                  "No regional heads found",
+                  style: TextStyle(color: Colors.black),
+                ))
               : ListView.builder(
                   itemCount: regionalHeads.length,
                   itemBuilder: (context, index) {
                     final head = regionalHeads[index];
-                    return Container(
-                      margin: const EdgeInsets.symmetric(
-                          horizontal: 12, vertical: 6),
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: Colors.amber,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.black, width: 2),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  head.name ?? "No Name",
-                                  style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18),
-                                ),
-                                Text("User ID: ${head.email ?? "N/A"}"),
-                              ]),
-                          Text(
-                            "Role: ${head.role ?? "Unknown"}",
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 16),
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                Regionheadunits(userId: head.id ?? 0),
                           ),
-                        ],
+                        );
+                      },
+                      child: Container(
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Colors.black, width: 2),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    head.name ?? "No Name",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  Text(
+                                    "User ID: ${head.email ?? "N/A"}",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ]),
+                            Text(
+                              "Role: ${head.role ?? "Unknown"}",
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 16,
+                                  color: Colors.black),
+                            ),
+                          ],
+                        ),
                       ),
                     );
                   },
                 ),
       floatingActionButton: FloatingActionButton.extended(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         onPressed: () async {
           await Navigator.push(
             context,
             MaterialPageRoute(
-                builder: (context) => const createregionalhead()),
+              builder: (context) => const createregionalhead(),
+            ),
           );
-          fetchRegionalHeads(); // Refresh after user creation
+          fetchRegionalHeads(); // Refresh list
         },
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: Colors.black),
         label: const Text("Create Regional Head"),
       ),
     );
