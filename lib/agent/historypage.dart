@@ -1,6 +1,9 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
+import 'package:provider/provider.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({super.key});
@@ -44,9 +47,11 @@ class _HistorypageState extends State<Historypage> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Total History (${_records.length})"),
+        title: Text('${localizations.totalhistory} (${_records.length})'),
         flexibleSpace: Container(
           color: Colors.white,
         ),
@@ -65,12 +70,12 @@ class _HistorypageState extends State<Historypage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          _buildStatEntity(
-                              "Accepted", offerAcceptedCount, Colors.green),
-                          _buildStatEntity(
-                              "Rejected", offerRejectedCount, Colors.red),
-                          _buildStatEntity("Subscribed", alreadySubscribedCount,
-                              Colors.blue),
+                          _buildStatEntity(localizations.accepted,
+                              offerAcceptedCount, Colors.green),
+                          _buildStatEntity(localizations.rejected,
+                              offerRejectedCount, Colors.red),
+                          _buildStatEntity(localizations.subscribed,
+                              alreadySubscribedCount, Colors.blue),
                         ],
                       ),
                     ),

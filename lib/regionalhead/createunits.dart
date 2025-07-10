@@ -237,8 +237,8 @@ class _createunitsState extends State<Createincharge> {
                   },
                 ),
 
-                const SizedBox(height: 10),
-                const Align(
+                SizedBox(height: 10),
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(localizations.uploadAadharPhoto,
                       style:
@@ -281,7 +281,7 @@ class _createunitsState extends State<Createincharge> {
                 ),
 
                 const SizedBox(height: 10),
-                const Align(
+                Align(
                   alignment: Alignment.centerLeft,
                   child: Text(localizations.uploadPanCardPhoto,
                       style:

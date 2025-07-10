@@ -528,4 +528,16 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get unitnamecantbeempty => 'యూనిట్ పేరు ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get totalhistory => 'టోటల్ హిస్టరీ';
+
+  @override
+  String get accepted => 'ఆమోదించబడింది ';
+
+  @override
+  String get rejected => 'తిరస్కరించబడింది';
+
+  @override
+  String get subscribed => 'చందా తీసుకున్నాడు';
 }
