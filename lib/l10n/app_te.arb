@@ -9,6 +9,9 @@
   "name": "పేరు",
   "date": "తేదీ",
   "eenadunewspaper": "ఈనాడు దినపత్రిక : ",
+   "familyheadname": " కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు",
+   "name":"పేరు",
+
   "yes": "అవును",
   "no": "కాదు",
   "feedbacktoimprovepaper": "ఈనాడు పేపర్‌ని మెరుగుపరచడానికి అభిప్రాయం",
@@ -133,7 +136,56 @@
    "entervalidemail":"సరైన ఇమెయిల్‌ను నమోదు చేయండి",
    "entervalidpassword":"సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి",
    "addressCantBeEmpty":"చిరునామా ఖాళీగా ఉండకూడదు",
-   "invalidAadhaar":" చెల్లని ఆధార్"
+   "invalidAadhaar":" చెల్లని ఆధార్",
+   "enterpannumber":"పాన్ నంబర్‌ను నమోదు చేయండి",
+    "aadhaarmustbe12digits":"ఆధార్ సంఖ్య 12 అంకెలు ఉండాలి",
+    "invalidpannumber":"చెల్లని పాన్ నంబర్",
+  "panmustbelikeABCDE1234F":"పాన్ ఫార్మాట్ ABCDE1234F లాగా ఉండాలి",
+  "fathersnamecannotbeempty":"తండ్రి పేరు ఖాళీగా ఉండకూడదు",
+   "mothersnamecannotbeempty":"తల్లి పేరు ఖాళీగా ఉండకూడదు",
+   "spousenamecannotbeempty":" భర్త లేదా భార్య పేరు ఖాళీగా ఉండకూడదు ",
+  "housenumbercannotbeempty":" ఇల్లు నంబర్ ఖాళీగా ఉండకూడదు",
+ "streetnumbercannotbeempty":"వీధి నంబర్ ఖాళీగా ఉండకూడదు",
+ "citycannotbeempty":"నగరం ఖాళీగా ఉండకూడదు",
+  "pincodecannotbeempty":"పిన్‌కోడ్ ఖాళీగా ఉండకూడదు",
+  "placecannotbeempty":"   ప్రదేశం ఖాళీగా ఉండకూడదు",
+  "landmark":" ల్యాండ్‌మార్క్/సూచిక ప్రదేశం",
+  "landmarkcannotbeempty":"  ల్యాండ్‌మార్క్/సూచిక ప్రదేశం ఖాళీగా ఉండకూడదు",
+   "mobilenumbercannotbeempty":"మొబైల్ నంబర్ ఖాళీగా ఉండకూడదు "   ,
+   "yes":"అవును",
+   "no":"కాదు",
+  "feedbackcannotbeempty":"ఫీడ్‌బ్యాక్ ఖాళీగా ఉండకూడదు",
+    "currentnewspapercannotbeempty":"  ప్రస్తుత పత్రిక ఖాళీగా ఉండకూడదు",
+      "reasonfornottakingcannotbeempty":"  తీసుకోకపోవడానికి కారణం ఖాళీగా ఉండకూడదు",
+  "reasonfornotreadingcannotbeempty":"చదవకపోవడానికి  కారణం ఖాళీగా  ఉండకూడదు",
+  "fieldcannotbeempty":"ఫీల్డ్ ఖాళీగా ఉండకూడదు",
+  "governmentjob":"ప్రభుత్వ ఉద్యోగం",
+  "selectdepartment":"శాఖను ఎంచుకోండి",
+  "centraljob":"కేంద్ర ప్రభుత్వ ఉద్యోగం",
+  "jobdesignation":"ఉద్యోగ పదవి",
+  "jobdepartment":"ఉద్యోగ శాఖ ",
+  "psupublicsectorundertaking":"ప్రభుత్వ రంగ సంస్థ",
+  "statejob":"స్టేట్ ప్రభుత్వ ఉద్యోగం",
+  "privatejob":"ప్రైవేట్ ఉద్యోగం",
+  "designation":"పదవి",
+"mobilenumber":"  మొబైల్ నంబర్"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

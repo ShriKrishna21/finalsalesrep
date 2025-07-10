@@ -285,7 +285,7 @@ class _CoustmerState extends State<Coustmer> {
         backgroundColor: Colors.white,
         title: Text(
           localizations.customerform,
-          style: TextStyle(
+          style: const TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
           ),
@@ -328,7 +328,7 @@ class _CoustmerState extends State<Coustmer> {
 
                 const SizedBox(height: 15),
                 Text(localizations.familyDetails,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
@@ -336,27 +336,27 @@ class _CoustmerState extends State<Coustmer> {
                 textformfeild(
                     controller: familyhead,
                     label: localizations.name,
-                    hunttext: "family head name cannot be empty"),
+                    hunttext: localizations.familyheadname),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: fathersname,
                     label: localizations.fathersname,
-                    hunttext: "fathers name cannot be empty"),
+                    hunttext: localizations.fathersnamecannotbeempty),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: mothername,
                     label: localizations.mothername,
-                    hunttext: "mothers name cannot be empty"),
+                    hunttext: localizations.mothersnamecannotbeempty),
                 const SizedBox(height: 10),
                 textformfeild(
                     controller: spousename,
                     label: localizations.spousename,
-                    hunttext: "spouse name cannot be empty "),
+                    hunttext: localizations.spousenamecannotbeempty),
                 const SizedBox(height: 10),
 
                 const SizedBox(height: 15),
                 Text(localizations.addressDetails,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
@@ -367,7 +367,7 @@ class _CoustmerState extends State<Coustmer> {
                         child: textformfeild(
                             controller: hno,
                             label: localizations.houseNumber,
-                            hunttext: "house number   cannot be empty",
+                            hunttext: localizations.housenumbercannotbeempty,
                             keyboardType: TextInputType.text)),
                     const SizedBox(
                       width: 10,
@@ -375,7 +375,7 @@ class _CoustmerState extends State<Coustmer> {
                     Expanded(
                         child: textformfeild(
                             controller: streetnumber,
-                            hunttext: "street number cannot be empty",
+                            hunttext: localizations.streetnumbercannotbeempty,
                             label: localizations.streetNo,
                             keyboardType: TextInputType.number)),
                   ],
@@ -385,7 +385,7 @@ class _CoustmerState extends State<Coustmer> {
                   children: [
                     Expanded(
                         child: textformfeild(
-                            hunttext: "city cannot be empty",
+                            hunttext: localizations.citycannotbeempty,
                             controller: city,
                             label: localizations.city,
                             keyboardType: TextInputType.text)),
@@ -394,7 +394,7 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                     Expanded(
                         child: textformfeild(
-                            hunttext: "pincode cannot be empty",
+                            hunttext: localizations.pincodecannotbeempty,
                             maxvalue: 6,
                             controller: pincode,
                             // textForCounter: "",
@@ -414,7 +414,7 @@ class _CoustmerState extends State<Coustmer> {
                 textformfeild(
                   controller: TextEditingController(text: street),
                   label: localizations.streetNo,
-                  hunttext: "Place Cannot Be Empty",
+                  hunttext: localizations.placecannotbeempty,
                   need: true,
                 ),
                 const SizedBox(
@@ -422,15 +422,15 @@ class _CoustmerState extends State<Coustmer> {
                 ),
                 textformfeild(
                     controller: TextEditingController(text: landmark),
-                    label: "LandMark",
-                    hunttext: "LandMark Cannot Be Empty",
+                    label: localizations.landmark,
+                    hunttext: localizations.landmarkcannotbeempty,
                     need: true),
 
                 // const SizedBox(height: 10),
                 // textformfeild(controller: adddress, label: "Address"),
                 const SizedBox(height: 10),
                 textformfeild(
-                    hunttext: "mobile number cannot empty",
+                    hunttext: localizations.mobilenumbercannotbeempty,
                     controller: mobile,
                     maxvalue: 10,
                     label: localizations.mobilenumber,
@@ -438,7 +438,7 @@ class _CoustmerState extends State<Coustmer> {
 
                 const SizedBox(height: 15),
                 Text(localizations.newsPaperDetails,
-                    style: TextStyle(
+                    style: const TextStyle(
                         color: Colors.black,
                         fontSize: 18,
                         fontWeight: FontWeight.bold)),
@@ -448,10 +448,10 @@ class _CoustmerState extends State<Coustmer> {
                   children: [
                     Expanded(
                       child: Text(localizations.eenadunewspaper,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
-                    Text(_isYes ? "Yes" : "No",
+                    Text(_isYes ? localizations.yes : localizations.no,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -475,7 +475,7 @@ class _CoustmerState extends State<Coustmer> {
                 ),
                 if (_isYes)
                   textformfeild(
-                      hunttext: "feedback cannot be empty",
+                      hunttext: localizations.feedbackcannotbeempty,
                       controller: feedback_to_improve,
                       label: localizations.feedbacktoimprovepaper),
 
@@ -484,10 +484,13 @@ class _CoustmerState extends State<Coustmer> {
                     children: [
                       Expanded(
                         child: Text(localizations.readnewspaper,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-                      Text(_isAnotherToggle ? "Yes" : "No",
+                      Text(
+                          _isAnotherToggle
+                              ? localizations.yes
+                              : localizations.no,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -508,27 +511,28 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   if (_isAnotherToggle)
                     textformfeild(
-                        hunttext: "current news paper cannot be empty",
+                        hunttext: localizations.currentnewspapercannotbeempty,
                         controller: current_newspaper,
                         label: localizations.currentnewpaper),
                   if (_isAnotherToggle)
                     textformfeild(
-                        hunttext: "reason for not talking cannot be empty",
+                        hunttext: localizations.reasonfornottakingcannotbeempty,
                         controller: reason_for_not_taking_eenadu,
                         label: localizations.reasonfornottakingeenadunewspaper),
                   if (!_isAnotherToggle)
                     textformfeild(
-                        hunttext: "reason for not reading cannot be empty",
+                        hunttext:
+                            localizations.reasonfornotreadingcannotbeempty,
                         controller: reason_for_not_reading,
                         label: localizations.reasonfornotreadingnewspaper),
                   Row(
                     children: [
                       Expanded(
                         child: Text(localizations.daysOfferRejected15,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-                      Text(_isofferTogle ? "Yes" : "No",
+                      Text(_isofferTogle ? localizations.yes : localizations.no,
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -549,7 +553,7 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   if (!_isofferTogle)
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: reason_for_not_taking_offer,
                         label: localizations.reasonfornottakingoffer),
                   const SizedBox(
@@ -565,10 +569,10 @@ class _CoustmerState extends State<Coustmer> {
                   children: [
                     Expanded(
                       child: Text(localizations.employed,
-                          style: TextStyle(
+                          style: const TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold)),
                     ),
-                    Text(_isemployed ? "Yes" : "No",
+                    Text(_isemployed ? localizations.yes : localizations.no,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -622,13 +626,13 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   ),
 
-                if (_selectedJobType == "government_job") ...[
+                if (_selectedJobType == localizations.governmentjob) ...[
                   const SizedBox(
                     height: 20,
                   ),
                   DropdownButtonFormField<String>(
                     value: _selectedGovDepartment,
-                    hint: const Text("Select Department"),
+                    hint: Text(localizations.selectdepartment),
                     isExpanded: true,
                     items: govDepartments.map((String dept) {
                       return DropdownMenuItem<String>(
@@ -649,76 +653,77 @@ class _CoustmerState extends State<Coustmer> {
                   ),
 
                   // Show additional fields based on selection
-                  if (_selectedGovDepartment == "central_job") ...[
+                  if (_selectedGovDepartment == localizations.centraljob) ...[
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_designation,
-                        label: " Job Designation"),
+                        label: localizations.jobdesignation),
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_proffesion,
-                        label: " Job Department"),
+                        label: localizations.jobdepartment),
                   ],
 
-                  if (_selectedGovDepartment == "PSU") ...[
+                  if (_selectedGovDepartment ==
+                      localizations.psupublicsectorundertaking) ...[
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_designation,
-                        label: " Job Designation"),
+                        label: localizations.jobdesignation),
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_proffesion,
-                        label: " Job Department"),
+                        label: localizations.jobdepartment),
                   ],
 
-                  if (_selectedGovDepartment == "state_job") ...[
+                  if (_selectedGovDepartment == localizations.statejob) ...[
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_designation,
-                        label: " Job Designation"),
+                        label: localizations.jobdesignation),
                     const SizedBox(
                       height: 10,
                     ),
                     textformfeild(
-                        hunttext: "feild cannot be empty",
+                        hunttext: localizations.fieldcannotbeempty,
                         controller: job_proffesion,
-                        label: " Job Department"),
+                        label: localizations.jobdepartment),
                   ],
                 ],
 
                 // Private job details
 
-                if (_selectedJobType == "private_job") ...[
+                if (_selectedJobType == localizations.privatejob) ...[
                   const SizedBox(
                     height: 10,
                   ),
                   textformfeild(
-                      hunttext: "feild cannot be empty",
+                      hunttext: localizations.fieldcannotbeempty,
                       controller: privateCompanyController,
                       label: localizations.companyname),
                   const SizedBox(height: 10),
                   textformfeild(
-                      hunttext: "feild cannot be empty",
+                      hunttext: localizations.fieldcannotbeempty,
                       controller: privatedesignationController,
-                      label: "Designation "),
+                      label: localizations.designation),
                   const SizedBox(height: 10),
                   textformfeild(
-                      hunttext: "feild cannot be empty",
+                      hunttext: localizations.fieldcannotbeempty,
                       controller: privateProffesionController,
                       label: localizations.profession),
                 ],

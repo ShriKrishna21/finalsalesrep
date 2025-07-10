@@ -18,7 +18,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get customerform => 'Customer Form';
 
   @override
-  String get name => 'Family Head Name';
+  String get familyheadname => 'Family Head Name';
+
+  @override
+  String get name => 'Name';
 
   @override
   String get date => 'Date';
@@ -68,10 +71,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobtype => 'Job Type';
 
   @override
-  String get governmentjob => 'Government Job';
+  String get governmentjob => 'Government job';
 
   @override
-  String get privatejob => 'Private Job';
+  String get privatejob => 'Private job';
 
   @override
   String get profession => 'Profession';
@@ -80,10 +83,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get govtjobtype => 'Govt Job Type';
 
   @override
-  String get centraljob => 'Central Job';
+  String get centraljob => 'Central job';
 
   @override
-  String get statejob => 'State Job';
+  String get statejob => 'State job';
 
   @override
   String get jobprofession => 'Job Profession';
@@ -107,7 +110,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get address => 'Address';
 
   @override
-  String get mobilenumber => 'Mobile number';
+  String get mobilenumber => 'Mobile Number';
 
   @override
   String get submit => 'Submit';
@@ -400,4 +403,79 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidAadhaar => 'Invalid Aadhaar';
+
+  @override
+  String get enterpannumber => 'Enter PAN Number';
+
+  @override
+  String get aadhaarmustbe12digits => 'Aadhaar must be 12 digits';
+
+  @override
+  String get invalidpannumber => 'Invalid PAN Number';
+
+  @override
+  String get panmustbelikeABCDE1234F => 'PAN Must Be Like ABCDE1234F';
+
+  @override
+  String get fathersnamecannotbeempty => 'Father\'s Name Cannot Be Empty';
+
+  @override
+  String get mothersnamecannotbeempty => 'Mother\'s Name Cannot Be Empty';
+
+  @override
+  String get spousenamecannotbeempty => 'Spouse Name Cannot Be Empty ';
+
+  @override
+  String get housenumbercannotbeempty => 'House Number Cannot Be Empty';
+
+  @override
+  String get streetnumbercannotbeempty => 'Street Number Cannot Be Empty';
+
+  @override
+  String get citycannotbeempty => ' City Cannot Be Empty ';
+
+  @override
+  String get pincodecannotbeempty => 'PinCode Cannot Be Empty';
+
+  @override
+  String get placecannotbeempty => 'Place Cannot Be Empty';
+
+  @override
+  String get landmark => 'Landmark ';
+
+  @override
+  String get landmarkcannotbeempty => 'landMarkCannotBeEmpty';
+
+  @override
+  String get mobilenumbercannotbeempty => 'Mobile Number Cannot Be Empty';
+
+  @override
+  String get feedbackcannotbeempty => 'Feedback Cannot Be Empty';
+
+  @override
+  String get currentnewspapercannotbeempty =>
+      'Current Newspaper Cannot Be Empty';
+
+  @override
+  String get reasonfornottakingcannotbeempty =>
+      'Reason For Not Taking Cannot Be Empty';
+
+  @override
+  String get reasonfornotreadingcannotbeempty =>
+      'Reason For Not Reading Cannot Be Empty';
+
+  @override
+  String get fieldcannotbeempty => 'Field cannot be empty';
+
+  @override
+  String get selectdepartment => 'Select Department';
+
+  @override
+  String get jobdepartment => 'Job Department';
+
+  @override
+  String get psupublicsectorundertaking => 'PSU / Public Sector Undertaking';
+
+  @override
+  String get designation => 'Designation';
 }

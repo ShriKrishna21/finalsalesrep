@@ -150,44 +150,44 @@ class _CreateAgentState extends State<CreateAgent> {
                 usercredentials(
                     controller: name,
                     hintText: localizations.name,
-                    errorText: "Enter a valid name"),
+                    errorText: localizations.enteravalidname),
                 usercredentials(
                     controller: unit,
                     hintText: localizations.unit1,
-                    errorText: "Unit not found",
+                    errorText: localizations.unitnotfound,
                     readOnly: true),
                 usercredentials(
                     controller: phone,
                     hintText: localizations.phone,
-                    errorText: "Enter valid phone",
+                    errorText: localizations.entervalidphone,
                     keyboardType: TextInputType.phone,
                     maxvalue: 10),
                 usercredentials(
                     controller: mail,
                     hintText: localizations.email,
-                    errorText: "Enter valid email",
+                    errorText: localizations.entervalidemail,
                     keyboardType: TextInputType.emailAddress),
                 usercredentials(
                     controller: password,
                     hintText: localizations.password,
-                    errorText: "Enter valid password",
+                    errorText: localizations.entervalidpassword,
                     keyboardType: TextInputType.visiblePassword),
                 usercredentials(
                     controller: state,
                     hintText: localizations.address,
-                    errorText: "Address can't be empty"),
+                    errorText: localizations.addressCantBeEmpty),
                 usercredentials(
                   controller: adhar,
                   hintText: localizations.aadhar,
-                  errorText: "Invalid Aadhaar",
+                  errorText: localizations.invalidAadhaar,
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
                     if (value == null || value.isEmpty)
-                      return "Enter Aadhaar number";
+                      return localizations.invalidAadhaar;
                     return RegExp(r'^\d{12}$').hasMatch(value)
                         ? null
-                        : "Aadhaar must be 12 digits";
+                        : localizations.aadhaarmustbe12digits;
                   },
                 ),
                 const SizedBox(height: 10),
@@ -197,15 +197,15 @@ class _CreateAgentState extends State<CreateAgent> {
                 usercredentials(
                   controller: pan,
                   hintText: localizations.panNumber,
-                  errorText: "Invalid PAN Number",
+                  errorText: localizations.invalidpannumber,
                   maxvalue: 10,
                   validator: (value) {
                     if (value == null || value.isEmpty)
-                      return "Enter PAN number";
+                      return localizations.enterpannumber;
                     return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
                             .hasMatch(value.toUpperCase())
                         ? null
-                        : "PAN must be like ABCDE1234F";
+                        : localizations.panmustbelikeABCDE1234F;
                   },
                 ),
                 uploadImageLabel(localizations.uploadPanCardPhoto),
