@@ -1105,6 +1105,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unit Name Can\'t Be Empty'**
   String get unitnamecantbeempty;
+
+  /// No description provided for @totalhistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Total History'**
+  String get totalhistory;
+
+  /// No description provided for @accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get accepted;
+
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// No description provided for @subscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed'**
+  String get subscribed;
 }
 
 class _AppLocalizationsDelegate

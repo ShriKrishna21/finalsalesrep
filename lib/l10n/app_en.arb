@@ -178,7 +178,11 @@
   "enteravalidemail":"Enter A Valid Email",
   "pleaseenteravalidpassword":"Please Enter A Valid Password",
    "enteravalidunitname":"Please Enter A Valid Unitname",
-   "unitnamecantbeempty":"Unit Name Can't Be Empty"
+   "unitnamecantbeempty":"Unit Name Can't Be Empty",
+   "totalhistory":"Total History",
+   "accepted":"Accepted",
+   "rejected":"Rejected",
+   "subscribed":"Subscribed"
 
 
 

@@ -520,4 +520,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unitnamecantbeempty => 'Unit Name Can\'t Be Empty';
+
+  @override
+  String get totalhistory => 'Total History';
+
+  @override
+  String get accepted => 'Accepted';
+
+  @override
+  String get rejected => 'Rejected';
+
+  @override
+  String get subscribed => 'Subscribed';
 }

@@ -186,7 +186,13 @@
     "enteravalidphonenumber":"  సరైన ఫోన్ నంబరును నమోదు చేయండి",
   "pleaseenteravalidpassword":"దయచేసి సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి",
   "enteravalidunitname":"  సరైన యూనిట్ పేరును నమోదు చేయండి",
-    "unitnamecantbeempty":"యూనిట్ పేరు ఖాళీగా ఉండకూడదు"
+    "unitnamecantbeempty":"యూనిట్ పేరు ఖాళీగా ఉండకూడదు",
+       "totalhistory":"టోటల్ హిస్టరీ", 
+        "accepted":"ఆమోదించబడింది ",
+   "rejected":"తిరస్కరించబడింది",
+   "subscribed":"చందా తీసుకున్నాడు"
+
+
 
 
 
