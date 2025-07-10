@@ -55,7 +55,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
         ],
         title: RichText(
           text: TextSpan(
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
               color: Colors.black,
@@ -64,7 +64,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
               TextSpan(text: localizations.office1staff),
               TextSpan(
                 text: "\n${localizations.unitName}",
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 14,
                   color: Colors.black,
                   fontWeight: FontWeight.normal,
@@ -103,7 +103,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
           children: [
             Text(
               localizations.officestaffdashboard,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.black,
@@ -116,14 +116,14 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
               child: ListTile(
                 leading: const Icon(Icons.assignment, color: Colors.black),
                 title: Text(localizations.viewcreatedagents,
-                    style: TextStyle(color: Colors.black)),
+                    style: const TextStyle(color: Colors.black)),
                 trailing: const Icon(Icons.arrow_forward_ios,
                     size: 16, color: Colors.grey),
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                        builder: (context) => Viewcreatedagents()),
+                        builder: (context) => const Viewcreatedagents()),
                   );
                 },
               ),

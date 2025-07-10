@@ -1,6 +1,3 @@
-import 'package:finalsalesrep/total_history.dart';
-import 'package:flutter/widgets.dart';
-
 class CommonApiClass {
   // ✅ Fixed: Removed trailing slash to avoid `//` in final URLs
   static String subDomain = "https://salesrep.esanchaya.com";
@@ -27,7 +24,8 @@ class CommonApiClass {
   static String oneDayAgent = "$subDomain/api/customer_forms_info_one_day";
 
   // Particular Agent Customer Forms Service
-  static String ParticularAgentCustomerFormsService = "$subDomain/api/customer_forms_info_id";
+  static String ParticularAgentCustomerFormsService =
+      "$subDomain/api/customer_forms_info_id";
 
   // Login Screen API
   static String Loginscreen = "$subDomain/web/session/authenticate";
@@ -44,12 +42,7 @@ class CommonApiClass {
   // Circulation Incharge Screen
   static String Circulationinchargescreen = "$subDomain/api/users_you_created";
 
-  
-  static String  agentUnitWise = "$subDomain/api/agents_info_based_on_the_unit";
+  static String agentUnitWise = "$subDomain/api/agents_info_based_on_the_unit";
 
-  static String  approveagent = "$subDomain/update/status";
+  static String approveagent = "$subDomain/update/status";
 }
-
-
-  
-

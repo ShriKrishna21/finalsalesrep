@@ -183,8 +183,9 @@ class _CreateAgentState extends State<CreateAgent> {
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return localizations.invalidAadhaar;
+                    }
                     return RegExp(r'^\d{12}$').hasMatch(value)
                         ? null
                         : localizations.aadhaarmustbe12digits;
@@ -200,8 +201,9 @@ class _CreateAgentState extends State<CreateAgent> {
                   errorText: localizations.invalidpannumber,
                   maxvalue: 10,
                   validator: (value) {
-                    if (value == null || value.isEmpty)
+                    if (value == null || value.isEmpty) {
                       return localizations.enterpannumber;
+                    }
                     return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
                             .hasMatch(value.toUpperCase())
                         ? null
@@ -259,7 +261,7 @@ class _CreateAgentState extends State<CreateAgent> {
             ? Image.file(image, fit: BoxFit.cover)
             : Center(
                 child: Text(AppLocalizations.of(context)!.taptoselectimage,
-                    style: TextStyle(color: Colors.black)),
+                    style: const TextStyle(color: Colors.black)),
               ),
       ),
     );
@@ -276,6 +278,7 @@ class usercredentials extends StatelessWidget {
   final bool readOnly;
 
   const usercredentials({
+    super.key,
     required this.controller,
     required this.hintText,
     required this.errorText,
@@ -305,10 +308,10 @@ class usercredentials extends StatelessWidget {
           counterStyle: const TextStyle(color: Colors.black54),
           contentPadding:
               const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.black)),
-          focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.black, width: 2)),
+          enabledBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black)),
+          focusedBorder: const OutlineInputBorder(
+              borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );

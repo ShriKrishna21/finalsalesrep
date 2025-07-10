@@ -76,9 +76,8 @@ class _LoginscreenState extends State<Loginscreen> {
 
         final setCookie = response.headers['set-cookie'];
         if (setCookie != null) {
-          final sessionId = RegExp(r'session_id=([^;]+)')
-              .firstMatch(setCookie)
-              ?.group(1);
+          final sessionId =
+              RegExp(r'session_id=([^;]+)').firstMatch(setCookie)?.group(1);
           if (sessionId != null) {
             await prefs.setString('session_id', sessionId);
             print('✅ Saved session_id: $sessionId');
@@ -86,7 +85,7 @@ class _LoginscreenState extends State<Loginscreen> {
         }
 
         if (_loginData!.result!.code == "200") {
-          print("${_loginData!.result!.target ?? "0"}");
+          print(_loginData!.result!.target ?? "0");
           await prefs.setString('apikey', _loginData!.result!.apiKey ?? '');
           await prefs.setString('name', _loginData!.result!.name ?? '');
           await prefs.setString('unit', _loginData!.result!.unit ?? '');
@@ -104,25 +103,25 @@ class _LoginscreenState extends State<Loginscreen> {
               screen = const Adminscreen();
               break;
             case "Office_staff":
-              screen = OfficeStaffScreen();
+              screen = const OfficeStaffScreen();
               break;
             case "agent":
-              screen = Agentscreen();
+              screen = const Agentscreen();
               break;
             case "unit_manager":
               screen = const Unitmanagerscreen();
               break;
             case "circulation_incharge":
-              screen = Circulationinchargescreen();
+              screen = const Circulationinchargescreen();
               break;
             case "segment_incharge":
-              screen = Segmentinchargescreen();
+              screen = const Segmentinchargescreen();
               break;
             case "region_head":
-              screen = Reginoalheadscreen();
+              screen = const Reginoalheadscreen();
               break;
             case "circulation_head":
-              screen = CirculationHead();
+              screen = const CirculationHead();
               break;
             default:
               ScaffoldMessenger.of(context).showSnackBar(
@@ -138,7 +137,8 @@ class _LoginscreenState extends State<Loginscreen> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Login failed: ${_loginData!.result!.code}")),
+            SnackBar(
+                content: Text("Login failed: ${_loginData!.result!.code}")),
           );
         }
       } else {
@@ -232,7 +232,8 @@ class _LoginscreenState extends State<Loginscreen> {
                           await loginUser();
                         }
                       },
-                      child: const Text("LOGIN", style: TextStyle(fontSize: 18)),
+                      child:
+                          const Text("LOGIN", style: TextStyle(fontSize: 18)),
                     ),
                   ],
                 ),

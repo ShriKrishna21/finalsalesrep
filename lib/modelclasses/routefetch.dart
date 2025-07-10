@@ -1,6 +1,6 @@
 class routefetch {
   String? jsonrpc;
-  Null? id;
+  Null id;
   Result? result;
 
   routefetch({this.jsonrpc, this.id, this.result});
@@ -8,16 +8,15 @@ class routefetch {
   routefetch.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -33,17 +32,16 @@ class Result {
   Result.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     success = json['success'];
-    rootMap = json['root_map'] != null
-        ? new RootMap.fromJson(json['root_map'])
-        : null;
+    rootMap =
+        json['root_map'] != null ? RootMap.fromJson(json['root_map']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['success'] = this.success;
-    if (this.rootMap != null) {
-      data['root_map'] = this.rootMap!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['success'] = success;
+    if (rootMap != null) {
+      data['root_map'] = rootMap!.toJson();
     }
     return data;
   }
@@ -61,9 +59,9 @@ class RootMap {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
     return data;
   }
 }

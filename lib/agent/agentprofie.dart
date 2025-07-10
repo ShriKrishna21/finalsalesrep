@@ -95,7 +95,7 @@ class _agentProfileState extends State<agentProfile> {
         backgroundColor: Colors.white,
         title: Text(
           Localizations.myProfile,
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
       body: Column(

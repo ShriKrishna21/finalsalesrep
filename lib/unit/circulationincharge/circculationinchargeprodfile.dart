@@ -10,10 +10,12 @@ class circulationinchargeprofile extends StatefulWidget {
   const circulationinchargeprofile({super.key});
 
   @override
-  State<circulationinchargeprofile> createState() => _circulationinchargeprofileState();
+  State<circulationinchargeprofile> createState() =>
+      _circulationinchargeprofileState();
 }
 
-class _circulationinchargeprofileState extends State<circulationinchargeprofile> {
+class _circulationinchargeprofileState
+    extends State<circulationinchargeprofile> {
   String? agentname;
   String? unitname;
   String? jobrole;
@@ -48,7 +50,7 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
         Navigator.pushReplacement(
             context,
             MaterialPageRoute(
-              builder: (context) => Loginscreen(),
+              builder: (context) => const Loginscreen(),
             ));
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -143,17 +145,21 @@ class _circulationinchargeprofileState extends State<circulationinchargeprofile>
                     builder: (BuildContext context) {
                       return AlertDialog(
                         backgroundColor: Colors.white,
-                        title: const Text("Confirm Logout", style: TextStyle(color: Colors.black)),
-                        content: const Text("Are you sure you want to logout?", style: TextStyle(color: Colors.black)),
+                        title: const Text("Confirm Logout",
+                            style: TextStyle(color: Colors.black)),
+                        content: const Text("Are you sure you want to logout?",
+                            style: TextStyle(color: Colors.black)),
                         actions: [
                           TextButton(
-                            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
+                            child: const Text("Cancel",
+                                style: TextStyle(color: Colors.black)),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                           ),
                           TextButton(
-                            child: const Text("Logout", style: TextStyle(color: Colors.black)),
+                            child: const Text("Logout",
+                                style: TextStyle(color: Colors.black)),
                             onPressed: () {
                               Navigator.of(context).pop();
                               agentLogout();
@@ -200,13 +206,18 @@ class profileitem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Expanded(child: Text(title, style: const TextStyle(fontSize: 16, color: Colors.black))),
+          Expanded(
+              child: Text(title,
+                  style: const TextStyle(fontSize: 16, color: Colors.black))),
           const Text(":", style: TextStyle(fontSize: 16, color: Colors.black)),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+              style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black),
               overflow: TextOverflow.ellipsis,
             ),
           ),

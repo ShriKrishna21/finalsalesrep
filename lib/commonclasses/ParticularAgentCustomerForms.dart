@@ -40,7 +40,7 @@ class ParticularAgentCustomerFormsService {
         final recordCount = result.result?.records?.length ?? 0;
         await prefs.setInt('record_count', recordCount);
 
-        print("Fetched ${recordCount} customer forms.");
+        print("Fetched $recordCount customer forms.");
         return result;
       } else {
         print("API Error: ${response.statusCode}");

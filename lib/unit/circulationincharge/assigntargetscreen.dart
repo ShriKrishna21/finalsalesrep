@@ -4,7 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AssignRouteScreen extends StatefulWidget {
-  const AssignRouteScreen({Key? key}) : super(key: key);
+  const AssignRouteScreen({super.key});
 
   @override
   State<AssignRouteScreen> createState() => _AssignRouteScreenState();
@@ -73,7 +73,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
         "params": {
           "user_id": _agentIdController.text.trim(),
           "token": token,
-          "target": int.parse(_assignTargetController.text.trim()), // Ensure int type
+          "target":
+              int.parse(_assignTargetController.text.trim()), // Ensure int type
         }
       }),
     );
@@ -98,7 +99,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
 
       if (routeSuccess && targetSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Route and Target assigned successfully')),
+          const SnackBar(
+              content: Text('Route and Target assigned successfully')),
         );
         Navigator.of(context).pop();
       } else if (!routeSuccess && !targetSuccess) {

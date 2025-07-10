@@ -1,6 +1,6 @@
 class unitwiseagent {
   String? jsonrpc;
-  Null? id;
+  Null id;
   Result? result;
 
   unitwiseagent({this.jsonrpc, this.id, this.result});
@@ -8,16 +8,15 @@ class unitwiseagent {
   unitwiseagent.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -34,16 +33,16 @@ class Result {
     if (json['users'] != null) {
       users = <Users>[];
       json['users'].forEach((v) {
-        users!.add(new Users.fromJson(v));
+        users!.add(Users.fromJson(v));
       });
     }
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    if (this.users != null) {
-      data['users'] = this.users!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    if (users != null) {
+      data['users'] = users!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -93,19 +92,19 @@ class Users {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['name'] = this.name;
-    data['email'] = this.email;
-    data['login'] = this.login;
-    data['create_uid'] = this.createUid;
-    data['unit_name'] = this.unitName;
-    data['phone'] = this.phone;
-    data['state'] = this.state;
-    data['pan_number'] = this.panNumber;
-    data['aadhar_number'] = this.aadharNumber;
-    data['role'] = this.role;
-    data['status'] = this.status;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['id'] = id;
+    data['name'] = name;
+    data['email'] = email;
+    data['login'] = login;
+    data['create_uid'] = createUid;
+    data['unit_name'] = unitName;
+    data['phone'] = phone;
+    data['state'] = state;
+    data['pan_number'] = panNumber;
+    data['aadhar_number'] = aadharNumber;
+    data['role'] = role;
+    data['status'] = status;
     return data;
   }
 }
