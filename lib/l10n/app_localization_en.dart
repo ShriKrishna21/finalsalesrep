@@ -327,10 +327,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobRole => 'Job Role';
 
   @override
-  String get logout => 'LogOut';
+  String get logout => 'Logout';
 
   @override
-  String get regionalHead => 'Regional Head';
+  String get regionalHead => 'Regional Head   ';
 
   @override
   String get karimnagar => 'KarimNagar';
@@ -478,4 +478,46 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designation => 'Designation';
+
+  @override
+  String get confirmlogout => 'Confirm Logout';
+
+  @override
+  String get areyousureyouwanttologout => 'Are You Sure You Want To Logout?';
+
+  @override
+  String get cancel => 'Cancel';
+
+  @override
+  String get createincharge => 'Create Incharge';
+
+  @override
+  String get nousersfoundinthisunit => 'No Users Found In This Unit';
+
+  @override
+  String get ustomerformsofunit => 'Customer Forms of Unit';
+
+  @override
+  String get aadhaarnumber => 'AadhaarNumber';
+
+  @override
+  String get invalidaadhaarnumber => 'InvalidAadhaarNumber';
+
+  @override
+  String get pleaseenteraadhaarnumber => 'Please Enter Aadhaar Number';
+
+  @override
+  String get enteravalidunitname => 'Please Enter A Valid Unitname';
+
+  @override
+  String get enteravalidphonenumber => 'Enter A Valid Phone Number';
+
+  @override
+  String get enteravalidemail => 'Enter A Valid Email';
+
+  @override
+  String get pleaseenteravalidpassword => 'Please Enter A Valid Password';
+
+  @override
+  String get unitnamecantbeempty => 'Unit Name Can\'t Be Empty';
 }
