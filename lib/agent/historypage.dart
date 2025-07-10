@@ -48,15 +48,10 @@ class _HistorypageState extends State<Historypage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Total History (${_records.length})"),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF3F51B5), Color(0xFF2196F3)],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
+       flexibleSpace: Container(
+  color: Colors.white,
+),
+
       ),
       body: _isLoading
           ? const Center(
