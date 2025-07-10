@@ -13,10 +13,10 @@ class createUserModel {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -35,8 +35,8 @@ class Result {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
-    data['success'] = this.success;
-    data['message'] = this.message;
+    data['success'] = success;
+    data['message'] = message;
     return data;
   }
 }

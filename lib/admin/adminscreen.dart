@@ -11,13 +11,11 @@ class Adminscreen extends StatefulWidget {
 class _AdminscreenState extends State<Adminscreen> {
   @override
   Widget build(BuildContext context) {
-    return  Scaffold(
+    return Scaffold(
       appBar: AppBar(
-        title: Text("admin dashboard"),
+        title: const Text("admin dashboard"),
       ),
-      body: Column(
-        
-      ),
+      body: const Column(),
     );
   }
 }

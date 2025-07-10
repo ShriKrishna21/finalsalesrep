@@ -1,6 +1,6 @@
 class Historymodel {
   String? jsonrpc;
-  Null? id;
+  Null id;
   Result? result;
 
   Historymodel({this.jsonrpc, this.id, this.result});
@@ -8,16 +8,15 @@ class Historymodel {
   Historymodel.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -34,7 +33,7 @@ class Result {
     if (json['records'] != null) {
       records = <Records>[];
       json['records'].forEach((v) {
-        records!.add(new Records.fromJson(v));
+        records!.add(Records.fromJson(v));
       });
     }
     count = json['count'];
@@ -42,12 +41,12 @@ class Result {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.records != null) {
-      data['records'] = this.records!.map((v) => v.toJson()).toList();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (records != null) {
+      data['records'] = records!.map((v) => v.toJson()).toList();
     }
-    data['count'] = this.count;
-    data['code'] = this.code;
+    data['count'] = count;
+    data['code'] = code;
     return data;
   }
 }
@@ -133,42 +132,43 @@ class Records {
 
   Records.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    agentName = json['agent_name'];
-    agentLogin = json['agent_login'];
-    unitName = json['unit_name'];
-    date = json['date'];
-    time = json['time'];
-    familyHeadName = json['family_head_name'];
-    fatherName = json['father_name'];
-    motherName = json['mother_name'];
-    spouseName = json['spouse_name'];
-    houseNumber = json['house_number'];
-    streetNumber = json['street_number'];
-    city = json['city'];
-    pinCode = json['pin_code'];
-    address = json['address'];
-    mobileNumber = json['mobile_number'];
+    agentName = _safeString(json['agent_name']);
+    agentLogin = _safeString(json['agent_login']);
+    unitName = _safeString(json['unit_name']);
+    date = _safeString(json['date']);
+    time = _safeString(json['time']);
+    familyHeadName = _safeString(json['family_head_name']);
+    fatherName = _safeString(json['father_name']);
+    motherName = _safeString(json['mother_name']);
+    spouseName = _safeString(json['spouse_name']);
+    houseNumber = _safeString(json['house_number']);
+    streetNumber = _safeString(json['street_number']);
+    city = _safeString(json['city']);
+    pinCode = _safeString(json['pin_code']);
+    address = _safeString(json['address']);
+    mobileNumber = _safeString(json['mobile_number']);
     eenaduNewspaper = _parseBool(json['eenadu_newspaper']);
-    feedbackToImproveEenaduPaper = json['feedback_to_improve_eenadu_paper'];
+    feedbackToImproveEenaduPaper =
+        _safeString(json['feedback_to_improve_eenadu_paper']);
     readNewspaper = _parseBool(json['read_newspaper']);
-    currentNewspaper = json['current_newspaper'];
+    currentNewspaper = _safeString(json['current_newspaper']);
     reasonForNotTakingEenaduNewsPaper =
-        json['reason_for_not_taking_eenadu_newsPaper'];
-    reasonNotReading = json['reason_not_reading'];
+        _safeString(json['reason_for_not_taking_eenadu_newsPaper']);
+    reasonNotReading = _safeString(json['reason_not_reading']);
     freeOffer15Days = _parseBool(json['free_offer_15_days']);
-    reasonNotTakingOffer = json['reason_not_taking_offer'];
+    reasonNotTakingOffer = _safeString(json['reason_not_taking_offer']);
     employed = _parseBool(json['employed']);
     jobType = _parseBool(json['job_type']);
     jobTypeOne = _parseBool(json['job_type_one']);
-    jobProfession = json['job_profession'];
-    jobDesignation = json['job_designation'];
-    companyName = json['company_name'];
-    profession = json['profession'];
+    jobProfession = _safeString(json['job_profession']);
+    jobDesignation = _safeString(json['job_designation']);
+    companyName = _safeString(json['company_name']);
+    profession = _safeString(json['profession']);
     jobWorkingState = _parseBool(json['job_working_state']);
     jobWorkingLocation = _parseBool(json['job_working_location']);
-    jobDesignationOne = json['job_designation_one'];
-    latitude = json['latitude'];
-    longitude = json['longitude'];
+    jobDesignationOne = _safeString(json['job_designation_one']);
+    latitude = _safeString(json['latitude']);
+    longitude = _safeString(json['longitude']);
     locationAddress = _parseBool(json['location_address']);
   }
 
@@ -215,10 +215,15 @@ class Records {
     return data;
   }
 
-  /// 🔧 Converts "true"/"false" or actual bool to bool?
+  /// 🔧 Converts "true"/"false" strings or actual bool to bool?
   bool? _parseBool(dynamic value) {
     if (value is bool) return value;
     if (value is String) return value.toLowerCase() == 'true';
     return null;
+  }
+
+  /// 🔧 Safely converts to String? (avoids assigning bool or int to String)
+  String? _safeString(dynamic value) {
+    return value is String ? value : null;
   }
 }

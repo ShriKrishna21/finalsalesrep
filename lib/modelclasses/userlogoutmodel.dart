@@ -8,16 +8,15 @@ class userlogout {
   userlogout.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -35,19 +34,19 @@ class Result {
     success = json['success'];
     message = json['message'];
     userLogin = json['user_login'] != null
-        ? new UserLogin.fromJson(json['user_login'])
+        ? UserLogin.fromJson(json['user_login'])
         : null;
     code = json['code'];
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    if (this.userLogin != null) {
-      data['user_login'] = this.userLogin!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['message'] = message;
+    if (userLogin != null) {
+      data['user_login'] = userLogin!.toJson();
     }
-    data['code'] = this.code;
+    data['code'] = code;
     return data;
   }
 }
@@ -66,10 +65,10 @@ class UserLogin {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['user_Id'] = this.userId;
-    data['user_login'] = this.userLogin;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['success'] = success;
+    data['user_Id'] = userId;
+    data['user_login'] = userLogin;
     return data;
   }
 }

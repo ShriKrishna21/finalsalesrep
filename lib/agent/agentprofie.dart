@@ -95,7 +95,7 @@ class _agentProfileState extends State<agentProfile> {
         backgroundColor: Colors.white,
         title: Text(
           Localizations.myProfile,
-          style: TextStyle(color: Colors.black),
+          style: const TextStyle(color: Colors.black),
         ),
       ),
       body: Column(
@@ -188,10 +188,8 @@ class _agentProfileState extends State<agentProfile> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-
                 child: Text(Localizations.logout,
                     style: const TextStyle(fontSize: 16, color: Colors.white)),
-
               ),
             ),
           )
