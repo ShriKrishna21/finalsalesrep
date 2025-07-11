@@ -9,7 +9,13 @@
   "name": "పేరు",
   "date": "తేదీ",
   "eenadunewspaper": "ఈనాడు దినపత్రిక : ",
-   "familyheadname": " కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు",
+   "familyheadname": " కుటుంబ అధిపతి పేరు ",
+   "familyheadnamecannotbeempty":"కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు",
+
+
+
+
+
    "name":"పేరు",
 
   "yes": "అవును",
@@ -168,7 +174,22 @@
   "statejob":"స్టేట్ ప్రభుత్వ ఉద్యోగం",
   "privatejob":"ప్రైవేట్ ఉద్యోగం",
   "designation":"పదవి",
-"mobilenumber":"  మొబైల్ నంబర్"
+"mobilenumber":"  మొబైల్ నంబర్",
+  "unitmanager":"యూనిట్ మేనేజర్",
+    "viewallcustomerforms":"అన్ని కస్టమర్ ఫారమ్‌లను వీక్షించండి",
+      "customerforms":"  కస్టమర్ ఫారమ్",
+        "nousersfound":"వినియోగదారులు కనపడలేదు",
+   "totalagents":"మొత్తం ఏజెంట్లు",
+     "allcustomerforms":"అన్ని కస్టమర్ ఫారమ్‌ల",
+       "summary":"యూనిట్ సారాంశం",
+  "nocustomerformsavailable":"ఎటువంటి కస్టమర్ ఫారమ్‌లు లేవు",
+  "offer":"ఆఫర్"
+
+
+       
+
+
+
 
 
 

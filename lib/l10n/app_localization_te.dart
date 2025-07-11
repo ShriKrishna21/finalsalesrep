@@ -18,7 +18,11 @@ class AppLocalizationsTe extends AppLocalizations {
   String get customerform => 'కస్టమర్ ఫారం';
 
   @override
-  String get familyheadname => ' కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
+  String get familyheadname => ' కుటుంబ అధిపతి పేరు ';
+
+  @override
+  String get familyheadnamecannotbeempty =>
+      'కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
 
   @override
   String get name => 'పేరు';
@@ -484,4 +488,31 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get designation => 'పదవి';
+
+  @override
+  String get unitmanager => 'యూనిట్ మేనేజర్';
+
+  @override
+  String get viewallcustomerforms => 'అన్ని కస్టమర్ ఫారమ్‌లను వీక్షించండి';
+
+  @override
+  String get customerforms => '  కస్టమర్ ఫారమ్';
+
+  @override
+  String get nousersfound => 'వినియోగదారులు కనపడలేదు';
+
+  @override
+  String get totalagents => 'మొత్తం ఏజెంట్లు';
+
+  @override
+  String get allcustomerforms => 'అన్ని కస్టమర్ ఫారమ్‌ల';
+
+  @override
+  String get summary => 'యూనిట్ సారాంశం';
+
+  @override
+  String get nocustomerformsavailable => 'ఎటువంటి కస్టమర్ ఫారమ్‌లు లేవు';
+
+  @override
+  String get offer => 'ఆఫర్';
 }

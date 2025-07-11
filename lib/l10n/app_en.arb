@@ -3,6 +3,7 @@
   "salesrep": "Sales Rep",
   "customerform": "Customer Form",
   "familyheadname": "Family Head Name",
+   "familyheadnamecannotbeempty":"familyHeadNameCannotBeEmpty",
   "name":"Name",
   "date": "Date",
   "eenadunewspaper": "Eenadu newspaper : ",
@@ -161,7 +162,16 @@
   "statejob":"State job",
   "privatejob":"Private job",
   "designation":"Designation",
-  "mobilenumber":"Mobile Number"
+  "mobilenumber":"Mobile Number",
+  "unitmanager":"UnitManager",
+  "viewallcustomerforms":"View All Customer Forms",
+  "customerforms":" Customer Forms",
+  "nousersfound":"No Users Found",
+  "totalagents":"Total Agents",
+  "allcustomerforms":"All Customer Forms",
+  "summary":"Summary",
+  "nocustomerformsavailable":"No Customer Forms Available",
+  "offer":"Offer"
 
 
 
