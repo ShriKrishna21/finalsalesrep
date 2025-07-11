@@ -1,9 +1,6 @@
 import 'dart:convert';
-import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Allcustomerforms extends StatefulWidget {
@@ -110,14 +107,11 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final Localizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text(Localizations.viewallcustomerforms),
+        title: const Text("All Customer Forms"),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -133,25 +127,22 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(Localizations.summary,
+                            const Text(" Summary",
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 6),
                             Text(
-                                "${Localizations.eenaduSubscription} $alreadySubscribedCount"),
-                            Text(
-                                "${Localizations.daysOfferAccepted15} $offerAcceptedCount"),
-                            Text(
-                                "${Localizations.daysOfferRejected15} $offerRejectedCount"),
+                                " Eenadu Subscription: $alreadySubscribedCount"),
+                            Text(" Offer Accepted: $offerAcceptedCount"),
+                            Text(" Offer Rejected: $offerRejectedCount"),
                           ],
                         ),
                       ),
                     ),
                     Expanded(
                       child: records.isEmpty
-                          ? Center(
-                              child:
-                                  Text(Localizations.nocustomerformsavailable))
+                          ? const Center(
+                              child: Text("No customer forms available."))
                           : ListView.builder(
                               itemCount: records.length,
                               itemBuilder: (context, index) {
@@ -166,36 +157,25 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                          "${Localizations.familyheadname}: ${r.familyHeadName ?? 'N/A'}",
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
-                                        ),
+                                            " Family Head: ${r.familyHeadName ?? 'N/A'}",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 6),
+                                        Text(" Date: ${r.date ?? 'N/A'}"),
+                                        Text(" Address: ${r.address ?? 'N/A'}"),
                                         Text(
-                                          "${Localizations.date}: ${r.date ?? 'N/A'}",
-                                        ),
+                                            " City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
                                         Text(
-                                          "${Localizations.address}: ${r.address ?? 'N/A'}",
-                                        ),
+                                            " Mobile: ${r.mobileNumber ?? 'N/A'}"),
                                         Text(
-                                          "${Localizations.pinCode}: ${r.city ?? ''}, ${r.pinCode ?? ''}",
-                                        ),
+                                            " Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
                                         Text(
-                                          "${Localizations.mobilenumber}: ${r.mobileNumber ?? 'N/A'}",
-                                        ),
+                                            " Employed: ${_boolToText(r.employed)}"),
                                         Text(
-                                          "${Localizations.readnewspaper}: ${_boolToText(r.eenaduNewspaper)}",
-                                        ),
+                                            " Agent Name: ${r.agentName ?? 'N/A'}"),
                                         Text(
-                                          "${Localizations.employed}: ${_boolToText(r.employed)}",
-                                        ),
-                                        Text(
-                                          "${Localizations.agentName}: ${r.agentName ?? 'N/A'}",
-                                        ),
-                                        Text(
-                                          "${Localizations.offer}: ${_boolToText(r.freeOffer15Days)}",
-                                        ),
+                                            " Offer: ${_boolToText(r.freeOffer15Days)}"),
                                       ],
                                     ),
                                   ),

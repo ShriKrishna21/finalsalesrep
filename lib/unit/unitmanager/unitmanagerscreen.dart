@@ -134,7 +134,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         ],
         title: RichText(
           text: TextSpan(
-            text: Localizations.unitmanager,
+            text: "Unit Manager - ",
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 40,
               fontWeight: FontWeight.bold,
@@ -142,7 +142,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: Localizations.karimnagar,
+                text: "karimnagar",
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
@@ -192,15 +192,13 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     fetchAgentCount(); // Refresh after return
                   },
                   child: _buildCard(
-                    title: Localizations.numberOfResources,
+                    title: "Number of Resources",
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(
-                          label: Localizations.agents,
-                          value: agentCount.toString()),
+                      _InfoRow(label: "Agents", value: agentCount.toString()),
                     ],
                   ),
                 ),
@@ -214,49 +212,49 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     );
                   },
                   child: _buildCard(
-                    title: Localizations.viewallcustomerforms,
+                    title: "View All CustomerForms",
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
                       _InfoRow(
-                          label: Localizations.customerform,
+                          label: "CustomerForms",
                           value: customerFormCount.toString()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
-                  title: Localizations.subscriptionDetails,
+                  title: "Subscription Details",
                   gradientColors: [
                     Colors.grey.shade200,
                     Colors.grey.shade400,
                   ],
                   rows: [
                     _InfoRow(
-                        label: Localizations.houseVisited,
+                        label: "Houses Visited",
                         value: customerFormCount.toString()),
                     _InfoRow(
-                        label: Localizations.eenaduSubscription,
+                        label: "Eenadu subscription",
                         value: alreadySubscribedCount.toString()),
                     _InfoRow(
-                        label: Localizations.willingToChange,
+                        label: "Willing to change",
                         value: offerAcceptedCount.toString()),
                     _InfoRow(
-                        label: Localizations.notInterested,
+                        label: "Not Interested",
                         value: offerRejectedCount.toString()),
                   ],
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
-                  title: Localizations.routeMap,
+                  title: "Route Map",
                   gradientColors: [
                     Colors.grey.shade200,
                     Colors.grey.shade400,
                   ],
-                  rows: [
-                    _InfoRow(label: Localizations.routes, value: "0"),
+                  rows: const [
+                    _InfoRow(label: "Routes", value: "0"),
                   ],
                 ),
               ],
