@@ -1,8 +1,11 @@
 import 'dart:convert';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/usersunit.dart';
 import 'package:finalsalesrep/regionalhead/customerformsscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class UnitUsersScreen extends StatefulWidget {
@@ -70,6 +73,8 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     final otherUsers =
         users.where((user) => user.role?.toLowerCase() != 'agent').toList();
     final agentUsers =
@@ -81,9 +86,9 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
         backgroundColor: Colors.blue,
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? Center(child: CircularProgressIndicator())
           : users.isEmpty
-              ? const Center(child: Text("No users found in this unit"))
+              ? Center(child: Text(localizations.nousersfoundinthisunit))
               : ListView(
                   children: [
                     // Show non-agent users directly
@@ -104,8 +109,8 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
                         padding: const EdgeInsets.all(8.0),
                         child: Card(
                           child: ExpansionTile(
-                            title: const Text(
-                              "Agents",
+                            title: Text(
+                              localizations.agents,
                               style: TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold,
@@ -138,9 +143,9 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
                         child: Card(
                           color: Colors.lightBlue[50],
                           elevation: 3,
-                          child: const ListTile(
+                          child: ListTile(
                             title: Text(
-                              "Customer Forms of Unit",
+                              localizations.ustomerformsofunit,
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             trailing: Icon(Icons.arrow_forward_ios),
