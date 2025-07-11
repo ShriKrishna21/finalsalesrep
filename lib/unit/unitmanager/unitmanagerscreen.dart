@@ -134,7 +134,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         ],
         title: RichText(
           text: TextSpan(
-            text: "Unit Manager - ",
+            text: Localizations.unitmanager,
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 40,
               fontWeight: FontWeight.bold,
@@ -142,7 +142,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: "karimnagar",
+                text: Localizations.karimnagar,
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
@@ -192,13 +192,15 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     fetchAgentCount(); // Refresh after return
                   },
                   child: _buildCard(
-                    title: "Number of Resources",
+                    title: Localizations.numberOfResources,
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(label: "Agents", value: agentCount.toString()),
+                      _InfoRow(
+                          label: Localizations.agents,
+                          value: agentCount.toString()),
                     ],
                   ),
                 ),
@@ -212,51 +214,41 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     );
                   },
                   child: _buildCard(
-                    title: "View All CustomerForms",
+                    title: Localizations.viewallcustomerforms,
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
                       _InfoRow(
-                          label: "CustomerForms",
+                          label: Localizations.customerform,
                           value: customerFormCount.toString()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
-                  title: "Subscription Details",
+                  title: Localizations.subscriptionDetails,
                   gradientColors: [
                     Colors.grey.shade200,
                     Colors.grey.shade400,
                   ],
                   rows: [
                     _InfoRow(
-                        label: "Houses Visited",
+                        label: Localizations.houseVisited,
                         value: customerFormCount.toString()),
                     _InfoRow(
-                        label: "Eenadu subscription",
+                        label: Localizations.eenaduSubscription,
                         value: alreadySubscribedCount.toString()),
                     _InfoRow(
-                        label: "Willing to change",
+                        label: Localizations.willingToChange,
                         value: offerAcceptedCount.toString()),
                     _InfoRow(
-                        label: "Not Interested",
+                        label: Localizations.notInterested,
                         value: offerRejectedCount.toString()),
                   ],
                 ),
                 const SizedBox(height: 20),
-                _buildCard(
-                  title: "Route Map",
-                  gradientColors: [
-                    Colors.grey.shade200,
-                    Colors.grey.shade400,
-                  ],
-                  rows: const [
-                    _InfoRow(label: "Routes", value: "0"),
-                  ],
-                ),
               ],
             ),
           ),

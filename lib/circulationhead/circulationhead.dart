@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:finalsalesrep/circulationhead/regionheadunits.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
@@ -65,6 +68,9 @@ class _CirculationHeadState extends State<CirculationHead> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
@@ -88,7 +94,7 @@ class _CirculationHeadState extends State<CirculationHead> {
         ],
         centerTitle: true,
         title: Text(
-          "Circulation Head",
+          Localizations.circulationhead,
           style: TextStyle(
             fontSize: MediaQuery.of(context).size.height / 30,
             fontWeight: FontWeight.w900,

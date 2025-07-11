@@ -532,4 +532,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get subscribed => 'Subscribed';
+
+  @override
+  String get unitmanager => 'UnitManager';
+
+  @override
+  String get viewallcustomerforms => 'ViewAllCustomerForms';
+
+  @override
+  String get circulationhead => 'CirculationHead';
 }

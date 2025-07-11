@@ -182,7 +182,11 @@
    "totalhistory":"Total History",
    "accepted":"Accepted",
    "rejected":"Rejected",
-   "subscribed":"Subscribed"
+   "subscribed":"Subscribed",
+   "unitmanager":"UnitManager",
+    "viewallcustomerforms":"ViewAllCustomerForms",
+       "circulationhead":"CirculationHead"
+
 
 
 

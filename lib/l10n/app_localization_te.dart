@@ -540,4 +540,13 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get subscribed => 'చందా తీసుకున్నాడు';
+
+  @override
+  String get unitmanager => 'యూనిట్ మేనేజర్';
+
+  @override
+  String get viewallcustomerforms => 'అన్ని కస్టమర్ ఫారమ్స్‌ను చూడండి';
+
+  @override
+  String get circulationhead => 'సర్క్యులేషన్ హెడ్';
 }
