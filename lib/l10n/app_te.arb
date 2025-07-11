@@ -1,7 +1,3 @@
-
-
-
-
 {
   "add": "జోడించు",
   "salesrep": "సేల్స్ ప్రతినిధి",
@@ -9,13 +5,7 @@
   "name": "పేరు",
   "date": "తేదీ",
   "eenadunewspaper": "ఈనాడు దినపత్రిక : ",
-   "familyheadname": " కుటుంబ అధిపతి పేరు ",
-   "familyheadnamecannotbeempty":"కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు",
-
-
-
-
-
+   "familyheadname": " కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు",
    "name":"పేరు",
 
   "yes": "అవును",
@@ -175,18 +165,33 @@
   "privatejob":"ప్రైవేట్ ఉద్యోగం",
   "designation":"పదవి",
 "mobilenumber":"  మొబైల్ నంబర్",
-  "unitmanager":"యూనిట్ మేనేజర్",
-    "viewallcustomerforms":"అన్ని కస్టమర్ ఫారమ్‌లను వీక్షించండి",
-      "customerforms":"  కస్టమర్ ఫారమ్",
-        "nousersfound":"వినియోగదారులు కనపడలేదు",
-   "totalagents":"మొత్తం ఏజెంట్లు",
-     "allcustomerforms":"అన్ని కస్టమర్ ఫారమ్‌ల",
-       "summary":"యూనిట్ సారాంశం",
-  "nocustomerformsavailable":"ఎటువంటి కస్టమర్ ఫారమ్‌లు లేవు",
-  "offer":"ఆఫర్"
+ "regionalHead":"రీజినల్ హెడ్   ",
+ "confirmlogout":"లాగౌట్ చేయడం కొనసాగించాలా",
+ "areyousureyouwanttologout":"మీరు ఖచ్చితంగా లాగౌట్ కావాలనుకుంటున్నారా?",
+ "cancel":"క్యాన్సల్",
+ "logout":"లాగౌట్",
+ "createincharge":"ఇన్‌చార్జ్‌ను సృష్టించండి ",
+  "nousersfoundinthisunit":"ఈ యూనిట్‌లో యూజర్లు లేరు",
+  "ustomerformsofunit":"యూనిట్ కస్టమర్ ఫారాలు",
+  "aadhaarnumber":"ఆధార్ సంఖ్య",
+  "invalidaadhaarnumber":"సరైన ఆధార్ సంఖ్యను నమోదు చేయండి",
+  "pleaseenteraadhaarnumber":"దయచేసి ఆధార్ సంఖ్యను నమోదు చేయండి",
+  "enteravalidunitname":" సరైన యూనిట్ పేరును నమోదు చేయండి",
+    "enteravalidemail":" సరైన ఇమెయిల్‌ను నమోదు చేయండి",
+
+    "enteravalidphonenumber":"  సరైన ఫోన్ నంబరును నమోదు చేయండి",
+  "pleaseenteravalidpassword":"దయచేసి సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి",
+  "enteravalidunitname":"  సరైన యూనిట్ పేరును నమోదు చేయండి",
+    "unitnamecantbeempty":"యూనిట్ పేరు ఖాళీగా ఉండకూడదు",
+       "totalhistory":"టోటల్ హిస్టరీ", 
+        "accepted":"ఆమోదించబడింది ",
+   "rejected":"తిరస్కరించబడింది",
+   "subscribed":"చందా తీసుకున్నాడు"
 
 
-       
+
+
+
 
 
 

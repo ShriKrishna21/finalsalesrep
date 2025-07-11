@@ -122,12 +122,6 @@ abstract class AppLocalizations {
   /// **'Family Head Name'**
   String get familyheadname;
 
-  /// No description provided for @familyheadnamecannotbeempty.
-  ///
-  /// In en, this message translates to:
-  /// **'familyHeadNameCannotBeEmpty'**
-  String get familyheadnamecannotbeempty;
-
   /// No description provided for @name.
   ///
   /// In en, this message translates to:
@@ -731,13 +725,13 @@ abstract class AppLocalizations {
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'LogOut'**
+  /// **'Logout'**
   String get logout;
 
   /// No description provided for @regionalHead.
   ///
   /// In en, this message translates to:
-  /// **'Regional Head'**
+  /// **'Regional Head   '**
   String get regionalHead;
 
   /// No description provided for @karimnagar.
@@ -1028,59 +1022,113 @@ abstract class AppLocalizations {
   /// **'Designation'**
   String get designation;
 
-  /// No description provided for @unitmanager.
+  /// No description provided for @confirmlogout.
   ///
   /// In en, this message translates to:
-  /// **'UnitManager'**
-  String get unitmanager;
+  /// **'Confirm Logout'**
+  String get confirmlogout;
 
-  /// No description provided for @viewallcustomerforms.
+  /// No description provided for @areyousureyouwanttologout.
   ///
   /// In en, this message translates to:
-  /// **'View All Customer Forms'**
-  String get viewallcustomerforms;
+  /// **'Are You Sure You Want To Logout?'**
+  String get areyousureyouwanttologout;
 
-  /// No description provided for @customerforms.
+  /// No description provided for @cancel.
   ///
   /// In en, this message translates to:
-  /// **' Customer Forms'**
-  String get customerforms;
+  /// **'Cancel'**
+  String get cancel;
 
-  /// No description provided for @nousersfound.
+  /// No description provided for @createincharge.
   ///
   /// In en, this message translates to:
-  /// **'No Users Found'**
-  String get nousersfound;
+  /// **'Create Incharge'**
+  String get createincharge;
 
-  /// No description provided for @totalagents.
+  /// No description provided for @nousersfoundinthisunit.
   ///
   /// In en, this message translates to:
-  /// **'Total Agents'**
-  String get totalagents;
+  /// **'No Users Found In This Unit'**
+  String get nousersfoundinthisunit;
 
-  /// No description provided for @allcustomerforms.
+  /// No description provided for @ustomerformsofunit.
   ///
   /// In en, this message translates to:
-  /// **'All Customer Forms'**
-  String get allcustomerforms;
+  /// **'Customer Forms of Unit'**
+  String get ustomerformsofunit;
 
-  /// No description provided for @summary.
+  /// No description provided for @aadhaarnumber.
   ///
   /// In en, this message translates to:
-  /// **'Summary'**
-  String get summary;
+  /// **'AadhaarNumber'**
+  String get aadhaarnumber;
 
-  /// No description provided for @nocustomerformsavailable.
+  /// No description provided for @invalidaadhaarnumber.
   ///
   /// In en, this message translates to:
-  /// **'No Customer Forms Available'**
-  String get nocustomerformsavailable;
+  /// **'InvalidAadhaarNumber'**
+  String get invalidaadhaarnumber;
 
-  /// No description provided for @offer.
+  /// No description provided for @pleaseenteraadhaarnumber.
   ///
   /// In en, this message translates to:
-  /// **'Offer'**
-  String get offer;
+  /// **'Please Enter Aadhaar Number'**
+  String get pleaseenteraadhaarnumber;
+
+  /// No description provided for @enteravalidunitname.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter A Valid Unitname'**
+  String get enteravalidunitname;
+
+  /// No description provided for @enteravalidphonenumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter A Valid Phone Number'**
+  String get enteravalidphonenumber;
+
+  /// No description provided for @enteravalidemail.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter A Valid Email'**
+  String get enteravalidemail;
+
+  /// No description provided for @pleaseenteravalidpassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter A Valid Password'**
+  String get pleaseenteravalidpassword;
+
+  /// No description provided for @unitnamecantbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit Name Can\'t Be Empty'**
+  String get unitnamecantbeempty;
+
+  /// No description provided for @totalhistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Total History'**
+  String get totalhistory;
+
+  /// No description provided for @accepted.
+  ///
+  /// In en, this message translates to:
+  /// **'Accepted'**
+  String get accepted;
+
+  /// No description provided for @rejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get rejected;
+
+  /// No description provided for @subscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribed'**
+  String get subscribed;
 }
 
 class _AppLocalizationsDelegate

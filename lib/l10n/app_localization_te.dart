@@ -18,11 +18,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get customerform => 'కస్టమర్ ఫారం';
 
   @override
-  String get familyheadname => ' కుటుంబ అధిపతి పేరు ';
-
-  @override
-  String get familyheadnamecannotbeempty =>
-      'కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
+  String get familyheadname => ' కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
 
   @override
   String get name => 'పేరు';
@@ -335,10 +331,10 @@ class AppLocalizationsTe extends AppLocalizations {
   String get jobRole => 'ఉద్యోగ పాత్ర';
 
   @override
-  String get logout => 'లాగ్ అవుట్';
+  String get logout => 'లాగౌట్';
 
   @override
-  String get regionalHead => 'రీజినల్ హెడ్';
+  String get regionalHead => 'రీజినల్ హెడ్   ';
 
   @override
   String get karimnagar => 'కరీంనగర్';
@@ -490,29 +486,58 @@ class AppLocalizationsTe extends AppLocalizations {
   String get designation => 'పదవి';
 
   @override
-  String get unitmanager => 'యూనిట్ మేనేజర్';
+  String get confirmlogout => 'లాగౌట్ చేయడం కొనసాగించాలా';
 
   @override
-  String get viewallcustomerforms => 'అన్ని కస్టమర్ ఫారమ్‌లను వీక్షించండి';
+  String get areyousureyouwanttologout =>
+      'మీరు ఖచ్చితంగా లాగౌట్ కావాలనుకుంటున్నారా?';
 
   @override
-  String get customerforms => '  కస్టమర్ ఫారమ్';
+  String get cancel => 'క్యాన్సల్';
 
   @override
-  String get nousersfound => 'వినియోగదారులు కనపడలేదు';
+  String get createincharge => 'ఇన్‌చార్జ్‌ను సృష్టించండి ';
 
   @override
-  String get totalagents => 'మొత్తం ఏజెంట్లు';
+  String get nousersfoundinthisunit => 'ఈ యూనిట్‌లో యూజర్లు లేరు';
 
   @override
-  String get allcustomerforms => 'అన్ని కస్టమర్ ఫారమ్‌ల';
+  String get ustomerformsofunit => 'యూనిట్ కస్టమర్ ఫారాలు';
 
   @override
-  String get summary => 'యూనిట్ సారాంశం';
+  String get aadhaarnumber => 'ఆధార్ సంఖ్య';
 
   @override
-  String get nocustomerformsavailable => 'ఎటువంటి కస్టమర్ ఫారమ్‌లు లేవు';
+  String get invalidaadhaarnumber => 'సరైన ఆధార్ సంఖ్యను నమోదు చేయండి';
 
   @override
-  String get offer => 'ఆఫర్';
+  String get pleaseenteraadhaarnumber => 'దయచేసి ఆధార్ సంఖ్యను నమోదు చేయండి';
+
+  @override
+  String get enteravalidunitname => '  సరైన యూనిట్ పేరును నమోదు చేయండి';
+
+  @override
+  String get enteravalidphonenumber => '  సరైన ఫోన్ నంబరును నమోదు చేయండి';
+
+  @override
+  String get enteravalidemail => ' సరైన ఇమెయిల్‌ను నమోదు చేయండి';
+
+  @override
+  String get pleaseenteravalidpassword =>
+      'దయచేసి సరైన పాస్‌వర్డ్‌ను నమోదు చేయండి';
+
+  @override
+  String get unitnamecantbeempty => 'యూనిట్ పేరు ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get totalhistory => 'టోటల్ హిస్టరీ';
+
+  @override
+  String get accepted => 'ఆమోదించబడింది ';
+
+  @override
+  String get rejected => 'తిరస్కరించబడింది';
+
+  @override
+  String get subscribed => 'చందా తీసుకున్నాడు';
 }
