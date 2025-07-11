@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyheadname => 'Family Head Name';
 
   @override
+  String get familyheadnamecannotbeempty => 'familyHeadNameCannotBeEmpty';
+
+  @override
   String get name => 'Name';
 
   @override
@@ -478,4 +481,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get designation => 'Designation';
+
+  @override
+  String get unitmanager => 'UnitManager';
+
+  @override
+  String get viewallcustomerforms => 'View All Customer Forms';
+
+  @override
+  String get customerforms => ' Customer Forms';
+
+  @override
+  String get nousersfound => 'No Users Found';
+
+  @override
+  String get totalagents => 'Total Agents';
+
+  @override
+  String get allcustomerforms => 'All Customer Forms';
+
+  @override
+  String get summary => 'Summary';
+
+  @override
+  String get nocustomerformsavailable => 'No Customer Forms Available';
+
+  @override
+  String get offer => 'Offer';
 }

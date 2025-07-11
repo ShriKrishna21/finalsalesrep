@@ -1,11 +1,14 @@
 import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
 import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/unitmanager/profilescreen.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 
@@ -19,7 +22,7 @@ class Unitmanagerscreen extends StatefulWidget {
 class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
   int agentCount = 0;
   int customerFormCount = 0;
-  int eenaduSubscriptionCount = 0;
+  int alreadySubscribedCount = 0;
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
 
@@ -63,20 +66,30 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
       final data = jsonDecode(response.body);
       final records = data['result']['records'] as List?;
 
+      int subscribed = 0;
+      int accepted = 0;
+      int rejected = 0;
+
+      records?.forEach((r) {
+        bool? newspaper = _parseBool(r['eenadu_newspaper']);
+        bool? offer = _parseBool(r['free_offer_15_days']);
+
+        if (newspaper == true) {
+          subscribed++;
+        } else {
+          if (offer == true) {
+            accepted++;
+          } else if (offer == false && newspaper == false) {
+            rejected++;
+          }
+        }
+      });
+
       setState(() {
         customerFormCount = records?.length ?? 0;
-        eenaduSubscriptionCount = records
-                ?.where((r) => _parseBool(r['eenadu_newspaper']) == true)
-                .length ??
-            0;
-        offerAcceptedCount = records
-                ?.where((r) => _parseBool(r['free_offer_15_days']) == true)
-                .length ??
-            0;
-        offerRejectedCount = records
-                ?.where((r) => _parseBool(r['free_offer_15_days']) == false)
-                .length ??
-            0;
+        alreadySubscribedCount = subscribed;
+        offerAcceptedCount = accepted;
+        offerRejectedCount = rejected;
       });
     }
   }
@@ -90,6 +103,9 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
@@ -118,7 +134,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         ],
         title: RichText(
           text: TextSpan(
-            text: "Unit Manager - ",
+            text: Localizations.unitmanager,
             style: TextStyle(
               fontSize: MediaQuery.of(context).size.height / 40,
               fontWeight: FontWeight.bold,
@@ -126,7 +142,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: "karimnagar",
+                text: Localizations.karimnagar,
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
@@ -136,7 +152,29 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ],
           ),
         ),
-        automaticallyImplyLeading: false,
+        automaticallyImplyLeading: true,
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(Localizations.salesrep),
+                ],
+              ),
+            ),
+            ListTile(
+              leading: const Icon(Icons.language),
+              title: const Text("Switch Language"),
+              onTap: () {
+                localeProvider.toggleLocale();
+              },
+            ),
+          ],
+        ),
       ),
       body: Stack(
         children: [
@@ -154,13 +192,15 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     fetchAgentCount(); // Refresh after return
                   },
                   child: _buildCard(
-                    title: "Number of Resources",
+                    title: Localizations.numberOfResources,
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(label: "Agents", value: agentCount.toString()),
+                      _InfoRow(
+                          label: Localizations.agents,
+                          value: agentCount.toString()),
                     ],
                   ),
                 ),
@@ -174,49 +214,49 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                     );
                   },
                   child: _buildCard(
-                    title: "View All CustomerForms",
+                    title: Localizations.viewallcustomerforms,
                     gradientColors: [
                       Colors.grey.shade200,
                       Colors.grey.shade400,
                     ],
                     rows: [
                       _InfoRow(
-                          label: "CustomerForms",
+                          label: Localizations.customerform,
                           value: customerFormCount.toString()),
                     ],
                   ),
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
-                  title: "Subscription Details",
+                  title: Localizations.subscriptionDetails,
                   gradientColors: [
                     Colors.grey.shade200,
                     Colors.grey.shade400,
                   ],
                   rows: [
                     _InfoRow(
-                        label: "Houses Visited",
+                        label: Localizations.houseVisited,
                         value: customerFormCount.toString()),
                     _InfoRow(
-                        label: "Eenadu subscription",
-                        value: eenaduSubscriptionCount.toString()),
+                        label: Localizations.eenaduSubscription,
+                        value: alreadySubscribedCount.toString()),
                     _InfoRow(
-                        label: "Willing to change",
+                        label: Localizations.willingToChange,
                         value: offerAcceptedCount.toString()),
                     _InfoRow(
-                        label: "Not Interested",
+                        label: Localizations.notInterested,
                         value: offerRejectedCount.toString()),
                   ],
                 ),
                 const SizedBox(height: 20),
                 _buildCard(
-                  title: "Route Map",
+                  title: Localizations.routeMap,
                   gradientColors: [
                     Colors.grey.shade200,
                     Colors.grey.shade400,
                   ],
-                  rows: const [
-                    _InfoRow(label: "Routes", value: "0"),
+                  rows: [
+                    _InfoRow(label: Localizations.routes, value: "0"),
                   ],
                 ),
               ],
@@ -285,7 +325,7 @@ class _InfoRow extends StatelessWidget {
   const _InfoRow({
     required this.label,
     required this.value,
-    this.bold = false, // ✅ Default value added to fix error
+    this.bold = false,
   });
 
   @override

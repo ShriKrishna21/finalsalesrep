@@ -122,6 +122,12 @@ abstract class AppLocalizations {
   /// **'Family Head Name'**
   String get familyheadname;
 
+  /// No description provided for @familyheadnamecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'familyHeadNameCannotBeEmpty'**
+  String get familyheadnamecannotbeempty;
+
   /// No description provided for @name.
   ///
   /// In en, this message translates to:
@@ -1021,6 +1027,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Designation'**
   String get designation;
+
+  /// No description provided for @unitmanager.
+  ///
+  /// In en, this message translates to:
+  /// **'UnitManager'**
+  String get unitmanager;
+
+  /// No description provided for @viewallcustomerforms.
+  ///
+  /// In en, this message translates to:
+  /// **'View All Customer Forms'**
+  String get viewallcustomerforms;
+
+  /// No description provided for @customerforms.
+  ///
+  /// In en, this message translates to:
+  /// **' Customer Forms'**
+  String get customerforms;
+
+  /// No description provided for @nousersfound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Users Found'**
+  String get nousersfound;
+
+  /// No description provided for @totalagents.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Agents'**
+  String get totalagents;
+
+  /// No description provided for @allcustomerforms.
+  ///
+  /// In en, this message translates to:
+  /// **'All Customer Forms'**
+  String get allcustomerforms;
+
+  /// No description provided for @summary.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary'**
+  String get summary;
+
+  /// No description provided for @nocustomerformsavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No Customer Forms Available'**
+  String get nocustomerformsavailable;
+
+  /// No description provided for @offer.
+  ///
+  /// In en, this message translates to:
+  /// **'Offer'**
+  String get offer;
 }
 
 class _AppLocalizationsDelegate

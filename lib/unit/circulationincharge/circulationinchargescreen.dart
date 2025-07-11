@@ -3,11 +3,12 @@ import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/staffofunit.dart';
+import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
@@ -24,7 +25,11 @@ class Circulationinchargescreen extends StatefulWidget {
 
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   int agentCount = 0;
+  int staffCount = 0;
   int houseVisited = 0;
+  int alreadySubscribedCount = 0;
+  int offerAcceptedCount = 0;
+  int offerRejectedCount = 0;
   bool isLoading = true;
   String namee = "";
   String unit = "";
@@ -49,14 +54,15 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     if (apiKey == null) return;
 
     await Future.wait([
-      _fetchAgentCount(apiKey),
+      _fetchAgentAndStaffCount(apiKey),
       _fetchUnitWiseForms(apiKey, unitName),
+      fetchSubscriptionDetails(),
     ]);
 
     setState(() => isLoading = false);
   }
 
-  Future<void> _fetchAgentCount(String apiKey) async {
+  Future<void> _fetchAgentAndStaffCount(String apiKey) async {
     try {
       final resp = await http.post(
         Uri.parse(CommonApiClass.Circulationinchargescreen),
@@ -68,11 +74,27 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 
       if (resp.statusCode == 200) {
         final data = NofAgents.fromJson(jsonDecode(resp.body));
-        final list = data.result?.users ?? [];
-        setState(() => agentCount = list.length);
+        final users = data.result?.users ?? [];
+
+        int agents = 0;
+        int staff = 0;
+
+        for (var user in users) {
+          final role = user.role?.toLowerCase();
+          if (role == 'agent') {
+            agents++;
+          } else {
+            staff++;
+          }
+        }
+
+        setState(() {
+          agentCount = agents;
+          staffCount = staff;
+        });
       }
     } catch (e) {
-      print("❌ Agent count error: $e");
+      print("❌ Agent/Staff count error: $e");
     }
   }
 
@@ -97,6 +119,66 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     } catch (e) {
       print("❌ UnitWiseForms error: $e");
     }
+  }
+
+  Future<void> fetchSubscriptionDetails() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final unitName = prefs.getString('unit');
+
+    if (token == null || unitName == null) return;
+
+    final response = await http.post(
+      Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "params": {
+          "token": token,
+          "from_date": "",
+          "to_date": "",
+          "unit_name": unitName,
+          "agent_name": "",
+          "order": "asc",
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final records = data['result']['records'] as List?;
+
+      int subscribed = 0;
+      int accepted = 0;
+      int rejected = 0;
+
+      records?.forEach((r) {
+        bool? newspaper = _parseBool(r['eenadu_newspaper']);
+        bool? offer = _parseBool(r['free_offer_15_days']);
+
+        if (newspaper == true) {
+          subscribed++;
+        } else {
+          if (offer == true) {
+            accepted++;
+          } else if (offer == false && newspaper == false) {
+            rejected++;
+          }
+        }
+      });
+
+      setState(() {
+        alreadySubscribedCount = subscribed;
+        offerAcceptedCount = accepted;
+        offerRejectedCount = rejected;
+      });
+    }
+  }
+
+  bool? _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.toLowerCase() == 'true';
+    if (value is num) return value == 1;
+    return null;
   }
 
   @override
@@ -164,38 +246,76 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     title: "Unit Summary",
                     rows: [
                       _InfoRow(
-                          label: "Total Agents in Unit",
-                          value: agentCount.toString(),
-                          bold: true),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildCard(
-                    title: "Number of Resources",
-                    rows: [
-                      _InfoRow(label: "Agents", value: agentCount.toString()),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  _buildCard(
-                    title: localeProvider.locale.languageCode == "en"
-                        ? "Subscription Details"
-                        : Localizations.subscriptionDetails,
-                    rows: [
+                        label: "Total Staff in Unit",
+                        value: agentCount.toString(),
+                        bold: true,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const Staffofunit(),
+                            ),
+                          );
+                        },
+                      ),
                       _InfoRow(
-                          label: Localizations.housesCount,
-                          value: "0",
-                          bold: true),
+                        label: "Total Sgents in Unit",
+                        value: staffCount.toString(),
+                        bold: true,
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const Noofresources(),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+
+                  // ✅ Replaced Number of Resources Container
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Noofresources()),
+                      );
+                    },
+                    child: _buildCard(
+                      title: Localizations.numberOfResources,
+                      rows: [
+                        _InfoRow(
+                          label: Localizations.agents,
+                          value: agentCount.toString(),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 20),
+
+                  // ✅ Replaced Subscription Details Container
+                  _buildCard(
+                    title: Localizations.subscriptionDetails,
+                    rows: [
                       _InfoRow(
                           label: Localizations.housesVisited,
                           value: houseVisited.toString()),
                       _InfoRow(
-                          label: Localizations.eenaduSubscription, value: "0"),
+                          label: Localizations.eenaduSubscription,
+                          value: alreadySubscribedCount.toString()),
                       _InfoRow(
-                          label: Localizations.willingToChange, value: "0"),
-                      _InfoRow(label: Localizations.notInterested, value: "0"),
+                          label: Localizations.willingToChange,
+                          value: offerAcceptedCount.toString()),
+                      _InfoRow(
+                          label: Localizations.notInterested,
+                          value: offerRejectedCount.toString()),
                     ],
                   ),
+
                   const SizedBox(height: 20),
                   _buildCard(
                     title: "Assign Route Map and Target",
@@ -283,23 +403,37 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 class _InfoRow extends StatelessWidget {
   final String label, value;
   final bool bold;
-  const _InfoRow({required this.label, required this.value, this.bold = false});
+  final VoidCallback? onTap;
+
+  const _InfoRow({
+    required this.label,
+    required this.value,
+    this.bold = false,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
+    Widget row = Row(
+      children: [
+        Expanded(
+          child: Text(
+            "$label:",
+            style: const TextStyle(fontWeight: FontWeight.w500),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Text(
+          value,
+          style:
+              TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+        ),
+      ],
+    );
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Expanded(
-              child: Text("$label:",
-                  style: const TextStyle(fontWeight: FontWeight.w500))),
-          const SizedBox(width: 8),
-          Text(value,
-              style: TextStyle(
-                  fontWeight: bold ? FontWeight.bold : FontWeight.normal)),
-        ],
-      ),
+      child: onTap != null ? InkWell(onTap: onTap, child: row) : row,
     );
   }
 }
