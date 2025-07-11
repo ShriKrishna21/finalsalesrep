@@ -175,13 +175,16 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const Noofresources()),
+                  MaterialPageRoute(
+                      builder: (context) => const Noofresources()),
                 );
               },
               child: _buildCard(
                 title: localizations.numberOfResources,
                 rows: [
-                  _InfoRow(label: localizations.agents, value: agentCount.toString()),
+                  _InfoRow(
+                      label: localizations.agents,
+                      value: agentCount.toString()),
                 ],
               ),
             ),
@@ -189,19 +192,21 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
             _buildCard(
               title: localizations.subscriptionDetails,
               rows: [
-                _InfoRow(label: localizations.housesVisited, value: customerFormCount.toString()),
-                _InfoRow(label: localizations.eenaduSubscription, value: alreadySubscribedCount.toString()),
-                _InfoRow(label: localizations.willingToChange, value: offerAcceptedCount.toString()),
-                _InfoRow(label: localizations.notInterested, value: offerRejectedCount.toString()),
+                _InfoRow(
+                    label: localizations.housesVisited,
+                    value: customerFormCount.toString()),
+                _InfoRow(
+                    label: localizations.eenaduSubscription,
+                    value: alreadySubscribedCount.toString()),
+                _InfoRow(
+                    label: localizations.willingToChange,
+                    value: offerAcceptedCount.toString()),
+                _InfoRow(
+                    label: localizations.notInterested,
+                    value: offerRejectedCount.toString()),
               ],
             ),
             const SizedBox(height: 16),
-            _buildCard(
-              title: localizations.routeMap,
-              rows: [
-                _InfoRow(label: localizations.routes, value: "0"),
-              ],
-            ),
             const Spacer(),
             SizedBox(
               width: double.infinity,

@@ -1129,6 +1129,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Subscribed'**
   String get subscribed;
+
+  /// No description provided for @unitmanager.
+  ///
+  /// In en, this message translates to:
+  /// **'UnitManager'**
+  String get unitmanager;
+
+  /// No description provided for @viewallcustomerforms.
+  ///
+  /// In en, this message translates to:
+  /// **'ViewAllCustomerForms'**
+  String get viewallcustomerforms;
+
+  /// No description provided for @circulationhead.
+  ///
+  /// In en, this message translates to:
+  /// **'CirculationHead'**
+  String get circulationhead;
 }
 
 class _AppLocalizationsDelegate
