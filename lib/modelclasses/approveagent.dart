@@ -9,8 +9,7 @@ class ApproveAgent {
     return ApproveAgent(
       jsonrpc: json['jsonrpc'],
       id: json['id'],
-      result:
-          json['result'] != null ? Result.fromJson(json['result']) : null,
+      result: json['result'] != null ? Result.fromJson(json['result']) : null,
     );
   }
 
@@ -46,3 +45,4 @@ class Result {
     };
   }
 }
+   

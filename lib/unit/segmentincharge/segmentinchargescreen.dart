@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
+import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
 
 class Segmentinchargescreen extends StatefulWidget {
   const Segmentinchargescreen({super.key});
@@ -19,10 +23,18 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
   String userName = '';
   String unitt = '';
 
+  int agentCount = 0;
+  int customerFormCount = 0;
+  int alreadySubscribedCount = 0;
+  int offerAcceptedCount = 0;
+  int offerRejectedCount = 0;
+
   @override
   void initState() {
     super.initState();
     _loadUserName();
+    fetchAgentCount();
+    fetchCustomerFormCount();
   }
 
   Future<void> _loadUserName() async {
@@ -33,10 +45,79 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
     });
   }
 
+  Future<void> fetchAgentCount() async {
+    final count = await AgentService.fetchAgentCountFromApi();
+    setState(() {
+      agentCount = count;
+    });
+  }
+
+  Future<void> fetchCustomerFormCount() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final unitName = prefs.getString('unit');
+
+    if (token == null || unitName == null) return;
+
+    final response = await http.post(
+      Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        "params": {
+          "token": token,
+          "from_date": "",
+          "to_date": "",
+          "unit_name": unitName,
+          "agent_name": "",
+          "order": "asc",
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final records = data['result']['records'] as List?;
+
+      int subscribed = 0;
+      int accepted = 0;
+      int rejected = 0;
+
+      records?.forEach((r) {
+        bool? newspaper = _parseBool(r['eenadu_newspaper']);
+        bool? offer = _parseBool(r['free_offer_15_days']);
+
+        if (newspaper == true) {
+          subscribed++;
+        } else {
+          if (offer == true) {
+            accepted++;
+          } else if (offer == false && newspaper == false) {
+            rejected++;
+          }
+        }
+      });
+
+      setState(() {
+        customerFormCount = records?.length ?? 0;
+        alreadySubscribedCount = subscribed;
+        offerAcceptedCount = accepted;
+        offerRejectedCount = rejected;
+      });
+    }
+  }
+
+  bool? _parseBool(dynamic value) {
+    if (value is bool) return value;
+    if (value is String) return value.toLowerCase() == 'true';
+    if (value is num) return value == 1;
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -93,14 +174,14 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
             GestureDetector(
               onTap: () {
                 Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const Noofresources()));
+                  context,
+                  MaterialPageRoute(builder: (context) => const Noofresources()),
+                );
               },
               child: _buildCard(
                 title: localizations.numberOfResources,
                 rows: [
-                  _InfoRow(label: localizations.agents, value: ""),
+                  _InfoRow(label: localizations.agents, value: agentCount.toString()),
                 ],
               ),
             ),
@@ -108,12 +189,10 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
             _buildCard(
               title: localizations.subscriptionDetails,
               rows: [
-                _InfoRow(
-                    label: localizations.housesCount, value: "", bold: true),
-                _InfoRow(label: localizations.housesVisited, value: "0"),
-                _InfoRow(label: localizations.eenaduSubscription, value: "0"),
-                _InfoRow(label: localizations.willingToChange, value: "0"),
-                _InfoRow(label: localizations.notInterested, value: "0"),
+                _InfoRow(label: localizations.housesVisited, value: customerFormCount.toString()),
+                _InfoRow(label: localizations.eenaduSubscription, value: alreadySubscribedCount.toString()),
+                _InfoRow(label: localizations.willingToChange, value: offerAcceptedCount.toString()),
+                _InfoRow(label: localizations.notInterested, value: offerRejectedCount.toString()),
               ],
             ),
             const SizedBox(height: 16),
@@ -141,9 +220,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                     style: const TextStyle(fontSize: 16)),
               ),
             ),
-            const SizedBox(
-              height: 20,
-            ),
+            const SizedBox(height: 20),
             SizedBox(
               width: double.infinity,
               child: OutlinedButton(
