@@ -297,11 +297,13 @@ class _CoustmerState extends State<Coustmer> {
           key: _formKey,
           child: SingleChildScrollView(
             child: Column(
+              
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                SizedBox(height: 30,),
                 textformfeild(
                     controller: agency,
-                    label: localizations.agencyname,
+                    label: localizations.agentName,
                     need: true),
                 const SizedBox(height: 20),
 

@@ -1,178 +1,140 @@
-import 'package:finalsalesrep/modelclasses/approveagent.dart';
-import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
+import 'package:finalsalesrep/modelclasses/approveagent.dart';
 
 const String apiUnitUrl = 'https://salesrep.esanchaya.com/api/agents_info_based_on_the_unit';
+const String apiApproveUrl = 'https://salesrep.esanchaya.com/update/status';
 
 class Approveagents extends StatefulWidget {
   const Approveagents({super.key});
-
   @override
   State<Approveagents> createState() => _ApproveagentsState();
 }
 
 class _ApproveagentsState extends State<Approveagents> {
-    List<Users> agents = [];
-    bool loading = true;
-    String? error;
+  List<Users> agents = [];
+  bool loading = true;
+  String? error;
 
-    @override
-    void initState() {
-      super.initState();
-      _loadDataAndFetchAgents();
-    }
+  @override
+  void initState() {
+    super.initState();
+    _loadDataAndFetchAgents();
+  }
 
-    Future<void> _loadDataAndFetchAgents() async {
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('apikey');
-      final unitName = prefs.getString('unit');
-      final sessionId = prefs.getString('session_id');
-
-      if (token == null || unitName == null || sessionId == null) {
-        setState(() {
-          error = 'Missing token, unit, or session ID in SharedPreferences';
-          loading = false;
-        });
-        return;
-      }
-
-      await fetchAgents(token, unitName, sessionId);
-    }
-
-    Future<void> fetchAgents(String token, String unitName, String sessionId) async {
-      final body = json.encode({
-        "params": {
-          "token": token,
-          "unit_name": unitName,
-        }
-      });
-
-      try {
-        final response = await http.post(
-          Uri.parse(apiUnitUrl),
-          headers: {
-            'Content-Type': 'application/json',
-            'User-Agent': 'FlutterApp/1.0',
-            'Cookie': 'session_id=$sessionId',
-          },
-          body: body,
-        );
-
-        print("🔐 SESSION ID USED: $sessionId");
-
-        if (response.statusCode == 200) {
-          final decoded = json.decode(response.body);
-          final unitData = unitwiseagent.fromJson(decoded);
-
-          if (unitData.result?.users != null) {
-            setState(() {
-              agents = unitData.result!.users!
-                  .where((u) => u.status == 'un_activ')
-                  .toList();
-              loading = false;
-            });
-          } else {
-            setState(() {
-              error = 'No agents found.';
-              loading = false;
-            });
-          }
-        } else {
-          setState(() {
-            error = 'Server error: ${response.statusCode}';
-            loading = false;
-          });
-        }
-      } catch (e) {
-        setState(() {
-          error = 'Network error: $e';
-          loading = false;
-        });
-      }
-    }
-
-  Future<void> approveAgent(int userId) async {
-    const String apiUrl = "https://salesrep.esanchaya.com/update/status";
+  Future<void> _loadDataAndFetchAgents() async {
     final prefs = await SharedPreferences.getInstance();
-
     final token = prefs.getString('apikey');
+    final unitName = prefs.getString('unit');
     final sessionId = prefs.getString('session_id');
 
-    if (token == null || sessionId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Missing API token or session ID")),
-      );
+    if (token == null || unitName == null || sessionId == null) {
+      setState(() {
+        error = 'Missing token, unit, or session ID';
+        loading = false;
+      });
       return;
     }
 
-    final Map<String, dynamic> requestBody = {
-      "params": {
-        "user_id": userId.toString(),
-        "token": token,
-        "status": "active",
-      }
+    await fetchAgents(token, unitName, sessionId);
+  }
+
+  Future<void> fetchAgents(String token, String unitName, String sessionId) async {
+    final headers = {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId',
     };
 
     try {
       final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'User-Agent': 'FlutterApp/1.0',
-          'Cookie': 'session_id=$sessionId',
-        },
-        body: jsonEncode(requestBody),
+        Uri.parse(apiUnitUrl),
+        headers: headers,
+        body: jsonEncode({
+          "params": {"token": token, "unit_name": unitName},
+        }),
       );
-
-      print("✅ Approve status code: ${response.statusCode}");
-      print("📦 Approve response: ${response.body}");
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body);
-        print("📩 Decoded JSON: $jsonResponse");
-
-        final ApproveAgent agentResponse = ApproveAgent.fromJson(jsonResponse);
-
-        if (agentResponse.result != null && agentResponse.result!.success == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Agent approved successfully")),
-          );
-          _loadDataAndFetchAgents();
-        } else {
-          final errorMsg = agentResponse.result?.message ?? 'Unknown error or empty response';
-          print("❌ Approval failed: $errorMsg");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed: $errorMsg")),
-          );
-        }
+        final unitData = unitwiseagent.fromJson(jsonDecode(response.body));
+        setState(() {
+          agents = unitData.result?.users
+                  ?.where((u) => u.status == 'un_activ')
+                  .toList() ??
+              [];
+          loading = false;
+        });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Server error: ${response.statusCode}")),
-        );
+        setState(() {
+          error = 'Server error: ${response.statusCode}';
+          loading = false;
+        });
       }
     } catch (e) {
-      print("❗ Exception occurred: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Network error: $e")),
+      setState(() {
+        error = 'Network error: $e';
+        loading = false;
+      });
+    }
+  }
+
+  /// Approves the agent and returns a message to display
+  Future<String> approveAgent(int userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final sessionId = prefs.getString('session_id');
+
+    if (token == null || sessionId == null) {
+      return "Missing token or session ID";
+    }
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Cookie': 'session_id=$sessionId',
+    };
+
+    final body = jsonEncode({
+      "params": {"user_id": userId.toString(), "token": token, "status": "active"},
+    });
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiApproveUrl),
+        headers: headers,
+        body: body,
       );
+
+      if (response.statusCode == 200) {
+        final agentResponse = ApproveAgent.fromJson(jsonDecode(response.body));
+
+        // Debug logs
+        print('Approve API response body: ${response.body}');
+        print('Parsed success: ${agentResponse.result?.success}, message: ${agentResponse.result?.message}');
+
+        if (agentResponse.result?.success == true) {
+          // reload list
+          _loadDataAndFetchAgents();
+          return agentResponse.result?.message ?? "Agent approved successfully";
+        } else {
+          return agentResponse.result?.message ?? "Approval  approved successfully";
+        }
+      } else {
+        return "Server error: ${response.statusCode}";
+      }
+    } catch (e) {
+      return "Network error: $e";
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (error != null) {
-      return Scaffold(body: Center(child: Text('Error: $error')));
-    }
+    if (loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (error != null) return Scaffold(body: Center(child: Text("Error: $error")));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Approve Agents')),
+      appBar: AppBar(title: const Text("Approve Agents")),
       body: ListView.builder(
         itemCount: agents.length,
         itemBuilder: (context, index) {
@@ -180,35 +142,27 @@ class _ApproveagentsState extends State<Approveagents> {
           return Card(
             margin: const EdgeInsets.all(8),
             child: Padding(
-              padding: const EdgeInsets.all(12.0),
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(agent.name ?? 'Unnamed Agent',
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                   Text("Email: ${agent.email ?? 'N/A'}"),
                   Text("Phone: ${agent.phone ?? 'N/A'}"),
-                  Text("Unit: ${agent.unitName ?? 'N/A'}"),
-                  Text("Role: ${agent.role ?? 'N/A'}"),
-                  Text("Status: ${agent.status ?? 'N/A'}"),
-                  Text("id: ${agent.id ?? 'N/A'}"),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                      ),
+                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
                       onPressed: () async {
-                        print("🟢 Approving agent ID: ${agent.id}");
-                        await approveAgent(agent.id ?? 0);
+                        final message = await approveAgent(agent.id ?? 0);
+                        if (!mounted) return;
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text(message)),
+                        );
                       },
-                      child: const Text("Approve",
-                          style: TextStyle(color: Colors.white)),
+                      child: const Text("Approve", style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],

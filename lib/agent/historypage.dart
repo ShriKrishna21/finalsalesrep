@@ -1,13 +1,9 @@
-import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
-import 'package:provider/provider.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({super.key});
-
   @override
   State<Historypage> createState() => _HistorypageState();
 }
@@ -22,22 +18,40 @@ class _HistorypageState extends State<Historypage> {
 
   final TotalHistory _historyFetcher = TotalHistory();
 
+  DateTimeRange? _selectedRange;
+
   @override
   void initState() {
     super.initState();
-    loadTotalHistory();
+    _fetchHistory();
   }
 
-  Future<void> loadTotalHistory() async {
+  Future<void> _fetchHistory() async {
     setState(() => _isLoading = true);
-
     final result = await _historyFetcher.fetchCustomerForm();
     if (result != null) {
+      final all = result['records'] as List<Records>;
+      final accepted = result['offer_accepted'] as int;
+      final rejected = result['offer_rejected'] as int;
+      final subscribed = result['already_subscribed'] as int;
+
+      var filtered = all;
+      if (_selectedRange != null) {
+        final s = _selectedRange!.start;
+        final e = _selectedRange!.end.add(const Duration(days: 1));
+        filtered = all.where((r) {
+          final dt = DateTime.tryParse(r.date ?? '');
+          return dt != null &&
+              dt.isAfter(s.subtract(const Duration(milliseconds: 1))) &&
+              dt.isBefore(e);
+        }).toList();
+      }
+
       setState(() {
-        _records = result['records'] as List<Records>;
-        offerAcceptedCount = result['offer_accepted'] as int;
-        offerRejectedCount = result['offer_rejected'] as int;
-        alreadySubscribedCount = result['already_subscribed'] as int;
+        _records = filtered;
+        offerAcceptedCount = accepted;
+        offerRejectedCount = rejected;
+        alreadySubscribedCount = subscribed;
         _isLoading = false;
       });
     } else {
@@ -45,83 +59,124 @@ class _HistorypageState extends State<Historypage> {
     }
   }
 
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _selectedRange,
+    );
+    if (picked != null) {
+      setState(() => _selectedRange = picked);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text('${localizations.totalhistory} (${_records.length})'),
-        flexibleSpace: Container(
-          color: Colors.white,
-        ),
+        title: Text("Total History (${_records.length})"),
+        backgroundColor: Colors.white,
       ),
-      body: _isLoading
-          ? const Center(
-              child: CircularProgressIndicator(color: Color(0xFF3F51B5)))
-          : _records.isEmpty
-              ? const Center(
-                  child:
-                      Text("No Records Found", style: TextStyle(fontSize: 18)))
-              : Column(
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: [
-                          _buildStatEntity(localizations.accepted,
-                              offerAcceptedCount, Colors.green),
-                          _buildStatEntity(localizations.rejected,
-                              offerRejectedCount, Colors.red),
-                          _buildStatEntity(localizations.subscribed,
-                              alreadySubscribedCount, Colors.blue),
-                        ],
-                      ),
+      body: Column(
+        children: [
+          Card(
+            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+              child: Row(
+                children: [
+                  GestureDetector(
+                    onTap: _pickDateRange,
+                    child: Row(
+                      children: [
+                        const Icon(Icons.date_range, color: Colors.blue),
+                        const SizedBox(width: 8),
+                        Text(
+                          _selectedRange == null
+                              ? "All Dates"
+                              : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}",
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        ),
+                      ],
                     ),
-                    const Divider(),
-                    Expanded(
-                      child: ListView.builder(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        itemCount: _records.length,
-                        itemBuilder: (c, i) => _buildRecordCard(_records[i]),
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          
+          // 🎯 Moved Fetch button below the date picker
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.filter_center_focus),
+                label: const Text("Fetch customer forms"),
+                onPressed: _fetchHistory,
+                style: ElevatedButton.styleFrom(padding: const EdgeInsets.symmetric(vertical: 14)),
+              ),
+            ),
+          ),
+
+          if (_isLoading) const LinearProgressIndicator(),
+          if (!_isLoading && _records.isEmpty) ...[
+            const Expanded(child: Center(child: Text("No Records Found", style: TextStyle(fontSize: 18)))),
+          ],
+          if (!_isLoading && _records.isNotEmpty) ...[
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStat("Accepted", offerAcceptedCount, Colors.green),
+                  _buildStat("Rejected", offerRejectedCount, Colors.red),
+                  _buildStat("Subscribed", alreadySubscribedCount, Colors.blue),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            Expanded(
+              child: ListView.builder(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                itemCount: _records.length,
+                itemBuilder: (c, i) => _buildRecordCard(_records[i]),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _buildStatEntity(String label, int count, Color color) {
-    return Column(
-      children: [
-        Text(label,
-            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16)),
-        const SizedBox(height: 4),
-        Text("$count",
-            style: TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: color)),
-      ],
-    );
-  }
+  Widget _buildStat(String label, int count, Color color) => Column(
+    children: [
+      Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+      const SizedBox(height: 4),
+      Text("$count", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: color)),
+    ],
+  );
 
   Widget _buildRecordCard(Records r) {
     return Card(
-      elevation: 4,
       margin: const EdgeInsets.only(bottom: 12),
+      elevation: 3,
       child: ExpansionTile(
-        title: Text("FamilyHeadName: ${r.familyHeadName ?? 'N/A'}",
-            style: const TextStyle(fontWeight: FontWeight.w700)),
+        title: Text(
+          "Family: ${r.familyHeadName ?? 'N/A'}",
+          style: const TextStyle(fontWeight: FontWeight.w600),
+        ),
         children: [
           Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _detailRow("Agent", r.agentName),
                 _detailRow("Date", r.date),
-                _detailRow("Eenadu Subscribed", _formatBool(r.eenaduNewspaper)),
+                _detailRow("Subscribed", _formatBool(r.eenaduNewspaper)),
                 _detailRow("Free Offer", _formatBool(r.freeOffer15Days)),
                 _detailRow("Read Newspaper", _formatBool(r.readNewspaper)),
                 _detailRow("Reject Reason", r.reasonNotTakingOffer),
@@ -131,7 +186,6 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow("Employed", _formatBool(r.employed)),
                 _detailRow("Job Type", _formatBool(r.jobType)),
                 _detailRow("Working in State", _formatBool(r.jobWorkingState)),
-                // Add more fields if needed...
               ],
             ),
           )
@@ -142,7 +196,7 @@ class _HistorypageState extends State<Historypage> {
 
   Widget _detailRow(String label, dynamic value) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 6.0),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
           Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -152,10 +206,9 @@ class _HistorypageState extends State<Historypage> {
     );
   }
 
-  /// Helper to convert bool? to "Yes", "No", or "N/A"
-  String _formatBool(bool? value) {
-    if (value == true) return 'Yes';
-    if (value == false) return 'No';
+  String _formatBool(bool? v) {
+    if (v == true) return 'Yes';
+    if (v == false) return 'No';
     return 'N/A';
   }
 }
