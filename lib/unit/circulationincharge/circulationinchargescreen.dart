@@ -3,7 +3,6 @@ import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
-import 'package:finalsalesrep/unit/circulationincharge/staffofunit.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -12,21 +11,17 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/modelclasses/noofagents.dart';
-import 'package:finalsalesrep/modelclasses/unitwiseforms.dart';
 
 class Circulationinchargescreen extends StatefulWidget {
   const Circulationinchargescreen({super.key});
 
   @override
-  State<Circulationinchargescreen> createState() =>
-      _CirculationinchargescreenState();
+  State<Circulationinchargescreen> createState() => _CirculationinchargescreenState();
 }
 
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   int agentCount = 0;
-  int staffCount = 0;
-  int houseVisited = 0;
+  int customerFormCount = 0;
   int alreadySubscribedCount = 0;
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
@@ -54,53 +49,16 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     if (apiKey == null) return;
 
     await Future.wait([
-      _fetchAgentAndStaffCount(apiKey),
-      _fetchUnitWiseForms(apiKey, unitName),
-      fetchSubscriptionDetails(),
+      _fetchAgentCount(apiKey, unitName),
+      fetchCustomerFormData(apiKey, unitName),
     ]);
 
     setState(() => isLoading = false);
   }
 
-  Future<void> _fetchAgentAndStaffCount(String apiKey) async {
+  Future<void> _fetchAgentCount(String apiKey, String unitName) async {
     try {
-      final resp = await http.post(
-        Uri.parse(CommonApiClass.Circulationinchargescreen),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {"token": apiKey}
-        }),
-      );
-
-      if (resp.statusCode == 200) {
-        final data = NofAgents.fromJson(jsonDecode(resp.body));
-        final users = data.result?.users ?? [];
-
-        int agents = 0;
-        int staff = 0;
-
-        for (var user in users) {
-          final role = user.role?.toLowerCase();
-          if (role == 'agent') {
-            agents++;
-          } else {
-            staff++;
-          }
-        }
-
-        setState(() {
-          agentCount = agents;
-          staffCount = staff;
-        });
-      }
-    } catch (e) {
-      print("❌ Agent/Staff count error: $e");
-    }
-  }
-
-  Future<void> _fetchUnitWiseForms(String apiKey, String unitName) async {
-    try {
-      final resp = await http.post(
+      final response = await http.post(
         Uri.parse(CommonApiClass.agentUnitWise),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -111,66 +69,72 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         }),
       );
 
-      if (resp.statusCode == 200) {
-        final data = UnitWiseFormsResponse.fromJson(jsonDecode(resp.body));
-        final count = data.result?.customerforms?.length ?? 0;
-        setState(() => houseVisited = count);
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final users = jsonResponse['result']['users'] as List<dynamic>;
+
+        setState(() {
+          agentCount = users.length;
+        });
+
+        print("✅ Agent count from Noofresources API: $agentCount");
+      } else {
+        print("❌ Failed to fetch agent count. Status: ${response.statusCode}");
       }
     } catch (e) {
-      print("❌ UnitWiseForms error: $e");
+      print("❌ Exception in _fetchAgentCount: $e");
     }
   }
 
-  Future<void> fetchSubscriptionDetails() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final unitName = prefs.getString('unit');
-
-    if (token == null || unitName == null) return;
-
-    final response = await http.post(
-      Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        "params": {
-          "token": token,
-          "from_date": "",
-          "to_date": "",
-          "unit_name": unitName,
-          "agent_name": "",
-          "order": "asc",
-        }
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final records = data['result']['records'] as List?;
-
-      int subscribed = 0;
-      int accepted = 0;
-      int rejected = 0;
-
-      records?.forEach((r) {
-        bool? newspaper = _parseBool(r['eenadu_newspaper']);
-        bool? offer = _parseBool(r['free_offer_15_days']);
-
-        if (newspaper == true) {
-          subscribed++;
-        } else {
-          if (offer == true) {
-            accepted++;
-          } else if (offer == false && newspaper == false) {
-            rejected++;
+  Future<void> fetchCustomerFormData(String token, String unitName) async {
+    try {
+      final response = await http.post(
+        Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "from_date": "",
+            "to_date": "",
+            "unit_name": unitName,
+            "agent_name": "",
+            "order": "asc",
           }
-        }
-      });
+        }),
+      );
 
-      setState(() {
-        alreadySubscribedCount = subscribed;
-        offerAcceptedCount = accepted;
-        offerRejectedCount = rejected;
-      });
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final records = data['result']['records'] as List?;
+
+        int subscribed = 0;
+        int accepted = 0;
+        int rejected = 0;
+
+        records?.forEach((r) {
+          bool? newspaper = _parseBool(r['eenadu_newspaper']);
+          bool? offer = _parseBool(r['free_offer_15_days']);
+
+          if (newspaper == true) {
+            subscribed++;
+          } else {
+            if (offer == true) {
+              accepted++;
+            } else if (offer == false && newspaper == false) {
+              rejected++;
+            }
+          }
+        });
+
+        setState(() {
+          customerFormCount = records?.length ?? 0;
+          alreadySubscribedCount = subscribed;
+          offerAcceptedCount = accepted;
+          offerRejectedCount = rejected;
+        });
+      }
+    } catch (e) {
+      print("❌ Customer form fetch error: $e");
     }
   }
 
@@ -242,135 +206,68 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
-                  _buildCard(
-                    title: "Unit Summary",
-                    rows: [
-                      _InfoRow(
-                        label: "Total Staff in Unit",
-                        value: agentCount.toString(),
-                        bold: true,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Staffofunit(),
-                            ),
-                          );
-                        },
-                      ),
-                      _InfoRow(
-                        label: "Total Sgents in Unit",
-                        value: staffCount.toString(),
-                        bold: true,
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => const Noofresources(),
-                            ),
-                          );
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-
-                  // ✅ Replaced Number of Resources Container
+                  // ✅ Number of Resources
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (context) => const Noofresources()),
+                        MaterialPageRoute(builder: (_) => const Noofresources()),
                       );
+                      _loadData(); // Refresh on return
                     },
                     child: _buildCard(
-                      title: Localizations.numberOfResources,
+                      title: "Number of Resources",
                       rows: [
-                        _InfoRow(
-                          label: Localizations.agents,
-                          value: agentCount.toString(),
-                        ),
+                        _InfoRow(label: "Agents", value: agentCount.toString()),
                       ],
                     ),
                   ),
-
                   const SizedBox(height: 20),
 
-                  // ✅ Replaced Subscription Details Container
+                  // ✅ Subscription Details
                   _buildCard(
-                    title: Localizations.subscriptionDetails,
+                    title: "Subscription Details",
                     rows: [
-                      _InfoRow(
-                          label: Localizations.housesVisited,
-                          value: houseVisited.toString()),
-                      _InfoRow(
-                          label: Localizations.eenaduSubscription,
-                          value: alreadySubscribedCount.toString()),
-                      _InfoRow(
-                          label: Localizations.willingToChange,
-                          value: offerAcceptedCount.toString()),
-                      _InfoRow(
-                          label: Localizations.notInterested,
-                          value: offerRejectedCount.toString()),
+                      _InfoRow(label: "Houses Visited", value: customerFormCount.toString()),
+                      _InfoRow(label: "Eenadu subscription", value: alreadySubscribedCount.toString()),
+                      _InfoRow(label: "Willing to change", value: offerAcceptedCount.toString()),
+                      _InfoRow(label: "Not Interested", value: offerRejectedCount.toString()),
                     ],
                   ),
-
                   const SizedBox(height: 20),
-                  _buildCard(
-                    title: "Assign Route Map and Target",
-                    rows: const [
-                      _InfoRow(label: "Routes", value: "0"),
-                    ],
-                  ),
+
                   const SizedBox(height: 10),
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blueAccent,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const AssignRouteScreen()),
+                          MaterialPageRoute(builder: (_) => const AssignRouteScreen()),
                         );
                       },
-                      child: const Text(
-                        "Assign Now",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      child: const Text("Assign Routemap and Target", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 30),
                   Center(
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18),
-                        ),
+                        backgroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const createstaff()),
+                          MaterialPageRoute(builder: (_) => const createstaff()),
                         );
                       },
-                      child: const Text(
-                        "Create User",
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
+                      child: const Text("Create Officestaff", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   )
                 ],
@@ -388,9 +285,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Column(children: rows),
           ],
@@ -425,8 +320,7 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           value,
-          style:
-              TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+          style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
         ),
       ],
     );

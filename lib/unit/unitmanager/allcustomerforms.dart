@@ -13,17 +13,32 @@ class Allcustomerforms extends StatefulWidget {
 class _AllcustomerformsState extends State<Allcustomerforms> {
   List<Record> records = [];
   bool isLoading = true;
+  String errorMessage = '';
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
 
-  String errorMessage = '';
+  DateTimeRange? _selectedRange;
 
   @override
   void initState() {
     super.initState();
     fetchAllForms();
+  }
+
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _selectedRange,
+    );
+
+    if (picked != null) {
+      setState(() => _selectedRange = picked);
+      fetchAllForms();
+    }
   }
 
   Future<void> fetchAllForms() async {
@@ -39,11 +54,19 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
       return;
     }
 
+    String fromDate = "";
+    String toDate = "";
+
+    if (_selectedRange != null) {
+      fromDate = _selectedRange!.start.toIso8601String().split('T')[0];
+      toDate = _selectedRange!.end.toIso8601String().split('T')[0];
+    }
+
     final requestBody = {
       "params": {
         "token": token,
-        "from_date": "",
-        "to_date": "",
+        "from_date": fromDate,
+        "to_date": toDate,
         "unit_name": unitName,
         "agent_name": "",
         "order": "asc",
@@ -61,7 +84,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         final data = AllCustomerForms.fromJson(jsonDecode(response.body));
         final fetchedRecords = data.result?.records ?? [];
 
-        // Custom logic for count
         int subscribed = 0;
         int accepted = 0;
         int rejected = 0;
@@ -72,8 +94,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
           } else {
             if (record.freeOffer15Days == true) {
               accepted++;
-            } else if (record.freeOffer15Days == false &&
-                record.eenaduNewspaper == false) {
+            } else if (record.freeOffer15Days == false && record.eenaduNewspaper == false) {
               rejected++;
             }
           }
@@ -109,16 +130,30 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
         title: const Text("All Customer Forms"),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : errorMessage.isNotEmpty
-              ? Center(child: Text("⚠️ $errorMessage"))
+              ? Center(child: Text("\u26a0\ufe0f $errorMessage"))
               : Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                      child: ElevatedButton.icon(
+                        onPressed: _pickDateRange,
+                        icon: const Icon(Icons.date_range),
+                        label: Text(_selectedRange == null
+                            ? 'Filter by Date'
+                            : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
                     Card(
                       margin: const EdgeInsets.all(12),
                       color: Colors.grey[200],
@@ -131,8 +166,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(
-                                " Eenadu Subscription: $alreadySubscribedCount"),
+                            Text(" Eenadu Subscription: $alreadySubscribedCount"),
                             Text(" Offer Accepted: $offerAcceptedCount"),
                             Text(" Offer Rejected: $offerRejectedCount"),
                           ],
@@ -141,53 +175,43 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                     ),
                     Expanded(
                       child: records.isEmpty
-                          ? const Center(
-                              child: Text("No customer forms available."))
+                          ? const Center(child: Text("No customer forms available."))
                           : ListView.builder(
                               itemCount: records.length,
                               itemBuilder: (context, index) {
                                 final r = records[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
+                                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                            " Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                            style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold)),
+                                        Text(" Family Head: ${r.familyHeadName ?? 'N/A'}",
+                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 6),
                                         Text(" Date: ${r.date ?? 'N/A'}"),
                                         Text(" Address: ${r.address ?? 'N/A'}"),
-                                        Text(
-                                            " City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
-                                        Text(
-                                            " Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                                        Text(
-                                            " Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
-                                        Text(
-                                            " Employed: ${_boolToText(r.employed)}"),
-                                        Text(
-                                            " Agent Name: ${r.agentName ?? 'N/A'}"),
-                                        Text(
-                                            " Offer: ${_boolToText(r.freeOffer15Days)}"),
+                                        Text(" City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                        Text(" Mobile: ${r.mobileNumber ?? 'N/A'}"),
+                                        Text(" Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
+                                        Text(" Employed: ${_boolToText(r.employed)}"),
+                                        Text(" Agent Name: ${r.agentName ?? 'N/A'}"),
+                                        Text(" Offer: ${_boolToText(r.freeOffer15Days)}"),
                                       ],
                                     ),
                                   ),
                                 );
                               },
                             ),
-                    )
+                    ),
                   ],
                 ),
     );
   }
 }
+
+// Add your model classes AllCustomerForms, Result, and Record here (unchanged from your previous code).
 
 class AllCustomerForms {
   String? jsonrpc;

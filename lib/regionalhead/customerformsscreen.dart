@@ -20,6 +20,7 @@ class _customerformsunitState extends State<customerformsunit> {
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   String errorMessage = '';
+  DateTimeRange? _selectedRange;
 
   @override
   void initState() {
@@ -27,14 +28,24 @@ class _customerformsunitState extends State<customerformsunit> {
     fetchAllForms();
   }
 
+  Future<void> _pickDateRange() async {
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2000),
+      lastDate: DateTime.now(),
+      initialDateRange: _selectedRange,
+    );
+
+    if (picked != null) {
+      setState(() => _selectedRange = picked);
+      fetchAllForms();
+    }
+  }
+
   Future<void> fetchAllForms() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
-
     final unitName = widget.unitName;
-
-    print("🔑 Token: $token");
-    print("🏢 Unit Name (from nav): $unitName");
 
     if (token == null || unitName.isEmpty) {
       setState(() {
@@ -44,11 +55,19 @@ class _customerformsunitState extends State<customerformsunit> {
       return;
     }
 
+    String fromDate = "";
+    String toDate = "";
+
+    if (_selectedRange != null) {
+      fromDate = _selectedRange!.start.toIso8601String().split('T')[0];
+      toDate = _selectedRange!.end.toIso8601String().split('T')[0];
+    }
+
     final requestBody = {
       "params": {
         "token": token,
-        "from_date": "",
-        "to_date": "",
+        "from_date": fromDate,
+        "to_date": toDate,
         "unit_name": unitName,
         "agent_name": "",
         "order": "asc",
@@ -75,7 +94,9 @@ class _customerformsunitState extends State<customerformsunit> {
               .where((r) => _parseBool(r.freeOffer15Days) == true)
               .length;
           offerRejectedCount = fetchedRecords
-              .where((r) => _parseBool(r.freeOffer15Days) == false)
+              .where((r) =>
+                  _parseBool(r.freeOffer15Days) == false &&
+                  _parseBool(r.eenaduNewspaper) == false)
               .length;
           isLoading = false;
         });
@@ -119,6 +140,20 @@ class _customerformsunitState extends State<customerformsunit> {
               ? Center(child: Text("⚠️ $errorMessage"))
               : Column(
                   children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                      child: ElevatedButton.icon(
+                        onPressed: _pickDateRange,
+                        icon: const Icon(Icons.date_range),
+                        label: Text(_selectedRange == null
+                            ? 'Filter by Date'
+                            : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.black,
+                          foregroundColor: Colors.white,
+                        ),
+                      ),
+                    ),
                     Card(
                       margin: const EdgeInsets.all(12),
                       color: Colors.grey[200],
@@ -176,8 +211,6 @@ class _customerformsunitState extends State<customerformsunit> {
                                             "Agent Name: ${r.agentName ?? 'N/A'}"),
                                         Text(
                                             "Offer: ${_boolToText(_parseBool(r.freeOffer15Days))}"),
-                                        // Text(
-                                        //     "unit: ${_boolToText(_parseBool(r.unitName))}"),
                                       ],
                                     ),
                                   ),
