@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Allcustomerforms extends StatefulWidget {
@@ -13,9 +16,11 @@ class Allcustomerforms extends StatefulWidget {
 class _AllcustomerformsState extends State<Allcustomerforms> {
   List<Record> records = [];
   bool isLoading = true;
-  int eenaduCount = 0;
+
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
+  int alreadySubscribedCount = 0;
+
   String errorMessage = '';
 
   @override
@@ -28,9 +33,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final unitName = prefs.getString('unit');
-
-    print("🔑 Token: $token");
-    print("🏢 Unit Name: $unitName");
 
     if (token == null || unitName == null) {
       setState(() {
@@ -51,8 +53,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
       }
     };
 
-    print("📤 Sending Request: ${jsonEncode(requestBody)}");
-
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
@@ -60,26 +60,33 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         body: jsonEncode(requestBody),
       );
 
-      print("📡 Status Code: ${response.statusCode}");
-      print("📥 Response Body: ${response.body}");
-
       if (response.statusCode == 200) {
         final data = AllCustomerForms.fromJson(jsonDecode(response.body));
         final fetchedRecords = data.result?.records ?? [];
 
-        print("✅ Records Fetched: ${fetchedRecords.length}");
+        // Custom logic for count
+        int subscribed = 0;
+        int accepted = 0;
+        int rejected = 0;
+
+        for (var record in fetchedRecords) {
+          if (record.eenaduNewspaper == true) {
+            subscribed++;
+          } else {
+            if (record.freeOffer15Days == true) {
+              accepted++;
+            } else if (record.freeOffer15Days == false &&
+                record.eenaduNewspaper == false) {
+              rejected++;
+            }
+          }
+        }
 
         setState(() {
           records = fetchedRecords;
-          eenaduCount = fetchedRecords
-              .where((r) => _parseBool(r.eenaduNewspaper) == true)
-              .length;
-          offerAcceptedCount = fetchedRecords
-              .where((r) => _parseBool(r.freeOffer15Days) == true)
-              .length;
-          offerRejectedCount = fetchedRecords
-              .where((r) => _parseBool(r.freeOffer15Days) == false)
-              .length;
+          alreadySubscribedCount = subscribed;
+          offerAcceptedCount = accepted;
+          offerRejectedCount = rejected;
           isLoading = false;
         });
       } else {
@@ -89,19 +96,11 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         });
       }
     } catch (e) {
-      print("❌ Exception: $e");
       setState(() {
         errorMessage = "Something went wrong: $e";
         isLoading = false;
       });
     }
-  }
-
-  bool? _parseBool(dynamic value) {
-    if (value is bool) return value;
-    if (value is String) return value.toLowerCase() == 'true';
-    if (value is num) return value == 1;
-    return null;
   }
 
   String _boolToText(bool? value) {
@@ -111,11 +110,14 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text("All Customer Forms"),
+        title: Text(Localizations.viewallcustomerforms),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -131,21 +133,25 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(" Summary",
+                            Text(Localizations.summary,
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(" Eenadu Subscription: $eenaduCount"),
-                            Text(" Offer Accepted: $offerAcceptedCount"),
-                            Text(" Offer Rejected: $offerRejectedCount"),
+                            Text(
+                                "${Localizations.eenaduSubscription} $alreadySubscribedCount"),
+                            Text(
+                                "${Localizations.daysOfferAccepted15} $offerAcceptedCount"),
+                            Text(
+                                "${Localizations.daysOfferRejected15} $offerRejectedCount"),
                           ],
                         ),
                       ),
                     ),
                     Expanded(
                       child: records.isEmpty
-                          ? const Center(
-                              child: Text("No customer forms available."))
+                          ? Center(
+                              child:
+                                  Text(Localizations.nocustomerformsavailable))
                           : ListView.builder(
                               itemCount: records.length,
                               itemBuilder: (context, index) {
@@ -160,25 +166,36 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                           CrossAxisAlignment.start,
                                       children: [
                                         Text(
-                                            " Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                            style: const TextStyle(
-                                                fontSize: 16,
-                                                fontWeight: FontWeight.bold)),
+                                          "${Localizations.familyheadname}: ${r.familyHeadName ?? 'N/A'}",
+                                          style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold),
+                                        ),
                                         const SizedBox(height: 6),
-                                        Text(" Date: ${r.date ?? 'N/A'}"),
-                                        Text(" Address: ${r.address ?? 'N/A'}"),
                                         Text(
-                                            " City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                          "${Localizations.date}: ${r.date ?? 'N/A'}",
+                                        ),
                                         Text(
-                                            " Mobile: ${r.mobileNumber ?? 'N/A'}"),
+                                          "${Localizations.address}: ${r.address ?? 'N/A'}",
+                                        ),
                                         Text(
-                                            " Reads Eenadu: ${_boolToText(_parseBool(r.eenaduNewspaper))}"),
+                                          "${Localizations.pinCode}: ${r.city ?? ''}, ${r.pinCode ?? ''}",
+                                        ),
                                         Text(
-                                            " Employed: ${_boolToText(_parseBool(r.employed))}"),
+                                          "${Localizations.mobilenumber}: ${r.mobileNumber ?? 'N/A'}",
+                                        ),
                                         Text(
-                                            " Agent Name: ${r.agentName ?? 'N/A'}"),
+                                          "${Localizations.readnewspaper}: ${_boolToText(r.eenaduNewspaper)}",
+                                        ),
                                         Text(
-                                            " Offer: ${_boolToText(_parseBool(r.freeOffer15Days))}"),
+                                          "${Localizations.employed}: ${_boolToText(r.employed)}",
+                                        ),
+                                        Text(
+                                          "${Localizations.agentName}: ${r.agentName ?? 'N/A'}",
+                                        ),
+                                        Text(
+                                          "${Localizations.offer}: ${_boolToText(r.freeOffer15Days)}",
+                                        ),
                                       ],
                                     ),
                                   ),
@@ -192,9 +209,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   }
 }
 
-//
-// Model Classes
-//
 class AllCustomerForms {
   String? jsonrpc;
   dynamic id;

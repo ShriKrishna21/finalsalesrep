@@ -21,6 +21,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get familyheadname => 'Family Head Name';
 
   @override
+  String get familyheadnamecannotbeempty => 'familyHeadNameCannotBeEmpty';
+
+  @override
   String get name => 'Name';
 
   @override
@@ -327,10 +330,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get jobRole => 'Job Role';
 
   @override
-  String get logout => 'Logout';
+  String get logout => 'LogOut';
 
   @override
-  String get regionalHead => 'Regional Head   ';
+  String get regionalHead => 'Regional Head';
 
   @override
   String get karimnagar => 'KarimNagar';
@@ -480,56 +483,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get designation => 'Designation';
 
   @override
-  String get confirmlogout => 'Confirm Logout';
+  String get unitmanager => 'UnitManager';
 
   @override
-  String get areyousureyouwanttologout => 'Are You Sure You Want To Logout?';
+  String get viewallcustomerforms => 'View All Customer Forms';
 
   @override
-  String get cancel => 'Cancel';
+  String get customerforms => ' Customer Forms';
 
   @override
-  String get createincharge => 'Create Incharge';
+  String get nousersfound => 'No Users Found';
 
   @override
-  String get nousersfoundinthisunit => 'No Users Found In This Unit';
+  String get totalagents => 'Total Agents';
 
   @override
-  String get ustomerformsofunit => 'Customer Forms of Unit';
+  String get allcustomerforms => 'All Customer Forms';
 
   @override
-  String get aadhaarnumber => 'AadhaarNumber';
+  String get summary => 'Summary';
 
   @override
-  String get invalidaadhaarnumber => 'InvalidAadhaarNumber';
+  String get nocustomerformsavailable => 'No Customer Forms Available';
 
   @override
-  String get pleaseenteraadhaarnumber => 'Please Enter Aadhaar Number';
-
-  @override
-  String get enteravalidunitname => 'Please Enter A Valid Unitname';
-
-  @override
-  String get enteravalidphonenumber => 'Enter A Valid Phone Number';
-
-  @override
-  String get enteravalidemail => 'Enter A Valid Email';
-
-  @override
-  String get pleaseenteravalidpassword => 'Please Enter A Valid Password';
-
-  @override
-  String get unitnamecantbeempty => 'Unit Name Can\'t Be Empty';
-
-  @override
-  String get totalhistory => 'Total History';
-
-  @override
-  String get accepted => 'Accepted';
-
-  @override
-  String get rejected => 'Rejected';
-
-  @override
-  String get subscribed => 'Subscribed';
+  String get offer => 'Offer';
 }
