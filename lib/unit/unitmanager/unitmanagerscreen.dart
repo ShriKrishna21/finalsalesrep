@@ -167,11 +167,29 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.language),
-              title: const Text("Switch Language"),
-              onTap: () {
-                localeProvider.toggleLocale();
-              },
+              // leading: const Icon(Icons.language),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // const Text("Switch Language"),
+                  Row(
+                    children: [
+                      const Text('English'),
+                      Switch(
+                        value: localeProvider.locale.languageCode == 'te',
+                        onChanged: (value) {
+                          localeProvider.toggleLocale();
+                        },
+                        activeColor: Colors.green,
+                        inactiveThumbColor: Colors.blue,
+                        activeTrackColor: Colors.green.shade200,
+                        inactiveTrackColor: Colors.blue.shade200,
+                      ),
+                      const Text('తెలుగు'),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ],
         ),
