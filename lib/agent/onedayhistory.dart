@@ -11,6 +11,7 @@ class Onedayhistory extends StatefulWidget {
 
 class _OnedayhistoryState extends State<Onedayhistory> {
   List<Record> records = [];
+  List<Record> filteredRecords = [];
   bool _isLoading = true;
 
   int offerAcceptedCount = 0;
@@ -18,6 +19,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
   int alreadySubscribedCount = 0;
 
   final Onedayagent _onedayagent = Onedayagent();
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -33,12 +35,41 @@ class _OnedayhistoryState extends State<Onedayhistory> {
     final result = await _onedayagent.fetchOnedayHistory();
 
     setState(() {
-      records = (result['records'] as List<Record>?) ?? [];
+      final fetchedRecords = (result['records'] as List<Record>?) ?? [];
+      records = fetchedRecords.reversed.toList();
+      filteredRecords = List.from(records);
+
       offerAcceptedCount = result['offer_accepted'] ?? 0;
       offerRejectedCount = result['offer_rejected'] ?? 0;
       alreadySubscribedCount = result['already_subscribed'] ?? 0;
       _isLoading = false;
     });
+  }
+
+  void _filterRecords(String query) {
+    setState(() {
+      if (query.isEmpty) {
+        filteredRecords = List.from(records);
+      } else {
+        final lowerQuery = query.toLowerCase();
+
+        filteredRecords = records.where((record) {
+          final id = record.id?.toString().toLowerCase() ?? '';
+          final name = record.agentName?.toLowerCase() ?? '';
+          final familyHead = record.familyHeadName?.toLowerCase() ?? '';
+
+          return id.contains(lowerQuery) ||
+              name.contains(lowerQuery) ||
+              familyHead.contains(lowerQuery);
+        }).toList();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   @override
@@ -73,7 +104,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
-                "Count: ${records.length}",
+                "Count: ${filteredRecords.length}",
                 style: const TextStyle(
                   fontWeight: FontWeight.w600,
                   fontSize: 16,
@@ -113,6 +144,23 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            TextField(
+                              controller: _searchController,
+                              onChanged: _filterRecords,
+                              decoration: InputDecoration(
+                                hintText: "Search by Name or ID",
+                                prefixIcon: const Icon(Icons.search),
+                                filled: true,
+                                fillColor: Colors.white,
+                                contentPadding: const EdgeInsets.symmetric(
+                                    vertical: 0, horizontal: 20),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                  borderSide: BorderSide.none,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
                             _buildStatRow(
                                 "Offer Accepted:", offerAcceptedCount),
                             const SizedBox(height: 8),
@@ -128,11 +176,11 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                       ),
                       Expanded(
                         child: ListView.builder(
-                          itemCount: records.length,
+                          itemCount: filteredRecords.length,
                           padding: const EdgeInsets.symmetric(
                               horizontal: 16, vertical: 8),
                           itemBuilder: (context, index) {
-                            final record = records[index];
+                            final record = filteredRecords[index];
                             return _buildRecordCard(record);
                           },
                         ),
