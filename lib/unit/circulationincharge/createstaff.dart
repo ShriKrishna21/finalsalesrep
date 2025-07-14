@@ -155,31 +155,31 @@ class _createstaffState extends State<createstaff> {
                 usercredentials(
                     controller: name,
                     hintText: Localizations.name,
-                    errorText: "Please enter a valid name"),
+                    errorText: Localizations.enteravalidname),
                 usercredentials(
                     controller: unit,
                     hintText: Localizations.unitName,
-                    errorText: "Please enter a valid unit"),
+                    errorText: Localizations.enteravalidunitname),
                 usercredentials(
                     controller: phone,
                     hintText: Localizations.phone,
-                    errorText: "Enter valid phone",
+                    errorText: Localizations.enteravalidphonenumber,
                     keyboardType: TextInputType.phone,
                     maxvalue: 10),
                 usercredentials(
                     controller: mail,
                     hintText: Localizations.emailOrUserId,
-                    errorText: "Enter valid email",
+                    errorText: Localizations.enteravalidemail,
                     keyboardType: TextInputType.emailAddress),
                 usercredentials(
                     controller: password,
                     hintText: Localizations.password,
-                    errorText: "Password required",
+                    errorText: Localizations.passwordrequired,
                     keyboardType: TextInputType.visiblePassword),
                 usercredentials(
                     controller: state,
                     hintText: Localizations.address,
-                    errorText: "Address required"),
+                    errorText: Localizations.addressrequired),
 
                 // Role Dropdown
                 Padding(
@@ -215,12 +215,12 @@ class _createstaffState extends State<createstaff> {
                 usercredentials(
                   controller: adhar,
                   hintText: Localizations.aadharNumber,
-                  errorText: "Invalid Aadhaar Number",
+                  errorText: Localizations.invalidaadhaarnumber,
                   keyboardType: TextInputType.number,
                   maxvalue: 12,
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return "Enter Aadhaar number";
+                      return Localizations.aadhaarnumber;
                     }
                     if (!RegExp(r'^\d{12}$').hasMatch(value)) {
                       return "Must be 12 digits";
@@ -237,7 +237,7 @@ class _createstaffState extends State<createstaff> {
                 usercredentials(
                   controller: pan,
                   hintText: Localizations.panNumber,
-                  errorText: "Invalid PAN Number",
+                  errorText: Localizations.invalidpannumber,
                   maxvalue: 10,
                   validator: (value) {
                     if (value == null || value.isEmpty) {

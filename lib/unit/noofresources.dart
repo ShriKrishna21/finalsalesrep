@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agentdetailsscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Noofresources extends StatefulWidget {
@@ -15,15 +18,12 @@ class Noofresources extends StatefulWidget {
 
 class _NoofresourcesState extends State<Noofresources> {
   List<User> users = [];
-  List<User> filteredUsers = [];
   bool isLoading = true;
-  String searchQuery = "";
-  final TextEditingController _searchController = TextEditingController();
 
   Future<void> agentdata() async {
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
-    final unitName = prefs.getString('unit');
+    final unitName = prefs.getString('unit'); // ✅ Correct key used
 
     if (apiKey == null || unitName == null || unitName.isEmpty) {
       print("❌ Missing API key or unit name");
@@ -34,7 +34,8 @@ class _NoofresourcesState extends State<Noofresources> {
     try {
       final response = await http
           .post(
-            Uri.parse(CommonApiClass.agentUnitWise),
+            Uri.parse(
+                CommonApiClass.agentUnitWise), // ✅ API for unit-based agents
             headers: {'Content-Type': 'application/json'},
             body: jsonEncode({
               "params": {
@@ -45,21 +46,21 @@ class _NoofresourcesState extends State<Noofresources> {
           )
           .timeout(const Duration(seconds: 20));
 
+      print("📤 Request sent to: ${CommonApiClass.agentUnitWise}");
+      print("📥 Status Code: ${response.statusCode}");
+      print("📥 Response Body: ${response.body}");
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final data = NofAgents.fromJson(jsonResponse);
-        List<User> fetchedUsers = data.result?.users ?? [];
-
-        // Sort users by ID descending
-        fetchedUsers.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
 
         setState(() {
-          users = fetchedUsers;
-          filteredUsers = fetchedUsers;
+          users = data.result?.users ?? [];
           isLoading = false;
         });
 
         await prefs.setInt('userCount', users.length);
+        print("✅ Total agents fetched: ${users.length}");
       } else {
         print("❌ Error fetching agents. Status: ${response.statusCode}");
         setState(() => isLoading = false);
@@ -70,68 +71,33 @@ class _NoofresourcesState extends State<Noofresources> {
     }
   }
 
-  void _filterUsers(String query) {
-    query = query.toLowerCase();
-    setState(() {
-      searchQuery = query;
-      filteredUsers = users.where((user) {
-        final name = user.name?.toLowerCase() ?? '';
-        final id = user.id?.toString() ?? '';
-        return name.contains(query) || id.contains(query);
-      }).toList();
-    });
-  }
-
   @override
   void initState() {
     super.initState();
     agentdata();
-    _searchController.addListener(() {
-      _filterUsers(_searchController.text);
-    });
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Number of Resources"),
+        title: Text(Localizations.numberOfResources),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : users.isEmpty
-              ? const Center(child: Text("No users found"))
+              ? Center(
+                  child: Text(Localizations.nousersfound,
+                      style: TextStyle(fontSize: 16)))
               : Column(
                   children: [
-                    // 🔍 Search bar
                     Padding(
                       padding: const EdgeInsets.all(12.0),
-                      child: TextField(
-                        controller: _searchController,
-                        decoration: InputDecoration(
-                          prefixIcon: const Icon(Icons.search),
-                          hintText: 'Search by name or ID',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[100],
-                        ),
-                      ),
-                    ),
-
-                    // 🧾 Total count card
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12.0),
                       child: Container(
                         width: double.infinity,
                         padding: const EdgeInsets.symmetric(
@@ -141,8 +107,8 @@ class _NoofresourcesState extends State<Noofresources> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          "Total Agents: ${filteredUsers.length}",
-                          style: const TextStyle(
+                          "${Localizations.totalagents} ${users.length}",
+                          style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -150,13 +116,11 @@ class _NoofresourcesState extends State<Noofresources> {
                         ),
                       ),
                     ),
-
-                    // 📋 Agent List
                     Expanded(
                       child: ListView.builder(
-                        itemCount: filteredUsers.length,
+                        itemCount: users.length,
                         itemBuilder: (context, index) {
-                          final user = filteredUsers[index];
+                          final user = users[index];
                           return Padding(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 12, vertical: 6),
@@ -201,19 +165,19 @@ class _NoofresourcesState extends State<Noofresources> {
                                     const SizedBox(height: 10),
                                     const Divider(color: Colors.grey),
                                     InfoRow(
-                                        label: "ID",
+                                        label: Localizations.emailOrUserId,
                                         value: user.id?.toString() ?? 'N/A'),
                                     InfoRow(
-                                        label: "Email",
+                                        label: Localizations.email,
                                         value: user.email ?? 'N/A'),
                                     InfoRow(
-                                        label: "Phone",
+                                        label: Localizations.phone,
                                         value: user.phone ?? 'N/A'),
                                     InfoRow(
-                                        label: "Role",
+                                        label: Localizations.jobRole,
                                         value: user.role ?? 'N/A'),
                                     InfoRow(
-                                        label: "Unit",
+                                        label: Localizations.unitName,
                                         value: user.unitName ?? 'N/A'),
                                   ],
                                 ),

@@ -541,4 +541,77 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get circulationhead => 'CirculationHead';
+
+  @override
+  String get customerforms => 'CustomerForms';
+
+  @override
+  String get assignroutemapandtarget => 'Assign Routemap and Target';
+
+  @override
+  String get createofficestaff => 'Create Officestaff';
+
+  @override
+  String get agentswaitingapproval => 'Agents Waiting Approval';
+
+  @override
+  String get assignroutetarget => 'Assign Route & Target';
+
+  @override
+  String get selectagent => 'SelectAgent';
+
+  @override
+  String get routeandtargetassignedsuccessfully =>
+      'Route and Target assigned successfully';
+
+  @override
+  String get bothassignmentsfailed => 'Both assignments failed';
+
+  @override
+  String get routeassignmentfailed => 'Route assignment failed';
+
+  @override
+  String get targetassignmentfailed => 'Target assignment failed';
+
+  @override
+  String get nousersfound => 'No Users Found';
+
+  @override
+  String get totalagents => 'Total Agents ';
+
+  @override
+  String get filterbydate => 'Filter by Date';
+
+  @override
+  String get nocustomerformsavailable => 'No Customer Forms Available';
+
+  @override
+  String get routemap => 'Route Map';
+
+  @override
+  String get enterroutemap => 'Enter Route Map';
+
+  @override
+  String get assigntarget => 'Assign Target';
+
+  @override
+  String get entertarget => 'Enter Target';
+
+  @override
+  String get pleaseenteravalidunit => 'Please Enter A Valid Unit';
+
+  @override
+  String get passwordrequired => 'Password required';
+
+  @override
+  String get addressrequired => 'Address required';
+
+  @override
+  String get unnamedagent => 'Unnamed Agent';
+
+  @override
+  String get na => 'N/A';
+
+  @override
+  String get approveagents => 'Approve Agents';
 }
