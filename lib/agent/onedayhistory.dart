@@ -52,7 +52,6 @@ class _OnedayhistoryState extends State<Onedayhistory> {
         filteredRecords = List.from(records);
       } else {
         final lowerQuery = query.toLowerCase();
-
         filteredRecords = records.where((record) {
           final id = record.id?.toString().toLowerCase() ?? '';
           final name = record.agentName?.toLowerCase() ?? '';
@@ -126,67 +125,75 @@ class _OnedayhistoryState extends State<Onedayhistory> {
         child: _isLoading
             ? const Center(
                 child: CircularProgressIndicator(color: Color(0xFF3F51B5)))
-            : records.isEmpty
-                ? const Center(
-                    child: Text(
-                      "No Houses Visited Today",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.grey,
-                      ),
-                    ),
-                  )
-                : Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            TextField(
-                              controller: _searchController,
-                              onChanged: _filterRecords,
-                              decoration: InputDecoration(
-                                hintText: "Search by Name or ID",
-                                prefixIcon: const Icon(Icons.search),
-                                filled: true,
-                                fillColor: Colors.white,
-                                contentPadding: const EdgeInsets.symmetric(
-                                    vertical: 0, horizontal: 20),
-                                border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(30),
-                                  borderSide: BorderSide.none,
-                                ),
+            : RefreshIndicator(
+                onRefresh: loadOnedayHistory,
+                child: filteredRecords.isEmpty
+                    ? ListView(
+                        children: const [
+                          SizedBox(height: 300),
+                          Center(
+                            child: Text(
+                              "No Houses Visited Today",
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey,
                               ),
                             ),
-                            const SizedBox(height: 16),
-                            _buildStatRow(
-                                "Offer Accepted:", offerAcceptedCount),
-                            const SizedBox(height: 8),
-                            _buildStatRow(
-                                "Offer Rejected:", offerRejectedCount),
-                            const SizedBox(height: 8),
-                            _buildStatRow(
-                                "Already Subscribed:", alreadySubscribedCount),
-                            const SizedBox(height: 16),
-                            Divider(color: Colors.grey[400]),
-                          ],
-                        ),
+                          ),
+                        ],
+                      )
+                    : Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                TextField(
+                                  controller: _searchController,
+                                  onChanged: _filterRecords,
+                                  decoration: InputDecoration(
+                                    hintText: "Search by Name or ID",
+                                    prefixIcon: const Icon(Icons.search),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    contentPadding: const EdgeInsets.symmetric(
+                                        vertical: 0, horizontal: 20),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                      borderSide: BorderSide.none,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                _buildStatRow(
+                                    "Offer Accepted:", offerAcceptedCount),
+                                const SizedBox(height: 8),
+                                _buildStatRow(
+                                    "Offer Rejected:", offerRejectedCount),
+                                const SizedBox(height: 8),
+                                _buildStatRow("Already Subscribed:",
+                                    alreadySubscribedCount),
+                                const SizedBox(height: 16),
+                                Divider(color: Colors.grey[400]),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: filteredRecords.length,
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 16, vertical: 8),
+                              itemBuilder: (context, index) {
+                                final record = filteredRecords[index];
+                                return _buildRecordCard(record);
+                              },
+                            ),
+                          ),
+                        ],
                       ),
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: filteredRecords.length,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 16, vertical: 8),
-                          itemBuilder: (context, index) {
-                            final record = filteredRecords[index];
-                            return _buildRecordCard(record);
-                          },
-                        ),
-                      ),
-                    ],
-                  ),
+              ),
       ),
     );
   }
