@@ -4,6 +4,9 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
+import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
+import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
+import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -73,14 +76,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final users = jsonResponse['result']['users'] as List<dynamic>;
-
-        setState(() {
-          agentCount = users.length;
-        });
-
-        print("✅ Agent count from Noofresources API: $agentCount");
-      } else {
-        print("❌ Failed to fetch agent count. Status: ${response.statusCode}");
+        setState(() => agentCount = users.length);
       }
     } catch (e) {
       print("❌ Exception in _fetchAgentCount: $e");
@@ -108,13 +104,11 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         final data = jsonDecode(response.body);
         final records = data['result']['records'] as List?;
 
-        int subscribed = 0;
-        int accepted = 0;
-        int rejected = 0;
+        int subscribed = 0, accepted = 0, rejected = 0;
 
         records?.forEach((r) {
-          bool? newspaper = _parseBool(r['eenadu_newspaper']);
-          bool? offer = _parseBool(r['free_offer_15_days']);
+          final bool? newspaper = _parseBool(r['eenadu_newspaper']);
+          final bool? offer = _parseBool(r['free_offer_15_days']);
 
           if (newspaper == true) {
             subscribed++;
@@ -149,7 +143,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
-    final Localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.white,
@@ -157,7 +151,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: Text("${Localizations.circulationIncharge} - $namee  $unit"),
+        title: Text("${localizations.circulationIncharge} - $namee  $unit"),
         automaticallyImplyLeading: true,
         actions: [
           IconButton(
@@ -169,168 +163,146 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           ),
         ],
       ),
-      drawer: Drawer(
-        child: ListView(
-          children: [
-            DrawerHeader(
-              child: Column(
-                children: [
-                  const Icon(Icons.account_circle, size: 60),
-                  const SizedBox(height: 10),
-                  Text(Localizations.salesrep),
-                ],
-              ),
-            ),
-            ListTile(
-              // leading: const Icon(Icons.language),
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  // const Text("Switch Language"),
-                  Row(
-                    children: [
-                      const Text('English'),
-                      Switch(
-                        value: localeProvider.locale.languageCode == 'te',
-                        onChanged: (value) {
-                          localeProvider.toggleLocale();
-                        },
-                        activeColor: Colors.green,
-                        inactiveThumbColor: Colors.blue,
-                        activeTrackColor: Colors.green.shade200,
-                        inactiveTrackColor: Colors.blue.shade200,
-                      ),
-                      const Text('తెలుగు'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            ListTile(
-              leading: const Icon(Icons.history),
-              title: Text(Localizations.historyPage),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const Historypage()),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      drawer: _buildDrawer(localeProvider, localizations),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : Padding(
               padding: const EdgeInsets.all(16.0),
               child: ListView(
                 children: [
-                  // ✅ Number of Resources
                   GestureDetector(
                     onTap: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(
-                            builder: (_) => const Noofresources()),
+                        MaterialPageRoute(builder: (_) => const Noofresources()),
                       );
-                      _loadData(); // Refresh on return
+                      _loadData();
                     },
                     child: _buildCard(
                       title: "Number of Resources",
-                      rows: [
-                        _InfoRow(label: "Agents", value: agentCount.toString()),
-                      ],
+                      rows: [_InfoRow(label: "Agents", value: agentCount.toString())],
                     ),
                   ),
                   const SizedBox(height: 20),
-
-                  // ✅ Subscription Details
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(context,
+                        MaterialPageRoute(builder: (_) => const Allcustomerforms()));
+                    },
+                    child: _buildCard(
+                      title: "View All Customer Forms",
+                      rows: [_InfoRow(label: "Customer Forms", value: customerFormCount.toString())],
+                    ),
+                  ), const SizedBox(height: 20),
                   _buildCard(
                     title: "Subscription Details",
                     rows: [
-                      _InfoRow(
-                          label: "Houses Visited",
-                          value: customerFormCount.toString()),
-                      _InfoRow(
-                          label: "Eenadu subscription",
-                          value: alreadySubscribedCount.toString()),
-                      _InfoRow(
-                          label: "Willing to change",
-                          value: offerAcceptedCount.toString()),
-                      _InfoRow(
-                          label: "Not Interested",
-                          value: offerRejectedCount.toString()),
+                      _InfoRow(label: "Houses Visited", value: customerFormCount.toString()),
+                      _InfoRow(label: "Eenadu subscription", value: alreadySubscribedCount.toString()),
+                      _InfoRow(label: "Willing to change", value: offerAcceptedCount.toString()),
+                      _InfoRow(label: "Not Interested", value: offerRejectedCount.toString()),
                     ],
                   ),
-                  const SizedBox(height: 20),
-
-                  const SizedBox(height: 10),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18)),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const AssignRouteScreen()),
-                        );
-                      },
-                      child: const Text("Assign Routemap and Target",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
-                    ),
-                  ),
                   const SizedBox(height: 30),
-                  Center(
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(18)),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const createstaff()),
-                        );
-                      },
-                      child: const Text("Create Officestaff",
-                          style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
-                    ),
-                  )
+                  _buildGridButtons()
                 ],
               ),
             ),
     );
   }
 
-  Widget _buildCard({required String title, required List<_InfoRow> rows}) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title,
-                style:
-                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Column(children: rows),
-          ],
-        ),
+  Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
+    return Drawer(
+      child: ListView(
+        children: [
+          DrawerHeader(
+            decoration: const BoxDecoration(color: Colors.black),
+            child: Column(
+              children: [
+                const Icon(Icons.account_circle, size: 60, color: Colors.white),
+                const SizedBox(height: 10),
+                Text(localizations.salesrep, style: const TextStyle(color: Colors.white)),
+              ],
+            ),
+          ),
+          SwitchListTile(
+            title: Text(localeProvider.locale.languageCode == 'te' ? 'తెలుగు' : 'English'),
+            value: localeProvider.locale.languageCode == 'te',
+            onChanged: (_) => localeProvider.toggleLocale(),
+            secondary: const Icon(Icons.language),
+          ),
+          ListTile(
+            leading: const Icon(Icons.history),
+            title: Text(localizations.historyPage),
+            onTap: () {
+              Navigator.push(context, MaterialPageRoute(builder: (_) => const Historypage()));
+            },
+          ),
+        ],
       ),
+    );
+  }
+
+  Widget _buildCard({required String title, required List<_InfoRow> rows}) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        border: Border.all(color: Colors.black),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(title,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)),
+          const Divider(color: Colors.black),
+          const SizedBox(height: 8),
+          Column(children: rows),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridButtons() {
+    return GridView.count(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      crossAxisCount: 2,
+      crossAxisSpacing: 16,
+      mainAxisSpacing: 16,
+      childAspectRatio: 2.5,
+      children: [
+        _buildBlackWhiteButton("Assign Routemap and Target", () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const AssignRouteScreen()));
+        }),
+        _buildBlackWhiteButton("Create Officestaff", () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const createstaff()));
+        }),
+        _buildBlackWhiteButton("Approved Agents", () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const approvedagents()));
+        }),
+        _buildBlackWhiteButton("Agents Waiting Approval", () {
+          Navigator.push(context, MaterialPageRoute(builder: (_) => const Approveagents()));
+        }),
+      ],
+    );
+  }
+
+  Widget _buildBlackWhiteButton(String label, VoidCallback onPressed) {
+    return OutlinedButton(
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        side: const BorderSide(color: Colors.black),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      ),
+      onPressed: onPressed,
+      child: Text(label,
+          textAlign: TextAlign.center,
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
     );
   }
 }
@@ -349,19 +321,25 @@ class _InfoRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Widget row = Row(
+    final row = Row(
       children: [
         Expanded(
           child: Text(
             "$label:",
-            style: const TextStyle(fontWeight: FontWeight.w500),
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: Colors.black,
+              fontSize: 16,
+            ),
           ),
         ),
-        const SizedBox(width: 8),
         Text(
           value,
-          style:
-              TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+          style: TextStyle(
+            fontWeight: bold ? FontWeight.bold : FontWeight.normal,
+            color: Colors.black,
+            fontSize: 16,
+          ),
         ),
       ],
     );
