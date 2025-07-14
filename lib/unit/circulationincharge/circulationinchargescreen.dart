@@ -174,33 +174,53 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     onTap: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const Noofresources()),
+                        MaterialPageRoute(
+                            builder: (_) => const Noofresources()),
                       );
                       _loadData();
                     },
                     child: _buildCard(
-                      title: "Number of Resources",
-                      rows: [_InfoRow(label: "Agents", value: agentCount.toString())],
+                      title: localizations.numberOfResources,
+                      rows: [
+                        _InfoRow(
+                            label: localizations.agents,
+                            value: agentCount.toString())
+                      ],
                     ),
                   ),
                   const SizedBox(height: 20),
                   GestureDetector(
                     onTap: () {
-                      Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Allcustomerforms()));
+                      Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const Allcustomerforms()));
                     },
                     child: _buildCard(
-                      title: "View All Customer Forms",
-                      rows: [_InfoRow(label: "Customer Forms", value: customerFormCount.toString())],
+                      title: localizations.viewallcustomerforms,
+                      rows: [
+                        _InfoRow(
+                            label: localizations.customerforms,
+                            value: customerFormCount.toString())
+                      ],
                     ),
-                  ), const SizedBox(height: 20),
+                  ),
+                  const SizedBox(height: 20),
                   _buildCard(
-                    title: "Subscription Details",
+                    title: localizations.subscriptionDetails,
                     rows: [
-                      _InfoRow(label: "Houses Visited", value: customerFormCount.toString()),
-                      _InfoRow(label: "Eenadu subscription", value: alreadySubscribedCount.toString()),
-                      _InfoRow(label: "Willing to change", value: offerAcceptedCount.toString()),
-                      _InfoRow(label: "Not Interested", value: offerRejectedCount.toString()),
+                      _InfoRow(
+                          label: localizations.housesVisited,
+                          value: customerFormCount.toString()),
+                      _InfoRow(
+                          label: localizations.eenaduSubscription,
+                          value: alreadySubscribedCount.toString()),
+                      _InfoRow(
+                          label: localizations.willingToChange,
+                          value: offerAcceptedCount.toString()),
+                      _InfoRow(
+                          label: localizations.notInterested,
+                          value: offerRejectedCount.toString()),
                     ],
                   ),
                   const SizedBox(height: 30),
@@ -211,7 +231,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     );
   }
 
-  Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
+  Widget _buildDrawer(
+      LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
       child: ListView(
         children: [
@@ -221,22 +242,18 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
               children: [
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text(localizations.salesrep, style: const TextStyle(color: Colors.white)),
+                Text(localizations.salesrep,
+                    style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
           SwitchListTile(
-            title: Text(localeProvider.locale.languageCode == 'te' ? 'తెలుగు' : 'English'),
+            title: Text(localeProvider.locale.languageCode == 'te'
+                ? 'తెలుగు'
+                : 'English'),
             value: localeProvider.locale.languageCode == 'te',
             onChanged: (_) => localeProvider.toggleLocale(),
             secondary: const Icon(Icons.language),
-          ),
-          ListTile(
-            leading: const Icon(Icons.history),
-            title: Text(localizations.historyPage),
-            onTap: () {
-              Navigator.push(context, MaterialPageRoute(builder: (_) => const Historypage()));
-            },
           ),
         ],
       ),
@@ -256,7 +273,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         children: [
           Text(title,
               style: const TextStyle(
-                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black)),
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black)),
           const Divider(color: Colors.black),
           const SizedBox(height: 8),
           Column(children: rows),
@@ -266,6 +285,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   }
 
   Widget _buildGridButtons() {
+    final localizations = AppLocalizations.of(context)!;
+
     return GridView.count(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -274,17 +295,21 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       mainAxisSpacing: 16,
       childAspectRatio: 2.5,
       children: [
-        _buildBlackWhiteButton("Assign Routemap and Target", () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const AssignRouteScreen()));
+        _buildBlackWhiteButton(localizations.assignroutemapandtarget, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const AssignRouteScreen()));
         }),
-        _buildBlackWhiteButton("Create Officestaff", () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const createstaff()));
+        _buildBlackWhiteButton(localizations.createofficestaff, () {
+          Navigator.push(
+              context, MaterialPageRoute(builder: (_) => const createstaff()));
         }),
-        _buildBlackWhiteButton("Approved Agents", () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const approvedagents()));
+        _buildBlackWhiteButton(localizations.approvedagents, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const approvedagents()));
         }),
-        _buildBlackWhiteButton("Agents Waiting Approval", () {
-          Navigator.push(context, MaterialPageRoute(builder: (_) => const Approveagents()));
+        _buildBlackWhiteButton(localizations.agentswaitingapproval, () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const Approveagents()));
         }),
       ],
     );

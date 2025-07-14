@@ -1,9 +1,12 @@
 import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agentdetailsscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Noofresources extends StatefulWidget {
@@ -76,18 +79,21 @@ class _NoofresourcesState extends State<Noofresources> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text("Number of Resources"),
+        title: Text(Localizations.numberOfResources),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : users.isEmpty
-              ? const Center(
-                  child: Text("No users found", style: TextStyle(fontSize: 16)))
+              ? Center(
+                  child: Text(Localizations.nousersfound,
+                      style: TextStyle(fontSize: 16)))
               : Column(
                   children: [
                     Padding(
@@ -101,8 +107,8 @@ class _NoofresourcesState extends State<Noofresources> {
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: Text(
-                          "Total Agents: ${users.length}",
-                          style: const TextStyle(
+                          "${Localizations.totalagents} ${users.length}",
+                          style: TextStyle(
                             fontSize: 18,
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
@@ -159,19 +165,19 @@ class _NoofresourcesState extends State<Noofresources> {
                                     const SizedBox(height: 10),
                                     const Divider(color: Colors.grey),
                                     InfoRow(
-                                        label: "ID",
+                                        label: Localizations.emailOrUserId,
                                         value: user.id?.toString() ?? 'N/A'),
                                     InfoRow(
-                                        label: "Email",
+                                        label: Localizations.email,
                                         value: user.email ?? 'N/A'),
                                     InfoRow(
-                                        label: "Phone",
+                                        label: Localizations.phone,
                                         value: user.phone ?? 'N/A'),
                                     InfoRow(
-                                        label: "Role",
+                                        label: Localizations.jobRole,
                                         value: user.role ?? 'N/A'),
                                     InfoRow(
-                                        label: "Unit",
+                                        label: Localizations.unitName,
                                         value: user.unitName ?? 'N/A'),
                                   ],
                                 ),

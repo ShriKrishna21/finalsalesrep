@@ -364,7 +364,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get segmentincharge => 'విభాగ ఇన్‌చార్జ్';
 
   @override
-  String get approvedagents => 'ఆమోదించబడిన ఏజెంట్లు';
+  String get approvedagents => 'ఆమోదం పొందిన ఏజెంట్లు';
 
   @override
   String get inprogressagents => 'ప్రగతిలో ఉన్న ఏజెంట్లు';
@@ -549,4 +549,78 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get circulationhead => 'సర్క్యులేషన్ హెడ్';
+
+  @override
+  String get customerforms => 'కస్టమర్ ఫారమ్స్‌';
+
+  @override
+  String get assignroutemapandtarget =>
+      'రూట్‌మ్యాప్ మరియు లక్ష్యాన్ని నియమించండి';
+
+  @override
+  String get createofficestaff => 'ఆఫీసు సిబ్బందిని సృష్టించండి';
+
+  @override
+  String get agentswaitingapproval => 'మంజూరుకు ఎదురు చూస్తున్న ఏజెంట్లు';
+
+  @override
+  String get assignroutetarget => 'రూట్ మరియు టార్గెట్‌ను నియమించు';
+
+  @override
+  String get selectagent => 'ఏజెంట్‌ను ఎంచుకోండి';
+
+  @override
+  String get routeandtargetassignedsuccessfully =>
+      'రూట్ మరియు టార్గెట్ విజయవంతంగా కేటాయించబడ్డాయి';
+
+  @override
+  String get bothassignmentsfailed => 'రెండు నియామకాలు విఫలమయ్యాయి';
+
+  @override
+  String get routeassignmentfailed => 'రూట్ నియామకం విఫలమైంది';
+
+  @override
+  String get targetassignmentfailed => 'లక్ష్య నియామకం విఫలమైంది';
+
+  @override
+  String get nousersfound => 'ఈ యూనిట్‌లో యూజర్లు లేరు';
+
+  @override
+  String get totalagents => ' మొత్తం ఏజెంట్లు';
+
+  @override
+  String get filterbydate => 'తేదీ ఆధారంగా';
+
+  @override
+  String get nocustomerformsavailable => 'No Customer Forms Available';
+
+  @override
+  String get routemap => 'రూట్ మ్యాప్';
+
+  @override
+  String get enterroutemap => 'రూట్ మ్యాప్ ఎంటర్ చేయండి';
+
+  @override
+  String get assigntarget => 'టార్గెట్ నియమించండి';
+
+  @override
+  String get entertarget => 'టార్గెట్ ఎంటర్ చేయండి';
+
+  @override
+  String get pleaseenteravalidunit => 'దయచేసి సరైన యూనిట్‌ను నమోదు చేయండి';
+
+  @override
+  String get passwordrequired => 'దయచేసి పాస్వర్డ్ నమోదు చేయండి';
+
+  @override
+  String get addressrequired => 'దయచేసి చిరునామా నమోదు చేయండి';
+
+  @override
+  String get unnamedagent => 'పేరు లేని ఏజెంట్';
+
+  @override
+  String get na => 'N/A';
+
+  @override
+  String get approveagents => 'ఏజెంట్లను అనుమతించండి';
 }

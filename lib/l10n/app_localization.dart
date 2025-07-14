@@ -1147,6 +1147,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'CirculationHead'**
   String get circulationhead;
+
+  /// No description provided for @customerforms.
+  ///
+  /// In en, this message translates to:
+  /// **'CustomerForms'**
+  String get customerforms;
+
+  /// No description provided for @assignroutemapandtarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Routemap and Target'**
+  String get assignroutemapandtarget;
+
+  /// No description provided for @createofficestaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Officestaff'**
+  String get createofficestaff;
+
+  /// No description provided for @agentswaitingapproval.
+  ///
+  /// In en, this message translates to:
+  /// **'Agents Waiting Approval'**
+  String get agentswaitingapproval;
+
+  /// No description provided for @assignroutetarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Route & Target'**
+  String get assignroutetarget;
+
+  /// No description provided for @selectagent.
+  ///
+  /// In en, this message translates to:
+  /// **'SelectAgent'**
+  String get selectagent;
+
+  /// No description provided for @routeandtargetassignedsuccessfully.
+  ///
+  /// In en, this message translates to:
+  /// **'Route and Target assigned successfully'**
+  String get routeandtargetassignedsuccessfully;
+
+  /// No description provided for @bothassignmentsfailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Both assignments failed'**
+  String get bothassignmentsfailed;
+
+  /// No description provided for @routeassignmentfailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Route assignment failed'**
+  String get routeassignmentfailed;
+
+  /// No description provided for @targetassignmentfailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Target assignment failed'**
+  String get targetassignmentfailed;
+
+  /// No description provided for @nousersfound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Users Found'**
+  String get nousersfound;
+
+  /// No description provided for @totalagents.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Agents '**
+  String get totalagents;
+
+  /// No description provided for @filterbydate.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by Date'**
+  String get filterbydate;
+
+  /// No description provided for @nocustomerformsavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No Customer Forms Available'**
+  String get nocustomerformsavailable;
+
+  /// No description provided for @routemap.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Map'**
+  String get routemap;
+
+  /// No description provided for @enterroutemap.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Route Map'**
+  String get enterroutemap;
+
+  /// No description provided for @assigntarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Target'**
+  String get assigntarget;
+
+  /// No description provided for @entertarget.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Target'**
+  String get entertarget;
+
+  /// No description provided for @pleaseenteravalidunit.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Enter A Valid Unit'**
+  String get pleaseenteravalidunit;
+
+  /// No description provided for @passwordrequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Password required'**
+  String get passwordrequired;
+
+  /// No description provided for @addressrequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Address required'**
+  String get addressrequired;
+
+  /// No description provided for @unnamedagent.
+  ///
+  /// In en, this message translates to:
+  /// **'Unnamed Agent'**
+  String get unnamedagent;
+
+  /// No description provided for @na.
+  ///
+  /// In en, this message translates to:
+  /// **'N/A'**
+  String get na;
+
+  /// No description provided for @approveagents.
+  ///
+  /// In en, this message translates to:
+  /// **'Approve Agents'**
+  String get approveagents;
 }
 
 class _AppLocalizationsDelegate

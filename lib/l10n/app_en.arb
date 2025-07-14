@@ -80,7 +80,6 @@
   "daysOfferRejected15": "15 days offer rejected",
   "alreadySubscribed": "Already Subscribed",
   "welcome": "Welcome",
-
   "circulationInchargeScreen": "Circulation Incharge Screen",
   "circulationIncharge": "Circulation Incharge",
   "numberOfResources": "Number Of Resources",
@@ -185,7 +184,38 @@
    "subscribed":"Subscribed",
    "unitmanager":"UnitManager",
     "viewallcustomerforms":"ViewAllCustomerForms",
-       "circulationhead":"CirculationHead"
+       "circulationhead":"CirculationHead",
+       "customerforms":"CustomerForms",
+"assignroutemapandtarget": "Assign Routemap and Target",
+"createofficestaff": "Create Officestaff",
+"approvedagents": "Approved Agents",
+"agentswaitingapproval": "Agents Waiting Approval",
+"assignroutetarget":"Assign Route & Target",
+"selectagent":"SelectAgent",
+"routeandtargetassignedsuccessfully":"Route and Target assigned successfully",
+"bothassignmentsfailed": "Both assignments failed",
+"routeassignmentfailed": "Route assignment failed",
+"targetassignmentfailed": "Target assignment failed",
+ "nousersfound":"No Users Found",
+ "totalagents":"Total Agents ",
+   "filterbydate":"Filter by Date",
+"nocustomerformsavailable":"No Customer Forms Available",
+"routemap":"Route Map",
+"enterroutemap":"Enter Route Map",
+"assigntarget":"Assign Target",
+"entertarget":"Enter Target",
+"pleaseenteravalidunit":"Please Enter A Valid Unit",
+"passwordrequired":"Password required",
+"addressrequired":"Address required",
+"approvedagents":"Approved Agents",
+"unnamedagent":"Unnamed Agent",
+"na":"N/A",
+"approveagents":"Approve Agents"
+
+
+
+
+
 
 
 

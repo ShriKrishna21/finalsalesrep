@@ -1,8 +1,11 @@
 import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AssignRouteScreen extends StatefulWidget {
@@ -93,7 +96,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     final token = prefs.getString('apikey');
     final sessionId = prefs.getString('session_id');
 
-    if (token == null || sessionId == null || selectedAgent == null) return false;
+    if (token == null || sessionId == null || selectedAgent == null)
+      return false;
 
     final response = await http.post(
       Uri.parse("https://salesrep.esanchaya.com/update/target"),
@@ -115,26 +119,36 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   }
 
   void _onSubmit() async {
+    final localizations = AppLocalizations.of(context)!;
+
     if (_formKey.currentState!.validate() && selectedAgent != null) {
       final routeSuccess = await assignRoute();
       final targetSuccess = await assignTarget();
 
       if (routeSuccess && targetSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Route and Target assigned successfully')),
+          SnackBar(
+            content: Text(localizations.routeandtargetassignedsuccessfully),
+          ),
         );
         Navigator.of(context).pop();
       } else if (!routeSuccess && !targetSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Both assignments failed')),
+          SnackBar(
+            content: Text(localizations.bothassignmentsfailed),
+          ),
         );
       } else if (!routeSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Route assignment failed')),
+          SnackBar(
+            content: Text(localizations.routeassignmentfailed),
+          ),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Target assignment failed')),
+          SnackBar(
+            content: Text(localizations.targetassignmentfailed),
+          ),
         );
       }
     }
@@ -142,8 +156,10 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
-      appBar: AppBar(title: const Text('Assign Route & Target')),
+      appBar: AppBar(title: Text(localizations.assignroutetarget)),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : Padding(
@@ -153,9 +169,9 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                 child: Column(
                   children: [
                     DropdownButtonFormField<User>(
-                      decoration: const InputDecoration(
-                        labelText: 'Select Agent',
-                        border: OutlineInputBorder(),
+                      decoration: InputDecoration(
+                        labelText: localizations.selectagent,
+                        border: const OutlineInputBorder(),
                       ),
                       value: selectedAgent,
                       items: users.map((User user) {
@@ -170,33 +186,35 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                         });
                       },
                       validator: (value) =>
-                          value == null ? 'Please select an agent' : null,
+                          value == null ? localizations.selectagent : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _routeMapController,
-                      decoration: const InputDecoration(
-                        labelText: 'Route Map',
+                      decoration: InputDecoration(
+                        labelText: localizations.routeMap,
                         border: OutlineInputBorder(),
                       ),
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter Route Map' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? localizations.enterroutemap
+                          : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _assignTargetController,
-                      decoration: const InputDecoration(
-                        labelText: 'Assign Target',
+                      decoration: InputDecoration(
+                        labelText: localizations.assigntarget,
                         border: OutlineInputBorder(),
                       ),
                       keyboardType: TextInputType.number,
-                      validator: (value) =>
-                          value == null || value.isEmpty ? 'Enter Target' : null,
+                      validator: (value) => value == null || value.isEmpty
+                          ? localizations.entertarget
+                          : null,
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
                       onPressed: _onSubmit,
-                      child: const Text('Submit'),
+                      child: Text(localizations.submit),
                     ),
                   ],
                 ),
