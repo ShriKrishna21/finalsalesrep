@@ -133,100 +133,117 @@ class _HistorypageState extends State<Historypage> {
         title: Text("Total History (${_filteredRecords.length})"),
         backgroundColor: Colors.white,
       ),
-      body: Column(
-        children: [
-          // 🔹 Date picker card
-          Card(
-            margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-              child: GestureDetector(
-                onTap: _pickDateRange,
-                child: Row(
-                  children: [
-                    const Icon(Icons.date_range, color: Colors.blue),
-                    const SizedBox(width: 8),
-                    Text(
-                      _selectedRange == null
-                          ? "All Dates"
-                          : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}",
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+      body: RefreshIndicator(
+        onRefresh: _fetchHistory,
+        child: _isLoading
+            ? const Center(child: CircularProgressIndicator())
+            : _filteredRecords.isEmpty
+                ? ListView(
+                    children: const [
+                      SizedBox(height: 200),
+                      Center(
+                          child: Text("No Records Found",
+                              style: TextStyle(fontSize: 18))),
+                    ],
+                  )
+                : ListView(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    children: [
+                      // 🔹 Date picker card
+                      Card(
+                        margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+                        elevation: 2,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 12, horizontal: 16),
+                          child: GestureDetector(
+                            onTap: _pickDateRange,
+                            child: Row(
+                              children: [
+                                const Icon(Icons.date_range,
+                                    color: Colors.blue),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _selectedRange == null
+                                      ? "All Dates"
+                                      : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}",
+                                  style: const TextStyle(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.w500),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
 
-          // 🔹 Fetch Button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.filter_center_focus),
-                label: const Text("Fetch customer forms"),
-                onPressed: _fetchHistory,
-                style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 14)),
-              ),
-            ),
-          ),
+                      // 🔹 Fetch Button
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            icon: const Icon(Icons.filter_center_focus),
+                            label: const Text("Fetch customer forms"),
+                            onPressed: _fetchHistory,
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
+                          ),
+                        ),
+                      ),
 
-          // 🔹 Search bar after fetch button
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: TextField(
-              controller: _searchController,
-              onChanged: _filterRecords,
-              decoration: InputDecoration(
-                hintText: "Search by ID or Family Head Name",
-                prefixIcon: const Icon(Icons.search),
-                filled: true,
-                fillColor: Colors.grey[200],
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide.none,
-                ),
-              ),
-            ),
-          ),
+                      // 🔹 Search bar
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: _filterRecords,
+                          decoration: InputDecoration(
+                            hintText: "Search by ID or Family Head Name",
+                            prefixIcon: const Icon(Icons.search),
+                            filled: true,
+                            fillColor: Colors.grey[200],
+                            contentPadding: const EdgeInsets.symmetric(
+                                vertical: 0, horizontal: 20),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(30),
+                              borderSide: BorderSide.none,
+                            ),
+                          ),
+                        ),
+                      ),
 
-          // 🔹 Loading or results
-          if (_isLoading) const LinearProgressIndicator(),
-          if (!_isLoading && _filteredRecords.isEmpty)
-            const Expanded(
-              child: Center(
-                child: Text("No Records Found", style: TextStyle(fontSize: 18)),
-              ),
-            ),
+                      // 🔹 Stats Row
+                      Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          children: [
+                            _buildStat(
+                                "Accepted", offerAcceptedCount, Colors.green),
+                            _buildStat(
+                                "Rejected", offerRejectedCount, Colors.red),
+                            _buildStat("Subscribed", alreadySubscribedCount,
+                                Colors.blue),
+                          ],
+                        ),
+                      ),
 
-          if (!_isLoading && _filteredRecords.isNotEmpty) ...[
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 12),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  _buildStat("Accepted", offerAcceptedCount, Colors.green),
-                  _buildStat("Rejected", offerRejectedCount, Colors.red),
-                  _buildStat("Subscribed", alreadySubscribedCount, Colors.blue),
-                ],
-              ),
-            ),
-            const Divider(height: 1),
-            Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                itemCount: _filteredRecords.length,
-                itemBuilder: (c, i) => _buildRecordCard(_filteredRecords[i]),
-              ),
-            ),
-          ],
-        ],
+                      const Divider(height: 1),
+
+                      // 🔹 Record List
+                      ..._filteredRecords
+                          .map((record) => Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    horizontal: 16, vertical: 8),
+                                child: _buildRecordCard(record),
+                              ))
+                          .toList(),
+                    ],
+                  ),
       ),
     );
   }
@@ -245,7 +262,6 @@ class _HistorypageState extends State<Historypage> {
 
   Widget _buildRecordCard(Records r) {
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
       elevation: 3,
       child: ExpansionTile(
         title: Text(
