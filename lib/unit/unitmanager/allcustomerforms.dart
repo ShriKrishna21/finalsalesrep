@@ -12,8 +12,12 @@ class Allcustomerforms extends StatefulWidget {
 
 class _AllcustomerformsState extends State<Allcustomerforms> {
   List<Record> records = [];
+  List<Record> filteredRecords = [];
+
   bool isLoading = true;
   String errorMessage = '';
+  String searchQuery = '';
+  final TextEditingController _searchController = TextEditingController();
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
@@ -25,6 +29,15 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   void initState() {
     super.initState();
     fetchAllForms();
+    _searchController.addListener(() {
+      _filterRecords(_searchController.text);
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
   Future<void> _pickDateRange() async {
@@ -39,6 +52,17 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
       setState(() => _selectedRange = picked);
       fetchAllForms();
     }
+  }
+
+  void _filterRecords(String query) {
+    setState(() {
+      searchQuery = query.toLowerCase();
+      filteredRecords = records.where((record) {
+        final name = record.familyHeadName?.toLowerCase() ?? '';
+        final id = record.id?.toString() ?? '';
+        return name.contains(searchQuery) || id.contains(searchQuery);
+      }).toList();
+    });
   }
 
   Future<void> fetchAllForms() async {
@@ -82,7 +106,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
 
       if (response.statusCode == 200) {
         final data = AllCustomerForms.fromJson(jsonDecode(response.body));
-        final fetchedRecords = data.result?.records ?? [];
+        final fetchedRecords = (data.result?.records ?? []).reversed.toList();
 
         int subscribed = 0;
         int accepted = 0;
@@ -94,7 +118,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
           } else {
             if (record.freeOffer15Days == true) {
               accepted++;
-            } else if (record.freeOffer15Days == false && record.eenaduNewspaper == false) {
+            } else if (record.freeOffer15Days == false &&
+                record.eenaduNewspaper == false) {
               rejected++;
             }
           }
@@ -102,6 +127,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
 
         setState(() {
           records = fetchedRecords;
+          filteredRecords = fetchedRecords;
           alreadySubscribedCount = subscribed;
           offerAcceptedCount = accepted;
           offerRejectedCount = rejected;
@@ -142,6 +168,21 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                   children: [
                     Padding(
                       padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
+                      child: TextField(
+                        controller: _searchController,
+                        decoration: InputDecoration(
+                          prefixIcon: const Icon(Icons.search),
+                          hintText: 'Search by name or ID',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey[100],
+                        ),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(12, 12, 12, 0),
                       child: ElevatedButton.icon(
                         onPressed: _pickDateRange,
                         icon: const Icon(Icons.date_range),
@@ -166,7 +207,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(" Eenadu Subscription: $alreadySubscribedCount"),
+                            Text(
+                                " Eenadu Subscription: $alreadySubscribedCount"),
                             Text(" Offer Accepted: $offerAcceptedCount"),
                             Text(" Offer Rejected: $offerRejectedCount"),
                           ],
@@ -174,30 +216,42 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                       ),
                     ),
                     Expanded(
-                      child: records.isEmpty
-                          ? const Center(child: Text("No customer forms available."))
+                      child: filteredRecords.isEmpty
+                          ? const Center(
+                              child: Text("No customer forms available."))
                           : ListView.builder(
-                              itemCount: records.length,
+                              itemCount: filteredRecords.length,
                               itemBuilder: (context, index) {
-                                final r = records[index];
+                                final r = filteredRecords[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(" Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                        Text(
+                                            " Family Head: ${r.familyHeadName ?? 'N/A'}",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 6),
                                         Text(" Date: ${r.date ?? 'N/A'}"),
                                         Text(" Address: ${r.address ?? 'N/A'}"),
-                                        Text(" City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
-                                        Text(" Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                                        Text(" Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
-                                        Text(" Employed: ${_boolToText(r.employed)}"),
-                                        Text(" Agent Name: ${r.agentName ?? 'N/A'}"),
-                                        Text(" Offer: ${_boolToText(r.freeOffer15Days)}"),
+                                        Text(
+                                            " City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                        Text(
+                                            " Mobile: ${r.mobileNumber ?? 'N/A'}"),
+                                        Text(
+                                            " Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
+                                        Text(
+                                            " Employed: ${_boolToText(r.employed)}"),
+                                        Text(
+                                            " Agent Name: ${r.agentName ?? 'N/A'}"),
+                                        Text(
+                                            " Offer: ${_boolToText(r.freeOffer15Days)}"),
                                       ],
                                     ),
                                   ),
@@ -210,8 +264,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
     );
   }
 }
-
-// Add your model classes AllCustomerForms, Result, and Record here (unchanged from your previous code).
 
 class AllCustomerForms {
   String? jsonrpc;
@@ -226,14 +278,6 @@ class AllCustomerForms {
       id: json['id'],
       result: json['result'] != null ? Result.fromJson(json['result']) : null,
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'jsonrpc': jsonrpc,
-      'id': id,
-      'result': result?.toJson(),
-    };
   }
 }
 
@@ -254,184 +298,49 @@ class Result {
       code: json['code'],
     );
   }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'success': success,
-      'records': records?.map((e) => e.toJson()).toList(),
-      'count': count,
-      'code': code,
-    };
-  }
 }
 
 class Record {
   int? id;
-  String? agentName;
-  String? agentLogin;
-  String? unitName;
-  String? date;
-  String? time;
   String? familyHeadName;
-  String? fatherName;
-  String? motherName;
-  String? spouseName;
-  String? houseNumber;
-  String? streetNumber;
+  String? agentName;
+  String? date;
+  String? address;
   String? city;
   String? pinCode;
-  String? address;
   String? mobileNumber;
   bool? eenaduNewspaper;
-  String? feedbackToImproveEenaduPaper;
-  bool? readNewspaper;
-  String? currentNewspaper;
-  String? reasonForNotTakingEenaduNewsPaper;
-  String? reasonNotReading;
-  bool? freeOffer15Days;
-  String? reasonNotTakingOffer;
   bool? employed;
-  bool? jobType;
-  bool? jobTypeOne;
-  String? jobProfession;
-  String? jobDesignation;
-  String? companyName;
-  String? profession;
-  bool? jobWorkingState;
-  bool? jobWorkingLocation;
-  String? jobDesignationOne;
-  String? latitude;
-  String? longitude;
-  String? locationAddress;
-  bool? offerAccepted;
+  bool? freeOffer15Days;
 
   Record({
     this.id,
-    this.agentName,
-    this.agentLogin,
-    this.unitName,
-    this.date,
-    this.time,
     this.familyHeadName,
-    this.fatherName,
-    this.motherName,
-    this.spouseName,
-    this.houseNumber,
-    this.streetNumber,
+    this.agentName,
+    this.date,
+    this.address,
     this.city,
     this.pinCode,
-    this.address,
     this.mobileNumber,
     this.eenaduNewspaper,
-    this.feedbackToImproveEenaduPaper,
-    this.readNewspaper,
-    this.currentNewspaper,
-    this.reasonForNotTakingEenaduNewsPaper,
-    this.reasonNotReading,
-    this.freeOffer15Days,
-    this.reasonNotTakingOffer,
     this.employed,
-    this.jobType,
-    this.jobTypeOne,
-    this.jobProfession,
-    this.jobDesignation,
-    this.companyName,
-    this.profession,
-    this.jobWorkingState,
-    this.jobWorkingLocation,
-    this.jobDesignationOne,
-    this.latitude,
-    this.longitude,
-    this.locationAddress,
-    this.offerAccepted,
+    this.freeOffer15Days,
   });
 
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record(
       id: json['id'],
-      agentName: json['agent_name'],
-      agentLogin: json['agent_login'],
-      unitName: json['unit_name'],
-      date: json['date'],
-      time: json['time'],
       familyHeadName: json['family_head_name'],
-      fatherName: json['father_name'],
-      motherName: json['mother_name'],
-      spouseName: json['spouse_name'],
-      houseNumber: json['house_number'],
-      streetNumber: json['street_number'],
+      agentName: json['agent_name'],
+      date: json['date'],
+      address: json['address'],
       city: json['city'],
       pinCode: json['pin_code'],
-      address: json['address'],
       mobileNumber: json['mobile_number'],
       eenaduNewspaper: _parseBool(json['eenadu_newspaper']),
-      feedbackToImproveEenaduPaper: json['feedback_to_improve_eenadu_paper'],
-      readNewspaper: _parseBool(json['read_newspaper']),
-      currentNewspaper: json['current_newspaper'],
-      reasonForNotTakingEenaduNewsPaper:
-          json['reason_for_not_taking_eenadu_newsPaper'],
-      reasonNotReading: json['reason_not_reading'],
-      freeOffer15Days: _parseBool(json['free_offer_15_days']),
-      reasonNotTakingOffer: json['reason_not_taking_offer'],
       employed: _parseBool(json['employed']),
-      jobType: _parseBool(json['job_type']),
-      jobTypeOne: _parseBool(json['job_type_one']),
-      jobProfession: json['job_profession'],
-      jobDesignation: json['job_designation'],
-      companyName: json['company_name'],
-      profession: json['profession'],
-      jobWorkingState: _parseBool(json['job_working_state']),
-      jobWorkingLocation: _parseBool(json['job_working_location']),
-      jobDesignationOne: json['job_designation_one'],
-      latitude: json['latitude'],
-      longitude: json['longitude'],
-      locationAddress: json['location_address'],
-      offerAccepted: _parseBool(json['offeraccepted']),
+      freeOffer15Days: _parseBool(json['free_offer_15_days']),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'agent_name': agentName,
-      'agent_login': agentLogin,
-      'unit_name': unitName,
-      'date': date,
-      'time': time,
-      'family_head_name': familyHeadName,
-      'father_name': fatherName,
-      'mother_name': motherName,
-      'spouse_name': spouseName,
-      'house_number': houseNumber,
-      'street_number': streetNumber,
-      'city': city,
-      'pin_code': pinCode,
-      'address': address,
-      'mobile_number': mobileNumber,
-      'eenadu_newspaper': eenaduNewspaper,
-      'feedback_to_improve_eenadu_paper': feedbackToImproveEenaduPaper,
-      'read_newspaper': readNewspaper,
-      'current_newspaper': currentNewspaper,
-      'reason_for_not_taking_eenadu_newsPaper':
-          reasonForNotTakingEenaduNewsPaper,
-      'reason_not_reading': reasonNotReading,
-      'free_offer_15_days': freeOffer15Days,
-      'reason_not_taking_offer': reasonNotTakingOffer,
-      'employed': employed,
-      'job_type': jobType,
-      'job_type_one': jobTypeOne,
-      'job_profession': jobProfession,
-      'job_designation': jobDesignation,
-      'company_name': companyName,
-      'profession': profession,
-      'job_working_state': jobWorkingState,
-      'job_working_location': jobWorkingLocation,
-      'job_designation_one': jobDesignationOne,
-      'latitude': latitude,
-      'longitude': longitude,
-      'location_address': locationAddress,
-      'offeraccepted': offerAccepted,
-    };
   }
 
   static bool? _parseBool(dynamic value) {
