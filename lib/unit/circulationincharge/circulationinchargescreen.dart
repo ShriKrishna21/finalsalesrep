@@ -16,7 +16,8 @@ class Circulationinchargescreen extends StatefulWidget {
   const Circulationinchargescreen({super.key});
 
   @override
-  State<Circulationinchargescreen> createState() => _CirculationinchargescreenState();
+  State<Circulationinchargescreen> createState() =>
+      _CirculationinchargescreenState();
 }
 
 class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
@@ -181,11 +182,29 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.language),
-              title: const Text("Switch Language"),
-              onTap: () {
-                localeProvider.toggleLocale();
-              },
+              // leading: const Icon(Icons.language),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // const Text("Switch Language"),
+                  Row(
+                    children: [
+                      const Text('English'),
+                      Switch(
+                        value: localeProvider.locale.languageCode == 'te',
+                        onChanged: (value) {
+                          localeProvider.toggleLocale();
+                        },
+                        activeColor: Colors.green,
+                        inactiveThumbColor: Colors.blue,
+                        activeTrackColor: Colors.green.shade200,
+                        inactiveTrackColor: Colors.blue.shade200,
+                      ),
+                      const Text('తెలుగు'),
+                    ],
+                  ),
+                ],
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.history),
@@ -211,7 +230,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     onTap: () async {
                       await Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const Noofresources()),
+                        MaterialPageRoute(
+                            builder: (_) => const Noofresources()),
                       );
                       _loadData(); // Refresh on return
                     },
@@ -228,10 +248,18 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                   _buildCard(
                     title: "Subscription Details",
                     rows: [
-                      _InfoRow(label: "Houses Visited", value: customerFormCount.toString()),
-                      _InfoRow(label: "Eenadu subscription", value: alreadySubscribedCount.toString()),
-                      _InfoRow(label: "Willing to change", value: offerAcceptedCount.toString()),
-                      _InfoRow(label: "Not Interested", value: offerRejectedCount.toString()),
+                      _InfoRow(
+                          label: "Houses Visited",
+                          value: customerFormCount.toString()),
+                      _InfoRow(
+                          label: "Eenadu subscription",
+                          value: alreadySubscribedCount.toString()),
+                      _InfoRow(
+                          label: "Willing to change",
+                          value: offerAcceptedCount.toString()),
+                      _InfoRow(
+                          label: "Not Interested",
+                          value: offerRejectedCount.toString()),
                     ],
                   ),
                   const SizedBox(height: 20),
@@ -241,16 +269,21 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const AssignRouteScreen()),
+                          MaterialPageRoute(
+                              builder: (_) => const AssignRouteScreen()),
                         );
                       },
-                      child: const Text("Assign Routemap and Target", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: const Text("Assign Routemap and Target",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   ),
                   const SizedBox(height: 30),
@@ -258,16 +291,21 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 24, vertical: 14),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(18)),
                       ),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const createstaff()),
+                          MaterialPageRoute(
+                              builder: (_) => const createstaff()),
                         );
                       },
-                      child: const Text("Create Officestaff", style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                      child: const Text("Create Officestaff",
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 16)),
                     ),
                   )
                 ],
@@ -285,7 +323,9 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Text(title,
+                style:
+                    const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
             const SizedBox(height: 8),
             Column(children: rows),
           ],
@@ -320,7 +360,8 @@ class _InfoRow extends StatelessWidget {
         const SizedBox(width: 8),
         Text(
           value,
-          style: TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
+          style:
+              TextStyle(fontWeight: bold ? FontWeight.bold : FontWeight.normal),
         ),
       ],
     );

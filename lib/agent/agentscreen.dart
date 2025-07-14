@@ -141,11 +141,29 @@ class _AgentscreenState extends State<Agentscreen> {
               ),
             ),
             ListTile(
-              leading: const Icon(Icons.language),
-              title: const Text("Switch Language"),
-              onTap: () {
-                localeProvider.toggleLocale();
-              },
+              // leading: const Icon(Icons.language),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // const Text("Switch Language"),
+                  Row(
+                    children: [
+                      const Text('English'),
+                      Switch(
+                        value: localeProvider.locale.languageCode == 'te',
+                        onChanged: (value) {
+                          localeProvider.toggleLocale();
+                        },
+                        activeColor: Colors.green,
+                        inactiveThumbColor: Colors.blue,
+                        activeTrackColor: Colors.green.shade200,
+                        inactiveTrackColor: Colors.blue.shade200,
+                      ),
+                      const Text('తెలుగు'),
+                    ],
+                  ),
+                ],
+              ),
             ),
             ListTile(
               leading: const Icon(Icons.history),
@@ -190,7 +208,6 @@ class _AgentscreenState extends State<Agentscreen> {
                     ),
                   ),
                   const SizedBox(height: 20),
-
                   Center(child: _buildSectionTitle(localizations.houseVisited)),
                   const SizedBox(height: 20),
                   _buildInfoRow(localizations.todaysHouseCount, target ?? "0"),
@@ -198,25 +215,21 @@ class _AgentscreenState extends State<Agentscreen> {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const Onedayhistory()),
+                        MaterialPageRoute(
+                            builder: (_) => const Onedayhistory()),
                       );
                     },
                     child: _buildInfoRow(
                         localizations.houseVisited, "${records.length}"),
                   ),
-                  _buildInfoRow(
-                      localizations.todaysTargetLeft,
+                  _buildInfoRow(localizations.todaysTargetLeft,
                       "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-
                   const SizedBox(height: 30),
-
                   Center(child: _buildSectionTitle(localizations.myRouteMap)),
                   routeName != null
                       ? _buildBulletPoint(routeName!)
                       : _buildBulletPoint("No route assigned"),
-
                   const SizedBox(height: 30),
-
                   Center(child: _buildSectionTitle(localizations.reports)),
                   _buildBulletPoint(
                       "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
