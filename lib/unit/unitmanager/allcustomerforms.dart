@@ -181,7 +181,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         controller: _searchController,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.search),
-                          // hintText: localizations.searchbynameoridormobilenumber,
+                          // hintText: localizations.searchbynameoridormobilenumber,git
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),

@@ -1,6 +1,9 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
+import 'package:provider/provider.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({super.key});
@@ -128,10 +131,12 @@ class _HistorypageState extends State<Historypage> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: Text("Total History (${_filteredRecords.length})"),
-        backgroundColor: Colors.white,
+        title:
+            Text('${localizations.totalhistory} (${_filteredRecords.length})'),
       ),
       body: RefreshIndicator(
         onRefresh: _fetchHistory,
@@ -139,10 +144,10 @@ class _HistorypageState extends State<Historypage> {
             ? const Center(child: CircularProgressIndicator())
             : _filteredRecords.isEmpty
                 ? ListView(
-                    children: const [
+                    children: [
                       SizedBox(height: 200),
                       Center(
-                          child: Text("No Records Found",
+                          child: Text(localizations.norecordsfound,
                               style: TextStyle(fontSize: 18))),
                     ],
                   )
@@ -165,7 +170,7 @@ class _HistorypageState extends State<Historypage> {
                                 const SizedBox(width: 8),
                                 Text(
                                   _selectedRange == null
-                                      ? "All Dates"
+                                      ? localizations.alldates
                                       : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}",
                                   style: const TextStyle(
                                       fontSize: 16,
@@ -185,7 +190,7 @@ class _HistorypageState extends State<Historypage> {
                           width: double.infinity,
                           child: ElevatedButton.icon(
                             icon: const Icon(Icons.filter_center_focus),
-                            label: const Text("Fetch customer forms"),
+                            label: Text(localizations.fetchcustomerforms),
                             onPressed: _fetchHistory,
                             style: ElevatedButton.styleFrom(
                               padding: const EdgeInsets.symmetric(vertical: 14),
@@ -202,7 +207,7 @@ class _HistorypageState extends State<Historypage> {
                           controller: _searchController,
                           onChanged: _filterRecords,
                           decoration: InputDecoration(
-                            hintText: "Search by ID or Family Head Name",
+                            hintText: localizations.searchbyidorfamilyheadname,
                             prefixIcon: const Icon(Icons.search),
                             filled: true,
                             fillColor: Colors.grey[200],
@@ -222,12 +227,12 @@ class _HistorypageState extends State<Historypage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStat(
-                                "Accepted", offerAcceptedCount, Colors.green),
-                            _buildStat(
-                                "Rejected", offerRejectedCount, Colors.red),
-                            _buildStat("Subscribed", alreadySubscribedCount,
-                                Colors.blue),
+                            _buildStat(localizations.accepted,
+                                offerAcceptedCount, Colors.green),
+                            _buildStat(localizations.rejected,
+                                offerRejectedCount, Colors.red),
+                            _buildStat(localizations.subscribed,
+                                alreadySubscribedCount, Colors.blue),
                           ],
                         ),
                       ),
@@ -239,7 +244,7 @@ class _HistorypageState extends State<Historypage> {
                           .map((record) => Padding(
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 16, vertical: 8),
-                                child: _buildRecordCard(record),
+                                child: _buildRecordCard(record, localizations),
                               ))
                           .toList(),
                     ],
@@ -260,7 +265,7 @@ class _HistorypageState extends State<Historypage> {
         ],
       );
 
-  Widget _buildRecordCard(Records r) {
+  Widget _buildRecordCard(Records r, AppLocalizations localizations) {
     return Card(
       elevation: 3,
       child: ExpansionTile(
@@ -274,19 +279,24 @@ class _HistorypageState extends State<Historypage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _detailRow("Agent", r.agentName),
-                _detailRow("Date", r.date),
-                _detailRow("Time", r.time),
-                _detailRow("Subscribed", _formatBool(r.eenaduNewspaper)),
-                _detailRow("Free Offer", _formatBool(r.freeOffer15Days)),
-                _detailRow("Read Newspaper", _formatBool(r.readNewspaper)),
-                _detailRow("Reject Reason", r.reasonNotTakingOffer),
-                _detailRow("City", r.city),
-                _detailRow("Mobile", r.mobileNumber),
-                _detailRow("Address", r.address),
-                _detailRow("Employed", _formatBool(r.employed)),
-                _detailRow("Job Type", _formatBool(r.jobType)),
-                _detailRow("Working in State", _formatBool(r.jobWorkingState)),
+                _detailRow(localizations.agents, r.agentName ?? ''),
+                _detailRow(localizations.date, r.date ?? ''),
+                _detailRow(localizations.time, r.time ?? ''),
+                _detailRow(
+                    localizations.subscribed, _formatBool(r.eenaduNewspaper)),
+                _detailRow(
+                    localizations.freeoffer, _formatBool(r.freeOffer15Days)),
+                _detailRow(
+                    localizations.readnewspaper, _formatBool(r.readNewspaper)),
+                _detailRow(localizations.reasonfornottakingoffer,
+                    r.reasonNotTakingOffer ?? ''),
+                _detailRow(localizations.city, r.city ?? ''),
+                _detailRow(localizations.phone, r.mobileNumber ?? ''),
+                _detailRow(localizations.address, r.address ?? ''),
+                _detailRow(localizations.employed, _formatBool(r.employed)),
+                _detailRow(localizations.jobtype, r.jobType ?? ''),
+                _detailRow(
+                    localizations.jobWorkingstate, r.jobWorkingState ?? ''),
               ],
             ),
           )

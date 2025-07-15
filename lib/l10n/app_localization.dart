@@ -1291,6 +1291,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Approve Agents'**
   String get approveagents;
+
+  /// No description provided for @norecordsfound.
+  ///
+  /// In en, this message translates to:
+  /// **'No Records Found'**
+  String get norecordsfound;
+
+  /// No description provided for @alldates.
+  ///
+  /// In en, this message translates to:
+  /// **'All Dates'**
+  String get alldates;
+
+  /// No description provided for @fetchcustomerforms.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetch Customer Forms'**
+  String get fetchcustomerforms;
+
+  /// No description provided for @searchbyidorfamilyheadname.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by ID or Family Head Name'**
+  String get searchbyidorfamilyheadname;
+
+  /// No description provided for @family.
+  ///
+  /// In en, this message translates to:
+  /// **'Family'**
+  String get family;
+
+  /// No description provided for @freeoffer.
+  ///
+  /// In en, this message translates to:
+  /// **'Free Offer'**
+  String get freeoffer;
+
+  /// No description provided for @jobWorkingstate.
+  ///
+  /// In en, this message translates to:
+  /// **'jobWorkingState'**
+  String get jobWorkingstate;
+
+  /// No description provided for @agentlogin.
+  ///
+  /// In en, this message translates to:
+  /// **'Agent Login'**
+  String get agentlogin;
+
+  /// No description provided for @todayhistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Today History'**
+  String get todayhistory;
 }
 
 class _AppLocalizationsDelegate

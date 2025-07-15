@@ -623,4 +623,32 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get approveagents => 'ఏజెంట్లను అనుమతించండి';
+
+  @override
+  String get norecordsfound => 'రికార్డులు కనబడలేదు';
+
+  @override
+  String get alldates => 'అన్ని తేదీలు';
+
+  @override
+  String get fetchcustomerforms => '  ఫారాలను పొందు';
+
+  @override
+  String get searchbyidorfamilyheadname =>
+      'ఐడీ లేదా కుటుంబ పెద్ద పేరు ద్వారా శోధించండి';
+
+  @override
+  String get family => 'కుటుంబం';
+
+  @override
+  String get freeoffer => 'ఉచిత ఆఫర్';
+
+  @override
+  String get jobWorkingstate => 'పని చేస్తున్న రాష్ట్రం';
+
+  @override
+  String get agentlogin => 'ఏజెంట్ లాగిన్';
+
+  @override
+  String get todayhistory => 'ఈరోజు హిస్టరీ';
 }
