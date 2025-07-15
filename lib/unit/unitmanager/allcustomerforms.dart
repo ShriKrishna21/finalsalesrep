@@ -1,6 +1,9 @@
 import 'dart:convert';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Allcustomerforms extends StatefulWidget {
@@ -94,7 +97,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
           } else {
             if (record.freeOffer15Days == true) {
               accepted++;
-            } else if (record.freeOffer15Days == false && record.eenaduNewspaper == false) {
+            } else if (record.freeOffer15Days == false &&
+                record.eenaduNewspaper == false) {
               rejected++;
             }
           }
@@ -128,11 +132,13 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        title: const Text("All Customer Forms"),
+        title: Text(localizations.viewallcustomerforms),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -146,7 +152,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         onPressed: _pickDateRange,
                         icon: const Icon(Icons.date_range),
                         label: Text(_selectedRange == null
-                            ? 'Filter by Date'
+                            ? localizations.filterbydate
                             : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}"),
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
@@ -166,38 +172,56 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 style: TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16)),
                             const SizedBox(height: 6),
-                            Text(" Eenadu Subscription: $alreadySubscribedCount"),
-                            Text(" Offer Accepted: $offerAcceptedCount"),
-                            Text(" Offer Rejected: $offerRejectedCount"),
+                            Text(
+                                " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
+                            Text(
+                                " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
+                            Text(
+                                " ${localizations.daysOfferRejected15}: $offerRejectedCount"),
                           ],
                         ),
                       ),
                     ),
                     Expanded(
                       child: records.isEmpty
-                          ? const Center(child: Text("No customer forms available."))
+                          ? Center(
+                              child:
+                                  Text(localizations.nocustomerformsavailable))
                           : ListView.builder(
                               itemCount: records.length,
                               itemBuilder: (context, index) {
                                 final r = records[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                  margin: const EdgeInsets.symmetric(
+                                      horizontal: 12, vertical: 8),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(" Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                        Text(
+                                            "${localizations.familyheadname}: ${r.familyHeadName ?? 'N/A'}",
+                                            style: const TextStyle(
+                                                fontSize: 16,
+                                                fontWeight: FontWeight.bold)),
                                         const SizedBox(height: 6),
-                                        Text(" Date: ${r.date ?? 'N/A'}"),
-                                        Text(" Address: ${r.address ?? 'N/A'}"),
-                                        Text(" City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
-                                        Text(" Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                                        Text(" Reads Eenadu: ${_boolToText(r.eenaduNewspaper)}"),
-                                        Text(" Employed: ${_boolToText(r.employed)}"),
-                                        Text(" Agent Name: ${r.agentName ?? 'N/A'}"),
-                                        Text(" Offer: ${_boolToText(r.freeOffer15Days)}"),
+                                        Text(
+                                            "${localizations.date}: ${r.date ?? 'N/A'}"),
+                                        Text(
+                                            "${localizations.address}: ${r.address ?? 'N/A'}"),
+                                        Text(
+                                            "${localizations.pinCode}: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                        Text(
+                                            "${localizations.phone}: ${r.mobileNumber ?? 'N/A'}"),
+                                        Text(
+                                            " ${localizations.eenadunewspaper}: ${_boolToText(r.eenaduNewspaper)}"),
+                                        Text(
+                                            " ${localizations.employed}: ${_boolToText(r.employed)}"),
+                                        Text(
+                                            " ${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
+                                        Text(
+                                            " ${localizations.daysforeenaduoffer}: ${_boolToText(r.freeOffer15Days)}"),
                                       ],
                                     ),
                                   ),
