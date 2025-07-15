@@ -31,6 +31,8 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
   }
 
   Future<void> agentdata() async {
+    setState(() => isLoading = true);
+
     final prefs = await SharedPreferences.getInstance();
     final apiKey = prefs.getString('apikey');
     final unitName = prefs.getString('unit');
@@ -128,27 +130,20 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
       if (routeSuccess && targetSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(localizations.routeandtargetassignedsuccessfully),
-          ),
+              content: Text(localizations.routeandtargetassignedsuccessfully)),
         );
         Navigator.of(context).pop();
       } else if (!routeSuccess && !targetSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(localizations.bothassignmentsfailed),
-          ),
+          SnackBar(content: Text(localizations.bothassignmentsfailed)),
         );
       } else if (!routeSuccess) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(localizations.routeassignmentfailed),
-          ),
+          SnackBar(content: Text(localizations.routeassignmentfailed)),
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(localizations.targetassignmentfailed),
-          ),
+          SnackBar(content: Text(localizations.targetassignmentfailed)),
         );
       }
     }
@@ -156,67 +151,71 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(title: Text(localizations.assignroutetarget)),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Form(
-                key: _formKey,
-                child: Column(
-                  children: [
-                    DropdownButtonFormField<User>(
-                      decoration: InputDecoration(
-                        labelText: localizations.selectagent,
-                        border: const OutlineInputBorder(),
+          : RefreshIndicator(
+              onRefresh: agentdata,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.all(16.0),
+                child: Form(
+                  key: _formKey,
+                  child: Column(
+                    children: [
+                      DropdownButtonFormField<User>(
+                        decoration: InputDecoration(
+                          labelText: localizations.selectagent,
+                          border: const OutlineInputBorder(),
+                        ),
+                        value: selectedAgent,
+                        items: users.map((User user) {
+                          return DropdownMenuItem<User>(
+                            value: user,
+                            child: Text('${user.name} (ID: ${user.id})'),
+                          );
+                        }).toList(),
+                        onChanged: (User? newValue) {
+                          setState(() {
+                            selectedAgent = newValue;
+                          });
+                        },
+                        validator: (value) =>
+                            value == null ? localizations.selectagent : null,
                       ),
-                      value: selectedAgent,
-                      items: users.map((User user) {
-                        return DropdownMenuItem<User>(
-                          value: user,
-                          child: Text('${user.name} (ID: ${user.id})'),
-                        );
-                      }).toList(),
-                      onChanged: (User? newValue) {
-                        setState(() {
-                          selectedAgent = newValue;
-                        });
-                      },
-                      validator: (value) =>
-                          value == null ? localizations.selectagent : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _routeMapController,
-                      decoration: InputDecoration(
-                        labelText: localizations.routeMap,
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _routeMapController,
+                        decoration: InputDecoration(
+                          labelText: localizations.routeMap,
+                          border: const OutlineInputBorder(),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? localizations.enterroutemap
+                            : null,
                       ),
-                      validator: (value) => value == null || value.isEmpty
-                          ? localizations.enterroutemap
-                          : null,
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _assignTargetController,
-                      decoration: InputDecoration(
-                        labelText: localizations.assigntarget,
-                        border: OutlineInputBorder(),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        controller: _assignTargetController,
+                        decoration: InputDecoration(
+                          labelText: localizations.assigntarget,
+                          border: const OutlineInputBorder(),
+                        ),
+                        keyboardType: TextInputType.number,
+                        validator: (value) => value == null || value.isEmpty
+                            ? localizations.entertarget
+                            : null,
                       ),
-                      keyboardType: TextInputType.number,
-                      validator: (value) => value == null || value.isEmpty
-                          ? localizations.entertarget
-                          : null,
-                    ),
-                    const SizedBox(height: 24),
-                    ElevatedButton(
-                      onPressed: _onSubmit,
-                      child: Text(localizations.submit),
-                    ),
-                  ],
+                      const SizedBox(height: 24),
+                      ElevatedButton(
+                        onPressed: _onSubmit,
+                        child: Text(localizations.submit),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),

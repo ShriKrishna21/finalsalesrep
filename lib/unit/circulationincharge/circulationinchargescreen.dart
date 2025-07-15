@@ -166,66 +166,70 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       drawer: _buildDrawer(localeProvider, localizations),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
-                children: [
-                  GestureDetector(
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const Noofresources()),
-                      );
-                      _loadData();
-                    },
-                    child: _buildCard(
-                      title: localizations.numberOfResources,
-                      rows: [
-                        _InfoRow(
-                            label: localizations.agents,
-                            value: agentCount.toString())
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+          : RefreshIndicator(
+              onRefresh: _loadData,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    GestureDetector(
+                      onTap: () async {
+                        await Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const Allcustomerforms()));
-                    },
-                    child: _buildCard(
-                      title: localizations.viewallcustomerforms,
+                              builder: (_) => const Noofresources()),
+                        );
+                        _loadData();
+                      },
+                      child: _buildCard(
+                        title: localizations.numberOfResources,
+                        rows: [
+                          _InfoRow(
+                              label: localizations.agents,
+                              value: agentCount.toString())
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const Allcustomerforms()),
+                        );
+                      },
+                      child: _buildCard(
+                        title: localizations.viewallcustomerforms,
+                        rows: [
+                          _InfoRow(
+                              label: localizations.customerforms,
+                              value: customerFormCount.toString())
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    _buildCard(
+                      title: localizations.subscriptionDetails,
                       rows: [
                         _InfoRow(
-                            label: localizations.customerforms,
-                            value: customerFormCount.toString())
+                            label: localizations.housesVisited,
+                            value: customerFormCount.toString()),
+                        _InfoRow(
+                            label: localizations.eenaduSubscription,
+                            value: alreadySubscribedCount.toString()),
+                        _InfoRow(
+                            label: localizations.willingToChange,
+                            value: offerAcceptedCount.toString()),
+                        _InfoRow(
+                            label: localizations.notInterested,
+                            value: offerRejectedCount.toString()),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  _buildCard(
-                    title: localizations.subscriptionDetails,
-                    rows: [
-                      _InfoRow(
-                          label: localizations.housesVisited,
-                          value: customerFormCount.toString()),
-                      _InfoRow(
-                          label: localizations.eenaduSubscription,
-                          value: alreadySubscribedCount.toString()),
-                      _InfoRow(
-                          label: localizations.willingToChange,
-                          value: offerAcceptedCount.toString()),
-                      _InfoRow(
-                          label: localizations.notInterested,
-                          value: offerRejectedCount.toString()),
-                    ],
-                  ),
-                  const SizedBox(height: 30),
-                  _buildGridButtons()
-                ],
+                    const SizedBox(height: 30),
+                    _buildGridButtons()
+                  ],
+                ),
               ),
             ),
     );
