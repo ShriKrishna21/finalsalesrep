@@ -189,7 +189,48 @@
    "subscribed":"చందా తీసుకున్నాడు",
    "unitmanager":"యూనిట్ మేనేజర్",
    "viewallcustomerforms":"అన్ని కస్టమర్ ఫారమ్స్‌ను చూడండి",
-   "circulationhead":"సర్క్యులేషన్ హెడ్"
+   "circulationhead":"సర్క్యులేషన్ హెడ్",
+          "customerforms":"కస్టమర్ ఫారమ్స్‌",
+"assignroutemapandtarget": "రూట్‌మ్యాప్ మరియు లక్ష్యాన్ని నియమించండి",
+"createofficestaff": "ఆఫీసు సిబ్బందిని సృష్టించండి",
+"approvedagents": "అనుమతించిన ఏజెంట్లు",
+"agentswaitingapproval": "మంజూరుకు ఎదురు చూస్తున్న ఏజెంట్లు",
+"assignroutetarget":"రూట్ మరియు టార్గెట్‌ను నియమించు",
+"selectagent":"ఏజెంట్‌ను ఎంచుకోండి",
+"routeandtargetassignedsuccessfully":"రూట్ మరియు టార్గెట్ విజయవంతంగా కేటాయించబడ్డాయి",
+"bothassignmentsfailed": "రెండు నియామకాలు విఫలమయ్యాయి",
+"routeassignmentfailed": "రూట్ నియామకం విఫలమైంది",
+"targetassignmentfailed": "లక్ష్య నియామకం విఫలమైంది",
+ "nousersfound":"ఈ యూనిట్‌లో యూజర్లు లేరు",
+  "totalagents":" మొత్తం ఏజెంట్లు",
+  "filterbydate":"తేదీ ఆధారంగా",
+  "routemap":"రూట్ మ్యాప్",
+  "enterroutemap":"రూట్ మ్యాప్ ఎంటర్ చేయండి",
+  "assigntarget":"టార్గెట్ నియమించండి",
+  "entertarget":"టార్గెట్ ఎంటర్ చేయండి",
+  "pleaseenteravalidunit":"దయచేసి సరైన యూనిట్‌ను నమోదు చేయండి",
+  "passwordrequired":"దయచేసి పాస్వర్డ్ నమోదు చేయండి",
+"addressrequired":"దయచేసి చిరునామా నమోదు చేయండి",
+"approvedagents":"ఆమోదం పొందిన ఏజెంట్లు",
+"unnamedagent":"పేరు లేని ఏజెంట్",
+"na":"N/A",
+"approveagents":"ఏజెంట్లను అనుమతించండి"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -1,10 +1,14 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
-const String apiUnitUrl = 'https://salesrep.esanchaya.com/api/agents_info_based_on_the_unit';
+const String apiUnitUrl =
+    'https://salesrep.esanchaya.com/api/agents_info_based_on_the_unit';
 
 class approvedagents extends StatefulWidget {
   const approvedagents({super.key});
@@ -41,7 +45,8 @@ class _approvedagentsState extends State<approvedagents> {
     await fetchAgents(token, unitName, sessionId);
   }
 
-  Future<void> fetchAgents(String token, String unitName, String sessionId) async {
+  Future<void> fetchAgents(
+      String token, String unitName, String sessionId) async {
     final body = json.encode({
       "params": {
         "token": token,
@@ -95,6 +100,8 @@ class _approvedagentsState extends State<approvedagents> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     if (loading) {
       return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
@@ -104,7 +111,7 @@ class _approvedagentsState extends State<approvedagents> {
     }
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Approved Agents')),
+      appBar: AppBar(title: Text(localizations.approvedagents)),
       body: ListView.builder(
         itemCount: agents.length,
         itemBuilder: (context, index) {
@@ -116,16 +123,16 @@ class _approvedagentsState extends State<approvedagents> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(agent.name ?? 'Unnamed Agent',
+                  Text(agent.name ?? localizations.unnamedagent,
                       style: const TextStyle(
                           fontSize: 18, fontWeight: FontWeight.bold)),
                   const SizedBox(height: 6),
-                  Text("Email: ${agent.email ?? 'N/A'}"),
-                  Text("Phone: ${agent.phone ?? 'N/A'}"),
-                  Text("Unit: ${agent.unitName ?? 'N/A'}"),
-                  Text("Role: ${agent.role ?? 'N/A'}"),
-                  Text("Status: ${agent.status ?? 'N/A'}"),
-                  Text("ID: ${agent.id ?? 'N/A'}"),
+                  Text("Email: ${agent.email ?? localizations.na}"),
+                  Text("Phone: ${agent.phone ?? localizations.na}"),
+                  Text("Unit: ${agent.unitName ?? localizations.na}"),
+                  Text("Role: ${agent.role ?? localizations.na}"),
+                  Text("Status: ${agent.status ?? localizations.na}"),
+                  Text("ID: ${agent.id ?? localizations.na}"),
                 ],
               ),
             ),
