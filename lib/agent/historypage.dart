@@ -131,8 +131,8 @@ class _HistorypageState extends State<Historypage> {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         title:
@@ -145,16 +145,18 @@ class _HistorypageState extends State<Historypage> {
             : _filteredRecords.isEmpty
                 ? ListView(
                     children: [
-                      SizedBox(height: 200),
+                      const SizedBox(height: 200),
                       Center(
-                          child: Text(localizations.norecordsfound,
-                              style: TextStyle(fontSize: 18))),
+                        child: Text(
+                          localizations.norecordsfound,
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                      ),
                     ],
                   )
                 : ListView(
                     padding: const EdgeInsets.only(bottom: 16),
                     children: [
-                      // 🔹 Date picker card
                       Card(
                         margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
                         elevation: 2,
@@ -181,8 +183,6 @@ class _HistorypageState extends State<Historypage> {
                           ),
                         ),
                       ),
-
-                      // 🔹 Fetch Button
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
@@ -198,8 +198,6 @@ class _HistorypageState extends State<Historypage> {
                           ),
                         ),
                       ),
-
-                      // 🔹 Search bar
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
@@ -220,8 +218,6 @@ class _HistorypageState extends State<Historypage> {
                           ),
                         ),
                       ),
-
-                      // 🔹 Stats Row
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         child: Row(
@@ -236,10 +232,7 @@ class _HistorypageState extends State<Historypage> {
                           ],
                         ),
                       ),
-
                       const Divider(height: 1),
-
-                      // 🔹 Record List
                       ..._filteredRecords
                           .map((record) => Padding(
                                 padding: const EdgeInsets.symmetric(
