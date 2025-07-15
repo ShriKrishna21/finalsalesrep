@@ -1,11 +1,15 @@
 import 'dart:convert';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
 import 'package:finalsalesrep/modelclasses/approveagent.dart';
 
-const String apiUnitUrl = 'https://salesrep.esanchaya.com/api/agents_info_based_on_the_unit';
+const String apiUnitUrl =
+    'https://salesrep.esanchaya.com/api/agents_info_based_on_the_unit';
 const String apiApproveUrl = 'https://salesrep.esanchaya.com/update/status';
 
 class Approveagents extends StatefulWidget {
@@ -42,7 +46,8 @@ class _ApproveagentsState extends State<Approveagents> {
     await fetchAgents(token, unitName, sessionId);
   }
 
-  Future<void> fetchAgents(String token, String unitName, String sessionId) async {
+  Future<void> fetchAgents(
+      String token, String unitName, String sessionId) async {
     final headers = {
       'Content-Type': 'application/json',
       'Cookie': 'session_id=$sessionId',
@@ -96,7 +101,11 @@ class _ApproveagentsState extends State<Approveagents> {
     };
 
     final body = jsonEncode({
-      "params": {"user_id": userId.toString(), "token": token, "status": "active"},
+      "params": {
+        "user_id": userId.toString(),
+        "token": token,
+        "status": "active"
+      },
     });
 
     try {
@@ -111,14 +120,16 @@ class _ApproveagentsState extends State<Approveagents> {
 
         // Debug logs
         print('Approve API response body: ${response.body}');
-        print('Parsed success: ${agentResponse.result?.success}, message: ${agentResponse.result?.message}');
+        print(
+            'Parsed success: ${agentResponse.result?.success}, message: ${agentResponse.result?.message}');
 
         if (agentResponse.result?.success == true) {
           // reload list
           _loadDataAndFetchAgents();
           return agentResponse.result?.message ?? "Agent approved successfully";
         } else {
-          return agentResponse.result?.message ?? "Approval  approved successfully";
+          return agentResponse.result?.message ??
+              "Approval  approved successfully";
         }
       } else {
         return "Server error: ${response.statusCode}";
@@ -130,11 +141,15 @@ class _ApproveagentsState extends State<Approveagents> {
 
   @override
   Widget build(BuildContext context) {
-    if (loading) return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (error != null) return Scaffold(body: Center(child: Text("Error: $error")));
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+    if (loading)
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    if (error != null)
+      return Scaffold(body: Center(child: Text("Error: $error")));
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Approve Agents")),
+      appBar: AppBar(title: Text(localizations.approveagents)),
       body: ListView.builder(
         itemCount: agents.length,
         itemBuilder: (context, index) {
@@ -146,15 +161,17 @@ class _ApproveagentsState extends State<Approveagents> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(agent.name ?? 'Unnamed Agent',
-                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("Email: ${agent.email ?? 'N/A'}"),
-                  Text("Phone: ${agent.phone ?? 'N/A'}"),
+                  Text(agent.name ?? localizations.unnamedagent,
+                      style: const TextStyle(
+                          fontSize: 18, fontWeight: FontWeight.bold)),
+                  Text("Email: ${agent.email ?? localizations.na}"),
+                  Text("Phone: ${agent.phone ?? localizations.na}"),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+                      style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green),
                       onPressed: () async {
                         final message = await approveAgent(agent.id ?? 0);
                         if (!mounted) return;
@@ -162,7 +179,8 @@ class _ApproveagentsState extends State<Approveagents> {
                           SnackBar(content: Text(message)),
                         );
                       },
-                      child: const Text("Approve", style: TextStyle(color: Colors.white)),
+                      child: Text(localizations.approveagents,
+                          style: TextStyle(color: Colors.white)),
                     ),
                   ),
                 ],
