@@ -1,6 +1,9 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
+import 'package:provider/provider.dart';
 
 class Onedayhistory extends StatefulWidget {
   const Onedayhistory({super.key});
@@ -223,6 +226,8 @@ class _OnedayhistoryState extends State<Onedayhistory> {
   }
 
   Widget _buildRecordCard(Record record) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -253,59 +258,71 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDetailRow("Agent Name", record.agentName ?? 'N/A'),
-                    _buildDetailRow("Agent Login", record.agentLogin ?? 'N/A'),
-                    _buildDetailRow("Date", record.date ?? 'N/A'),
-                    _buildDetailRow("Time", record.time ?? 'N/A'),
                     _buildDetailRow(
-                        "Family Head Name", record.familyHeadName ?? 'N/A'),
-                    _buildDetailRow("Father Name", record.fatherName ?? 'N/A'),
-                    _buildDetailRow("Mother Name", record.motherName ?? 'N/A'),
-                    _buildDetailRow("Spouse Name", record.spouseName ?? 'N/A'),
+                        localizations.agentName, record.agentName ?? 'N/A'),
                     _buildDetailRow(
-                        "House Number", record.houseNumber ?? 'N/A'),
+                        localizations.agentlogin, record.agentLogin ?? 'N/A'),
+                    _buildDetailRow(localizations.date, record.date ?? 'N/A'),
+                    _buildDetailRow(localizations.time, record.time ?? 'N/A'),
+                    _buildDetailRow(localizations.familyheadname,
+                        record.familyHeadName ?? 'N/A'),
                     _buildDetailRow(
-                        "Street Number", record.streetNumber ?? 'N/A'),
-                    _buildDetailRow("City", record.city ?? 'N/A'),
-                    _buildDetailRow("Pin Code", record.pinCode ?? 'N/A'),
-                    _buildDetailRow("Address", record.address ?? 'N/A'),
+                        localizations.fathersname, record.fatherName ?? 'N/A'),
                     _buildDetailRow(
-                        "Mobile Number", record.mobileNumber ?? 'N/A'),
-                    _buildDetailRow("Eenadu Newspaper",
-                        "${record.eenaduNewspaper ?? 'N/A'}"),
-                    _buildDetailRow("Feedback to Improve",
+                        localizations.mothername, record.motherName ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.spousename, record.spouseName ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.housenumber, record.houseNumber ?? 'N/A'),
+                    _buildDetailRow(localizations.streetnumber,
+                        record.streetNumber ?? 'N/A'),
+                    _buildDetailRow(localizations.city, record.city ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.pincode, record.pinCode ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.address, record.address ?? 'N/A'),
+                    _buildDetailRow(localizations.mobilenumber,
+                        record.mobileNumber ?? 'N/A'),
+                    _buildDetailRow(localizations.eenadunewspaper,
+                        _formatBool(record.eenaduNewspaper)),
+                    _buildDetailRow(localizations.feedbacktoimprove,
                         record.feedbackToImproveEenaduPaper ?? 'N/A'),
-                    _buildDetailRow(
-                        "Read Newspaper", "${record.readNewspaper ?? 'N/A'}"),
-                    _buildDetailRow(
-                        "Current Newspaper", record.currentNewspaper ?? 'N/A'),
-                    _buildDetailRow("Reason for not taking Eenadu",
+                    _buildDetailRow(localizations.readnewspaper,
+                        _formatBool(record.readNewspaper)),
+                    _buildDetailRow(localizations.currentnewspaper,
+                        record.currentNewspaper ?? 'N/A'),
+                    _buildDetailRow(localizations.reasonfornottakingeenadu,
                         record.reasonForNotTakingEenaduNewsPaper ?? 'N/A'),
-                    _buildDetailRow(
-                        "Reason not reading", record.reasonNotReading ?? 'N/A'),
-                    _buildDetailRow("Free Offer 15 Days",
-                        "${record.freeOffer15Days ?? 'N/A'}"),
-                    _buildDetailRow("Reason not taking offer",
+                    _buildDetailRow(localizations.reasonnotreading,
+                        record.reasonNotReading ?? 'N/A'),
+                    _buildDetailRow(localizations.freeoffer,
+                        _formatBool(record.freeOffer15Days)),
+                    _buildDetailRow(localizations.reasonfornottakingoffer,
                         record.reasonNotTakingOffer ?? 'N/A'),
-                    _buildDetailRow("Employed", "${record.employed ?? 'N/A'}"),
-                    _buildDetailRow("Job Type", "${record.jobType ?? 'N/A'}"),
                     _buildDetailRow(
-                        "Job Type One", "${record.jobTypeOne ?? 'N/A'}"),
+                        localizations.employed, _formatBool(record.employed)),
                     _buildDetailRow(
-                        "Job Profession", record.jobProfession ?? 'N/A'),
+                        localizations.jobtype, record.jobType ?? 'N/A'),
                     _buildDetailRow(
-                        "Job Designation", record.jobDesignation ?? 'N/A'),
+                        localizations.jobtypeone, record.jobTypeOne ?? 'N/A'),
+                    _buildDetailRow(localizations.jobprofession,
+                        record.jobProfession ?? 'N/A'),
+                    _buildDetailRow(localizations.jobdesignation,
+                        record.jobDesignation ?? 'N/A'),
                     _buildDetailRow(
-                        "Company Name", record.companyName ?? 'N/A'),
-                    _buildDetailRow("Profession", record.profession ?? 'N/A'),
-                    _buildDetailRow("Job Working State",
-                        "${record.jobWorkingState ?? 'N/A'}"),
-                    _buildDetailRow("Job Working Location",
-                        "${record.jobWorkingLocation ?? 'N/A'}"),
-                    _buildDetailRow("Job Designation One",
+                        localizations.companyname, record.companyName ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.profession, record.profession ?? 'N/A'),
+                    _buildDetailRow(localizations.jobWorkingstate,
+                        record.jobWorkingState ?? 'N/A'),
+                    _buildDetailRow(localizations.jobworkinglocation,
+                        record.jobWorkingLocation ?? 'N/A'),
+                    _buildDetailRow(localizations.jobdesignationone,
                         record.jobDesignationOne ?? 'N/A'),
-                    _buildDetailRow("Latitude", record.latitude ?? 'N/A'),
-                    _buildDetailRow("Longitude", record.longitude ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.latitude, record.latitude ?? 'N/A'),
+                    _buildDetailRow(
+                        localizations.longitude, record.longitude ?? 'N/A'),
                   ],
                 ),
               ),

@@ -614,4 +614,31 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get approveagents => 'Approve Agents';
+
+  @override
+  String get norecordsfound => 'No Records Found';
+
+  @override
+  String get alldates => 'All Dates';
+
+  @override
+  String get fetchcustomerforms => 'Fetch Customer Forms';
+
+  @override
+  String get searchbyidorfamilyheadname => 'Search by ID or Family Head Name';
+
+  @override
+  String get family => 'Family';
+
+  @override
+  String get freeoffer => 'Free Offer';
+
+  @override
+  String get jobWorkingstate => 'jobWorkingState';
+
+  @override
+  String get agentlogin => 'Agent Login';
+
+  @override
+  String get todayhistory => 'Today History';
 }

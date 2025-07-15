@@ -214,7 +214,27 @@
 "approvedagents":"ఆమోదం పొందిన ఏజెంట్లు",
 "unnamedagent":"పేరు లేని ఏజెంట్",
 "na":"N/A",
-"approveagents":"ఏజెంట్లను అనుమతించండి"
+"approveagents":"ఏజెంట్లను అనుమతించండి",
+"norecordsfound":"రికార్డులు కనబడలేదు",
+"alldates":"అన్ని తేదీలు",
+"fetchcustomerforms":"  ఫారాలను పొందు",
+"searchbyidorfamilyheadname":"ఐడీ లేదా కుటుంబ పెద్ద పేరు ద్వారా శోధించండి",
+"family":"కుటుంబం",
+"freeoffer":"ఉచిత ఆఫర్",
+"jobWorkingstate":"పని చేస్తున్న రాష్ట్రం",
+"agentlogin":"ఏజెంట్ లాగిన్",
+"todayhistory":"ఈరోజు హిస్టరీ"
+
+
+
+
+
+
+
+
+
+
+
 
 
 

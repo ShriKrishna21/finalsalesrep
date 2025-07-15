@@ -210,7 +210,17 @@
 "approvedagents":"Approved Agents",
 "unnamedagent":"Unnamed Agent",
 "na":"N/A",
-"approveagents":"Approve Agents"
+"approveagents":"Approve Agents",
+"norecordsfound":"No Records Found",
+"alldates":"All Dates",
+"fetchcustomerforms":"Fetch Customer Forms",
+"searchbyidorfamilyheadname":"Search by ID or Family Head Name",
+"family":"Family",
+"freeoffer":"Free Offer",
+"jobWorkingstate":"jobWorkingState",
+"agentlogin":"Agent Login",
+"todayhistory":"Today History"
+
 
 
 
