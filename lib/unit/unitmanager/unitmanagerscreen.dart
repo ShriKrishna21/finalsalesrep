@@ -25,6 +25,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
   int alreadySubscribedCount = 0;
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
+  String unitt = "";
 
   @override
   void initState() {
@@ -90,8 +91,14 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         alreadySubscribedCount = subscribed;
         offerAcceptedCount = accepted;
         offerRejectedCount = rejected;
+        unitt = unitName;
       });
     }
+  }
+
+  Future<void> _onRefresh() async {
+    await fetchAgentCount();
+    await fetchCustomerFormCount();
   }
 
   bool? _parseBool(dynamic value) {
@@ -142,7 +149,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ),
             children: <TextSpan>[
               TextSpan(
-                text: Localizations.karimnagar,
+                text: "  -$unitt",
                 style: TextStyle(
                   fontSize: MediaQuery.of(context).size.height / 44,
                   fontWeight: FontWeight.bold,
@@ -167,11 +174,9 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               ),
             ),
             ListTile(
-              // leading: const Icon(Icons.language),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // const Text("Switch Language"),
                   Row(
                     children: [
                       const Text('English'),
@@ -194,9 +199,11 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
           ],
         ),
       ),
-      body: Stack(
-        children: [
-          Padding(
+      body: RefreshIndicator(
+        onRefresh: _onRefresh,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
             padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
@@ -207,7 +214,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                       MaterialPageRoute(
                           builder: (context) => const Noofresources()),
                     );
-                    fetchAgentCount(); // Refresh after return
+                    fetchAgentCount();
                   },
                   child: _buildCard(
                     title: Localizations.numberOfResources,
@@ -270,7 +277,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
               ],
             ),
           ),
-        ],
+        ),
       ),
     );
   }
