@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
-import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
+import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -9,7 +9,6 @@ import 'package:http/http.dart' as http;
 
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
-import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
 
 class Segmentinchargescreen extends StatefulWidget {
@@ -113,6 +112,12 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
     return null;
   }
 
+  Future<void> _handleRefresh() async {
+    await _loadUserName();
+    await fetchAgentCount();
+    await fetchCustomerFormCount();
+  }
+
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
@@ -158,11 +163,9 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
               ),
             ),
             ListTile(
-              // leading: const Icon(Icons.language),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // const Text("Switch Language"),
                   Row(
                     children: [
                       const Text('English'),
@@ -185,83 +188,71 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
           ],
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(14.0),
-        child: Column(
-          children: [
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                      builder: (context) => const Noofresources()),
-                );
-              },
-              child: _buildCard(
-                title: localizations.numberOfResources,
-                rows: [
-                  _InfoRow(
-                      label: localizations.agents,
-                      value: agentCount.toString()),
-                ],
-              ),
-            ),
-            const SizedBox(height: 16),
-            _buildCard(
-              title: localizations.subscriptionDetails,
-              rows: [
-                _InfoRow(
-                    label: localizations.housesVisited,
-                    value: customerFormCount.toString()),
-                _InfoRow(
-                    label: localizations.eenaduSubscription,
-                    value: alreadySubscribedCount.toString()),
-                _InfoRow(
-                    label: localizations.willingToChange,
-                    value: offerAcceptedCount.toString()),
-                _InfoRow(
-                    label: localizations.notInterested,
-                    value: offerRejectedCount.toString()),
+      body: RefreshIndicator(
+        onRefresh: _handleRefresh,
+        color: Colors.black,
+        child: SingleChildScrollView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          child: Padding(
+            padding: const EdgeInsets.all(14.0),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Noofresources()),
+                    );
+                  },
+                  child: _buildCard(
+                    title: localizations.numberOfResources,
+                    rows: [
+                      _InfoRow(
+                          label: localizations.agents,
+                          value: agentCount.toString()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                          builder: (context) => const Allcustomerforms()),
+                    );
+                  },
+                  child: _buildCard(
+                    title: localizations.viewallcustomerforms,
+                    rows: [
+                      _InfoRow(
+                          label: localizations.customerform,
+                          value: customerFormCount.toString()),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+                _buildCard(
+                  title: localizations.subscriptionDetails,
+                  rows: [
+                    _InfoRow(
+                        label: localizations.housesVisited,
+                        value: customerFormCount.toString()),
+                    _InfoRow(
+                        label: localizations.eenaduSubscription,
+                        value: alreadySubscribedCount.toString()),
+                    _InfoRow(
+                        label: localizations.willingToChange,
+                        value: offerAcceptedCount.toString()),
+                    _InfoRow(
+                        label: localizations.notInterested,
+                        value: offerRejectedCount.toString()),
+                  ],
+                ),
               ],
             ),
-            const SizedBox(height: 16),
-            const Spacer(),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const approvedagents()));
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Colors.black),
-                ),
-                child: Text(localizations.approvedagents,
-                    style: const TextStyle(fontSize: 16)),
-              ),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () {
-                  Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                          builder: (context) => const Approveagents()));
-                },
-                style: OutlinedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  side: const BorderSide(color: Colors.black),
-                ),
-                child: Text(localizations.inprogressagents,
-                    style: const TextStyle(fontSize: 16)),
-              ),
-            ),
-          ],
+          ),
         ),
       ),
     );

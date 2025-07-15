@@ -14,6 +14,7 @@ const String apiApproveUrl = 'https://salesrep.esanchaya.com/update/status';
 
 class Approveagents extends StatefulWidget {
   const Approveagents({super.key});
+
   @override
   State<Approveagents> createState() => _ApproveagentsState();
 }
@@ -21,6 +22,8 @@ class Approveagents extends StatefulWidget {
 class _ApproveagentsState extends State<Approveagents> {
   List<Users> agents = [];
   bool loading = true;
+  bool approving = false;
+  int? approvingUserId;
   String? error;
 
   @override
@@ -30,6 +33,11 @@ class _ApproveagentsState extends State<Approveagents> {
   }
 
   Future<void> _loadDataAndFetchAgents() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final unitName = prefs.getString('unit');
@@ -85,7 +93,6 @@ class _ApproveagentsState extends State<Approveagents> {
     }
   }
 
-  /// Approves the agent and returns a message to display
   Future<String> approveAgent(int userId) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
@@ -106,6 +113,11 @@ class _ApproveagentsState extends State<Approveagents> {
         "token": token,
         "status": "active"
       },
+      "params": {
+        "user_id": userId.toString(),
+        "token": token,
+        "status": "active"
+      },
     });
 
     try {
@@ -114,6 +126,8 @@ class _ApproveagentsState extends State<Approveagents> {
         headers: headers,
         body: body,
       );
+
+      await Future.delayed(const Duration(seconds: 2)); // Optional wait
 
       if (response.statusCode == 200) {
         final agentResponse = ApproveAgent.fromJson(jsonDecode(response.body));
@@ -136,6 +150,48 @@ class _ApproveagentsState extends State<Approveagents> {
       }
     } catch (e) {
       return "Network error: $e";
+    }
+  }
+
+  Future<void> _confirmApproval(BuildContext context, Users agent) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text("Confirm Approval"),
+        content:
+            Text("Are you sure you want to approve agent \"${agent.name}\"?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(false),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(ctx).pop(true),
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() {
+        approving = true;
+        approvingUserId = agent.id;
+      });
+
+      final message = await approveAgent(agent.id ?? 0);
+
+      if (!mounted) return;
+
+      setState(() {
+        agents.removeWhere((a) => a.id == agent.id);
+        approving = false;
+        approvingUserId = null;
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(message)),
+      );
     }
   }
 

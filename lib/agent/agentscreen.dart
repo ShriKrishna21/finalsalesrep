@@ -41,8 +41,18 @@ class _AgentscreenState extends State<Agentscreen> {
     String formattedDate = DateFormat('EEE, MMM d, y').format(DateTime.now());
     dateController.text = formattedDate;
     loadAgentName();
-    loadOnedayHistory();
-    fetchRoute();
+    refreshData();
+  }
+
+  Future<void> refreshData() async {
+    setState(() {
+      _isLoading = true;
+    });
+    await loadOnedayHistory();
+    await fetchRoute();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   Future<void> fetchRoute() async {
@@ -93,7 +103,6 @@ class _AgentscreenState extends State<Agentscreen> {
       offerAcceptedCount = result['offer_accepted'] ?? 0;
       offerRejectedCount = result['offer_rejected'] ?? 0;
       alreadySubscribedCount = result['already_subscribed'] ?? 0;
-      _isLoading = false;
     });
   }
 
@@ -141,11 +150,9 @@ class _AgentscreenState extends State<Agentscreen> {
               ),
             ),
             ListTile(
-              // leading: const Icon(Icons.language),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // const Text("Switch Language"),
                   Row(
                     children: [
                       const Text('English'),
@@ -185,6 +192,7 @@ class _AgentscreenState extends State<Agentscreen> {
             context,
             MaterialPageRoute(builder: (_) => const Coustmer()),
           );
+          await refreshData(); // Refresh after returning from form
         },
         label: Text(
           localizations.customerform,
@@ -194,50 +202,55 @@ class _AgentscreenState extends State<Agentscreen> {
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
-                children: [
-                  Center(
-                    child: Text(
-                      dateController.text,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w500,
+          : RefreshIndicator(
+              onRefresh: refreshData,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    Center(
+                      child: Text(
+                        dateController.text,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(child: _buildSectionTitle(localizations.houseVisited)),
-                  const SizedBox(height: 20),
-                  _buildInfoRow(localizations.todaysHouseCount, target ?? "0"),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const Onedayhistory()),
-                      );
-                    },
-                    child: _buildInfoRow(
-                        localizations.houseVisited, "${records.length}"),
-                  ),
-                  _buildInfoRow(localizations.todaysTargetLeft,
-                      "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-                  const SizedBox(height: 30),
-                  Center(child: _buildSectionTitle(localizations.myRouteMap)),
-                  routeName != null
-                      ? _buildBulletPoint(routeName!)
-                      : _buildBulletPoint("No route assigned"),
-                  const SizedBox(height: 30),
-                  Center(child: _buildSectionTitle(localizations.reports)),
-                  _buildBulletPoint(
-                      "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
-                  _buildBulletPoint(
-                      "${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                  _buildBulletPoint(
-                      "${localizations.daysOfferRejected15}: $offerRejectedCount"),
-                ],
+                    const SizedBox(height: 20),
+                    Center(
+                        child: _buildSectionTitle(localizations.houseVisited)),
+                    const SizedBox(height: 20),
+                    _buildInfoRow(
+                        localizations.todaysHouseCount, target ?? "0"),
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const Onedayhistory()),
+                        );
+                      },
+                      child: _buildInfoRow(
+                          localizations.houseVisited, "${records.length}"),
+                    ),
+                    _buildInfoRow(localizations.todaysTargetLeft,
+                        "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
+                    const SizedBox(height: 30),
+                    Center(child: _buildSectionTitle(localizations.myRouteMap)),
+                    routeName != null
+                        ? _buildBulletPoint(routeName!)
+                        : _buildBulletPoint("No route assigned"),
+                    const SizedBox(height: 30),
+                    Center(child: _buildSectionTitle(localizations.reports)),
+                    _buildBulletPoint(
+                        "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
+                    _buildBulletPoint(
+                        "${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
+                    _buildBulletPoint(
+                        "${localizations.daysOfferRejected15}: $offerRejectedCount"),
+                  ],
+                ),
               ),
             ),
     );

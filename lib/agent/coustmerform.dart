@@ -36,8 +36,6 @@ class _CoustmerState extends State<Coustmer> {
   String place = "";
   String landmark = "";
 
-  // String? locationAddress;
-  // Employment Dropdown Variables
   String? _selectedJobType;
   String? _selectedGovDepartment;
 
@@ -74,14 +72,9 @@ class _CoustmerState extends State<Coustmer> {
         permission == LocationPermission.deniedForever) {
       print("Location Denied");
       await Geolocator.requestPermission();
-      LocationPermission get = await Geolocator.requestPermission();
     } else {
       Position currentPosition = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
-
-      print("latitude=================>${currentPosition.latitude.toString()}");
-      print(
-          "longitude================>${currentPosition.longitude.toString()}");
 
       try {
         List<Placemark> placemarks = await placemarkFromCoordinates(
@@ -96,38 +89,24 @@ class _CoustmerState extends State<Coustmer> {
           street = fetchedStreet;
           place = fetchedPlace;
           landmark = fetchedLandmark;
-          adddress.text = "$fetchedStreet,$fetchedPlace";
+          adddress.text = "$fetchedStreet, $fetchedPlace";
           city.text = placemark.locality ?? "";
           pincode.text = placemark.postalCode ?? "";
         });
         print("Street: $street");
-        print("Place : $place");
+        print("Place: $place");
         print("LandMark: $landmark");
       } catch (e) {
-        print("Error fetching addresss======>:$e");
+        print("Error fetching address: $e");
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error fetching address: $e")));
       }
-
-      print("latitude=${currentPosition.latitude.toString()}");
-      latitude = currentPosition.latitude.toString();
-      print("longitude=${currentPosition.longitude.toString()}");
-      longitude = currentPosition.longitude.toString();
-
-      setState(() {
-        latitude = currentPosition.latitude.toString();
-        longitude = currentPosition.longitude.toString();
-      });
     }
   }
 
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
-  List<String> govDepartments = [
-    "central_job",
-    "pSU",
-    "state_job",
-  ];
+  List<String> govDepartments = ["central_job", "pSU", "state_job"];
   String? _selectedproffesion;
   List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
   coustmerform? data;
@@ -146,7 +125,6 @@ class _CoustmerState extends State<Coustmer> {
     setState(() {
       agents = prefs.getString('name') ?? '';
       agency.text = agents;
-      // Set it in the controller too
     });
   }
 
@@ -155,10 +133,6 @@ class _CoustmerState extends State<Coustmer> {
     final String? agentapi = prefs.getString('apikey');
     final String? agentlog = prefs.getString('agentlogin');
     final String? unit = prefs.getString('unit');
-    print("Sending Latitude: $latitude, Longitude:$longitude");
-    print("Street: $street, place: $place, Landmark: $landmark");
-
-    print("Rrddddddddddddddddddddd$agentapi");
 
     try {
       final url = CommonApiClass.customerform;
@@ -185,16 +159,16 @@ class _CoustmerState extends State<Coustmer> {
             "pin_code": pincode.text,
             "address": adddress.text,
             "mobile_number": mobile.text,
-            "eenadu_newspaper": _isYes, // Send boolean directly
+            "eenadu_newspaper": _isYes,
             "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
-            "read_newspaper": _isAnotherToggle, // Send boolean directly
+            "read_newspaper": _isAnotherToggle,
             "current_newspaper": current_newspaper.text,
             "reason_for_not_taking_eenadu_newsPaper":
                 reason_for_not_taking_eenadu.text,
             "reason_not_reading": reason_for_not_reading.text,
-            "free_offer_15_days": _isofferTogle, // Send boolean directly
+            "free_offer_15_days": _isofferTogle,
             "reason_not_taking_offer": reason_for_not_taking_offer.text,
-            "employed": _isemployed, // Send boolean directly
+            "employed": _isemployed,
             "job_type": _selectedJobType,
             "job_type_one": _selectedGovDepartment,
             "job_profession": job_proffesion.text,
@@ -206,21 +180,15 @@ class _CoustmerState extends State<Coustmer> {
             "longitude": longitude,
             "street": street,
             "place": place,
-            // "LandMark": landmark,
             "location_address": landmark,
           }
         }),
       );
 
-      print(latitude);
-      print(longitude);
       if (responsee.statusCode == 200) {
-        print("wwwwwwwwwwwwwwwwwwwwwwwwwwwwww${responsee.statusCode}");
         final jsonResponse = jsonDecode(responsee.body) as Map<String, dynamic>;
         setState(() {
           data = coustmerform.fromJson(jsonResponse);
-          print(
-              "ttttttttttttttttttttttttttttttttttt${data?.toJson().toString()}");
         });
 
         if (data?.result?.code == "200") {
@@ -228,14 +196,12 @@ class _CoustmerState extends State<Coustmer> {
             const SnackBar(content: Text("Data added successfully")),
           );
 
-          // Load and update SharedPreferences values
           int houseVisited = prefs.getInt("house_visited") ?? 0;
           int targetLeft = prefs.getInt("target_left") ?? 0;
-          int alreadySubscribed = prefs.getInt("already_Subscribed") ?? 0;
-          int offerAccepted = prefs.getInt("offer_Accepted") ?? 0;
-          int offerRejected = prefs.getInt("offer_Rejected") ?? 0;
+          int alreadySubscribed = prefs.getInt("already_subscribed") ?? 0;
+          int offerAccepted = prefs.getInt("offer_accepted") ?? 0;
+          int offerRejected = prefs.getInt("offer_rejected") ?? 0;
 
-          // Update values
           houseVisited += 1;
           if (targetLeft > 0) {
             targetLeft -= 1;
@@ -248,7 +214,6 @@ class _CoustmerState extends State<Coustmer> {
             offerRejected += 1;
           }
 
-          // Save updated values
           await prefs.setInt("house_visited", houseVisited);
           await prefs.setInt("target_left", targetLeft);
           await prefs.setInt("already_subscribed", alreadySubscribed);
@@ -265,6 +230,10 @@ class _CoustmerState extends State<Coustmer> {
             const SnackBar(content: Text("Data Not added")),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error: ${responsee.statusCode}")),
+        );
       }
     } catch (error) {
       print("Error fetching data: $error");
@@ -272,6 +241,55 @@ class _CoustmerState extends State<Coustmer> {
         SnackBar(content: Text("Error: $error")),
       );
     }
+  }
+
+  Future<void> _refreshForm() async {
+    setState(() {
+      _isYes = false;
+      _isAnotherToggle = false;
+      _isofferTogle = false;
+      _isemployed = false;
+      _selectedJobType = null;
+      _selectedGovDepartment = null;
+      _selectedproffesion = null;
+      agency.clear();
+      familyhead.clear();
+      fathersname.clear();
+      mothername.clear();
+      spousename.clear();
+      hno.clear();
+      streetnumber.clear();
+      city.clear();
+      pincode.clear();
+      adddress.clear();
+      mobile.clear();
+      feedback_to_improve.clear();
+      reason_for_not_reading.clear();
+      current_newspaper.clear();
+      reason_for_not_taking_eenadu.clear();
+      reason_for_not_taking_offer.clear();
+      job_designation.clear();
+      job_proffesion.clear();
+      privateCompanyController.clear();
+      privatedesignationController.clear();
+      privateProffesionController.clear();
+
+      datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+      timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
+
+      latitude = "";
+      longitude = "";
+      street = "";
+      place = "";
+      landmark = "";
+    });
+
+    _loadSavedData();
+    await getCurrentLocation();
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Form refreshed successfully")),
+    );
   }
 
   @override
@@ -291,500 +309,444 @@ class _CoustmerState extends State<Coustmer> {
           ),
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Form(
-          key: _formKey,
-          child: SingleChildScrollView(
-            child: Column(
-              
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 30,),
-                textformfeild(
-                    controller: agency,
-                    label: localizations.agentName,
-                    need: true),
-                const SizedBox(height: 20),
-
-                // Date & Time Fields
-                Row(
-                  children: [
-                    Expanded(
-                        child: date(
-                            needed: true,
-                            Dcontroller: datecontroller,
-                            date: localizations.date,
-                            inputType: TextInputType.datetime)),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                        child: date(
-                            needed: true,
-                            Dcontroller: timecontroller,
-                            date: localizations.time,
-                            inputType: TextInputType.datetime)),
-                  ],
-                ),
-
-                const SizedBox(height: 15),
-                Text(localizations.familyDetails,
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                textformfeild(
-                    controller: familyhead,
-                    label: localizations.name,
-                    hunttext: localizations.familyheadname),
-                const SizedBox(height: 10),
-                textformfeild(
-                    controller: fathersname,
-                    label: localizations.fathersname,
-                    hunttext: localizations.fathersnamecannotbeempty),
-                const SizedBox(height: 10),
-                textformfeild(
-                    controller: mothername,
-                    label: localizations.mothername,
-                    hunttext: localizations.mothersnamecannotbeempty),
-                const SizedBox(height: 10),
-                textformfeild(
-                    controller: spousename,
-                    label: localizations.spousename,
-                    hunttext: localizations.spousenamecannotbeempty),
-                const SizedBox(height: 10),
-
-                const SizedBox(height: 15),
-                Text(localizations.addressDetails,
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                        child: textformfeild(
-                            controller: hno,
-                            label: localizations.houseNumber,
-                            hunttext: localizations.housenumbercannotbeempty,
-                            keyboardType: TextInputType.text)),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                        child: textformfeild(
-                            controller: streetnumber,
-                            hunttext: localizations.streetnumbercannotbeempty,
-                            label: localizations.streetNo,
-                            keyboardType: TextInputType.number)),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                        child: textformfeild(
-                            hunttext: localizations.citycannotbeempty,
-                            controller: city,
-                            label: localizations.city,
-                            keyboardType: TextInputType.text)),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    Expanded(
-                        child: textformfeild(
-                            hunttext: localizations.pincodecannotbeempty,
-                            maxvalue: 6,
-                            controller: pincode,
-                            // textForCounter: "",
-                            label: localizations.pinCode,
-                            keyboardType: TextInputType.number)),
-                  ],
-                ),
-
-                const SizedBox(
-                  height: 10,
-                ),
-                textformfeild(
-                    controller: adddress, label: localizations.address),
-                const SizedBox(
-                  height: 10,
-                ),
-                textformfeild(
-                  controller: TextEditingController(text: street),
-                  label: localizations.streetNo,
-                  hunttext: localizations.placecannotbeempty,
-                  need: true,
-                ),
-                const SizedBox(
-                  height: 10,
-                ),
-                textformfeild(
-                    controller: TextEditingController(text: landmark),
-                    label: localizations.landmark,
-                    hunttext: localizations.landmarkcannotbeempty,
-                    need: true),
-
-                // const SizedBox(height: 10),
-                // textformfeild(controller: adddress, label: "Address"),
-                const SizedBox(height: 10),
-                textformfeild(
-                    hunttext: localizations.mobilenumbercannotbeempty,
-                    controller: mobile,
-                    maxvalue: 10,
-                    label: localizations.mobilenumber,
-                    keyboardType: TextInputType.phone),
-
-                const SizedBox(height: 15),
-                Text(localizations.newsPaperDetails,
-                    style: const TextStyle(
-                        color: Colors.black,
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold)),
-
-                // Eenadu Newspaper Toggle
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(localizations.eenadunewspaper,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                    Text(_isYes ? localizations.yes : localizations.no,
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: _isYes ? Colors.green : Colors.red,
-                        )),
-                    Switch(
-                      inactiveThumbColor: Colors.white,
-                      activeTrackColor: Colors.green,
-                      inactiveTrackColor: Colors.red,
-                      value: _isYes,
-                      onChanged: (value) {
-                        setState(() {
-                          _isYes = value;
-                          // if (value) {
-                          //   // _isAnotherToggle = false;
-                          // }
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                if (_isYes)
+      body: RefreshIndicator(
+        onRefresh: _refreshForm,
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Form(
+            key: _formKey,
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 30),
                   textformfeild(
-                      hunttext: localizations.feedbackcannotbeempty,
-                      controller: feedback_to_improve,
-                      label: localizations.feedbacktoimprovepaper),
-
-                if (!_isYes) ...[
+                      controller: agency,
+                      label: localizations.agentName,
+                      need: true),
+                  const SizedBox(height: 20),
                   Row(
                     children: [
                       Expanded(
-                        child: Text(localizations.readnewspaper,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
-                      ),
-                      Text(
-                          _isAnotherToggle
-                              ? localizations.yes
-                              : localizations.no,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: _isAnotherToggle ? Colors.green : Colors.red,
-                          )),
-                      Switch(
-                        inactiveThumbColor: Colors.white,
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: _isAnotherToggle,
-                        onChanged: (value) {
-                          setState(() {
-                            _isAnotherToggle = value;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  if (_isAnotherToggle)
-                    textformfeild(
-                        hunttext: localizations.currentnewspapercannotbeempty,
-                        controller: current_newspaper,
-                        label: localizations.currentnewpaper),
-                  if (_isAnotherToggle)
-                    textformfeild(
-                        hunttext: localizations.reasonfornottakingcannotbeempty,
-                        controller: reason_for_not_taking_eenadu,
-                        label: localizations.reasonfornottakingeenadunewspaper),
-                  if (!_isAnotherToggle)
-                    textformfeild(
-                        hunttext:
-                            localizations.reasonfornotreadingcannotbeempty,
-                        controller: reason_for_not_reading,
-                        label: localizations.reasonfornotreadingnewspaper),
-                  Row(
-                    children: [
+                          child: date(
+                              needed: true,
+                              Dcontroller: datecontroller,
+                              date: localizations.date,
+                              inputType: TextInputType.datetime)),
+                      const SizedBox(width: 10),
                       Expanded(
-                        child: Text(localizations.daysOfferRejected15,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
-                      ),
-                      Text(_isofferTogle ? localizations.yes : localizations.no,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: _isofferTogle ? Colors.green : Colors.red,
-                          )),
-                      Switch(
-                        inactiveThumbColor: Colors.white,
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: _isofferTogle,
-                        onChanged: (value) {
-                          setState(() {
-                            _isofferTogle = value;
-                          });
-                        },
-                      ),
+                          child: date(
+                              needed: true,
+                              Dcontroller: timecontroller,
+                              date: localizations.time,
+                              inputType: TextInputType.datetime)),
                     ],
                   ),
-                  if (!_isofferTogle)
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: reason_for_not_taking_offer,
-                        label: localizations.reasonfornottakingoffer),
-                  const SizedBox(
-                    height: 15,
-                  ),
-                ],
-                const SizedBox(
-                  height: 15,
-                ),
-
-                // Employment Status Toggle
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(localizations.employed,
-                          style: const TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold)),
-                    ),
-                    Text(_isemployed ? localizations.yes : localizations.no,
-                        style: TextStyle(
+                  const SizedBox(height: 15),
+                  Text(localizations.familyDetails,
+                      style: const TextStyle(
+                          color: Colors.black,
                           fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: _isemployed ? Colors.green : Colors.red,
-                        )),
-                    Switch(
-                      inactiveThumbColor: Colors.white,
-                      activeTrackColor: Colors.green,
-                      inactiveTrackColor: Colors.red,
-                      value: _isemployed,
-                      onChanged: (value) {
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: familyhead,
+                      label: localizations.name,
+                      hunttext: localizations.familyheadname),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: fathersname,
+                      label: localizations.fathersname,
+                      hunttext: localizations.fathersnamecannotbeempty),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: mothername,
+                      label: localizations.mothername,
+                      hunttext: localizations.mothersnamecannotbeempty),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: spousename,
+                      label: localizations.spousename,
+                      hunttext: localizations.spousenamecannotbeempty),
+                  const SizedBox(height: 10),
+                  const SizedBox(height: 15),
+                  Text(localizations.addressDetails,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: textformfeild(
+                              controller: hno,
+                              label: localizations.houseNumber,
+                              hunttext: localizations.housenumbercannotbeempty,
+                              keyboardType: TextInputType.text)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child: textformfeild(
+                              controller: streetnumber,
+                              hunttext: localizations.streetnumbercannotbeempty,
+                              label: localizations.streetNo,
+                              keyboardType: TextInputType.number)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: textformfeild(
+                              hunttext: localizations.citycannotbeempty,
+                              controller: city,
+                              label: localizations.city,
+                              keyboardType: TextInputType.text)),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child: textformfeild(
+                              hunttext: localizations.pincodecannotbeempty,
+                              maxvalue: 6,
+                              controller: pincode,
+                              label: localizations.pinCode,
+                              keyboardType: TextInputType.number)),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: adddress, label: localizations.address),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                    controller: TextEditingController(text: street),
+                    label: localizations.streetNo,
+                    hunttext: localizations.placecannotbeempty,
+                    need: true,
+                  ),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      controller: TextEditingController(text: landmark),
+                      label: localizations.landmark,
+                      hunttext: localizations.landmarkcannotbeempty,
+                      need: true),
+                  const SizedBox(height: 10),
+                  textformfeild(
+                      hunttext: localizations.mobilenumbercannotbeempty,
+                      controller: mobile,
+                      maxvalue: 10,
+                      label: localizations.mobilenumber,
+                      keyboardType: TextInputType.phone),
+                  const SizedBox(height: 15),
+                  Text(localizations.newsPaperDetails,
+                      style: const TextStyle(
+                          color: Colors.black,
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(localizations.eenadunewspaper,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                      Text(_isYes ? localizations.yes : localizations.no,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _isYes ? Colors.green : Colors.red,
+                          )),
+                      Switch(
+                        inactiveThumbColor: Colors.white,
+                        activeTrackColor: Colors.green,
+                        inactiveTrackColor: Colors.red,
+                        value: _isYes,
+                        onChanged: (value) {
+                          setState(() {
+                            _isYes = value;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  if (_isYes)
+                    textformfeild(
+                        hunttext: localizations.feedbackcannotbeempty,
+                        controller: feedback_to_improve,
+                        label: localizations.feedbacktoimprovepaper),
+                  if (!_isYes) ...[
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(localizations.readnewspaper,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                        ),
+                        Text(
+                            _isAnotherToggle
+                                ? localizations.yes
+                                : localizations.no,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  _isAnotherToggle ? Colors.green : Colors.red,
+                            )),
+                        Switch(
+                          inactiveThumbColor: Colors.white,
+                          activeTrackColor: Colors.green,
+                          inactiveTrackColor: Colors.red,
+                          value: _isAnotherToggle,
+                          onChanged: (value) {
+                            setState(() {
+                              _isAnotherToggle = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    if (_isAnotherToggle)
+                      textformfeild(
+                          hunttext: localizations.currentnewspapercannotbeempty,
+                          controller: current_newspaper,
+                          label: localizations.currentnewpaper),
+                    if (_isAnotherToggle)
+                      textformfeild(
+                          hunttext:
+                              localizations.reasonfornottakingcannotbeempty,
+                          controller: reason_for_not_taking_eenadu,
+                          label:
+                              localizations.reasonfornottakingeenadunewspaper),
+                    if (!_isAnotherToggle)
+                      textformfeild(
+                          hunttext:
+                              localizations.reasonfornotreadingcannotbeempty,
+                          controller: reason_for_not_reading,
+                          label: localizations.reasonfornotreadingnewspaper),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(localizations.daysOfferRejected15,
+                              style: const TextStyle(
+                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                        ),
+                        Text(
+                            _isofferTogle
+                                ? localizations.yes
+                                : localizations.no,
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: _isofferTogle ? Colors.green : Colors.red,
+                            )),
+                        Switch(
+                          inactiveThumbColor: Colors.white,
+                          activeTrackColor: Colors.green,
+                          inactiveTrackColor: Colors.red,
+                          value: _isofferTogle,
+                          onChanged: (value) {
+                            setState(() {
+                              _isofferTogle = value;
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    if (!_isofferTogle)
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: reason_for_not_taking_offer,
+                          label: localizations.reasonfornottakingoffer),
+                    const SizedBox(height: 15),
+                  ],
+                  const SizedBox(height: 15),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(localizations.employed,
+                            style: const TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold)),
+                      ),
+                      Text(_isemployed ? localizations.yes : localizations.no,
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color: _isemployed ? Colors.green : Colors.red,
+                          )),
+                      Switch(
+                        inactiveThumbColor: Colors.white,
+                        activeTrackColor: Colors.green,
+                        inactiveTrackColor: Colors.red,
+                        value: _isemployed,
+                        onChanged: (value) {
+                          setState(() {
+                            _isemployed = value;
+                            _selectedJobType = null;
+                            _selectedGovDepartment = null;
+                            privateCompanyController.clear();
+                            privateProffesionController.clear();
+                            _selectedproffesion = null;
+                          });
+                        },
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  if (_isemployed)
+                    DropdownButtonFormField<String>(
+                      value: _selectedJobType,
+                      hint: Text(localizations.jobtype),
+                      isExpanded: true,
+                      items: jobTypes.map((String job) {
+                        return DropdownMenuItem<String>(
+                          value: job,
+                          child: Text(job),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
                         setState(() {
-                          _isemployed = value;
-                          _selectedJobType = null;
+                          _selectedJobType = newValue;
                           _selectedGovDepartment = null;
                           privateCompanyController.clear();
                           privateProffesionController.clear();
-                          _selectedproffesion = null;
                         });
                       },
+                      decoration: InputDecoration(
+                        labelText: localizations.jobtype,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
                     ),
+                  if (_selectedJobType == localizations.governmentjob) ...[
+                    const SizedBox(height: 20),
+                    DropdownButtonFormField<String>(
+                      value: _selectedGovDepartment,
+                      hint: Text(localizations.selectdepartment),
+                      isExpanded: true,
+                      items: govDepartments.map((String dept) {
+                        return DropdownMenuItem<String>(
+                          value: dept,
+                          child: Text(dept),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedGovDepartment = newValue;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: localizations.governmentjob,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                    if (_selectedGovDepartment == localizations.centraljob) ...[
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_designation,
+                          label: localizations.jobdesignation),
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_proffesion,
+                          label: localizations.jobdepartment),
+                    ],
+                    if (_selectedGovDepartment ==
+                        localizations.psupublicsectorundertaking) ...[
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_designation,
+                          label: localizations.jobdesignation),
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_proffesion,
+                          label: localizations.jobdepartment),
+                    ],
+                    if (_selectedGovDepartment == localizations.statejob) ...[
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_designation,
+                          label: localizations.jobdesignation),
+                      const SizedBox(height: 10),
+                      textformfeild(
+                          hunttext: localizations.fieldcannotbeempty,
+                          controller: job_proffesion,
+                          label: localizations.jobdepartment),
+                    ],
                   ],
-                ),
-                const SizedBox(
-                  height: 15,
-                ),
-
-                if (_isemployed)
-                  DropdownButtonFormField<String>(
-                    value: _selectedJobType,
-                    hint: Text(localizations.jobtype),
-                    isExpanded: true,
-                    items: jobTypes.map((String job) {
-                      return DropdownMenuItem<String>(
-                        value: job,
-                        child: Text(job),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedJobType = newValue;
-                        _selectedGovDepartment = null;
-                        privateCompanyController.clear();
-                        privateProffesionController.clear();
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: localizations.jobtype,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-
-                if (_selectedJobType == localizations.governmentjob) ...[
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  DropdownButtonFormField<String>(
-                    value: _selectedGovDepartment,
-                    hint: Text(localizations.selectdepartment),
-                    isExpanded: true,
-                    items: govDepartments.map((String dept) {
-                      return DropdownMenuItem<String>(
-                        value: dept,
-                        child: Text(dept),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedGovDepartment = newValue;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: localizations.governmentjob,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-
-                  // Show additional fields based on selection
-                  if (_selectedGovDepartment == localizations.centraljob) ...[
-                    const SizedBox(
-                      height: 10,
-                    ),
+                  if (_selectedJobType == localizations.privatejob) ...[
+                    const SizedBox(height: 10),
                     textformfeild(
                         hunttext: localizations.fieldcannotbeempty,
-                        controller: job_designation,
-                        label: localizations.jobdesignation),
-                    const SizedBox(
-                      height: 10,
-                    ),
+                        controller: privateCompanyController,
+                        label: localizations.companyname),
+                    const SizedBox(height: 10),
                     textformfeild(
                         hunttext: localizations.fieldcannotbeempty,
-                        controller: job_proffesion,
-                        label: localizations.jobdepartment),
+                        controller: privatedesignationController,
+                        label: localizations.designation),
+                    const SizedBox(height: 10),
+                    textformfeild(
+                        hunttext: localizations.fieldcannotbeempty,
+                        controller: privateProffesionController,
+                        label: localizations.profession),
                   ],
-
-                  if (_selectedGovDepartment ==
-                      localizations.psupublicsectorundertaking) ...[
-                    const SizedBox(
-                      height: 10,
+                  if (!_isemployed)
+                    DropdownButtonFormField<String>(
+                      value: _selectedproffesion,
+                      hint: Text(localizations.profession),
+                      isExpanded: true,
+                      items: proffesion.map((String item) {
+                        return DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedproffesion = newValue;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: localizations.profession,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
                     ),
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: job_designation,
-                        label: localizations.jobdesignation),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: job_proffesion,
-                        label: localizations.jobdepartment),
-                  ],
-
-                  if (_selectedGovDepartment == localizations.statejob) ...[
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: job_designation,
-                        label: localizations.jobdesignation),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: job_proffesion,
-                        label: localizations.jobdepartment),
-                  ],
-                ],
-
-                // Private job details
-
-                if (_selectedJobType == localizations.privatejob) ...[
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  textformfeild(
-                      hunttext: localizations.fieldcannotbeempty,
-                      controller: privateCompanyController,
-                      label: localizations.companyname),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                      hunttext: localizations.fieldcannotbeempty,
-                      controller: privatedesignationController,
-                      label: localizations.designation),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                      hunttext: localizations.fieldcannotbeempty,
-                      controller: privateProffesionController,
-                      label: localizations.profession),
-                ],
-
-// If NOT employed, show Profession Dropdown
-                if (!_isemployed)
-                  DropdownButtonFormField<String>(
-                    value: _selectedproffesion,
-                    hint: Text(localizations.profession),
-                    isExpanded: true,
-                    items: proffesion.map((String item) {
-                      return DropdownMenuItem<String>(
-                        value: item,
-                        child: Text(item),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedproffesion = newValue;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      labelText: localizations.profession,
-                      border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                  ),
-                const SizedBox(
-                  height: 20,
-                ),
-
-                Center(
-                  child: GestureDetector(
-                    onTap: () async => {
-                      if (_formKey.currentState?.validate() ?? false)
-                        {
-                          // datasaved(),
-                          await getCurrentLocation(),
-                          await uploaddata(),
+                  const SizedBox(height: 20),
+                  Center(
+                    child: GestureDetector(
+                      onTap: () async {
+                        if (_formKey.currentState?.validate() ?? false) {
+                          await getCurrentLocation();
+                          await uploaddata();
                         }
-                    },
-                    child: Container(
-                      decoration: const BoxDecoration(
-                          color: Colors.grey,
-                          borderRadius: BorderRadius.all(Radius.circular(50))),
-                      height: MediaQuery.of(context).size.height / 18,
-                      width: MediaQuery.of(context).size.height / 5,
-                      child: Center(
-                          child: Text(
-                        localizations.submit,
-                        style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                            fontSize: MediaQuery.of(context).size.height / 45),
-                      )),
+                      },
+                      child: Container(
+                        decoration: const BoxDecoration(
+                            color: Colors.grey,
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(50))),
+                        height: MediaQuery.of(context).size.height / 18,
+                        width: MediaQuery.of(context).size.height / 5,
+                        child: Center(
+                            child: Text(
+                          localizations.submit,
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize:
+                                  MediaQuery.of(context).size.height / 45),
+                        )),
+                      ),
                     ),
                   ),
-                )
-              ],
+                  const SizedBox(height: 20),
+                ],
+              ),
             ),
           ),
         ),
@@ -793,11 +755,12 @@ class _CoustmerState extends State<Coustmer> {
   }
 }
 
-SizedBox date(
-    {required TextEditingController Dcontroller,
-    required String date,
-    needed = false,
-    required TextInputType inputType}) {
+SizedBox date({
+  required TextEditingController Dcontroller,
+  required String date,
+  bool needed = false,
+  required TextInputType inputType,
+}) {
   return SizedBox(
     height: 50,
     width: 180,
@@ -817,45 +780,15 @@ SizedBox date(
   );
 }
 
-SizedBox address({
-  required TextEditingController address,
-  String? add,
-  required TextInputType keyboardType,
-  String? hhinnttextt,
+SizedBox textformfeild({
+  required TextEditingController controller,
+  required String label,
+  String? hunttext,
+  String? textForCounter,
+  int? maxvalue,
+  bool need = false,
+  TextInputType keyboardType = TextInputType.text,
 }) {
-  return SizedBox(
-    height: 50,
-    // width: 180,
-    child: TextFormField(
-      keyboardType: TextInputType.number,
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return hhinnttextt;
-        }
-        return null;
-      },
-      controller: address,
-      // readOnly: true,
-      decoration: InputDecoration(
-          labelText: add,
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black)),
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black, width: 4))),
-    ),
-  );
-}
-
-SizedBox textformfeild(
-    {required TextEditingController controller,
-    required String label,
-    String? hunttext,
-    String? textForCounter,
-    int? maxvalue,
-    need = false,
-    keyboardType = TextInputType.text}) {
   return SizedBox(
     height: label == "mobile number" ? 85 : 70,
     width: double.infinity,
