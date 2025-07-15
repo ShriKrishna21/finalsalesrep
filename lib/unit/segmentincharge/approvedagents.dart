@@ -29,6 +29,11 @@ class _approvedagentsState extends State<approvedagents> {
   }
 
   Future<void> _loadDataAndFetchAgents() async {
+    setState(() {
+      loading = true;
+      error = null;
+    });
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final unitName = prefs.getString('unit');
@@ -65,8 +70,6 @@ class _approvedagentsState extends State<approvedagents> {
         body: body,
       );
 
-      print("🔐 SESSION ID USED: $sessionId");
-
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
         final unitData = unitwiseagent.fromJson(decoded);
@@ -102,43 +105,58 @@ class _approvedagentsState extends State<approvedagents> {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
-    if (loading) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
-    if (error != null) {
-      return Scaffold(body: Center(child: Text('Error: $error')));
-    }
 
     return Scaffold(
       appBar: AppBar(title: Text(localizations.approvedagents)),
-      body: ListView.builder(
-        itemCount: agents.length,
-        itemBuilder: (context, index) {
-          final agent = agents[index];
-          return Card(
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(12.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(agent.name ?? localizations.unnamedagent,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 6),
-                  Text("Email: ${agent.email ?? localizations.na}"),
-                  Text("Phone: ${agent.phone ?? localizations.na}"),
-                  Text("Unit: ${agent.unitName ?? localizations.na}"),
-                  Text("Role: ${agent.role ?? localizations.na}"),
-                  Text("Status: ${agent.status ?? localizations.na}"),
-                  Text("ID: ${agent.id ?? localizations.na}"),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : error != null
+              ? Center(child: Text('Error: $error'))
+              : RefreshIndicator(
+                  onRefresh: _loadDataAndFetchAgents,
+                  child: agents.isEmpty
+                      ? ListView(
+                          children: [
+                            const SizedBox(height: 200),
+                            Center(child: Text(localizations.norecordsfound)),
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: agents.length,
+                          itemBuilder: (context, index) {
+                            final agent = agents[index];
+                            return Card(
+                              margin: const EdgeInsets.all(8),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12.0),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        agent.name ??
+                                            localizations.unnamedagent,
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 6),
+                                    Text(
+                                        "Email: ${agent.email ?? localizations.na}"),
+                                    Text(
+                                        "Phone: ${agent.phone ?? localizations.na}"),
+                                    Text(
+                                        "Unit: ${agent.unitName ?? localizations.na}"),
+                                    Text(
+                                        "Role: ${agent.role ?? localizations.na}"),
+                                    Text(
+                                        "Status: ${agent.status ?? localizations.na}"),
+                                    Text("ID: ${agent.id ?? localizations.na}"),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
     );
   }
 }

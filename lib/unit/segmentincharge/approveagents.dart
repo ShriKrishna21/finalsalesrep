@@ -112,12 +112,7 @@ class _ApproveagentsState extends State<Approveagents> {
         "user_id": userId.toString(),
         "token": token,
         "status": "active"
-      },
-      "params": {
-        "user_id": userId.toString(),
-        "token": token,
-        "status": "active"
-      },
+      }
     });
 
     try {
@@ -127,23 +122,16 @@ class _ApproveagentsState extends State<Approveagents> {
         body: body,
       );
 
-      await Future.delayed(const Duration(seconds: 2)); // Optional wait
+      await Future.delayed(const Duration(seconds: 2));
 
       if (response.statusCode == 200) {
         final agentResponse = ApproveAgent.fromJson(jsonDecode(response.body));
 
-        // Debug logs
-        print('Approve API response body: ${response.body}');
-        print(
-            'Parsed success: ${agentResponse.result?.success}, message: ${agentResponse.result?.message}');
-
         if (agentResponse.result?.success == true) {
-          // reload list
-          _loadDataAndFetchAgents();
+          await _loadDataAndFetchAgents();
           return agentResponse.result?.message ?? "Agent approved successfully";
         } else {
-          return agentResponse.result?.message ??
-              "Approval  approved successfully";
+          return agentResponse.result?.message ?? "Approval failed";
         }
       } else {
         return "Server error: ${response.statusCode}";
@@ -197,54 +185,77 @@ class _ApproveagentsState extends State<Approveagents> {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
-    if (loading)
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    if (error != null)
-      return Scaffold(body: Center(child: Text("Error: $error")));
 
     return Scaffold(
       appBar: AppBar(title: Text(localizations.approveagents)),
-      body: ListView.builder(
-        itemCount: agents.length,
-        itemBuilder: (context, index) {
-          final agent = agents[index];
-          return Card(
-            margin: const EdgeInsets.all(8),
-            child: Padding(
-              padding: const EdgeInsets.all(12),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(agent.name ?? localizations.unnamedagent,
-                      style: const TextStyle(
-                          fontSize: 18, fontWeight: FontWeight.bold)),
-                  Text("Email: ${agent.email ?? localizations.na}"),
-                  Text("Phone: ${agent.phone ?? localizations.na}"),
-                  const SizedBox(height: 10),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green),
-                      onPressed: () async {
-                        final message = await approveAgent(agent.id ?? 0);
-                        if (!mounted) return;
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text(message)),
-                        );
-                      },
-                      child: Text(localizations.approveagents,
-                          style: TextStyle(color: Colors.white)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
+      body: loading
+          ? const Center(child: CircularProgressIndicator())
+          : error != null
+              ? Center(child: Text("Error: $error"))
+              : RefreshIndicator(
+                  onRefresh: _loadDataAndFetchAgents,
+                  child: agents.isEmpty
+                      ? ListView(
+                          children: [
+                            const SizedBox(height: 200),
+                            Center(child: Text(localizations.norecordsfound)),
+                          ],
+                        )
+                      : ListView.builder(
+                          itemCount: agents.length,
+                          itemBuilder: (context, index) {
+                            final agent = agents[index];
+                            return Card(
+                              margin: const EdgeInsets.all(8),
+                              child: Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                        agent.name ??
+                                            localizations.unnamedagent,
+                                        style: const TextStyle(
+                                            fontSize: 18,
+                                            fontWeight: FontWeight.bold)),
+                                    Text(
+                                        "Email: ${agent.email ?? localizations.na}"),
+                                    Text(
+                                        "Phone: ${agent.phone ?? localizations.na}"),
+                                    const SizedBox(height: 10),
+                                    Align(
+                                      alignment: Alignment.centerRight,
+                                      child: ElevatedButton(
+                                        style: ElevatedButton.styleFrom(
+                                            backgroundColor: Colors.green),
+                                        onPressed: () async {
+                                          final message =
+                                              await approveAgent(agent.id ?? 0);
+                                          if (!mounted) return;
+                                          setState(() {
+                                            agents.removeWhere(
+                                                (a) => a.id == agent.id);
+                                          });
+                                          ScaffoldMessenger.of(context)
+                                              .showSnackBar(
+                                            SnackBar(content: Text(message)),
+                                          );
+                                        },
+                                        child: Text(
+                                          localizations.approveagents,
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
     );
   }
 }
