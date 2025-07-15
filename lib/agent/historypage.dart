@@ -57,10 +57,11 @@ class _HistorypageState extends State<Historypage> {
         }).toList();
       }
 
+      // Sort by ID in descending order
       filtered.sort((a, b) {
-        final dateTimeA = _combineDateTime(a.date, a.time);
-        final dateTimeB = _combineDateTime(b.date, b.time);
-        return dateTimeB.compareTo(dateTimeA);
+        final idA = int.tryParse(a.id.toString()) ?? 0;
+        final idB = int.tryParse(b.id.toString()) ?? 0;
+        return idB.compareTo(idA);
       });
 
       setState(() {
