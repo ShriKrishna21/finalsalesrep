@@ -89,46 +89,47 @@ class Records {
   String? latitude;
   String? longitude;
   bool? locationAddress;
+  String? locationUrl;
 
-  Records({
-    this.id,
-    this.agentName,
-    this.agentLogin,
-    this.unitName,
-    this.date,
-    this.time,
-    this.familyHeadName,
-    this.fatherName,
-    this.motherName,
-    this.spouseName,
-    this.houseNumber,
-    this.streetNumber,
-    this.city,
-    this.pinCode,
-    this.address,
-    this.mobileNumber,
-    this.eenaduNewspaper,
-    this.feedbackToImproveEenaduPaper,
-    this.readNewspaper,
-    this.currentNewspaper,
-    this.reasonForNotTakingEenaduNewsPaper,
-    this.reasonNotReading,
-    this.freeOffer15Days,
-    this.reasonNotTakingOffer,
-    this.employed,
-    this.jobType,
-    this.jobTypeOne,
-    this.jobProfession,
-    this.jobDesignation,
-    this.companyName,
-    this.profession,
-    this.jobWorkingState,
-    this.jobWorkingLocation,
-    this.jobDesignationOne,
-    this.latitude,
-    this.longitude,
-    this.locationAddress,
-  });
+  Records(
+      {this.id,
+      this.agentName,
+      this.agentLogin,
+      this.unitName,
+      this.date,
+      this.time,
+      this.familyHeadName,
+      this.fatherName,
+      this.motherName,
+      this.spouseName,
+      this.houseNumber,
+      this.streetNumber,
+      this.city,
+      this.pinCode,
+      this.address,
+      this.mobileNumber,
+      this.eenaduNewspaper,
+      this.feedbackToImproveEenaduPaper,
+      this.readNewspaper,
+      this.currentNewspaper,
+      this.reasonForNotTakingEenaduNewsPaper,
+      this.reasonNotReading,
+      this.freeOffer15Days,
+      this.reasonNotTakingOffer,
+      this.employed,
+      this.jobType,
+      this.jobTypeOne,
+      this.jobProfession,
+      this.jobDesignation,
+      this.companyName,
+      this.profession,
+      this.jobWorkingState,
+      this.jobWorkingLocation,
+      this.jobDesignationOne,
+      this.latitude,
+      this.longitude,
+      this.locationAddress,
+      this.locationUrl});
 
   Records.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -170,6 +171,7 @@ class Records {
     latitude = _safeString(json['latitude']);
     longitude = _safeString(json['longitude']);
     locationAddress = _parseBool(json['location_address']);
+    locationUrl = _safeString(json['location_url']) ?? "N/A"; // ✅ fixed
   }
 
   Map<String, dynamic> toJson() {

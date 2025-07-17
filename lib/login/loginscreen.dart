@@ -11,6 +11,7 @@ import 'package:finalsalesrep/unit/segmentincharge/segmentinchargescreen.dart';
 import 'package:finalsalesrep/unit/unitmanager/unitmanagerscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 // ... [all your existing imports]
 
@@ -90,7 +91,8 @@ class _LoginscreenState extends State<Loginscreen> {
 
       // Only agents must have status 'active'
       if (result.role == 'agent' && result.status != 'active') {
-        _showSnack('Your agent account status is "${result.status}". Please contact admin.');
+        _showSnack(
+            'Your agent account status is "${result.status}". Please contact admin.');
         return;
       }
 
@@ -151,7 +153,6 @@ class _LoginscreenState extends State<Loginscreen> {
         MaterialPageRoute(builder: (_) => screen),
         (route) => false,
       );
-
     } catch (e) {
       Navigator.pop(context);
       _showSnack('Error: $e');
@@ -159,65 +160,96 @@ class _LoginscreenState extends State<Loginscreen> {
   }
 
   void _showSnack(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Stack(children: [
-        Positioned.fill(
-          child: Image.asset("assets/images/loginbackground.jpg", fit: BoxFit.cover),
-        ),
-        Center(
-          child: Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(20)),
-            width: MediaQuery.of(context).size.width * 0.75,
-            child: Form(
-              key: _formKey,
-              child: Column(mainAxisSize: MainAxisSize.min, children: [
-                Image.asset("assets/images/logo.jpg", height: MediaQuery.of(context).size.height / 7),
-                const SizedBox(height: 20),
-                TextFormField(
-                  controller: usernameController,
-                  validator: (v) => v!.isEmpty ? "Username cannot be empty" : null,
-                  decoration: InputDecoration(
-                    labelText: "Username",
-                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: Image.asset("assets/images/loginbackground.jpg",
+                fit: BoxFit.cover),
+          ),
+          Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Login form (centered)
+              Expanded(
+                child: Center(
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    width: MediaQuery.of(context).size.width * 0.75,
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset("assets/images/logo.jpg",
+                              height: MediaQuery.of(context).size.height / 7),
+                          const SizedBox(height: 20),
+                          TextFormField(
+                            controller: usernameController,
+                            validator: (v) =>
+                                v!.isEmpty ? "Username cannot be empty" : null,
+                            decoration: InputDecoration(
+                              labelText: "Username",
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                          const SizedBox(height: 15),
+                          TextFormField(
+                            controller: passwordController,
+                            obscureText: !_isPasswordVisible,
+                            validator: (v) =>
+                                v!.isEmpty ? "Password cannot be empty" : null,
+                            decoration: InputDecoration(
+                              labelText: "Password",
+                              suffixIcon: IconButton(
+                                icon: Icon(_isPasswordVisible
+                                    ? Icons.visibility_off
+                                    : Icons.visibility),
+                                onPressed: () => setState(() =>
+                                    _isPasswordVisible = !_isPasswordVisible),
+                              ),
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(10)),
+                            ),
+                          ),
+                          const SizedBox(height: 20),
+                          ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              fixedSize: const Size(250, 50),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (_formKey.currentState!.validate())
+                                loginUser();
+                            },
+                            child: const Text("LOGIN",
+                                style: TextStyle(fontSize: 18)),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                const SizedBox(height: 15),
-                TextFormField(
-                  controller: passwordController,
-                    obscureText: !_isPasswordVisible,
-                    validator: (v) => v!.isEmpty ? "Password cannot be empty" : null,
-                    decoration: InputDecoration(
-                      labelText: "Password",
-                      suffixIcon: IconButton(
-                        icon: Icon(_isPasswordVisible ? Icons.visibility_off : Icons.visibility),
-                        onPressed: () => setState(() => _isPasswordVisible = !_isPasswordVisible),
-                      ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                ),
-                const SizedBox(height: 20),
-                ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.blue,
-                      fixedSize: const Size(250, 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-                  onPressed: () {
-                    if (_formKey.currentState!.validate()) loginUser();
-                  },
-                  child: const Text("LOGIN", style: TextStyle(fontSize: 18)),
-                ),
-              ]),
-            ),
+              ),
+            ],
           ),
-        ),
-      ]),
+        ],
+      ),
     );
   }
 }
