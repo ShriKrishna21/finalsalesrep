@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Onedayhistory extends StatefulWidget {
   const Onedayhistory({super.key});
@@ -33,6 +34,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
   Future<void> loadOnedayHistory() async {
     setState(() => _isLoading = true);
     final result = await _onedayagent.fetchOnedayHistory();
+    print('API Response: $result');
 
     setState(() {
       final fetchedRecords = (result['records'] as List<Record>?) ?? [];
@@ -43,6 +45,34 @@ class _OnedayhistoryState extends State<Onedayhistory> {
       alreadySubscribedCount = result['already_subscribed'] ?? 0;
       _isLoading = false;
     });
+  }
+
+  Future<void> openGoogleMaps(
+      double? latitude, double? longitude, String? locationUrl) async {
+    String url = '';
+
+    if (latitude != null && longitude != null) {
+      url =
+          'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    } else if (locationUrl != null &&
+        locationUrl.isNotEmpty &&
+        locationUrl != 'false' &&
+        locationUrl != 'N/A') {
+      url = locationUrl;
+    }
+
+    final uri = Uri.parse(url);
+
+    try {
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (e) {
+      debugPrint('Could not launch $url');
+      // Optional: show a dialog or snackbar
+    }
   }
 
   void _filterRecords(String query) {
@@ -162,6 +192,21 @@ class _OnedayhistoryState extends State<Onedayhistory> {
       );
 
   Widget _buildRecordCard(Record r, AppLocalizations localizations) {
+    bool hasValidCoordinates = r.latitude != null &&
+        r.longitude != null &&
+        double.tryParse(r.latitude!) != null &&
+        double.tryParse(r.longitude!) != null;
+    bool hasValidLocationUrl = r.locationUrl != null &&
+        r.locationUrl != 'false' &&
+        r.locationUrl != 'N/A' &&
+        r.locationUrl!.isNotEmpty;
+
+    // Determine display text
+    String locationText = hasValidCoordinates
+        ? 'View on Google Maps'
+        : hasValidLocationUrl
+            ? r.locationUrl!
+            : 'Not available';
     return Card(
       elevation: 3,
       child: ExpansionTile(
@@ -198,6 +243,41 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 _detailRow(localizations.companyname, r.companyName),
                 _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
+                _detailRow(localizations.profession, r.profession),
+                _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Location URL: ",
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            openGoogleMaps(
+                              double.tryParse(r.latitude ?? ''),
+                              double.tryParse(r.longitude ?? ''),
+                              r.locationUrl,
+                            );
+                          },
+                          child: Text(
+                            r.locationUrl != null &&
+                                    r.locationUrl != 'false' &&
+                                    r.locationUrl != 'N/A'
+                                ? r.locationUrl!
+                                : 'View on Google Maps',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              //decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           )

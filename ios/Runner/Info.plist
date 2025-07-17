@@ -4,6 +4,16 @@
 <dict>
 <key>NSLocationWhenInUseUsageDescription</key>
 <string>This app needs access to location when open.</string>
+
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>http</string>
+  <string>https</string>
+  <string>comgooglemaps</string>
+</array>
+
+<key>NSLocationWhenInUseUsageDescription</key>
+<string>This app needs access to location when open.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>

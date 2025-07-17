@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
@@ -8,9 +9,11 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Coustmer extends StatefulWidget {
   const Coustmer({super.key});
@@ -35,10 +38,11 @@ class _CoustmerState extends State<Coustmer> {
   String street = "";
   String place = "";
   String landmark = "";
-
+  String? locationUrl = "";
+  File? locationImage;
   String? _selectedJobType;
   String? _selectedGovDepartment;
-
+  final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController agency = TextEditingController();
@@ -64,6 +68,8 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privateCompanyController = TextEditingController();
   TextEditingController privatedesignationController = TextEditingController();
   TextEditingController privateProffesionController = TextEditingController();
+  TextEditingController locationUrlController = TextEditingController();
+  TextEditingController faceBase64Controller = TextEditingController();
 
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -83,24 +89,54 @@ class _CoustmerState extends State<Coustmer> {
         String? fetchedStreet = placemark.street ?? "";
         String? fetchedPlace = placemark.locality ?? "";
         String? fetchedLandmark = placemark.name ?? "";
+        String googleMapsUrl =
+            "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
         setState(() {
           latitude = currentPosition.latitude.toString();
           longitude = currentPosition.longitude.toString();
           street = fetchedStreet;
           place = fetchedPlace;
           landmark = fetchedLandmark;
+          locationUrl = googleMapsUrl;
+          locationUrlController.text = googleMapsUrl;
           adddress.text = "$fetchedStreet, $fetchedPlace";
           city.text = placemark.locality ?? "";
           pincode.text = placemark.postalCode ?? "";
         });
+        print("Generated Google Maps URL: $googleMapsUrl");
         print("Street: $street");
         print("Place: $place");
         print("LandMark: $landmark");
+        print("Google Maps URL: $googleMapsUrl");
       } catch (e) {
         print("Error fetching address: $e");
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("Error fetching address: $e")));
       }
+    }
+  }
+
+  Future<void> _launchUrl(Uri url) async {
+    try {
+      // Try to launch with external application (recommended for Google Maps)
+      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+        throw Exception('Could not launch $url');
+      }
+    } catch (e) {
+      // Handle error (optional logging or user feedback)
+      print('Launch error: $e');
+    }
+  }
+
+  Future<void> faceBaseImage() async {
+    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      final base64Image = base64Encode(bytes);
+      setState(() {
+        locationImage = File(image.path);
+        faceBase64Controller.text = base64Image;
+      });
     }
   }
 
@@ -181,6 +217,8 @@ class _CoustmerState extends State<Coustmer> {
             "street": street,
             "place": place,
             "location_address": landmark,
+            "location_url": locationUrlController.text,
+            "face_base64": faceBase64Controller.text,
           }
         }),
       );
@@ -243,6 +281,13 @@ class _CoustmerState extends State<Coustmer> {
     }
   }
 
+  void openGoogleMaps(String? latitude, String? longitude) {
+    final Uri url = Uri.parse(
+      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
+    );
+    _launchUrl(url);
+  }
+
   Future<void> _refreshForm() async {
     setState(() {
       _isYes = false;
@@ -273,6 +318,8 @@ class _CoustmerState extends State<Coustmer> {
       privateCompanyController.clear();
       privatedesignationController.clear();
       privateProffesionController.clear();
+      locationUrlController.clear();
+      faceBase64Controller.clear();
 
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
@@ -282,6 +329,7 @@ class _CoustmerState extends State<Coustmer> {
       street = "";
       place = "";
       landmark = "";
+      locationUrl = "";
     });
 
     _loadSavedData();
@@ -429,6 +477,38 @@ class _CoustmerState extends State<Coustmer> {
                       label: localizations.landmark,
                       hunttext: localizations.landmarkcannotbeempty,
                       need: true),
+                  const SizedBox(height: 10),
+                  // Landmark link Field
+
+                  textformfeild(
+                      controller: TextEditingController(text: landmark),
+                      label: localizations.landmark,
+                      hunttext: localizations.landmarkcannotbeempty,
+                      need: true),
+                  const SizedBox(height: 10),
+
+                  InkWell(
+                    onTap: () {
+                      openGoogleMaps(
+                          latitude, longitude); // Example coordinates
+                    },
+                    child: const Text(
+                      'Open Location in Google Maps',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue,
+                        //   decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 10),
+                  // textformfeild(
+                  //   controller: faceBase64Controller,
+                  //   label: "Face Base64",
+                  //   hunttext: "facebasecannotbeempty",
+                  //   need: true,
+                  // ),
                   const SizedBox(height: 10),
                   textformfeild(
                       hunttext: localizations.mobilenumbercannotbeempty,
@@ -750,6 +830,26 @@ class _CoustmerState extends State<Coustmer> {
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget imagePickerBox(File? image, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 150,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey[300],
+          border: Border.all(color: Colors.black),
+        ),
+        child: image != null
+            ? Image.file(image, fit: BoxFit.cover)
+            : Center(
+                child: Text(AppLocalizations.of(context)!.taptoselectimage,
+                    style: const TextStyle(color: Colors.black)),
+              ),
       ),
     );
   }

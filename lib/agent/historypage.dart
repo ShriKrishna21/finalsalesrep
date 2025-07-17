@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Historypage extends StatefulWidget {
   const Historypage({super.key});
@@ -35,6 +36,34 @@ class _HistorypageState extends State<Historypage> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> openGoogleMaps(
+      double? latitude, double? longitude, String? locationUrl) async {
+    String url = '';
+
+    if (latitude != null && longitude != null) {
+      url =
+          'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    } else if (locationUrl != null &&
+        locationUrl.isNotEmpty &&
+        locationUrl != 'false' &&
+        locationUrl != 'N/A') {
+      url = locationUrl;
+    }
+
+    final uri = Uri.parse(url);
+
+    try {
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (e) {
+      debugPrint('Could not launch $url');
+      // Optional: show a dialog or snackbar
+    }
   }
 
   Future<void> _fetchHistory() async {
@@ -291,6 +320,39 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow(localizations.jobtype, r.jobType ?? ''),
                 _detailRow(
                     localizations.jobWorkingstate, r.jobWorkingState ?? ''),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 6),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text("Location URL: ",
+                          style: TextStyle(fontWeight: FontWeight.w600)),
+                      Expanded(
+                        child: InkWell(
+                          onTap: () {
+                            openGoogleMaps(
+                              double.tryParse(r.latitude ?? ''),
+                              double.tryParse(r.longitude ?? ''),
+                              r.locationUrl,
+                            );
+                          },
+                          child: Text(
+                            r.locationUrl != null &&
+                                    r.locationUrl != 'false' &&
+                                    r.locationUrl != 'N/A'
+                                ? r.locationUrl!
+                                : 'View on Google Maps',
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                              //decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           )
