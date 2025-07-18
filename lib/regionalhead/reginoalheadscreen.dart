@@ -1,12 +1,14 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/login/loginscreen.dart';
+import 'package:finalsalesrep/modelclasses/unitwiseusers.dart';
 import 'package:finalsalesrep/regionalhead/unitwisescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:finalsalesrep/modelclasses/unitwiseusers.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/regionalhead/createunits.dart';
 
@@ -23,11 +25,63 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
   List<String> unitNames = [];
   List<Users> allUsers = [];
   bool isLoading = true;
+  Timer? tokenTimer;
 
   @override
   void initState() {
     super.initState();
     loadUserDataAndFetchUnits();
+    startTokenValidation();
+  }
+
+  @override
+  void dispose() {
+    tokenTimer?.cancel();
+    super.dispose();
+  }
+
+  Future<void> startTokenValidation() async {
+    tokenTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+      validateToken();
+    });
+  }
+
+  Future<void> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final currentToken = prefs.getString('apikey') ?? '';
+
+    final url = Uri.parse('https://salesrep.esanchaya.com/api/token_validation');
+    try {
+      final response = await http.post(
+        url,
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {"token": currentToken}
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result['result'] != true) {
+          logoutUser();
+        }
+      } else {
+        logoutUser();
+      }
+    } catch (e) {
+      logoutUser();
+    }
+  }
+
+  void logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    if (!mounted) return;
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute(builder: (_) => const Loginscreen()),
+      (route) => false,
+    );
   }
 
   Future<void> loadUserDataAndFetchUnits() async {
@@ -38,8 +92,7 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
   }
 
   Future<void> fetchUnits() async {
-    final url =
-        Uri.parse('https://salesrep.esanchaya.com/api/users_you_created');
+    final url = Uri.parse('https://salesrep.esanchaya.com/api/users_you_created');
     try {
       final response = await http.post(
         url,
@@ -135,11 +188,9 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
               ),
             ),
             ListTile(
-              // leading: const Icon(Icons.language),
               title: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  // const Text("Switch Language"),
                   Row(
                     children: [
                       const Text('English'),
@@ -166,9 +217,7 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
           ? const Center(child: CircularProgressIndicator())
           : Column(
               children: [
-                SizedBox(
-                  height: 10,
-                ),
+                const SizedBox(height: 10),
                 Expanded(
                   child: unitNames.isEmpty
                       ? const Center(child: Text("No units found"))
