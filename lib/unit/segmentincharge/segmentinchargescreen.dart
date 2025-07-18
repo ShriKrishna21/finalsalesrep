@@ -1,12 +1,13 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
@@ -21,6 +22,7 @@ class Segmentinchargescreen extends StatefulWidget {
 class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
   String userName = '';
   String unitt = '';
+  Timer? _sessionCheckTimer;
 
   int agentCount = 0;
   int customerFormCount = 0;
@@ -34,6 +36,59 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
     _loadUserName();
     fetchAgentCount();
     fetchCustomerFormCount();
+    startTokenValidation();
+  }
+
+  void startTokenValidation() {
+    validateToken(); // initial check
+    _sessionCheckTimer?.cancel();
+    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      await validateToken();
+    });
+  }
+
+  Future<void> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) {
+      forceLogout("Session expired or invalid token.");
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/token_validation"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {"token": token}
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      final result = data['result'];
+
+      if (result == null || result['success'] != true) {
+        forceLogout("Session expired. You may have logged in on another device.");
+      }
+    } catch (e) {
+      forceLogout("Error validating session. Please log in again.");
+    }
+  }
+
+  void forceLogout(String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const Loginscreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _loadUserName() async {
@@ -119,6 +174,12 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
   }
 
   @override
+  void dispose() {
+    _sessionCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
@@ -201,8 +262,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const Noofresources()),
+                      MaterialPageRoute(builder: (_) => const Noofresources()),
                     );
                   },
                   child: _buildCard(
@@ -219,8 +279,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(
-                          builder: (context) => const Allcustomerforms()),
+                      MaterialPageRoute(builder: (_) => const Allcustomerforms()),
                     );
                   },
                   child: _buildCard(

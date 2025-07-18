@@ -1,19 +1,20 @@
+import 'dart:async';
 import 'dart:convert';
-import 'package:finalsalesrep/agent/historypage.dart';
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
-import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
+import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
 import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
+import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
+import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
-import 'package:finalsalesrep/agent/agentprofie.dart';
-import 'package:finalsalesrep/common_api_class.dart';
 
 class Circulationinchargescreen extends StatefulWidget {
   const Circulationinchargescreen({super.key});
@@ -32,11 +33,71 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
   bool isLoading = true;
   String namee = "";
   String unit = "";
+  Timer? _sessionCheckTimer;
 
   @override
   void initState() {
     super.initState();
+    startTokenValidation();
     _loadData();
+  }
+
+  @override
+  void dispose() {
+    _sessionCheckTimer?.cancel();
+    super.dispose();
+  }
+
+  void startTokenValidation() {
+    validateToken();
+    _sessionCheckTimer =
+        Timer.periodic(const Duration(seconds: 2), (_) async {
+      await validateToken();
+    });
+  }
+
+  Future<void> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) {
+      forceLogout("Session expired or invalid token.");
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/token_validation"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {"token": token}
+        }),
+      );
+
+      final data = jsonDecode(response.body);
+      final result = data['result'];
+
+      if (result == null || result['success'] != true) {
+        forceLogout("Session expired. You may have logged in on another device.");
+      }
+    } catch (e) {
+      forceLogout("Error validating session. Please log in again.");
+    }
+  }
+
+  void forceLogout(String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const Loginscreen()),
+      (route) => false,
+    );
   }
 
   Future<void> _loadData() async {
@@ -176,17 +237,14 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       onTap: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const Noofresources()),
+                          MaterialPageRoute(builder: (_) => const Noofresources()),
                         );
                         _loadData();
                       },
                       child: _buildCard(
                         title: localizations.numberOfResources,
                         rows: [
-                          _InfoRow(
-                              label: localizations.agents,
-                              value: agentCount.toString())
+                          _InfoRow(label: localizations.agents, value: agentCount.toString())
                         ],
                       ),
                     ),
@@ -195,16 +253,13 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(
-                              builder: (_) => const Allcustomerforms()),
+                          MaterialPageRoute(builder: (_) => const Allcustomerforms()),
                         );
                       },
                       child: _buildCard(
                         title: localizations.viewallcustomerforms,
                         rows: [
-                          _InfoRow(
-                              label: localizations.customerforms,
-                              value: customerFormCount.toString())
+                          _InfoRow(label: localizations.customerforms, value: customerFormCount.toString())
                         ],
                       ),
                     ),
@@ -212,18 +267,10 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     _buildCard(
                       title: localizations.subscriptionDetails,
                       rows: [
-                        _InfoRow(
-                            label: localizations.housesVisited,
-                            value: customerFormCount.toString()),
-                        _InfoRow(
-                            label: localizations.eenaduSubscription,
-                            value: alreadySubscribedCount.toString()),
-                        _InfoRow(
-                            label: localizations.willingToChange,
-                            value: offerAcceptedCount.toString()),
-                        _InfoRow(
-                            label: localizations.notInterested,
-                            value: offerRejectedCount.toString()),
+                        _InfoRow(label: localizations.housesVisited, value: customerFormCount.toString()),
+                        _InfoRow(label: localizations.eenaduSubscription, value: alreadySubscribedCount.toString()),
+                        _InfoRow(label: localizations.willingToChange, value: offerAcceptedCount.toString()),
+                        _InfoRow(label: localizations.notInterested, value: offerRejectedCount.toString()),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -235,8 +282,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     );
   }
 
-  Widget _buildDrawer(
-      LocalizationProvider localeProvider, AppLocalizations localizations) {
+  Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
       child: ListView(
         children: [
@@ -246,15 +292,12 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
               children: [
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text(localizations.salesrep,
-                    style: const TextStyle(color: Colors.white)),
+                Text(localizations.salesrep, style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
           SwitchListTile(
-            title: Text(localeProvider.locale.languageCode == 'te'
-                ? 'తెలుగు'
-                : 'English'),
+            title: Text(localeProvider.locale.languageCode == 'te' ? 'తెలుగు' : 'English'),
             value: localeProvider.locale.languageCode == 'te',
             onChanged: (_) => localeProvider.toggleLocale(),
             secondary: const Icon(Icons.language),

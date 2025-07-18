@@ -26,8 +26,51 @@ class _CirculationHeadState extends State<CirculationHead> {
   void initState() {
     super.initState();
     fetchRegionalHeads();
+    startTokenValidationTimer();
   }
 
+  // Token Validation Timer
+  void startTokenValidationTimer() {
+    Future.delayed(const Duration(seconds: 3), () async {
+      bool isValid = await validateToken();
+      if (!isValid && mounted) {
+        logoutUser();
+      } else if (mounted) {
+        startTokenValidationTimer(); // keep validating
+      }
+    });
+  }
+
+  // Validate Token API
+  Future<bool> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null) return false;
+
+    final response = await http.post(
+      Uri.parse('https://salesrep.esanchaya.com/token_validation'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({"params": {"token": token}}),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return data['result']['success'] == true;
+    }
+    return false;
+  }
+
+  // Logout if token is invalid
+  void logoutUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    if (mounted) {
+      Navigator.of(context).pushNamedAndRemoveUntil('/login', (route) => false);
+    }
+  }
+
+  // Fetch Regional Heads
   Future<void> fetchRegionalHeads() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');

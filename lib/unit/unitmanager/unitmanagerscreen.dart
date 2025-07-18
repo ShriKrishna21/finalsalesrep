@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
@@ -26,12 +28,64 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   String unitt = "";
+  Timer? _sessionCheckTimer;
 
   @override
   void initState() {
     super.initState();
     fetchAgentCount();
     fetchCustomerFormCount();
+    startTokenValidation(); // Start session validation
+  }
+
+  void startTokenValidation() {
+    validateToken(); // Initial check
+    _sessionCheckTimer?.cancel();
+    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 3), (_) async {
+      await validateToken();
+    });
+  }
+
+  Future<void> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) {
+      forceLogout("Session expired or invalid token.");
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/token_validation"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({"params": {"token": token}}),
+      );
+
+      final data = jsonDecode(response.body);
+      final result = data['result'];
+
+      if (result == null || result['success'] != true) {
+        forceLogout("Session expired. You may have logged in on another device.");
+      }
+    } catch (e) {
+      forceLogout("Error validating session. Please log in again.");
+    }
+  }
+
+  void forceLogout(String message) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const Loginscreen()),
+      (route) => false,
+    );
   }
 
   Future<void> fetchAgentCount() async {
@@ -106,6 +160,12 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
     if (value is String) return value.toLowerCase() == 'true';
     if (value is num) return value == 1;
     return null;
+  }
+
+  @override
+  void dispose() {
+    _sessionCheckTimer?.cancel(); // stop the timer
+    super.dispose();
   }
 
   @override
