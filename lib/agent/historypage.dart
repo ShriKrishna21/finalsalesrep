@@ -29,7 +29,7 @@ class _HistorypageState extends State<Historypage> {
   @override
   void initState() {
     super.initState();
-    _fetchHistory();
+    _fetchHistory(); // If you want initial load to be empty, comment this out
   }
 
   @override
@@ -62,7 +62,6 @@ class _HistorypageState extends State<Historypage> {
       }
     } catch (e) {
       debugPrint('Could not launch $url');
-      // Optional: show a dialog or snackbar
     }
   }
 
@@ -86,7 +85,6 @@ class _HistorypageState extends State<Historypage> {
         }).toList();
       }
 
-      // Sort by ID in descending order
       filtered.sort((a, b) {
         final idA = int.tryParse(a.id.toString()) ?? 0;
         final idB = int.tryParse(b.id.toString()) ?? 0;
@@ -213,21 +211,23 @@ class _HistorypageState extends State<Historypage> {
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 8),
-                        child: SizedBox(
-                          width: double.infinity,
-                          child: ElevatedButton.icon(
-                            icon: const Icon(Icons.filter_center_focus),
-                            label: Text(localizations.fetchcustomerforms),
-                            onPressed: _fetchHistory,
-                            style: ElevatedButton.styleFrom(
-                              padding: const EdgeInsets.symmetric(vertical: 14),
+                      if (_selectedRange != null)
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 8),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton.icon(
+                              icon: const Icon(Icons.filter_center_focus),
+                              label: Text(localizations.fetchcustomerforms),
+                              onPressed: _fetchHistory,
+                              style: ElevatedButton.styleFrom(
+                                padding:
+                                    const EdgeInsets.symmetric(vertical: 14),
+                              ),
                             ),
                           ),
                         ),
-                      ),
                       Padding(
                         padding: const EdgeInsets.symmetric(
                             horizontal: 16, vertical: 8),
@@ -345,7 +345,6 @@ class _HistorypageState extends State<Historypage> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
-                              //decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
