@@ -41,7 +41,7 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
   }
 
   Future<void> startTokenValidation() async {
-    tokenTimer = Timer.periodic(const Duration(seconds: 30), (_) {
+    tokenTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       validateToken();
     });
   }
@@ -102,10 +102,18 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         }),
       );
 
+      print("Response Body: ${response.body}");
+
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final unitData = unitwiseusers.fromJson(data);
         final users = unitData.result?.users ?? [];
+
+        print("Total users: ${users.length}");
+        for (var user in users) {
+          print("User: ${user.name}, Unit: ${user.unitName}");
+        }
+
         final units = users
             .map((user) => user.unitName ?? '')
             .where((unit) => unit.isNotEmpty)
@@ -119,9 +127,11 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
           isLoading = false;
         });
       } else {
+        print("Error: ${response.statusCode}");
         setState(() => isLoading = false);
       }
     } catch (e) {
+      print("Fetch units error: $e");
       setState(() => isLoading = false);
     }
   }
