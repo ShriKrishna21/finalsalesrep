@@ -27,6 +27,7 @@ class _CoustmerState extends State<Coustmer> {
   bool _isAnotherToggle = false;
   bool _isofferTogle = false;
   bool _isemployed = false;
+  bool _isLoading = false; // Added for loading indicator
   int offerintresetedpeople = 0;
   int offernotintresetedpeople = 0;
   int offerintresetedpeoplecount = 0;
@@ -42,6 +43,7 @@ class _CoustmerState extends State<Coustmer> {
   File? locationImage;
   String? _selectedJobType;
   String? _selectedGovDepartment;
+  String? _selectedproffesion;
   final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
@@ -70,6 +72,29 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privateProffesionController = TextEditingController();
   TextEditingController locationUrlController = TextEditingController();
   TextEditingController faceBase64Controller = TextEditingController();
+
+  String agents = '';
+  List<String> jobTypes = ["government_job", "private_job"];
+  List<String> govDepartments = ["central_job", "pSU", "state_job"];
+  List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
+  coustmerform? data;
+
+  @override
+  void initState() {
+    super.initState();
+    datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
+    _loadSavedData();
+    getCurrentLocation();
+  }
+
+  void _loadSavedData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      agents = prefs.getString('name') ?? '';
+      agency.text = agents;
+    });
+  }
 
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
@@ -118,12 +143,10 @@ class _CoustmerState extends State<Coustmer> {
 
   Future<void> _launchUrl(Uri url) async {
     try {
-      // Try to launch with external application (recommended for Google Maps)
       if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
         throw Exception('Could not launch $url');
       }
     } catch (e) {
-      // Handle error (optional logging or user feedback)
       print('Launch error: $e');
     }
   }
@@ -140,31 +163,11 @@ class _CoustmerState extends State<Coustmer> {
     }
   }
 
-  String agents = '';
-  List<String> jobTypes = ["government_job", "private_job"];
-  List<String> govDepartments = ["central_job", "pSU", "state_job"];
-  String? _selectedproffesion;
-  List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
-  coustmerform? data;
-
-  @override
-  void initState() {
-    super.initState();
-    datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-    _loadSavedData();
-    getCurrentLocation();
-  }
-
-  void _loadSavedData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    setState(() {
-      agents = prefs.getString('name') ?? '';
-      agency.text = agents;
-    });
-  }
-
   Future<void> uploaddata() async {
+    setState(() {
+      _isLoading = true; // Start loading
+    });
+
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String? agentlog = prefs.getString('agentlogin');
@@ -278,6 +281,10 @@ class _CoustmerState extends State<Coustmer> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Error: $error")),
       );
+    } finally {
+      setState(() {
+        _isLoading = false; // Stop loading
+      });
     }
   }
 
@@ -320,10 +327,8 @@ class _CoustmerState extends State<Coustmer> {
       privateProffesionController.clear();
       locationUrlController.clear();
       faceBase64Controller.clear();
-
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-
       latitude = "";
       longitude = "";
       street = "";
@@ -417,7 +422,6 @@ class _CoustmerState extends State<Coustmer> {
                       controller: spousename,
                       label: localizations.spousename,
                       hunttext: localizations.spousenamecannotbeempty),
-                  const SizedBox(height: 10),
                   const SizedBox(height: 15),
                   Text(localizations.addressDetails,
                       style: const TextStyle(
@@ -478,37 +482,18 @@ class _CoustmerState extends State<Coustmer> {
                       hunttext: localizations.landmarkcannotbeempty,
                       need: true),
                   const SizedBox(height: 10),
-                  // Landmark link Field
-
-                  textformfeild(
-                      controller: TextEditingController(text: landmark),
-                      label: localizations.landmark,
-                      hunttext: localizations.landmarkcannotbeempty,
-                      need: true),
-                  const SizedBox(height: 10),
-
                   InkWell(
                     onTap: () {
-                      openGoogleMaps(
-                          latitude, longitude); // Example coordinates
+                      openGoogleMaps(latitude, longitude);
                     },
                     child: const Text(
                       'Open Location in Google Maps',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
-                        //   decoration: TextDecoration.underline,
                       ),
                     ),
                   ),
-
-                  const SizedBox(height: 10),
-                  // textformfeild(
-                  //   controller: faceBase64Controller,
-                  //   label: "Face Base64",
-                  //   hunttext: "facebasecannotbeempty",
-                  //   need: true,
-                  // ),
                   const SizedBox(height: 10),
                   textformfeild(
                       hunttext: localizations.mobilenumbercannotbeempty,
@@ -636,7 +621,6 @@ class _CoustmerState extends State<Coustmer> {
                           hunttext: localizations.fieldcannotbeempty,
                           controller: reason_for_not_taking_offer,
                           label: localizations.reasonfornottakingoffer),
-                    const SizedBox(height: 15),
                   ],
                   const SizedBox(height: 15),
                   Row(
@@ -696,7 +680,7 @@ class _CoustmerState extends State<Coustmer> {
                             borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
-                  if (_selectedJobType == localizations.governmentjob) ...[
+                  if (_selectedJobType == "government_job") ...[
                     const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
                       value: _selectedGovDepartment,
@@ -719,32 +703,7 @@ class _CoustmerState extends State<Coustmer> {
                             borderRadius: BorderRadius.circular(10)),
                       ),
                     ),
-                    if (_selectedGovDepartment == localizations.centraljob) ...[
-                      const SizedBox(height: 10),
-                      textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
-                          controller: job_designation,
-                          label: localizations.jobdesignation),
-                      const SizedBox(height: 10),
-                      textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
-                          controller: job_proffesion,
-                          label: localizations.jobdepartment),
-                    ],
-                    if (_selectedGovDepartment ==
-                        localizations.psupublicsectorundertaking) ...[
-                      const SizedBox(height: 10),
-                      textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
-                          controller: job_designation,
-                          label: localizations.jobdesignation),
-                      const SizedBox(height: 10),
-                      textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
-                          controller: job_proffesion,
-                          label: localizations.jobdepartment),
-                    ],
-                    if (_selectedGovDepartment == localizations.statejob) ...[
+                    if (_selectedGovDepartment != null) ...[
                       const SizedBox(height: 10),
                       textformfeild(
                           hunttext: localizations.fieldcannotbeempty,
@@ -757,7 +716,7 @@ class _CoustmerState extends State<Coustmer> {
                           label: localizations.jobdepartment),
                     ],
                   ],
-                  if (_selectedJobType == localizations.privatejob) ...[
+                  if (_selectedJobType == "private_job") ...[
                     const SizedBox(height: 10),
                     textformfeild(
                         hunttext: localizations.fieldcannotbeempty,
@@ -798,31 +757,37 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   const SizedBox(height: 20),
                   Center(
-                    child: GestureDetector(
-                      onTap: () async {
-                        if (_formKey.currentState?.validate() ?? false) {
-                          await getCurrentLocation();
-                          await uploaddata();
-                        }
-                      },
-                      child: Container(
-                        decoration: const BoxDecoration(
-                            color: Colors.grey,
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(50))),
-                        height: MediaQuery.of(context).size.height / 18,
-                        width: MediaQuery.of(context).size.height / 5,
-                        child: Center(
-                            child: Text(
-                          localizations.submit,
-                          style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize:
-                                  MediaQuery.of(context).size.height / 45),
-                        )),
-                      ),
-                    ),
+                    child: _isLoading
+                        ? const CircularProgressIndicator(
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                          )
+                        : GestureDetector(
+                            onTap: () async {
+                              if (_formKey.currentState?.validate() ?? false) {
+                                await getCurrentLocation();
+                                await uploaddata();
+                              }
+                            },
+                            child: Container(
+                              decoration: const BoxDecoration(
+                                  color: Colors.grey,
+                                  borderRadius:
+                                      BorderRadius.all(Radius.circular(50))),
+                              height: MediaQuery.of(context).size.height / 18,
+                              width: MediaQuery.of(context).size.height / 5,
+                              child: Center(
+                                  child: Text(
+                                localizations.submit,
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height /
+                                            45),
+                              )),
+                            ),
+                          ),
                   ),
                   const SizedBox(height: 20),
                 ],
