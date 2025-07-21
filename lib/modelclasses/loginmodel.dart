@@ -32,11 +32,11 @@ class Result {
   String? unit;
   String? expiration;
   String? code;
-  String? state;
+  dynamic state; // Changed to dynamic to handle both boolean and string values
   String? aadharNumber;
   String? panNumber;
   String? phone;
-  String? target; // Changed from int? to String?
+  dynamic target; // Already changed to dynamic
 
   Result({
     this.status,
@@ -65,11 +65,11 @@ class Result {
     unit = json['unit'];
     expiration = json['expiration'];
     code = json['code'];
-    state = json['state'];
+    state = json['state']; // Store as dynamic without conversion
     aadharNumber = json['aadhar_number'];
     panNumber = json['pan_number'];
     phone = json['phone'];
-    target = json['target']?.toString(); // Safely convert any type to String
+    target = json['target']; // Already storing as dynamic
   }
 
   Map<String, dynamic> toJson() {
