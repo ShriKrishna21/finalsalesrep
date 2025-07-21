@@ -1,24 +1,24 @@
-class unitwiseagent {
+class UnitwiseAgent {
   String? jsonrpc;
-  Null id;
+  dynamic id;
   Result? result;
 
-  unitwiseagent({this.jsonrpc, this.id, this.result});
+  UnitwiseAgent({this.jsonrpc, this.id, this.result});
 
-  unitwiseagent.fromJson(Map<String, dynamic> json) {
-    jsonrpc = json['jsonrpc'];
-    id = json['id'];
-    result = json['result'] != null ? Result.fromJson(json['result']) : null;
+  factory UnitwiseAgent.fromJson(Map<String, dynamic> json) {
+    return UnitwiseAgent(
+      jsonrpc: json['jsonrpc']?.toString(),
+      id: json['id'],
+      result: json['result'] != null ? Result.fromJson(json['result']) : null,
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['jsonrpc'] = jsonrpc;
-    data['id'] = id;
-    if (result != null) {
-      data['result'] = result!.toJson();
-    }
-    return data;
+    return {
+      'jsonrpc': jsonrpc,
+      'id': id,
+      'result': result?.toJson(),
+    };
   }
 }
 
@@ -28,23 +28,20 @@ class Result {
 
   Result({this.status, this.users});
 
-  Result.fromJson(Map<String, dynamic> json) {
-    status = json['status'];
-    if (json['users'] != null) {
-      users = <Users>[];
-      json['users'].forEach((v) {
-        users!.add(Users.fromJson(v));
-      });
-    }
+  factory Result.fromJson(Map<String, dynamic> json) {
+    return Result(
+      status: json['status'] is int
+          ? json['status']
+          : int.tryParse(json['status']?.toString() ?? ''),
+      users: (json['users'] as List?)?.map((e) => Users.fromJson(e)).toList(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['status'] = status;
-    if (users != null) {
-      data['users'] = users!.map((v) => v.toJson()).toList();
-    }
-    return data;
+    return {
+      'status': status,
+      'users': users?.map((v) => v.toJson()).toList(),
+    };
   }
 }
 
@@ -62,49 +59,52 @@ class Users {
   String? role;
   String? status;
 
-  Users(
-      {this.id,
-      this.name,
-      this.email,
-      this.login,
-      this.createUid,
-      this.unitName,
-      this.phone,
-      this.state,
-      this.panNumber,
-      this.aadharNumber,
-      this.role,
-      this.status});
+  Users({
+    this.id,
+    this.name,
+    this.email,
+    this.login,
+    this.createUid,
+    this.unitName,
+    this.phone,
+    this.state,
+    this.panNumber,
+    this.aadharNumber,
+    this.role,
+    this.status,
+  });
 
-  Users.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
-    email = json['email'];
-    login = json['login'];
-    createUid = json['create_uid'];
-    unitName = json['unit_name'];
-    phone = json['phone'];
-    state = json['state'];
-    panNumber = json['pan_number'];
-    aadharNumber = json['aadhar_number'];
-    role = json['role'];
-    status = json['status'];
+  factory Users.fromJson(Map<String, dynamic> json) {
+    return Users(
+      id: json['id'] is int ? json['id'] : int.tryParse(json['id']?.toString() ?? ''),
+      name: json['name']?.toString(),
+      email: json['email']?.toString(),
+      login: json['login']?.toString(),
+      createUid: json['create_uid']?.toString(),
+      unitName: json['unit_name']?.toString(),
+      phone: json['phone']?.toString(),
+      state: json['state']?.toString(),
+      panNumber: json['pan_number']?.toString(),
+      aadharNumber: json['aadhar_number']?.toString(),
+      role: json['role']?.toString(),
+      status: json['status']?.toString(),
+    );
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['name'] = name;
-    data['email'] = email;
-    data['login'] = login;
-    data['create_uid'] = createUid;
-    data['unit_name'] = unitName;
-    data['phone'] = phone;
-    data['state'] = state;
-    data['pan_number'] = panNumber;
-    data['aadhar_number'] = aadharNumber;
-    data['role'] = role;
-    data['status'] = status;
-    return data;
+    return {
+      'id': id,
+      'name': name,
+      'email': email,
+      'login': login,
+      'create_uid': createUid,
+      'unit_name': unitName,
+      'phone': phone,
+      'state': state,
+      'pan_number': panNumber,
+      'aadhar_number': aadharNumber,
+      'role': role,
+      'status': status,
+    };
   }
 }

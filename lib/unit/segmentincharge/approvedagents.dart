@@ -72,7 +72,7 @@ class _approvedagentsState extends State<approvedagents> {
 
       if (response.statusCode == 200) {
         final decoded = json.decode(response.body);
-        final unitData = unitwiseagent.fromJson(decoded);
+        final unitData = UnitwiseAgent.fromJson(decoded);
 
         if (unitData.result?.users != null) {
           setState(() {

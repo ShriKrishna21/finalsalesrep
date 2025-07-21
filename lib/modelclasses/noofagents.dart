@@ -7,7 +7,7 @@ class NofAgents {
 
   factory NofAgents.fromJson(Map<String, dynamic> json) {
     return NofAgents(
-      jsonrpc: json['jsonrpc'],
+      jsonrpc: json['jsonrpc']?.toString(),
       id: json['id'],
       result: json['result'] != null ? Result.fromJson(json['result']) : null,
     );
@@ -79,19 +79,19 @@ class User {
       id: json['id'] is int
           ? json['id']
           : int.tryParse(json['id']?.toString() ?? ''),
-      name: json['name'],
-      email: json['email'],
-      login: json['login'],
+      name: json['name']?.toString(),
+      email: json['email']?.toString(),
+      login: json['login']?.toString(),
       createUid: json['create_uid'] is int
           ? json['create_uid']
           : int.tryParse(json['create_uid']?.toString() ?? ''),
-      unitName: json['unit_name'],
-      phone: json['phone'],
-      state: json['state'],
-      panNumber: json['pan_number'],
-      aadharNumber: json['aadhar_number'],
-      role: json['role'],
-      status: json['status'],
+      unitName: json['unit_name']?.toString(),
+      phone: json['phone']?.toString(),
+      state: json['state']?.toString(),
+      panNumber: json['pan_number']?.toString(),
+      aadharNumber: json['aadhar_number']?.toString(),
+      role: json['role']?.toString(),
+      status: json['status']?.toString(),
     );
   }
 

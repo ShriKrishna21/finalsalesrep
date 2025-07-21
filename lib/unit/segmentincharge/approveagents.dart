@@ -71,7 +71,7 @@ class _ApproveagentsState extends State<Approveagents> {
       );
 
       if (response.statusCode == 200) {
-        final unitData = unitwiseagent.fromJson(jsonDecode(response.body));
+        final unitData = UnitwiseAgent.fromJson(jsonDecode(response.body));
         setState(() {
           agents = unitData.result?.users
                   ?.where((u) => u.status == 'un_activ')
