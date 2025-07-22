@@ -1,6 +1,7 @@
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
+import 'package:finalsalesrep/unit/circulationincharge/govtidimages.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -34,8 +35,8 @@ class _approvedagentsState extends State<approvedagents> {
       error = null;
     });
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
     final unitName = prefs.getString('unit');
     final sessionId = prefs.getString('session_id');
 
@@ -150,6 +151,17 @@ class _approvedagentsState extends State<approvedagents> {
                                     Text(
                                         "Status: ${agent.status ?? localizations.na}"),
                                     Text("ID: ${agent.id ?? localizations.na}"),
+                                    GestureDetector(
+                                        onTap: () {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => GovtIdImages(
+                                                  agentId: agent.id ?? 0),
+                                            ),
+                                          );
+                                        },
+                                        child: Text("Governament Id proof"))
                                   ],
                                 ),
                               ),

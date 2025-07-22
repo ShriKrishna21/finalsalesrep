@@ -356,7 +356,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
         }),
         _buildBlackWhiteButton(localizations.agentswaitingapproval, () {
           Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const Approveagents()));
+              MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
       ],
     );
