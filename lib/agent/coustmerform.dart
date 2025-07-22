@@ -23,6 +23,9 @@ class Coustmer extends StatefulWidget {
 }
 
 class _CoustmerState extends State<Coustmer> {
+  File? faceImage;
+  final ImagePicker _picker = ImagePicker();
+
   bool _isYes = false;
   bool _isAnotherToggle = false;
   bool _isofferTogle = false;
@@ -44,7 +47,6 @@ class _CoustmerState extends State<Coustmer> {
   String? _selectedJobType;
   String? _selectedGovDepartment;
   String? _selectedproffesion;
-  final ImagePicker _picker = ImagePicker();
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController agency = TextEditingController();
@@ -94,6 +96,21 @@ class _CoustmerState extends State<Coustmer> {
       agents = prefs.getString('name') ?? '';
       agency.text = agents;
     });
+  }
+
+  Future<void> pickFaceImage() async {
+    final XFile? img = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (img != null) {
+      final bytes = await img.readAsBytes();
+      setState(() {
+        faceImage = File(img.path);
+        faceBase64Controller.text = base64Encode(bytes);
+      });
+    }
   }
 
   Future<void> getCurrentLocation() async {
@@ -482,6 +499,30 @@ class _CoustmerState extends State<Coustmer> {
                       hunttext: localizations.landmarkcannotbeempty,
                       need: true),
                   const SizedBox(height: 10),
+                  Text("faceimagelabel",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 8),
+                  GestureDetector(
+                    onTap: pickFaceImage,
+                    child: Container(
+                      height: 150,
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        border: Border.all(color: Colors.grey),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: faceImage != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.file(faceImage!, fit: BoxFit.cover),
+                            )
+                          : Center(child: Text("tapToSelectImage")),
+                    ),
+                  ),
+                  SizedBox(
+                    height: 20,
+                  ),
                   InkWell(
                     onTap: () {
                       openGoogleMaps(latitude, longitude);
