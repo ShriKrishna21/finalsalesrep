@@ -110,71 +110,68 @@ class _OnedayhistoryState extends State<Onedayhistory> {
       ),
       body: RefreshIndicator(
         onRefresh: loadOnedayHistory,
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : filteredRecords.isEmpty
-                ? ListView(
-                    children: [
-                      const SizedBox(height: 200),
-                      Center(
-                        child: Text(
-                          localizations.norecordsfound,
-                          style: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    ],
-                  )
-                : ListView(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    children: [
-                      // 🔍 Search bar
-                      Padding(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 16, vertical: 12),
-                        child: TextField(
-                          controller: _searchController,
-                          onChanged: _filterRecords,
-                          decoration: InputDecoration(
-                            hintText: localizations.searchbyidorfamilyheadname,
-                            prefixIcon: const Icon(Icons.search),
-                            filled: true,
-                            fillColor: Colors.grey[200],
-                            contentPadding: const EdgeInsets.symmetric(
-                                vertical: 0, horizontal: 20),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(30),
-                              borderSide: BorderSide.none,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      // 📊 Stats Row
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStat(localizations.accepted,
-                                offerAcceptedCount, Colors.green),
-                            _buildStat(localizations.rejected,
-                                offerRejectedCount, Colors.red),
-                            _buildStat(localizations.subscribed,
-                                alreadySubscribedCount, Colors.blue),
-                          ],
-                        ),
-                      ),
-
-                      const Divider(height: 1),
-
-                      // 📋 Record List
-                      ...filteredRecords.map((record) => Padding(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            child: _buildRecordCard(record, localizations),
-                          )),
-                    ],
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 16),
+          children: [
+            // 🔍 Search bar
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: TextField(
+                controller: _searchController,
+                onChanged: _filterRecords,
+                decoration: InputDecoration(
+                  hintText: localizations.searchbyidorfamilyheadname,
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 0, horizontal: 20),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
                   ),
+                ),
+              ),
+            ),
+
+            // 📊 Stats Row
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  _buildStat(
+                      localizations.accepted, offerAcceptedCount, Colors.green),
+                  _buildStat(
+                      localizations.rejected, offerRejectedCount, Colors.red),
+                  _buildStat(localizations.subscribed, alreadySubscribedCount,
+                      Colors.blue),
+                ],
+              ),
+            ),
+
+            const Divider(height: 1),
+
+            if (_isLoading)
+              const Center(child: CircularProgressIndicator())
+            else if (filteredRecords.isEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: 100),
+                child: Center(
+                  child: Text(
+                    localizations.norecordsfound,
+                    style: const TextStyle(fontSize: 18),
+                  ),
+                ),
+              )
+            else
+              ...filteredRecords.map((record) => Padding(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: _buildRecordCard(record, localizations),
+                  )),
+          ],
+        ),
       ),
     );
   }
