@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/modelclasses/customerformsunitwise.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -14,8 +15,8 @@ class Allcustomerforms extends StatefulWidget {
 }
 
 class _AllcustomerformsState extends State<Allcustomerforms> {
-  List<Record> records = [];
-  List<Record> filteredRecords = [];
+  List<Records> records = [];
+  List<Records> filteredRecords = [];
 
   bool isLoading = true;
   String errorMessage = '';
@@ -159,9 +160,15 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
     return value ? localizations.yes : localizations.no;
   }
 
+  String _cleanBase64(String input) {
+    if (input.contains(',')) {
+      return input.split(',').last;
+    }
+    return input;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
@@ -181,7 +188,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         controller: _searchController,
                         decoration: InputDecoration(
                           prefixIcon: const Icon(Icons.search),
-                          // hintText: localizations.searchbynameoridormobilenumber,git
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -268,6 +274,38 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                               "${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
                                           Text(
                                               "${localizations.daysforeenaduoffer}: ${_boolToText(r.freeOffer15Days)}"),
+                                          const SizedBox(height: 8),
+                                          if (r.faceBase64 != null &&
+                                              r.faceBase64!.isNotEmpty)
+                                            Column(
+                                              crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                 " localizations.customerphoto",
+                                                  style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold),
+                                                ),
+                                                const SizedBox(height: 6),
+                                                ClipRRect(
+                                                  borderRadius:
+                                                      BorderRadius.circular(8),
+                                                  child: Image.memory(
+                                                    base64Decode(_cleanBase64(
+                                                        r.faceBase64!)),
+                                                    width: 120,
+                                                    height: 120,
+                                                    fit: BoxFit.cover,
+                                                    errorBuilder: (context,
+                                                            error,
+                                                            stackTrace) =>
+                                                        const Text(
+                                                            "Invalid image"),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                         ],
                                       ),
                                     ),
@@ -279,91 +317,5 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                   ],
                 ),
     );
-  }
-}
-
-class AllCustomerForms {
-  String? jsonrpc;
-  dynamic id;
-  Result? result;
-
-  AllCustomerForms({this.jsonrpc, this.id, this.result});
-
-  factory AllCustomerForms.fromJson(Map<String, dynamic> json) {
-    return AllCustomerForms(
-      jsonrpc: json['jsonrpc'],
-      id: json['id'],
-      result: json['result'] != null ? Result.fromJson(json['result']) : null,
-    );
-  }
-}
-
-class Result {
-  bool? success;
-  List<Record>? records;
-  int? count;
-  String? code;
-
-  Result({this.success, this.records, this.count, this.code});
-
-  factory Result.fromJson(Map<String, dynamic> json) {
-    return Result(
-      success: json['success'],
-      records:
-          (json['records'] as List?)?.map((e) => Record.fromJson(e)).toList(),
-      count: json['count'],
-      code: json['code'],
-    );
-  }
-}
-
-class Record {
-  int? id;
-  String? familyHeadName;
-  String? agentName;
-  String? date;
-  String? address;
-  String? city;
-  String? pinCode;
-  String? mobileNumber;
-  bool? eenaduNewspaper;
-  bool? employed;
-  bool? freeOffer15Days;
-
-  Record({
-    this.id,
-    this.familyHeadName,
-    this.agentName,
-    this.date,
-    this.address,
-    this.city,
-    this.pinCode,
-    this.mobileNumber,
-    this.eenaduNewspaper,
-    this.employed,
-    this.freeOffer15Days,
-  });
-
-  factory Record.fromJson(Map<String, dynamic> json) {
-    return Record(
-      id: json['id'],
-      familyHeadName: json['family_head_name'],
-      agentName: json['agent_name'],
-      date: json['date'],
-      address: json['address'],
-      city: json['city'],
-      pinCode: json['pin_code'],
-      mobileNumber: json['mobile_number'],
-      eenaduNewspaper: _parseBool(json['eenadu_newspaper']),
-      employed: _parseBool(json['employed']),
-      freeOffer15Days: _parseBool(json['free_offer_15_days']),
-    );
-  }
-
-  static bool? _parseBool(dynamic value) {
-    if (value is bool) return value;
-    if (value is String) return value.toLowerCase() == 'true';
-    if (value is num) return value == 1;
-    return null;
   }
 }

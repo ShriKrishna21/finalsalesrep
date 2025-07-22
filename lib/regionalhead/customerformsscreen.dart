@@ -1,20 +1,19 @@
 import 'dart:convert';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:finalsalesrep/modelclasses/customerformsunitwise.dart';
 
-class customerformsunit extends StatefulWidget {
+class CustomerFormsUnit extends StatefulWidget {
   final String unitName;
-
-  const customerformsunit({super.key, required this.unitName});
+  const CustomerFormsUnit({super.key, required this.unitName});
 
   @override
-  State<customerformsunit> createState() => _customerformsunitState();
+  State<CustomerFormsUnit> createState() => _CustomerFormsUnitState();
 }
 
-class _customerformsunitState extends State<customerformsunit> {
-  List<Record> records = [];
+class _CustomerFormsUnitState extends State<CustomerFormsUnit> {
+  List<Records> records = [];
   bool isLoading = true;
   int eenaduCount = 0;
   int offerAcceptedCount = 0;
@@ -87,16 +86,10 @@ class _customerformsunitState extends State<customerformsunit> {
 
         setState(() {
           records = fetchedRecords;
-          eenaduCount = fetchedRecords
-              .where((r) => _parseBool(r.eenaduNewspaper) == true)
-              .length;
-          offerAcceptedCount = fetchedRecords
-              .where((r) => _parseBool(r.freeOffer15Days) == true)
-              .length;
+          eenaduCount = fetchedRecords.where((r) => _parseBool(r.eenaduNewspaper) == true).length;
+          offerAcceptedCount = fetchedRecords.where((r) => _parseBool(r.freeOffer15Days) == true).length;
           offerRejectedCount = fetchedRecords
-              .where((r) =>
-                  _parseBool(r.freeOffer15Days) == false &&
-                  _parseBool(r.eenaduNewspaper) == false)
+              .where((r) => _parseBool(r.freeOffer15Days) == false && _parseBool(r.eenaduNewspaper) == false)
               .length;
           isLoading = false;
         });
@@ -121,9 +114,11 @@ class _customerformsunitState extends State<customerformsunit> {
     return null;
   }
 
-  String _boolToText(bool? value) {
-    if (value == null) return 'N/A';
-    return value ? 'Yes' : 'No';
+  String _boolToText(bool? value) => value == true ? 'Yes' : 'No';
+
+  String _cleanBase64(String input) {
+    if (input.contains(',')) return input.split(',').last;
+    return input;
   }
 
   @override
@@ -175,42 +170,50 @@ class _customerformsunitState extends State<customerformsunit> {
                     ),
                     Expanded(
                       child: records.isEmpty
-                          ? const Center(
-                              child: Text("No customer forms available."))
+                          ? const Center(child: Text("No customer forms available."))
                           : ListView.builder(
                               itemCount: records.length,
                               itemBuilder: (context, index) {
                                 final r = records[index];
                                 return Card(
-                                  margin: const EdgeInsets.symmetric(
-                                      horizontal: 12, vertical: 8),
+                                  margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                                   child: Padding(
                                     padding: const EdgeInsets.all(16),
                                     child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
                                         Text(
                                           "Family Head: ${r.familyHeadName ?? 'N/A'}",
-                                          style: const TextStyle(
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold),
+                                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                                         ),
                                         const SizedBox(height: 6),
                                         Text("Date: ${r.date ?? 'N/A'}"),
                                         Text("Address: ${r.address ?? 'N/A'}"),
-                                        Text(
-                                            "City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
-                                        Text(
-                                            "Mobile: ${r.mobileNumber ?? 'N/A'}"),
-                                        Text(
-                                            "Reads Eenadu: ${_boolToText(_parseBool(r.eenaduNewspaper))}"),
-                                        Text(
-                                            "Employed: ${_boolToText(_parseBool(r.employed))}"),
-                                        Text(
-                                            "Agent Name: ${r.agentName ?? 'N/A'}"),
-                                        Text(
-                                            "Offer: ${_boolToText(_parseBool(r.freeOffer15Days))}"),
+                                        Text("City & Pincode: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
+                                        Text("Mobile: ${r.mobileNumber ?? 'N/A'}"),
+                                        Text("Reads Eenadu: ${_boolToText(_parseBool(r.eenaduNewspaper))}"),
+                                        Text("Employed: ${_boolToText(_parseBool(r.employed))}"),
+                                        Text("Agent Name: ${r.agentName ?? 'N/A'}"),
+                                        Text("Offer: ${_boolToText(_parseBool(r.freeOffer15Days))}"),
+                                        if (r.faceBase64 != null && r.faceBase64!.isNotEmpty)
+                                          Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              const SizedBox(height: 10),
+                                              const Text("Customer Photo:", style: TextStyle(fontWeight: FontWeight.bold)),
+                                              const SizedBox(height: 6),
+                                              ClipRRect(
+                                                borderRadius: BorderRadius.circular(8),
+                                                child: Image.memory(
+                                                  base64Decode(_cleanBase64(r.faceBase64!)),
+                                                  width: 120,
+                                                  height: 120,
+                                                  fit: BoxFit.cover,
+                                                  errorBuilder: (context, error, stackTrace) => const Text("Invalid image"),
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                       ],
                                     ),
                                   ),
