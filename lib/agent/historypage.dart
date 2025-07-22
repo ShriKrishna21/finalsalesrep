@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -369,23 +370,33 @@ class _HistorypageState extends State<Historypage> {
   }
 
   Widget _base64ImageWidget(String label, String base64String) {
-    try {
-      // Remove data URI prefix if present
-      final cleanedBase64 = base64String.contains(',')
-          ? base64String.split(',').last
-          : base64String;
+  try {
+    final cleanedBase64 = base64String.contains(',')
+        ? base64String.split(',').last
+        : base64String;
 
-      final decodedBytes = base64Decode(cleanedBase64);
+    final decodedBytes = base64Decode(cleanedBase64);
 
-      return Padding(
-        padding: const EdgeInsets.only(bottom: 12),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text("$label:",
-                style: const TextStyle(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 6),
-            ClipRRect(
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text("$label:", style: const TextStyle(fontWeight: FontWeight.w600)),
+          const SizedBox(height: 6),
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => FullscreenImageView(
+                    imageBytes: decodedBytes,
+                    label: label,
+                  ),
+                ),
+              );
+            },
+            child: ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.memory(
                 decodedBytes,
@@ -394,14 +405,15 @@ class _HistorypageState extends State<Historypage> {
                 fit: BoxFit.cover,
               ),
             ),
-          ],
-        ),
-      );
-    } catch (e) {
-      debugPrint("Base64 image decoding failed: $e");
-      return const SizedBox.shrink();
-    }
+          ),
+        ],
+      ),
+    );
+  } catch (e) {
+    debugPrint("Base64 decoding error: $e");
+    return const SizedBox.shrink();
   }
+}
 
   Widget _detailRow(String label, dynamic value) {
     return Padding(
@@ -419,5 +431,37 @@ class _HistorypageState extends State<Historypage> {
     if (v == true) return 'Yes';
     if (v == false) return 'No';
     return 'N/A';
+  }
+}
+
+
+class FullscreenImageView extends StatelessWidget {
+  final Uint8List imageBytes;
+  final String label;
+
+  const FullscreenImageView({
+    super.key,
+    required this.imageBytes,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(label),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+      ),
+      backgroundColor: Colors.black,
+      body: Center(
+        child: InteractiveViewer(
+          panEnabled: true,
+          minScale: 1,
+          maxScale: 5,
+          child: Image.memory(imageBytes),
+        ),
+      ),
+    );
   }
 }
