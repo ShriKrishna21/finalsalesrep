@@ -1,7 +1,7 @@
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/unitwiseagentsmodel.dart';
-import 'package:finalsalesrep/unit/circulationincharge/adharimage.dart';
+import 'package:finalsalesrep/unit/circulationincharge/govtidimages.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -156,7 +156,7 @@ class _approvedagentsState extends State<approvedagents> {
                                           Navigator.push(
                                             context,
                                             MaterialPageRoute(
-                                              builder: (context) => Adharimage(
+                                              builder: (context) => GovtIdImages(
                                                   agentId: agent.id ?? 0),
                                             ),
                                           );
