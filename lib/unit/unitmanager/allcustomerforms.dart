@@ -282,7 +282,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                 " localizations.customerphoto",
+                                                 " land mark",
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
