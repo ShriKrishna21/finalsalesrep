@@ -499,7 +499,7 @@ class _CoustmerState extends State<Coustmer> {
                       hunttext: localizations.landmarkcannotbeempty,
                       need: true),
                   const SizedBox(height: 10),
-                  Text("faceimagelabel",
+                  Text("landmark photo",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   GestureDetector(

@@ -1,73 +1,65 @@
-class routemap {
-  String? jsonrpc;
-  Null id;
-  Result? result;
+class RouteMap {
+  final String? jsonrpc;
+  final dynamic id;
+  final Result? result;
 
-  routemap({this.jsonrpc, this.id, this.result});
+  RouteMap({this.jsonrpc, this.id, this.result});
 
-  routemap.fromJson(Map<String, dynamic> json) {
-    jsonrpc = json['jsonrpc'];
-    id = json['id'];
-    result = json['result'] != null ? Result.fromJson(json['result']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['jsonrpc'] = jsonrpc;
-    data['id'] = id;
-    if (result != null) {
-      data['result'] = result!.toJson();
-    }
-    return data;
+  factory RouteMap.fromJson(Map<String, dynamic> json) {
+    return RouteMap(
+      jsonrpc: json['jsonrpc'] as String?,
+      id: json['id'],
+      result: json['result'] != null
+          ? Result.fromJson(json['result'] as Map<String, dynamic>)
+          : null,
+    );
   }
 }
 
 class Result {
-  bool? success;
-  String? message;
-  int? status;
-  int? agentId;
-  RootMap? rootMap;
+  final List<Assigned>? assigned;
 
-  Result({this.success, this.message, this.status, this.agentId, this.rootMap});
+  Result({this.assigned});
 
-  Result.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
-    message = json['message'];
-    status = json['status'];
-    agentId = json['agent_id'];
-    rootMap =
-        json['root_map'] != null ? RootMap.fromJson(json['root_map']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['success'] = success;
-    data['message'] = message;
-    data['status'] = status;
-    data['agent_id'] = agentId;
-    if (rootMap != null) {
-      data['root_map'] = rootMap!.toJson();
-    }
-    return data;
+  factory Result.fromJson(Map<String, dynamic> json) {
+    var list = json['assigned'] as List?;
+    List<Assigned>? assignedList = list
+        ?.map((e) => Assigned.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return Result(assigned: assignedList);
   }
 }
 
-class RootMap {
-  int? id;
-  String? name;
+class Assigned {
+  final int? id;
+  final List<FromTo>? fromTo;
 
-  RootMap({this.id, this.name});
+  Assigned({this.id, this.fromTo});
 
-  RootMap.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    name = json['name'];
+  factory Assigned.fromJson(Map<String, dynamic> json) {
+    var list = json['from_to'] as List?;
+    List<FromTo>? fromToList = list
+        ?.map((e) => FromTo.fromJson(e as Map<String, dynamic>))
+        .toList();
+    return Assigned(
+      id: json['id'] as int?,
+      fromTo: fromToList,
+    );
   }
+}
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['name'] = name;
-    return data;
+class FromTo {
+  final String? fromLocation;
+  final String? toLocation;
+  final String? extraPoint; // Always stored as string for safety
+
+  FromTo({this.fromLocation, this.toLocation, this.extraPoint});
+
+  factory FromTo.fromJson(Map<String, dynamic> json) {
+    return FromTo(
+      fromLocation: json['from_location'] as String?,
+      toLocation: json['to_location'] as String?,
+      extraPoint: json['extra_point']?.toString(), // Safe cast to string
+    );
   }
 }
