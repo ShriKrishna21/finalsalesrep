@@ -17,12 +17,19 @@ class AssignRouteScreen extends StatefulWidget {
 
 class _AssignRouteScreenState extends State<AssignRouteScreen> {
   final _formKey = GlobalKey<FormState>();
-  final TextEditingController _routeMapController = TextEditingController();
   final TextEditingController _assignTargetController = TextEditingController();
 
   List<User> users = [];
   User? selectedAgent;
   bool isLoading = true;
+
+  // From-To Controllers
+  List<Map<String, TextEditingController>> fromToControllers = [
+    {
+      'from': TextEditingController(),
+      'to': TextEditingController(),
+    },
+  ];
 
   @override
   void initState() {
@@ -78,6 +85,16 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
 
     if (token == null || selectedAgent == null) return false;
 
+    final fromToList = fromToControllers
+        .where((pair) =>
+            pair['from']!.text.trim().isNotEmpty &&
+            pair['to']!.text.trim().isNotEmpty)
+        .map((pair) => {
+              "from_location": pair['from']!.text.trim(),
+              "to_location": pair['to']!.text.trim(),
+            })
+        .toList();
+
     final response = await http.post(
       Uri.parse('https://salesrep.esanchaya.com/api/For_root_map_asin'),
       headers: {'Content-Type': 'application/json'},
@@ -85,7 +102,7 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
         "params": {
           "token": token,
           "agent_id": selectedAgent!.id.toString(),
-          "root_map": _routeMapController.text.trim(),
+          "from_to_list": fromToList,
         }
       }),
     );
@@ -149,6 +166,15 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
     }
   }
 
+  void _addFromToField() {
+    setState(() {
+      fromToControllers.add({
+        'from': TextEditingController(),
+        'to': TextEditingController(),
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -187,16 +213,51 @@ class _AssignRouteScreenState extends State<AssignRouteScreen> {
                             value == null ? localizations.selectagent : null,
                       ),
                       const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _routeMapController,
-                        decoration: InputDecoration(
-                          labelText: localizations.routeMap,
-                          border: const OutlineInputBorder(),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? localizations.enterroutemap
-                            : null,
+
+                      // Dynamic From-To fields
+                      ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: fromToControllers.length,
+                        itemBuilder: (context, index) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 12.0),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: TextFormField(
+                                    controller:
+                                        fromToControllers[index]['from'],
+                                    decoration: const InputDecoration(
+                                      labelText: 'From',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Expanded(
+                                  child: TextFormField(
+                                    controller: fromToControllers[index]['to'],
+                                    decoration: const InputDecoration(
+                                      labelText: 'To',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
                       ),
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton.icon(
+                          onPressed: _addFromToField,
+                          icon: const Icon(Icons.add),
+                          label: const Text("Add From-To"),
+                        ),
+                      ),
+
                       const SizedBox(height: 16),
                       TextFormField(
                         controller: _assignTargetController,
