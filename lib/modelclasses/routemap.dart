@@ -17,7 +17,7 @@ class RouteMap {
 }
 
 class Result {
-  final List<Assigned>? assigned;
+  List<Assigned>? assigned;
 
   Result({this.assigned});
 
@@ -32,34 +32,39 @@ class Result {
 
 class Assigned {
   final int? id;
+  final String? date;
   final List<FromTo>? fromTo;
 
-  Assigned({this.id, this.fromTo});
+  Assigned({this.id, this.date, this.fromTo});
 
   factory Assigned.fromJson(Map<String, dynamic> json) {
     var list = json['from_to'] as List?;
     List<FromTo>? fromToList = list
         ?.map((e) => FromTo.fromJson(e as Map<String, dynamic>))
         .toList();
+
     return Assigned(
       id: json['id'] as int?,
+      date: json['date'] as String?,
       fromTo: fromToList,
     );
   }
 }
 
 class FromTo {
+  final int? id; // Added this line
   final String? fromLocation;
   final String? toLocation;
-  final String? extraPoint; // Always stored as string for safety
+  final String? extraPoint;
 
-  FromTo({this.fromLocation, this.toLocation, this.extraPoint});
+  FromTo({this.id, this.fromLocation, this.toLocation, this.extraPoint});
 
   factory FromTo.fromJson(Map<String, dynamic> json) {
     return FromTo(
+      id: json['id'] as int?, // Parse 'id' if present
       fromLocation: json['from_location'] as String?,
       toLocation: json['to_location'] as String?,
-      extraPoint: json['extra_point']?.toString(), // Safe cast to string
+      extraPoint: json['extra_point']?.toString(),
     );
   }
 }
