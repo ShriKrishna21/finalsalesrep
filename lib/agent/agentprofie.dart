@@ -150,7 +150,7 @@ class _agentProfileState extends State<agentProfile> {
                   profileitem(
                       title: Localizations.jobRole, value: jobrole ?? "-"),
                   profileitem(
-                      title: Localizations.jobRole, value: unitname ?? "-"),
+                      title: Localizations.unitName, value: unitname ?? "-"),
                 ],
               ),
             ),
@@ -167,18 +167,18 @@ class _agentProfileState extends State<agentProfile> {
                       builder: (BuildContext context) {
                         return AlertDialog(
                           title: Text(Localizations.confirmlogout,
-                              style: TextStyle(color: Colors.black)),
+                              style: const TextStyle(color: Colors.black)),
                           content: Text(Localizations.areyousureyouwanttologout,
-                              style: TextStyle(color: Colors.black)),
+                              style: const TextStyle(color: Colors.black)),
                           actions: [
                             TextButton(
                               child: Text(Localizations.cancel,
-                                  style: TextStyle(color: Colors.black)),
+                                  style: const TextStyle(color: Colors.black)),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                             TextButton(
                               child: Text(Localizations.logout,
-                                  style: TextStyle(color: Colors.red)),
+                                  style: const TextStyle(color: Colors.red)),
                               onPressed: () {
                                 Navigator.of(context).pop(); // Close dialog
                                 agentLogout(); // Proceed with logout
