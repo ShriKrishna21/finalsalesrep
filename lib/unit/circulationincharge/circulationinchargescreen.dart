@@ -50,8 +50,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 
   void startTokenValidation() {
     validateToken();
-    _sessionCheckTimer =
-        Timer.periodic(const Duration(seconds: 2), (_) async {
+    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 2), (_) async {
       await validateToken();
     });
   }
@@ -78,7 +77,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       final result = data['result'];
 
       if (result == null || result['success'] != true) {
-        forceLogout("Session expired. You may have logged in on another device.");
+        forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
       forceLogout("Error validating session. Please log in again.");
@@ -91,7 +91,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -237,14 +238,17 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       onTap: () async {
                         await Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const Noofresources()),
+                          MaterialPageRoute(
+                              builder: (_) => const Noofresources()),
                         );
                         _loadData();
                       },
                       child: _buildCard(
                         title: localizations.numberOfResources,
                         rows: [
-                          _InfoRow(label: localizations.agents, value: agentCount.toString())
+                          _InfoRow(
+                              label: localizations.agents,
+                              value: agentCount.toString())
                         ],
                       ),
                     ),
@@ -253,13 +257,16 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       onTap: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (_) => const Allcustomerforms()),
+                          MaterialPageRoute(
+                              builder: (_) => const Allcustomerforms()),
                         );
                       },
                       child: _buildCard(
                         title: localizations.viewallcustomerforms,
                         rows: [
-                          _InfoRow(label: localizations.customerforms, value: customerFormCount.toString())
+                          _InfoRow(
+                              label: localizations.customerforms,
+                              value: customerFormCount.toString())
                         ],
                       ),
                     ),
@@ -267,10 +274,18 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                     _buildCard(
                       title: localizations.subscriptionDetails,
                       rows: [
-                        _InfoRow(label: localizations.housesVisited, value: customerFormCount.toString()),
-                        _InfoRow(label: localizations.eenaduSubscription, value: alreadySubscribedCount.toString()),
-                        _InfoRow(label: localizations.willingToChange, value: offerAcceptedCount.toString()),
-                        _InfoRow(label: localizations.notInterested, value: offerRejectedCount.toString()),
+                        _InfoRow(
+                            label: localizations.housesVisited,
+                            value: customerFormCount.toString()),
+                        _InfoRow(
+                            label: localizations.eenaduSubscription,
+                            value: alreadySubscribedCount.toString()),
+                        _InfoRow(
+                            label: localizations.willingToChange,
+                            value: offerAcceptedCount.toString()),
+                        _InfoRow(
+                            label: localizations.notInterested,
+                            value: offerRejectedCount.toString()),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -282,25 +297,39 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     );
   }
 
-  Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
+  Widget _buildDrawer(
+      LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
       child: ListView(
         children: [
           DrawerHeader(
-            decoration: const BoxDecoration(color: Colors.black),
+            decoration: const BoxDecoration(color: Colors.blue),
             child: Column(
               children: [
+                // Image.asset('assets/logo.png'),
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text(localizations.salesrep, style: const TextStyle(color: Colors.white)),
+                Text("${localizations.circulationIncharge}    ",
+                    style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
-          SwitchListTile(
-            title: Text(localeProvider.locale.languageCode == 'te' ? 'తెలుగు' : 'English'),
-            value: localeProvider.locale.languageCode == 'te',
-            onChanged: (_) => localeProvider.toggleLocale(),
-            secondary: const Icon(Icons.language),
+          ListTile(
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('English'),
+                Switch(
+                  value: localeProvider.locale.languageCode == 'te',
+                  onChanged: (value) => localeProvider.toggleLocale(),
+                  activeColor: Colors.green,
+                  inactiveThumbColor: Colors.blue,
+                  activeTrackColor: Colors.green.shade200,
+                  inactiveTrackColor: Colors.blue.shade200,
+                ),
+                const Text('తెలుగు'),
+              ],
+            ),
           ),
         ],
       ),

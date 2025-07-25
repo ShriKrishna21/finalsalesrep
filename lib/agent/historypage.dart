@@ -370,50 +370,51 @@ class _HistorypageState extends State<Historypage> {
   }
 
   Widget _base64ImageWidget(String label, String base64String) {
-  try {
-    final cleanedBase64 = base64String.contains(',')
-        ? base64String.split(',').last
-        : base64String;
+    try {
+      final cleanedBase64 = base64String.contains(',')
+          ? base64String.split(',').last
+          : base64String;
 
-    final decodedBytes = base64Decode(cleanedBase64);
+      final decodedBytes = base64Decode(cleanedBase64);
 
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text("$label:", style: const TextStyle(fontWeight: FontWeight.w600)),
-          const SizedBox(height: 6),
-          GestureDetector(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => FullscreenImageView(
-                    imageBytes: decodedBytes,
-                    label: label,
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("$label:",
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FullscreenImageView(
+                      imageBytes: decodedBytes,
+                      label: label,
+                    ),
                   ),
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(
+                  decodedBytes,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
-              );
-            },
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: Image.memory(
-                decodedBytes,
-                height: 180,
-                width: double.infinity,
-                fit: BoxFit.cover,
               ),
             ),
-          ),
-        ],
-      ),
-    );
-  } catch (e) {
-    debugPrint("Base64 decoding error: $e");
-    return const SizedBox.shrink();
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint("Base64 decoding error: $e");
+      return const SizedBox.shrink();
+    }
   }
-}
 
   Widget _detailRow(String label, dynamic value) {
     return Padding(
@@ -433,7 +434,6 @@ class _HistorypageState extends State<Historypage> {
     return 'N/A';
   }
 }
-
 
 class FullscreenImageView extends StatelessWidget {
   final Uint8List imageBytes;
