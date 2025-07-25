@@ -30,7 +30,7 @@ class _CoustmerState extends State<Coustmer> {
   bool _isAnotherToggle = false;
   bool _isofferTogle = false;
   bool _isemployed = false;
-  bool _isLoading = false; // Added for loading indicator
+  bool _isLoading = false;
   int offerintresetedpeople = 0;
   int offernotintresetedpeople = 0;
   int offerintresetedpeoplecount = 0;
@@ -47,6 +47,9 @@ class _CoustmerState extends State<Coustmer> {
   String? _selectedJobType;
   String? _selectedGovDepartment;
   String? _selectedproffesion;
+  String? _selectedNewspaper;
+  String?
+      _selectedPrivateProfession; // Added for private job profession dropdown
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController agency = TextEditingController();
@@ -77,8 +80,42 @@ class _CoustmerState extends State<Coustmer> {
 
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
-  List<String> govDepartments = ["central_job", "pSU", "state_job"];
+  List<String> govDepartments = ["Central", "PSU", "State"];
   List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
+  List<String> newspapers = [
+    "Eenadu",
+    "Sakshi",
+    "Andhra Jyothi",
+    "Andhra Bhoomi",
+    "Vaartha",
+    "Namasthe Telangana",
+    "Prajasakti",
+    "Nava Telangana",
+    "Andhra Prabha",
+    "Suryaa",
+    "Mana Telangana",
+    "Janam Sakshi",
+    "Visalaandhra",
+    "Deccan Chronicle",
+    "The Hans India",
+    "Telangana Today",
+    "The Siasat Daily",
+    "Etemaad Daily"
+  ];
+  List<String> privateProfessions = [
+    "IT & Software",
+    "Healthcare & Medical",
+    "Retail & Sales",
+    "Manufacturing & Industrial",
+    "Finance & Accounting",
+    "Telecommunications",
+    "Marketing & Advertising",
+    "Hospitality & Tourism",
+    "Creative & Design",
+    "Education & Training",
+    "Logistics & Supply Chain",
+    "Startup Ecosystem"
+  ]; // Added private professions list
   coustmerform? data;
 
   @override
@@ -182,7 +219,7 @@ class _CoustmerState extends State<Coustmer> {
 
   Future<void> uploaddata() async {
     setState(() {
-      _isLoading = true; // Start loading
+      _isLoading = true;
     });
 
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -218,7 +255,7 @@ class _CoustmerState extends State<Coustmer> {
             "eenadu_newspaper": _isYes,
             "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
             "read_newspaper": _isAnotherToggle,
-            "current_newspaper": current_newspaper.text,
+            "current_newspaper": _selectedNewspaper ?? current_newspaper.text,
             "reason_for_not_taking_eenadu_newsPaper":
                 reason_for_not_taking_eenadu.text,
             "reason_not_reading": reason_for_not_reading.text,
@@ -230,7 +267,9 @@ class _CoustmerState extends State<Coustmer> {
             "job_profession": job_proffesion.text,
             "job_designation": job_designation.text,
             "company_name": privateCompanyController.text,
-            "profession": privateProffesionController.text,
+            "profession": _selectedPrivateProfession ??
+                privateProffesionController
+                    .text, // Updated to use dropdown value
             "job_designation_one": privatedesignationController.text,
             "latitude": latitude,
             "longitude": longitude,
@@ -300,7 +339,7 @@ class _CoustmerState extends State<Coustmer> {
       );
     } finally {
       setState(() {
-        _isLoading = false; // Stop loading
+        _isLoading = false;
       });
     }
   }
@@ -321,6 +360,8 @@ class _CoustmerState extends State<Coustmer> {
       _selectedJobType = null;
       _selectedGovDepartment = null;
       _selectedproffesion = null;
+      _selectedNewspaper = null;
+      _selectedPrivateProfession = null; // Reset private profession dropdown
       agency.clear();
       familyhead.clear();
       fathersname.clear();
@@ -517,7 +558,7 @@ class _CoustmerState extends State<Coustmer> {
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(faceImage!, fit: BoxFit.cover),
                             )
-                          : Center(child: Text("tapToSelectImage")),
+                          : Center(child: Text("TapToSelectImage")),
                     ),
                   ),
                   SizedBox(
@@ -536,12 +577,20 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  textformfeild(
-                      hunttext: localizations.mobilenumbercannotbeempty,
-                      controller: mobile,
-                      maxvalue: 10,
-                      label: localizations.mobilenumber,
-                      keyboardType: TextInputType.phone),
+                  TextFormField(
+                    controller: mobile,
+                    maxLength: 10,
+                    keyboardType: TextInputType.phone,
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      labelText: localizations.mobilenumber,
+                      errorText: mobile.text.length < 10
+                          ? localizations.mobilenumbercannotbeempty
+                          : null,
+                    ),
+                  ),
                   const SizedBox(height: 15),
                   Text(localizations.newsPaperDetails,
                       style: const TextStyle(
@@ -611,10 +660,34 @@ class _CoustmerState extends State<Coustmer> {
                       ],
                     ),
                     if (_isAnotherToggle)
-                      textformfeild(
-                          hunttext: localizations.currentnewspapercannotbeempty,
-                          controller: current_newspaper,
-                          label: localizations.currentnewpaper),
+                      DropdownButtonFormField<String>(
+                        value: _selectedNewspaper,
+                        hint: Text(localizations.currentnewpaper),
+                        isExpanded: true,
+                        items: newspapers.map((String newspaper) {
+                          return DropdownMenuItem<String>(
+                            value: newspaper,
+                            child: Text(newspaper),
+                          );
+                        }).toList(),
+                        onChanged: (String? newValue) {
+                          setState(() {
+                            _selectedNewspaper = newValue;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) {
+                            return localizations.currentnewspapercannotbeempty;
+                          }
+                          return null;
+                        },
+                        decoration: InputDecoration(
+                          labelText: localizations.currentnewpaper,
+                          border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10)),
+                        ),
+                      ),
+                    SizedBox(height: 10),
                     if (_isAnotherToggle)
                       textformfeild(
                           hunttext:
@@ -689,7 +762,8 @@ class _CoustmerState extends State<Coustmer> {
                             _selectedGovDepartment = null;
                             privateCompanyController.clear();
                             privateProffesionController.clear();
-                            _selectedproffesion = null;
+                            _selectedPrivateProfession =
+                                null; // Reset private profession
                           });
                         },
                       ),
@@ -713,6 +787,8 @@ class _CoustmerState extends State<Coustmer> {
                           _selectedGovDepartment = null;
                           privateCompanyController.clear();
                           privateProffesionController.clear();
+                          _selectedPrivateProfession =
+                              null; // Reset private profession
                         });
                       },
                       decoration: InputDecoration(
@@ -769,10 +845,33 @@ class _CoustmerState extends State<Coustmer> {
                         controller: privatedesignationController,
                         label: localizations.designation),
                     const SizedBox(height: 10),
-                    textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
-                        controller: privateProffesionController,
-                        label: localizations.profession),
+                    DropdownButtonFormField<String>(
+                      value: _selectedPrivateProfession,
+                      hint: Text(localizations.profession),
+                      isExpanded: true,
+                      items: privateProfessions.map((String profession) {
+                        return DropdownMenuItem<String>(
+                          value: profession,
+                          child: Text(profession),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedPrivateProfession = newValue;
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return localizations.fieldcannotbeempty;
+                        }
+                        return null;
+                      },
+                      decoration: InputDecoration(
+                        labelText: localizations.profession,
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
                   ],
                   if (!_isemployed)
                     DropdownButtonFormField<String>(
