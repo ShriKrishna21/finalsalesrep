@@ -1,5 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:finalsalesrep/agent/agentaddrouite.dart';
+import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -130,9 +132,16 @@ class _AgentscreenState extends State<Agentscreen> {
               routeDate.day == today.day;
         }).toList();
 
+        Assigned? latestRoute;
+        if (todayOnlyRoutes != null && todayOnlyRoutes.isNotEmpty) {
+          todayOnlyRoutes.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
+          latestRoute = todayOnlyRoutes.first;
+        }
+
         setState(() {
           fullRouteMap = routeMap;
-          fullRouteMap?.result?.assigned = todayOnlyRoutes;
+          fullRouteMap?.result?.assigned =
+              latestRoute != null ? [latestRoute] : [];
         });
       } else {
         debugPrint("Failed to fetch full route map: ${response.statusCode}");
@@ -183,9 +192,11 @@ class _AgentscreenState extends State<Agentscreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(localizations.salesrep),
-            Text("${localizations.welcome} $agentname",
-                style: const TextStyle(fontSize: 16)),
+            Center(child: Text(localizations.salesrep)),
+            Center(
+              child: Text("${localizations.welcome} $agentname",
+                  style: const TextStyle(fontSize: 16)),
+            ),
           ],
         ),
         actions: [
@@ -239,7 +250,37 @@ class _AgentscreenState extends State<Agentscreen> {
                     _buildInfoRow(localizations.todaysTargetLeft,
                         "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
                     const SizedBox(height: 30),
-                    Center(child: _buildSectionTitle(localizations.myRouteMap)),
+                    Row(children: [
+                      Center(
+                          child: _buildSectionTitle(localizations.myRouteMap)),
+                          Spacer(),
+                    TextButton.icon(
+  icon: const Icon(Icons.assignment_outlined, size: 18),
+  label: const Text("Route Map Assign", style: TextStyle(fontSize: 14)),
+  onPressed: () async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final agentId = prefs.getInt('id');
+
+    if (token != null && agentId != null) {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Agentaddrouite(
+            agentId: agentId,
+            token: token,
+          ),
+        ),
+      ).then((_) => refreshData());
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Missing Agent ID or Token")),
+      );
+    }
+  },
+),
+
+                    ]),
                     const SizedBox(height: 8),
                     if (fullRouteMap?.result?.assigned != null)
                       ...fullRouteMap!.result!.assigned!.map((assigned) =>
@@ -264,8 +305,13 @@ class _AgentscreenState extends State<Agentscreen> {
                                                           ft.fromLocation,
                                                       "to_location":
                                                           ft.toLocation,
-                                                      "extra_point":
-                                                          ft.extraPoint,
+                                                      "extra_points": ft
+                                                          .extraPoints
+                                                          ?.map((ep) => {
+                                                                "id": ep.id,
+                                                                "name": ep.name,
+                                                              })
+                                                          .toList(),
                                                     })
                                                 .toList() ??
                                             [];
@@ -277,7 +323,9 @@ class _AgentscreenState extends State<Agentscreen> {
                                               fromToIds: fromToIds,
                                             ),
                                           ),
-                                        );
+                                        ).then((_) {
+                                          refreshData(); // ✅ refresh on return
+                                        });
                                       }
                                     },
                                     icon: const Icon(Icons.edit, size: 18),
@@ -288,61 +336,69 @@ class _AgentscreenState extends State<Agentscreen> {
                               ),
                               const SizedBox(height: 4),
                               ...?assigned.fromTo?.map(
-                                    (ft) => Padding(
-                                      padding: const EdgeInsets.symmetric(
-                                          vertical: 2),
-                                      child: Row(
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.start,
-                                        children: [
-                                          const Icon(Icons.location_on_outlined,
-                                              size: 20, color: Colors.blue),
-                                          const SizedBox(width: 4),
-                                          Expanded(
-                                            child: Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Row(
-                                                  children: [
-                                                    Text(
-                                                        ft.fromLocation ??
-                                                            'N/A',
-                                                        style: const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.w600)),
-                                                    const Icon(
-                                                        Icons.arrow_forward,
-                                                        size: 16),
-                                                    if (ft.extraPoint != null &&
-                                                        ft.extraPoint!
-                                                            .isNotEmpty && ft.extraPoint!="false") ...[
-                                                      Text(
-                                                          ft.extraPoint ?? '',
-                                                          style: const TextStyle(
-                                                              fontSize: 14,
-                                                              color:
-                                                                  Colors.black)),
-                                                      const Icon(
-                                                          Icons.arrow_forward,
-                                                          size: 16),
-                                                    ],
-                                                    Text(
-                                                        ft.toLocation ?? 'N/A',
-                                                        style: const TextStyle(
-                                                            fontSize: 15,
-                                                            fontWeight:
-                                                                FontWeight.w600)),
+                                (ft) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 2),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.location_on_outlined,
+                                          size: 20, color: Colors.blue),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: [
+                                                  Text(ft.fromLocation ?? 'N/A',
+                                                      style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                  const Icon(
+                                                      Icons.arrow_forward,
+                                                      size: 16),
+                                                  if (ft.extraPoints != null &&
+                                                      ft.extraPoints!
+                                                          .isNotEmpty) ...[
+                                                    ...ft.extraPoints!
+                                                        .map((ep) => Row(
+                                                              children: [
+                                                                Text(
+                                                                    ep.name ??
+                                                                        '',
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            14,
+                                                                        color: Colors
+                                                                            .black)),
+                                                                const Icon(
+                                                                    Icons
+                                                                        .arrow_forward,
+                                                                    size: 16),
+                                                              ],
+                                                            )),
                                                   ],
-                                                ),
-                                              ],
+                                                  Text(ft.toLocation ?? 'N/A',
+                                                      style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                ],
+                                              ),
                                             ),
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
-                                    ),
+                                    ],
                                   ),
+                                ),
+                              ),
                             ],
                           )),
                     const SizedBox(height: 30),
