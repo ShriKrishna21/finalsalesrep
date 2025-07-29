@@ -94,7 +94,7 @@ class _agentProfileState extends State<Profilescreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
-        title: const Text('My Profile'),
+        title: Text(Localizations.myProfile),
       ),
       body: Column(
         children: [
@@ -130,10 +130,11 @@ class _agentProfileState extends State<Profilescreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                profileitem(title: "Name", value: agentname ?? ""),
-                profileitem(title: "User Name", value: userid ?? ""),
-                profileitem(title: "Job role", value: jobrole ?? ""),
-                profileitem(title: "Unit name", value: unitname ?? ""),
+                profileitem(title: Localizations.name, value: agentname ?? ""),
+                profileitem(title: Localizations.userName, value: userid ?? ""),
+                profileitem(title: Localizations.jobRole, value: jobrole ?? ""),
+                profileitem(
+                    title: Localizations.unitName, value: unitname ?? ""),
               ],
             ),
           ),
@@ -149,18 +150,18 @@ class _agentProfileState extends State<Profilescreen> {
                     context: context,
                     builder: (BuildContext context) {
                       return AlertDialog(
-                        title: const Text("Confirm Logout"),
-                        content: const Text("Are you sure you want to logout?"),
+                        title: Text(Localizations.confirmlogout),
                         actions: [
                           TextButton(
-                            child: const Text("Cancel"),
+                            child: Text(Localizations.cancel,
+                                style: const TextStyle(color: Colors.black)),
                             onPressed: () {
                               Navigator.of(context).pop();
                             },
                           ),
                           TextButton(
-                            child: const Text("Logout",
-                                style: TextStyle(color: Colors.red)),
+                            child: Text(Localizations.logout,
+                                style: const TextStyle(color: Colors.red)),
                             onPressed: () {
                               Navigator.of(context).pop();
                               agentLogout();
@@ -177,8 +178,8 @@ class _agentProfileState extends State<Profilescreen> {
                     borderRadius: BorderRadius.circular(10),
                   ),
                 ),
-                child: const Text(
-                  'Logout',
+                child: Text(
+                  Localizations.logout,
                   style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),

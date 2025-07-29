@@ -253,33 +253,34 @@ class _AgentscreenState extends State<Agentscreen> {
                     Row(children: [
                       Center(
                           child: _buildSectionTitle(localizations.myRouteMap)),
-                          Spacer(),
-                    TextButton.icon(
-  icon: const Icon(Icons.assignment_outlined, size: 18),
-  label: const Text("Route Map Assign", style: TextStyle(fontSize: 14)),
-  onPressed: () async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final agentId = prefs.getInt('id');
+                      Spacer(),
+                      TextButton.icon(
+                        icon: Icon(Icons.assignment_outlined, size: 18),
+                        label: Text(localizations.routemapassign,
+                            style: TextStyle(fontSize: 14)),
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          final token = prefs.getString('apikey');
+                          final agentId = prefs.getInt('id');
 
-    if (token != null && agentId != null) {
-      await Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Agentaddrouite(
-            agentId: agentId,
-            token: token,
-          ),
-        ),
-      ).then((_) => refreshData());
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Missing Agent ID or Token")),
-      );
-    }
-  },
-),
-
+                          if (token != null && agentId != null) {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Agentaddrouite(
+                                  agentId: agentId,
+                                  token: token,
+                                ),
+                              ),
+                            ).then((_) => refreshData());
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Missing Agent ID or Token")),
+                            );
+                          }
+                        },
+                      ),
                     ]),
                     const SizedBox(height: 8),
                     if (fullRouteMap?.result?.assigned != null)
@@ -428,9 +429,7 @@ class _AgentscreenState extends State<Agentscreen> {
               children: [
                 const Icon(Icons.account_circle, size: 60),
                 const SizedBox(height: 10),
-                Text(localizations.salesrep,
-                    style: const TextStyle(
-                        fontSize: 20, fontWeight: FontWeight.bold)),
+                Text(" $agentname", style: const TextStyle(fontSize: 16)),
               ],
             ),
           ),

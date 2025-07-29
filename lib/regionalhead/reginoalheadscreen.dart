@@ -50,7 +50,14 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
     final prefs = await SharedPreferences.getInstance();
     final currentToken = prefs.getString('apikey') ?? '';
 
-    final url = Uri.parse('https://salesrep.esanchaya.com/api/token_validation');
+    if (currentToken.isEmpty) {
+      print("No token found. Skipping validation.");
+      return;
+    }
+
+    final url =
+        Uri.parse('https://salesrep.esanchaya.com/api/token_validation');
+
     try {
       final response = await http.post(
         url,
@@ -60,16 +67,19 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         }),
       );
 
+      print("Token validation response: ${response.body}");
+
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
         if (result['result'] != true) {
+          print("Invalid token, triggering logout.");
           logoutUser();
         }
       } else {
-        logoutUser();
+        print("Token validation failed with status: ${response.statusCode}");
       }
     } catch (e) {
-      logoutUser();
+      print("Token validation error: $e");
     }
   }
 
@@ -92,7 +102,8 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
   }
 
   Future<void> fetchUnits() async {
-    final url = Uri.parse('https://salesrep.esanchaya.com/api/users_you_created');
+    final url =
+        Uri.parse('https://salesrep.esanchaya.com/api/users_you_created');
     try {
       final response = await http.post(
         url,
@@ -144,8 +155,6 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
-        foregroundColor: Colors.white,
         automaticallyImplyLeading: true,
         actions: [
           GestureDetector(
@@ -170,16 +179,19 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         ],
         title: Center(
           child: RichText(
+            textAlign: TextAlign.center, // 👈 Add this line
             text: TextSpan(
               text: localizations.regionalHead,
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.height / 40,
                 fontWeight: FontWeight.bold,
+                color: Colors.black, // Ensure a visible color is set here
               ),
               children: <TextSpan>[
                 TextSpan(
-                    text: "$username\n",
-                    style: const TextStyle(color: Colors.black))
+                  text: "\n$username",
+                  style: const TextStyle(color: Colors.black),
+                ),
               ],
             ),
           ),
@@ -189,11 +201,17 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         child: ListView(
           children: [
             DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
               child: Column(
                 children: [
                   const Icon(Icons.account_circle, size: 60),
                   const SizedBox(height: 10),
-                  Text(localizations.salesrep),
+                  Text(
+                    "$username",
+                    style: const TextStyle(color: Colors.black),
+                  ),
                 ],
               ),
             ),
@@ -230,7 +248,7 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
                 const SizedBox(height: 10),
                 Expanded(
                   child: unitNames.isEmpty
-                      ? const Center(child: Text("No units found"))
+                      ? Center(child: Text(localizations.nounitsfound))
                       : ListView.builder(
                           itemCount: unitNames.length,
                           itemBuilder: (context, index) {

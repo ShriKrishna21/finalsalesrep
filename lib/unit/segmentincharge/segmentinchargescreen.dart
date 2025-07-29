@@ -69,7 +69,8 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
       final result = data['result'];
 
       if (result == null || result['success'] != true) {
-        forceLogout("Session expired. You may have logged in on another device.");
+        forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
       forceLogout("Error validating session. Please log in again.");
@@ -82,7 +83,8 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -204,10 +206,14 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(localizations.segmentincharge,
-                style: const TextStyle(fontWeight: FontWeight.bold)),
-            Text(userName, style: const TextStyle(fontSize: 14)),
-            Text(unitt, style: const TextStyle(fontSize: 12)),
+            Center(
+              child: Text(localizations.segmentincharge,
+                  style: const TextStyle(fontWeight: FontWeight.bold)),
+            ),
+            Center(
+                child: Text(localizations.segmentincharge,
+                    style: const TextStyle(fontSize: 14))),
+            Center(child: Text(unitt, style: const TextStyle(fontSize: 12))),
           ],
         ),
       ),
@@ -215,11 +221,14 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
         child: ListView(
           children: [
             DrawerHeader(
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+              ),
               child: Column(
                 children: [
                   const Icon(Icons.account_circle, size: 60),
                   const SizedBox(height: 10),
-                  Text(localizations.salesrep),
+                  Text(localizations.segmentincharge),
                 ],
               ),
             ),
@@ -279,7 +288,8 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   onTap: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (_) => const Allcustomerforms()),
+                      MaterialPageRoute(
+                          builder: (_) => const Allcustomerforms()),
                     );
                   },
                   child: _buildCard(

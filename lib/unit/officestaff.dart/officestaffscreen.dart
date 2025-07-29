@@ -68,7 +68,8 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
       final result = data['result'];
 
       if (result == null || result['success'] != true) {
-        forceLogout("Session expired. You may have logged in on another device.");
+        forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
       forceLogout("Error validating session. Please log in again.");
@@ -81,7 +82,8 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -118,24 +120,26 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
             },
           )
         ],
-        title: RichText(
-          text: TextSpan(
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-            ),
-            children: [
-              TextSpan(text: localizations.office1staff),
-              TextSpan(
-                text: "\n${localizations.unitName}",
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Colors.black,
-                  fontWeight: FontWeight.normal,
-                ),
+        title: Center(
+          child: RichText(
+            text: TextSpan(
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
               ),
-            ],
+              children: [
+                TextSpan(text: localizations.office1staff),
+                TextSpan(
+                  text: "\n${localizations.unitName}",
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.black,
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -143,11 +147,14 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
         child: ListView(
           children: [
             DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
               child: Column(
                 children: [
                   const Icon(Icons.account_circle, size: 60),
                   const SizedBox(height: 10),
-                  Text(localizations.salesrep),
+                  Text(localizations.unitName),
                 ],
               ),
             ),
