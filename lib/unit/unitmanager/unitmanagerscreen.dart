@@ -59,14 +59,17 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/token_validation"),
         headers: {"Content-Type": "application/json"},
-        body: jsonEncode({"params": {"token": token}}),
+        body: jsonEncode({
+          "params": {"token": token}
+        }),
       );
 
       final data = jsonDecode(response.body);
       final result = data['result'];
 
       if (result == null || result['success'] != true) {
-        forceLogout("Session expired. You may have logged in on another device.");
+        forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
       forceLogout("Error validating session. Please log in again.");
@@ -79,7 +82,8 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
 
     if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
 
     Navigator.pushAndRemoveUntil(
       context,
@@ -199,24 +203,29 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             ),
           )
         ],
-        title: RichText(
-          text: TextSpan(
-            text: Localizations.unitmanager,
-            style: TextStyle(
-              fontSize: MediaQuery.of(context).size.height / 40,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-            children: <TextSpan>[
-              TextSpan(
-                text: "  -$unitt",
+        title: Center(
+          child: Center(
+            child: RichText(
+              textAlign: TextAlign.center,
+              text: TextSpan(
+                text: AppLocalizations.of(context)!.unitmanager,
                 style: TextStyle(
-                  fontSize: MediaQuery.of(context).size.height / 44,
+                  fontSize: MediaQuery.of(context).size.height / 40,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
                 ),
-              )
-            ],
+                children: [
+                  TextSpan(
+                    text: '  -$unitt',
+                    style: TextStyle(
+                      fontSize: MediaQuery.of(context).size.height / 44,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         automaticallyImplyLeading: true,
@@ -225,11 +234,14 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
         child: ListView(
           children: [
             DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
               child: Column(
                 children: [
                   const Icon(Icons.account_circle, size: 60),
                   const SizedBox(height: 10),
-                  Text(Localizations.salesrep),
+                  Text(AppLocalizations.of(context)!.unitName),
                 ],
               ),
             ),

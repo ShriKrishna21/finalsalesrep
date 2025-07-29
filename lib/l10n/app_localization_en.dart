@@ -483,6 +483,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get confirmlogout => 'Confirm Logout';
 
   @override
+  String get logoutconfirmation => 'logoutConfirmation';
+
+  @override
   String get areyousureyouwanttologout => 'Are You Sure You Want To Logout?';
 
   @override
@@ -641,4 +644,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get todayhistory => 'Today History';
+
+  @override
+  String get routemapassign => 'Route Map Assign';
+
+  @override
+  String get createregionalhead => 'Create Regional Head';
+
+  @override
+  String get nounitsfound => 'noUnitsFound';
 }

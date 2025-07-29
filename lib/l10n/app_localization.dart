@@ -1028,6 +1028,12 @@ abstract class AppLocalizations {
   /// **'Confirm Logout'**
   String get confirmlogout;
 
+  /// No description provided for @logoutconfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'logoutConfirmation'**
+  String get logoutconfirmation;
+
   /// No description provided for @areyousureyouwanttologout.
   ///
   /// In en, this message translates to:
@@ -1345,6 +1351,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Today History'**
   String get todayhistory;
+
+  /// No description provided for @routemapassign.
+  ///
+  /// In en, this message translates to:
+  /// **'Route Map Assign'**
+  String get routemapassign;
+
+  /// No description provided for @createregionalhead.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Regional Head'**
+  String get createregionalhead;
+
+  /// No description provided for @nounitsfound.
+  ///
+  /// In en, this message translates to:
+  /// **'noUnitsFound'**
+  String get nounitsfound;
 }
 
 class _AppLocalizationsDelegate

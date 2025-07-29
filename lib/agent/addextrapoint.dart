@@ -18,23 +18,45 @@ class Addextrapoint extends StatefulWidget {
 }
 
 class _AddextrapointState extends State<Addextrapoint> {
-  late List<TextEditingController> controllers;
+  late List<List<TextEditingController>> controllersList;
 
   @override
   void initState() {
     super.initState();
-    controllers = widget.fromToIds
-        .map((entry) =>
-            TextEditingController(text: entry['extra_point']?.toString() ?? ''))
-        .toList();
+    // Initialize controllersList with one controller per extra point for each fromTo entry
+    controllersList = widget.fromToIds.map((entry) {
+      final extraPoints = entry['extra_points'] as List<dynamic>? ?? [];
+      return extraPoints.isNotEmpty
+          ? extraPoints
+              .map((ep) => TextEditingController(text: ep['name']?.toString() ?? ''))
+              .toList()
+          : [TextEditingController()];
+    }).toList();
   }
 
   @override
   void dispose() {
-    for (final controller in controllers) {
-      controller.dispose();
+    for (final controllers in controllersList) {
+      for (final controller in controllers) {
+        controller.dispose();
+      }
     }
     super.dispose();
+  }
+
+  void addExtraPointField(int fromToIndex) {
+    setState(() {
+      controllersList[fromToIndex].add(TextEditingController());
+    });
+  }
+
+  void removeExtraPointField(int fromToIndex, int controllerIndex) {
+    setState(() {
+      if (controllersList[fromToIndex].length > 1) {
+        controllersList[fromToIndex][controllerIndex].dispose();
+        controllersList[fromToIndex].removeAt(controllerIndex);
+      }
+    });
   }
 
   Future<void> saveExtraPoints() async {
@@ -52,7 +74,10 @@ class _AddextrapointState extends State<Addextrapoint> {
 
     for (int i = 0; i < widget.fromToIds.length; i++) {
       final fromToId = widget.fromToIds[i]['id'];
-      final extraPoint = controllers[i].text;
+      final extraPointNames = controllersList[i]
+          .map((controller) => controller.text.trim())
+          .where((text) => text.isNotEmpty)
+          .toList();
 
       final url =
           Uri.parse('https://salesrep.esanchaya.com/api/for_assign_extra_point');
@@ -62,9 +87,9 @@ class _AddextrapointState extends State<Addextrapoint> {
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "params": {
-            "extra_point": extraPoint,
-            "location_id": fromToId,
             "token": token,
+            "location_id": fromToId,
+            "extra_point_names": extraPointNames,
           }
         }),
       );
@@ -90,7 +115,7 @@ class _AddextrapointState extends State<Addextrapoint> {
     );
 
     if (allSuccessful) {
-      Navigator.pop(context, true); // return true so previous screen can refresh
+      Navigator.pop(context, true);
     }
   }
 
@@ -100,10 +125,7 @@ class _AddextrapointState extends State<Addextrapoint> {
       appBar: AppBar(
         title: Text('Edit Route - ID: ${widget.routeId}'),
         actions: [
-          IconButton(
-            icon: const Icon(Icons.save),
-            onPressed: saveExtraPoints,
-          )
+        
         ],
       ),
       body: ListView.builder(
@@ -133,20 +155,49 @@ class _AddextrapointState extends State<Addextrapoint> {
                       style: const TextStyle(fontSize: 16),
                     ),
                     const SizedBox(height: 10),
-                    TextField(
-                      controller: controllers[index],
-                      decoration: const InputDecoration(
-                        labelText: "Extra Point",
-                        border: OutlineInputBorder(),
+                    ...controllersList[index].asMap().entries.map((entry) {
+                      final controllerIndex = entry.key;
+                      final controller = entry.value;
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: TextField(
+                                controller: controller,
+                                decoration: const InputDecoration(
+                                  labelText: "Extra Point",
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                            ),
+                            if (controllersList[index].length > 1)
+                              IconButton(
+                                icon: const Icon(Icons.remove_circle, color: Colors.red),
+                                onPressed: () => removeExtraPointField(index, controllerIndex),
+                              ),
+                          ],
+                        ),
+                      );
+                    }),
+                    const SizedBox(height: 8),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: IconButton(
+                        icon: const Icon(Icons.add_circle, color: Colors.blue),
+                        onPressed: () => addExtraPointField(index),
                       ),
                     ),
+                    Center(child: ElevatedButton(onPressed:  saveExtraPoints, child: Text("Update route")))
                   ],
                 ),
               ),
             ),
           );
         },
+      
       ),
+      
     );
   }
 }

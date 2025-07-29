@@ -163,7 +163,8 @@
   "mobilenumber":"Mobile Number",
   "regionalHead":"Regional Head   ",
   "confirmlogout":"Confirm Logout",
-  "areyousureyouwanttologout":"Are You Sure You Want To Logout?",
+  "logoutconfirmation":"logoutConfirmation",
+ "areyousureyouwanttologout":"Are You Sure You Want To Logout?",
   "cancel":"Cancel",
   "logout":"Logout",
   "createincharge":"Create Incharge",
@@ -219,7 +220,11 @@
 "freeoffer":"Free Offer",
 "jobWorkingstate":"jobWorkingState",
 "agentlogin":"Agent Login",
-"todayhistory":"Today History"
+"todayhistory":"Today History",
+"routemapassign":"Route Map Assign",
+"createregionalhead":"Create Regional Head",
+"nounitsfound":"noUnitsFound"
+
 
 
 

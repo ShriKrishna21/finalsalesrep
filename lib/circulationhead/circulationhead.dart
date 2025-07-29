@@ -49,7 +49,9 @@ class _CirculationHeadState extends State<CirculationHead> {
     final response = await http.post(
       Uri.parse('https://salesrep.esanchaya.com/token_validation'),
       headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({"params": {"token": token}}),
+      body: jsonEncode({
+        "params": {"token": token}
+      }),
     );
 
     if (response.statusCode == 200) {
@@ -81,7 +83,9 @@ class _CirculationHeadState extends State<CirculationHead> {
       final response = await http.post(
         Uri.parse(CommonApiClass.noOfAgents),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({"params": {"token": token}}),
+        body: jsonEncode({
+          "params": {"token": token}
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -108,14 +112,15 @@ class _CirculationHeadState extends State<CirculationHead> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final Localizations = AppLocalizations.of(context)!;
+
     final localizer = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
         centerTitle: true,
         title: Text(
           localizer.circulationhead,
@@ -126,7 +131,8 @@ class _CirculationHeadState extends State<CirculationHead> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person, size: MediaQuery.of(context).size.height / 20),
+            icon: Icon(Icons.person,
+                size: MediaQuery.of(context).size.height / 20),
             onPressed: () {
               Navigator.push(
                 context,
@@ -135,6 +141,47 @@ class _CirculationHeadState extends State<CirculationHead> {
             },
           ),
         ],
+      ),
+      drawer: Drawer(
+        child: ListView(
+          children: [
+            DrawerHeader(
+              decoration: BoxDecoration(
+                color: Colors.blue,
+              ),
+              child: Column(
+                children: [
+                  const Icon(Icons.account_circle, size: 60),
+                  const SizedBox(height: 10),
+                  Text(localizer.circulationhead),
+                ],
+              ),
+            ),
+            ListTile(
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Row(
+                    children: [
+                      const Text('English'),
+                      Switch(
+                        value: localeProvider.locale.languageCode == 'te',
+                        onChanged: (value) {
+                          localeProvider.toggleLocale();
+                        },
+                        activeColor: Colors.green,
+                        inactiveThumbColor: Colors.blue,
+                        activeTrackColor: Colors.green.shade200,
+                        inactiveTrackColor: Colors.blue.shade200,
+                      ),
+                      const Text('తెలుగు'),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator(color: Colors.black))
@@ -154,12 +201,14 @@ class _CirculationHeadState extends State<CirculationHead> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => Regionheadunits(userId: head.id ?? 0),
+                            builder: (_) =>
+                                Regionheadunits(userId: head.id ?? 0),
                           ),
                         );
                       },
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -169,20 +218,22 @@ class _CirculationHeadState extends State<CirculationHead> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                              Text(
-                                head.name ?? "No Name",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: Colors.black,
-                                ),
-                              ),
-                              Text(
-                                "Email: ${head.email ?? "N/A"}",
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                            ]),
+                            Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    head.name ?? "No Name",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 18,
+                                      color: Colors.black,
+                                    ),
+                                  ),
+                                  Text(
+                                    "Email: ${head.email ?? "N/A"}",
+                                    style: const TextStyle(color: Colors.black),
+                                  ),
+                                ]),
                             Text(
                               "Role: ${head.role ?? "Unknown"}",
                               style: const TextStyle(
@@ -208,7 +259,7 @@ class _CirculationHeadState extends State<CirculationHead> {
           fetchRegionalHeads(); // Refresh list
         },
         icon: const Icon(Icons.add),
-        label: const Text("Create Regional Head"),
+        label: Text(Localizations.createregionalhead),
       ),
     );
   }

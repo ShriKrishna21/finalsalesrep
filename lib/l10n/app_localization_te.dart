@@ -489,6 +489,9 @@ class AppLocalizationsTe extends AppLocalizations {
   String get confirmlogout => 'లాగౌట్ చేయడం కొనసాగించాలా';
 
   @override
+  String get logoutconfirmation => 'logoutConfirmation';
+
+  @override
   String get areyousureyouwanttologout =>
       'మీరు ఖచ్చితంగా లాగౌట్ కావాలనుకుంటున్నారా?';
 
@@ -651,4 +654,13 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get todayhistory => 'ఈరోజు హిస్టరీ';
+
+  @override
+  String get routemapassign => 'రూట్ మ్యాప్ కేటాయింపు';
+
+  @override
+  String get createregionalhead => 'ప్రాంతీయ హెడ్ సృష్టించు';
+
+  @override
+  String get nounitsfound => 'యూనిట్‌లు లేవు';
 }

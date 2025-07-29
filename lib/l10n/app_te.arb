@@ -107,6 +107,7 @@
   "userName": "వినియోగదారు",
   "jobRole": "ఉద్యోగ పాత్ర",
   "logout": "లాగ్ అవుట్",
+    "logoutConfirmation":"లాగ్ అవుట్ చేయాలా?",
   "regionalHead": "రీజినల్ హెడ్",
   "karimnagar": "కరీంనగర్",
   "unit1": "యూనిట్ 1",
@@ -223,7 +224,12 @@
 "freeoffer":"ఉచిత ఆఫర్",
 "jobWorkingstate":"పని చేస్తున్న రాష్ట్రం",
 "agentlogin":"ఏజెంట్ లాగిన్",
-"todayhistory":"ఈరోజు హిస్టరీ"
+"todayhistory":"ఈరోజు హిస్టరీ",
+"routemapassign":"రూట్ మ్యాప్ కేటాయింపు",
+"createregionalhead":"ప్రాంతీయ హెడ్ సృష్టించు",
+"nounitsfound":"యూనిట్‌లు లేవు"
+
+
 
 
 
