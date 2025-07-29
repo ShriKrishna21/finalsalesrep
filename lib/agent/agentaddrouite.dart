@@ -159,19 +159,19 @@ class _AgentaddrouiteState extends State<Agentaddrouite> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Assign Target",
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            TextFormField(
-              controller: _assignTargetController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Enter Target",
-                border: OutlineInputBorder(),
-              ),
-            ),
+            // const Text(
+            //   "Assign Target",
+            //   style: TextStyle(fontWeight: FontWeight.bold),
+            // ),
+            // const SizedBox(height: 8),
+            // TextFormField(
+            //   controller: _assignTargetController,
+            //   keyboardType: TextInputType.number,
+            //   decoration: const InputDecoration(
+            //     labelText: "Enter Target",
+            //     border: OutlineInputBorder(),
+            //   ),
+            // ),
             const SizedBox(height: 20),
             const Text(
               "Assign Route",

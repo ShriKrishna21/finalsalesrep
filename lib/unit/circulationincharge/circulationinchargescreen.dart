@@ -403,7 +403,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       onPressed: onPressed,
       child: Text(label,
           textAlign: TextAlign.center,
-          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+          style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
     );
   }
 }

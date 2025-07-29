@@ -131,7 +131,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
               children: [
                 TextSpan(text: localizations.office1staff),
                 TextSpan(
-                  text: "\n${localizations.unitName}",
+                  text: "\n${localizations.unitName} :${unitName}",
                   style: const TextStyle(
                     fontSize: 14,
                     color: Colors.black,
@@ -154,7 +154,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
                 children: [
                   const Icon(Icons.account_circle, size: 60),
                   const SizedBox(height: 10),
-                  Text(localizations.unitName),
+                  Text("${localizations.unitName} :${unitName}"),
                 ],
               ),
             ),

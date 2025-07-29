@@ -135,7 +135,7 @@ class _createstaffState extends State<createstaff> {
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
-        backgroundColor: Colors.blue,
+        backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: Text(
           Localizations.createUser,
