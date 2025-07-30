@@ -8,6 +8,8 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:provider/provider.dart';
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  // await Future.delayed(const Duration(seconds: 1));
   runApp(ChangeNotifierProvider(
       create: (_) {
         return LocalizationProvider();
