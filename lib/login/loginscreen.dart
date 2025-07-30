@@ -347,7 +347,7 @@ class _LoginscreenState extends State<Loginscreen> {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          Image.asset("assets/images/esanchaya_survey.png.png",
+                          Image.asset("assets/images/esanchaya_survey.png",
                               height: MediaQuery.of(context).size.height / 4),
                           const SizedBox(height: 20),
                           TextFormField(
