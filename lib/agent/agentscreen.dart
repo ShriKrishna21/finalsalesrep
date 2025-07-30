@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
+import 'package:finalsalesrep/agent/edittarget.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -48,7 +49,7 @@ class _AgentscreenState extends State<Agentscreen> {
     super.initState();
     startTokenValidation();
     dateController.text = DateFormat('EEE, MMM d, y').format(DateTime.now());
-    loadAgentName();
+    loadAgentData();
     refreshData();
   }
 
@@ -101,6 +102,7 @@ class _AgentscreenState extends State<Agentscreen> {
     setState(() => _isLoading = true);
     await loadOnedayHistory();
     await fetchFullRouteMap();
+    await fetchTarget();
     setState(() => _isLoading = false);
   }
 
@@ -151,14 +153,68 @@ class _AgentscreenState extends State<Agentscreen> {
     }
   }
 
-  Future<void> loadAgentName() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+  Future<void> loadAgentData() async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      setState(() {
+        agentname = prefs.getString('agentname') ?? '';
+      });
+      await fetchTarget();
+    } catch (e) {
+      debugPrint("Error loading agent data: $e");
+    }
+  }
+Future<void> fetchTarget() async {
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('apikey');
+  final userId = prefs.getInt('id');
+
+  if (token == null || userId == null) {
+    debugPrint("Missing token or user ID");
     setState(() {
-      agentname = prefs.getString('agentname') ?? '';
+      target = prefs.getString('target') ?? "0";
+    });
+    return;
+  }
+
+  try {
+    final response = await http.post(
+      Uri.parse("https://salesrep.esanchaya.com/update/target"),
+      headers: {
+        "Content-Type": "application/json",
+        "Cookie": "session_id=${prefs.getString('session_id')}",
+      },
+      body: jsonEncode({
+        "params": {"user_id": userId, "token": token}
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body);
+      if (result["result"]?["success"] == true) {
+        setState(() {
+          target = result["result"]["target"]?.toString() ?? "0";
+        });
+        await prefs.setString('target', target ?? "0");
+      } else {
+        debugPrint("Failed to fetch target: ${result["result"]["message"]}");
+        setState(() {
+          target = prefs.getString('target') ?? "0";
+        });
+      }
+    } else {
+      debugPrint("Failed to fetch target: ${response.statusCode}");
+      setState(() {
+        target = prefs.getString('target') ?? "0";
+      });
+    }
+  } catch (e) {
+    debugPrint("Error fetching target: $e");
+    setState(() {
       target = prefs.getString('target') ?? "0";
     });
   }
-
+}
   Future<void> loadOnedayHistory() async {
     try {
       final result = await _onedayagent.fetchOnedayHistory();
@@ -235,7 +291,51 @@ class _AgentscreenState extends State<Agentscreen> {
                                 fontSize: 18, fontWeight: FontWeight.w500))),
                     const SizedBox(height: 20),
                     Center(
-                        child: _buildSectionTitle(localizations.houseVisited)),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            localizations.houseVisited,
+                            style: TextStyle(
+                                fontSize: 18, fontWeight: FontWeight.bold),
+                          ),
+                          SizedBox(width: 6),
+                          GestureDetector(
+                            onTap: () async {
+                              final prefs = await SharedPreferences.getInstance();
+                              final userId = prefs.getInt('id');
+                              final token = prefs.getString('apikey');
+
+                              if (userId != null && token != null) {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => edittarget(
+                                      userId: userId,
+                                      token: token,
+                                    ),
+                                  ),
+                                );
+                                if (result == true) {
+                                  await fetchTarget();
+                                  setState(() {});
+                                }
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                      content: Text("Missing user ID or token")),
+                                );
+                              }
+                            },
+                            child: const Icon(
+                              Icons.edit,
+                              size: 20,
+                              color: Colors.blue,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                     const SizedBox(height: 20),
                     _buildInfoRow(
                         localizations.todaysHouseCount, target ?? "0"),
@@ -325,7 +425,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                             ),
                                           ),
                                         ).then((_) {
-                                          refreshData(); // ✅ refresh on return
+                                          refreshData();
                                         });
                                       }
                                     },
