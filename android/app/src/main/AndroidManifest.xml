@@ -10,9 +10,10 @@
 
 
     <application
-        android:label="finalsalesrep"
-        android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:label="eSurvey"
+        android:icon="@mipmap/ic_launcher"
+        android:theme="@style/LaunchTheme">
+
 
         <activity
             android:name=".MainActivity"
