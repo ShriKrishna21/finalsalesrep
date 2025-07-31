@@ -1,11 +1,13 @@
 import 'dart:convert';
-
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
 import 'package:finalsalesrep/modelclasses/userlogoutmodel.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
@@ -14,15 +16,98 @@ class agentProfile extends StatefulWidget {
   const agentProfile({super.key});
 
   @override
-  State<agentProfile> createState() => _agentProfileState();
+  State<agentProfile> createState() => _AgentProfileState();
 }
 
-class _agentProfileState extends State<agentProfile> {
+class _AgentProfileState extends State<agentProfile> {
   String? agentname;
   String? unitname;
   String? jobrole;
   String? userid;
   userlogout? logoutt;
+  Uint8List? _imageBytes;
+  File? _selectedImage;
+
+  Future<void> _pickAndUploadImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile == null) return;
+
+    setState(() {
+      _selectedImage = File(pickedFile.path);
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final String? token = prefs.getString('apikey');
+    final int? userId = prefs.getInt('id');
+
+    if (token == null || userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Token or User ID is missing")),
+      );
+      return;
+    }
+
+    final bytes = await pickedFile.readAsBytes();
+    final base64Image = base64Encode(bytes);
+
+    print("Token: $token");
+    print("User ID: $userId");
+    print("Image size: ${base64Image.length}");
+
+    final url = 'https://salesrep.esanchaya.com/api/upload_user_image';
+
+    try {
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "user_id": userId,
+            "image": base64Image,
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseBody = jsonDecode(response.body);
+        print("Upload Response: $responseBody");
+
+        final result = responseBody["result"];
+        final message = result?["message"] ?? "Unknown error";
+        final code = result?["code"];
+
+        if (code == "200" ||
+            message.toString().toLowerCase().contains("uploaded")) {
+          await prefs.setString('profile_image_base64', base64Image);
+          setState(() {
+            _imageBytes = base64Decode(base64Image);
+          });
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+                content: Text("Profile image uploaded successfully")),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to upload image: $message")),
+          );
+        }
+      } else {
+        print("Upload HTTP error: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error uploading image")),
+        );
+      }
+    } catch (error) {
+      print("Error uploading image: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("An error occurred while uploading the image")),
+      );
+    }
+  }
 
   Future<void> agentLogout() async {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -30,8 +115,10 @@ class _agentProfileState extends State<agentProfile> {
     print("API Key: $apiKey");
 
     try {
-      final url = CommonApiClass.agentProfile;
-      final respond = await http.post(
+      // Note: Verify that CommonApiClass.agentProfile is the correct logout endpoint
+      final url = CommonApiClass
+          .agentProfile; // Replace with correct logout endpoint if needed
+      final response = await http.post(
         Uri.parse(url),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
@@ -39,8 +126,8 @@ class _agentProfileState extends State<agentProfile> {
         }),
       );
 
-      if (respond.statusCode == 200) {
-        final jsonResponse = jsonDecode(respond.body) as Map<String, dynamic>;
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         logoutt = userlogout.fromJson(jsonResponse);
       }
 
@@ -71,56 +158,84 @@ class _agentProfileState extends State<agentProfile> {
   @override
   void initState() {
     super.initState();
-    saveddata();
+    loadSavedData(); // Rename the method
   }
 
-  Future<void> saveddata() async {
+  Future<void> loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     setState(() {
       agentname = prefs.getString('name');
       userid = prefs.getInt('id')?.toString();
       jobrole = prefs.getString('role');
       unitname = prefs.getString('unit');
+
+      String? base64Image = prefs.getString('profile_image_base64');
+      if (base64Image != null) {
+        if (base64Image.startsWith('data:image')) {
+          base64Image = base64Image.split(',').last;
+        }
+        try {
+          _imageBytes = base64Decode(base64Image);
+        } catch (e) {
+          print("Error decoding base64 image: $e");
+          _imageBytes = null;
+        }
+      }
     });
   }
 
   @override
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
-    final Localizations = AppLocalizations.of(context)!;
+    final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: Text(
-          Localizations.myProfile,
+          localizations.myProfile,
           style: const TextStyle(color: Colors.black),
         ),
       ),
       body: RefreshIndicator(
-        onRefresh: saveddata,
+        onRefresh: loadSavedData,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
           children: [
             const SizedBox(height: 20),
-            const Stack(
+            Stack(
               alignment: Alignment.bottomRight,
               children: [
                 Center(
                   child: CircleAvatar(
                     radius: 60,
                     backgroundColor: Colors.black12,
-                    child: Icon(Icons.person, size: 60, color: Colors.black54),
+                    backgroundImage:
+                        _imageBytes != null ? MemoryImage(_imageBytes!) : null,
+                    child: _imageBytes == null
+                        ? const Icon(Icons.person,
+                            size: 60, color: Colors.black54)
+                        : null,
                   ),
                 ),
                 Positioned(
                   bottom: 8,
                   right: 150,
-                  child: CircleAvatar(
-                    backgroundColor: Colors.black,
-                    radius: 14,
-                    child: Icon(Icons.edit, color: Colors.white, size: 14),
+                  child: GestureDetector(
+                    onTap: _pickAndUploadImage,
+                    child: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: const BoxDecoration(
+                        color: Colors.blue,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.camera_alt,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
                   ),
                 ),
               ],
@@ -143,14 +258,14 @@ class _agentProfileState extends State<agentProfile> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  profileitem(
-                      title: Localizations.name, value: agentname ?? "-"),
-                  profileitem(
-                      title: Localizations.userid, value: userid ?? "-"),
-                  profileitem(
-                      title: Localizations.jobRole, value: jobrole ?? "-"),
-                  profileitem(
-                      title: Localizations.unitName, value: unitname ?? "-"),
+                  ProfileItem(
+                      title: localizations.name, value: agentname ?? "-"),
+                  ProfileItem(
+                      title: localizations.userid, value: userid ?? "-"),
+                  ProfileItem(
+                      title: localizations.jobRole, value: jobrole ?? "-"),
+                  ProfileItem(
+                      title: localizations.unitName, value: unitname ?? "-"),
                 ],
               ),
             ),
@@ -166,22 +281,22 @@ class _agentProfileState extends State<agentProfile> {
                       context: context,
                       builder: (BuildContext context) {
                         return AlertDialog(
-                          title: Text(Localizations.confirmlogout,
+                          title: Text(localizations.confirmlogout,
                               style: const TextStyle(color: Colors.black)),
-                          content: Text(Localizations.areyousureyouwanttologout,
+                          content: Text(localizations.areyousureyouwanttologout,
                               style: const TextStyle(color: Colors.black)),
                           actions: [
                             TextButton(
-                              child: Text(Localizations.cancel,
+                              child: Text(localizations.cancel,
                                   style: const TextStyle(color: Colors.black)),
                               onPressed: () => Navigator.of(context).pop(),
                             ),
                             TextButton(
-                              child: Text(Localizations.logout,
+                              child: Text(localizations.logout,
                                   style: const TextStyle(color: Colors.red)),
                               onPressed: () {
-                                Navigator.of(context).pop(); // Close dialog
-                                agentLogout(); // Proceed with logout
+                                Navigator.of(context).pop();
+                                agentLogout();
                               },
                             ),
                           ],
@@ -195,7 +310,7 @@ class _agentProfileState extends State<agentProfile> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
-                  child: Text(Localizations.logout,
+                  child: Text(localizations.logout,
                       style:
                           const TextStyle(fontSize: 16, color: Colors.white)),
                 ),
@@ -208,8 +323,8 @@ class _agentProfileState extends State<agentProfile> {
   }
 }
 
-class profileitem extends StatelessWidget {
-  const profileitem({
+class ProfileItem extends StatelessWidget {
+  const ProfileItem({
     super.key,
     required this.title,
     required this.value,

@@ -164,57 +164,59 @@ class _AgentscreenState extends State<Agentscreen> {
       debugPrint("Error loading agent data: $e");
     }
   }
-Future<void> fetchTarget() async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('apikey');
-  final userId = prefs.getInt('id');
 
-  if (token == null || userId == null) {
-    debugPrint("Missing token or user ID");
-    setState(() {
-      target = prefs.getString('target') ?? "0";
-    });
-    return;
-  }
+  Future<void> fetchTarget() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
 
-  try {
-    final response = await http.post(
-      Uri.parse("https://salesrep.esanchaya.com/update/target"),
-      headers: {
-        "Content-Type": "application/json",
-        "Cookie": "session_id=${prefs.getString('session_id')}",
-      },
-      body: jsonEncode({
-        "params": {"user_id": userId, "token": token}
-      }),
-    );
+    if (token == null || userId == null) {
+      debugPrint("Missing token or user ID");
+      setState(() {
+        target = prefs.getString('target') ?? "0";
+      });
+      return;
+    }
 
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body);
-      if (result["result"]?["success"] == true) {
-        setState(() {
-          target = result["result"]["target"]?.toString() ?? "0";
-        });
-        await prefs.setString('target', target ?? "0");
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/update/target"),
+        headers: {
+          "Content-Type": "application/json",
+          "Cookie": "session_id=${prefs.getString('session_id')}",
+        },
+        body: jsonEncode({
+          "params": {"user_id": userId, "token": token}
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body);
+        if (result["result"]?["success"] == true) {
+          setState(() {
+            target = result["result"]["target"]?.toString() ?? "0";
+          });
+          await prefs.setString('target', target ?? "0");
+        } else {
+          debugPrint("Failed to fetch target: ${result["result"]["message"]}");
+          setState(() {
+            target = prefs.getString('target') ?? "0";
+          });
+        }
       } else {
-        debugPrint("Failed to fetch target: ${result["result"]["message"]}");
+        debugPrint("Failed to fetch target: ${response.statusCode}");
         setState(() {
           target = prefs.getString('target') ?? "0";
         });
       }
-    } else {
-      debugPrint("Failed to fetch target: ${response.statusCode}");
+    } catch (e) {
+      debugPrint("Error fetching target: $e");
       setState(() {
         target = prefs.getString('target') ?? "0";
       });
     }
-  } catch (e) {
-    debugPrint("Error fetching target: $e");
-    setState(() {
-      target = prefs.getString('target') ?? "0";
-    });
   }
-}
+
   Future<void> loadOnedayHistory() async {
     try {
       final result = await _onedayagent.fetchOnedayHistory();
@@ -302,7 +304,8 @@ Future<void> fetchTarget() async {
                           SizedBox(width: 6),
                           GestureDetector(
                             onTap: () async {
-                              final prefs = await SharedPreferences.getInstance();
+                              final prefs =
+                                  await SharedPreferences.getInstance();
                               final userId = prefs.getInt('id');
                               final token = prefs.getString('apikey');
 
@@ -323,7 +326,8 @@ Future<void> fetchTarget() async {
                               } else {
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   const SnackBar(
-                                      content: Text("Missing user ID or token")),
+                                      content:
+                                          Text("Missing user ID or token")),
                                 );
                               }
                             },
