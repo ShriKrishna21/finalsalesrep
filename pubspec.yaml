@@ -71,7 +71,7 @@ flutter:
 flutter_launcher_icons: 
   android: true
   ios: true
-  image_path: "assets/esanchaya_survey_removebg.png"
+  image_path: "assets/images/esanchaya_survey_removebg.png"
   min_sdk_android: 21
   min_sdk_ios: 11.0
   remove_alpha_ios: true
