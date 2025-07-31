@@ -32,11 +32,12 @@ class Result {
   String? unit;
   String? expiration;
   String? code;
-  dynamic state; // Changed to dynamic to handle both boolean and string values
+  dynamic state; // Can be bool or string
   String? aadharNumber;
   String? panNumber;
   String? phone;
-  dynamic target; // Already changed to dynamic
+  dynamic target;
+  String? image1920; // <-- Added field
 
   Result({
     this.status,
@@ -53,6 +54,7 @@ class Result {
     this.panNumber,
     this.phone,
     this.target,
+    this.image1920, // <-- Added to constructor
   });
 
   Result.fromJson(Map<String, dynamic> json) {
@@ -65,11 +67,12 @@ class Result {
     unit = json['unit'];
     expiration = json['expiration'];
     code = json['code'];
-    state = json['state']; // Store as dynamic without conversion
+    state = json['state'];
     aadharNumber = json['aadhar_number'];
     panNumber = json['pan_number'];
     phone = json['phone'];
-    target = json['target']; // Already storing as dynamic
+    target = json['target'];
+    image1920 = json['image_1920']; // <-- Parsing new field
   }
 
   Map<String, dynamic> toJson() {
@@ -88,6 +91,7 @@ class Result {
     data['pan_number'] = panNumber;
     data['phone'] = phone;
     data['target'] = target;
+    data['image_1920'] = image1920; // <-- Serializing new field
     return data;
   }
 }
