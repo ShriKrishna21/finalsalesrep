@@ -30,7 +30,6 @@ class _LoginscreenState extends State<Loginscreen> {
   @override
   void initState() {
     super.initState();
-    _checkAutoLogin();
   }
 
   Future<void> _checkAutoLogin() async {
