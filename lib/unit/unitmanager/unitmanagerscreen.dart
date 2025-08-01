@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -187,7 +188,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Profilescreen()),
+                MaterialPageRoute(builder: (context) => agentProfile()),
               );
             },
             child: Container(
