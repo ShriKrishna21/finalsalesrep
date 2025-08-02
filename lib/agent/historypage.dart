@@ -313,8 +313,8 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow(localizations.time, r.time ?? ''),
                 _detailRow(
                     localizations.subscribed, _formatBool(r.eenaduNewspaper)),
-                _detailRow(
-                    localizations.freeoffer, _formatBool(r.freeOffer15Days)),
+                // _detailRow(
+                //     localizations.freeoffer, _formatBool(r.freeOffer15Days)),
                 _detailRow(
                     localizations.readnewspaper, _formatBool(r.readNewspaper)),
                 _detailRow(localizations.reasonfornottakingoffer,

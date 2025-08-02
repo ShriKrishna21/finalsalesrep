@@ -349,18 +349,34 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
+
                     _buildInfoRow(
-                        localizations.todaysHouseCount, target ?? "0"),
+                        "Customers the Promoter has met", "${records.length}"),
                     GestureDetector(
                       onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const Onedayhistory())),
-                      child: _buildInfoRow(
-                          localizations.houseVisited, "${records.length}"),
+                        context,
+                        MaterialPageRoute(
+                            builder: (_) => const Onedayhistory()),
+                      ),
+                      child: _buildInfoRow("Houses Visited",
+                          "${records.length} house${records.length == 1 ? '' : 's'} visited"),
                     ),
-                    _buildInfoRow(localizations.todaysTargetLeft,
-                        "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
+                    // _buildInfoRow("Remaining Target",
+                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
+
+                    // _buildInfoRow(
+                    //     localizations.todaysHouseCount, target ?? "0"),
+                    // GestureDetector(
+                    //   onTap: () => Navigator.push(
+                    //       context,
+                    //       MaterialPageRoute(
+                    //           builder: (_) => const Onedayhistory())),
+                    //   child: _buildInfoRow(
+                    //       localizations.houseVisited, "${records.length}"),
+                    // ),
+                    // _buildInfoRow(localizations.todaysTargetLeft,
+                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
+
                     const SizedBox(height: 30),
                     Row(children: [
                       Center(

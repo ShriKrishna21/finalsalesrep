@@ -6,7 +6,7 @@ import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Onedayhistory extends StatefulWidget { 
+class Onedayhistory extends StatefulWidget {
   const Onedayhistory({super.key});
 
   @override
@@ -30,7 +30,8 @@ class _OnedayhistoryState extends State<Onedayhistory> {
     super.initState();
     loadOnedayHistory();
   }
-// 8566682 
+
+// 8566682
   Future<void> loadOnedayHistory() async {
     setState(() => _isLoading = true);
     final result = await _onedayagent.fetchOnedayHistory();
@@ -232,10 +233,10 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                     _formatBool(r.eenaduNewspaper)),
                 _detailRow(
                     localizations.readnewspaper, _formatBool(r.readNewspaper)),
-                _detailRow(
-                    localizations.freeoffer, _formatBool(r.freeOffer15Days)),
-                _detailRow(localizations.reasonfornottakingoffer,
-                    r.reasonNotTakingOffer),
+                // _detailRow(
+                //     localizations.freeoffer, _formatBool(r.freeOffer15Days)),
+                // _detailRow(localizations.reasonfornottakingoffer,
+                //     r.reasonNotTakingOffer),
                 _detailRow(localizations.employed, _formatBool(r.employed)),
                 _detailRow(localizations.jobtype, r.jobType),
                 _detailRow(localizations.jobprofession, r.jobProfession),

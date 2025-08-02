@@ -24,7 +24,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   final TextEditingController _searchController = TextEditingController();
 
   int offerAcceptedCount = 0;
-  int offerRejectedCount = 0;
+  // int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
 
   DateTimeRange? _selectedRange;
@@ -118,26 +118,11 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         final fetchedRecords = (data.result?.records ?? []).reversed.toList();
 
         int subscribed = 0;
-        int accepted = 0;
-        int rejected = 0;
-
-        for (var record in fetchedRecords) {
-          if (record.eenaduNewspaper == true) {
-            subscribed++;
-          } else if (record.freeOffer15Days == true) {
-            accepted++;
-          } else if (record.freeOffer15Days == false &&
-              record.eenaduNewspaper == false) {
-            rejected++;
-          }
-        }
 
         setState(() {
           records = fetchedRecords;
           filteredRecords = fetchedRecords;
           alreadySubscribedCount = subscribed;
-          offerAcceptedCount = accepted;
-          offerRejectedCount = rejected;
           isLoading = false;
         });
       } else {
@@ -226,8 +211,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
                             Text(
                                 " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                            Text(
-                                " ${localizations.daysOfferRejected15}: $offerRejectedCount"),
+                            //      Text(
+                            //    " ${localizations.daysOfferRejected15}: $offerRejectedCount"),
                           ],
                         ),
                       ),
@@ -267,13 +252,11 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                           Text(
                                               "${localizations.phone}: ${r.mobileNumber ?? 'N/A'}"),
                                           Text(
-                                              "${localizations.eenadunewspaper}: ${_boolToText(r.eenaduNewspaper)}"),
+                                              "${_boolToText(r.eenaduNewspaper)}"),
                                           Text(
                                               "${localizations.employed}: ${_boolToText(r.employed)}"),
                                           Text(
                                               "${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
-                                          Text(
-                                              "${localizations.daysforeenaduoffer}: ${_boolToText(r.freeOffer15Days)}"),
                                           const SizedBox(height: 8),
                                           if (r.faceBase64 != null &&
                                               r.faceBase64!.isNotEmpty)
@@ -282,7 +265,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                 " land mark",
+                                                  " land mark",
                                                   style: const TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
