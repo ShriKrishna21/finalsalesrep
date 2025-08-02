@@ -277,9 +277,7 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   child: _buildCard(
                     title: localizations.numberOfResources,
                     rows: [
-                      _InfoRow(
-                          label: localizations.agents,
-                          value: agentCount.toString()),
+                      _InfoRow(label: "Staff", value: agentCount.toString()),
                     ],
                   ),
                 ),

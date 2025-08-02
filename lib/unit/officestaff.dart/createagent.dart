@@ -135,7 +135,7 @@ class _CreateAgentState extends State<CreateAgent> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(localizations.createagent),
+        title: Text("Create Staff"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 1,

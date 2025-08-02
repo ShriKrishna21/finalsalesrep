@@ -17,6 +17,7 @@ import 'package:http/http.dart' as http;
 
 class Unitmanagerscreen extends StatefulWidget {
   const Unitmanagerscreen({super.key});
+  // done by surajith
 
   @override
   State<Unitmanagerscreen> createState() => _UnitmanagerscreenState();
@@ -296,9 +297,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                       Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(
-                          label: Localizations.agents,
-                          value: agentCount.toString()),
+                      _InfoRow(label: "Staff", value: agentCount.toString()),
                     ],
                   ),
                 ),

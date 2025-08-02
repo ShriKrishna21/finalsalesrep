@@ -108,7 +108,7 @@ class _NoofresourcesState extends State<Noofresources> {
                   padding: const EdgeInsets.all(12),
                   child: TextField(
                     decoration: InputDecoration(
-                      hintText: "Id/AgentName",
+                      hintText: "Id/StaffName",
                       prefixIcon: const Icon(Icons.search),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
@@ -130,7 +130,7 @@ class _NoofresourcesState extends State<Noofresources> {
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Text(
-                      "${Localizations.totalagents} ${filteredUsers.length}",
+                      "${"Total Staff"} ${filteredUsers.length}",
                       style: const TextStyle(
                         fontSize: 18,
                         color: Colors.white,

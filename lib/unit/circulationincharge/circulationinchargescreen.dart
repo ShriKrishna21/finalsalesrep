@@ -247,8 +247,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         title: localizations.numberOfResources,
                         rows: [
                           _InfoRow(
-                              label: localizations.agents,
-                              value: agentCount.toString())
+                              label: "Staff Name", value: agentCount.toString())
                         ],
                       ),
                     ),
@@ -379,15 +378,15 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(
               context, MaterialPageRoute(builder: (_) => const createstaff()));
         }),
-        _buildBlackWhiteButton(localizations.approvedagents, () {
+        _buildBlackWhiteButton("Approved Staff", () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const approvedagents()));
         }),
-        _buildBlackWhiteButton(localizations.agentswaitingapproval, () {
+        _buildBlackWhiteButton("Staff Waiting  For Approval", () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
-            _buildBlackWhiteButton("Agents working route ", () {
+        _buildBlackWhiteButton("Staff working route ", () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
