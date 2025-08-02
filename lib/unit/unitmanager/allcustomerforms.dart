@@ -105,13 +105,14 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         "order": "asc",
       }
     };
-
+    print(requestBody);
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
+      print(response.body);
 
       if (response.statusCode == 200) {
         final data = AllCustomerForms.fromJson(jsonDecode(response.body));
@@ -136,6 +137,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         errorMessage = "Something went wrong: $e";
         isLoading = false;
       });
+      print("Error Message: $errorMessage");
+      //print( "Error fetching data: $e");
     }
   }
 
@@ -211,8 +214,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
                             Text(
                                 " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                            //      Text(
-                            //    " ${localizations.daysOfferRejected15}: $offerRejectedCount"),
                           ],
                         ),
                       ),
@@ -228,6 +229,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 itemCount: filteredRecords.length,
                                 itemBuilder: (context, index) {
                                   final r = filteredRecords[index];
+                                  print(
+                                      '======================>Yes: ${localizations.yes}, type: ${localizations.yes.runtimeType}');
                                   return Card(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 8),
@@ -251,12 +254,17 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                               "${localizations.pinCode}: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
                                           Text(
                                               "${localizations.phone}: ${r.mobileNumber ?? 'N/A'}"),
-                                          Text(
-                                              "${_boolToText(r.eenaduNewspaper)}"),
+                                          // Text(
+                                          //     "${_boolToText(r.eenaduNewspaper)}"),
+
+                                          Text(_boolToText(r.eenaduNewspaper) ??
+                                              'N/A'),
+
                                           Text(
                                               "${localizations.employed}: ${_boolToText(r.employed)}"),
                                           Text(
                                               "${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
+
                                           const SizedBox(height: 8),
                                           if (r.faceBase64 != null &&
                                               r.faceBase64!.isNotEmpty)
@@ -264,7 +272,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                               crossAxisAlignment:
                                                   CrossAxisAlignment.start,
                                               children: [
-                                                Text(
+                                                const Text(
                                                   " land mark",
                                                   style: const TextStyle(
                                                       fontWeight:

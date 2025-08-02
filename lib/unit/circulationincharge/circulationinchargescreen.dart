@@ -282,9 +282,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         _InfoRow(
                             label: localizations.willingToChange,
                             value: offerAcceptedCount.toString()),
-                        _InfoRow(
-                            label: localizations.notInterested,
-                            value: offerRejectedCount.toString()),
                       ],
                     ),
                     const SizedBox(height: 30),
@@ -386,17 +383,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
-<<<<<<< HEAD
-<<<<<<< HEAD
-        _buildBlackWhiteButton("Agents working route ", () {
-=======
         _buildBlackWhiteButton("Staff working route ", () {
->>>>>>> b60d44fc258f6bb5573153afb1b467d6a2aec4b9
-=======
-
-        _buildBlackWhiteButton("Agents working route ", () {
-
->>>>>>> 04e0d40b561cd5c15c9d04927ca2c935cb6a32ef
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
