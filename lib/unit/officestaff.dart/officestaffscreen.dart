@@ -203,7 +203,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
               elevation: 2,
               child: ListTile(
                 leading: const Icon(Icons.assignment, color: Colors.black),
-                title: Text(localizations.viewcreatedagents,
+                title: Text("ViewCreatedStaff",
                     style: const TextStyle(color: Colors.black)),
                 trailing: const Icon(Icons.arrow_forward_ios,
                     size: 16, color: Colors.grey),
@@ -228,7 +228,7 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
                 backgroundColor: Colors.black,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.person_add),
-                label: Text(localizations.createagent),
+                label: Text("Create Staff"),
               ),
             ),
             const Spacer(),

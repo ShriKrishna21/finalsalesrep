@@ -10,7 +10,7 @@
 
 
     <application
-        android:label="eSurvey"
+        android:label="ePromotion"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/LaunchTheme">
 
