@@ -8,8 +8,7 @@ class AllCustomerForms {
   AllCustomerForms.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result =
-        json['result'] != null ? Result.fromJson(json['result']) : null;
+    result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -32,7 +31,7 @@ class Result {
   Result({this.success, this.records, this.count, this.code});
 
   Result.fromJson(Map<String, dynamic> json) {
-    success = _parseBool(json['success']);
+    success = json['success'] == true;
     if (json['records'] != null) {
       records = <Records>[];
       json['records'].forEach((v) {
@@ -159,14 +158,14 @@ class Records {
     feedbackToImproveEenaduPaper = json['feedback_to_improve_eenadu_paper'];
     readNewspaper = _parseBool(json['read_newspaper']);
     currentNewspaper = json['current_newspaper'];
-    reasonForNotTakingEenaduNewsPaper = json['reason_for_not_taking_eenadu_newsPaper'];
+    reasonForNotTakingEenaduNewsPaper =
+        json['reason_for_not_taking_eenadu_newsPaper'];
     reasonNotReading = json['reason_not_reading'];
-    freeOffer15Days = _parseBool(json['free_offer_15_days']);
     reasonNotTakingOffer = json['reason_not_taking_offer'];
     employed = _parseBool(json['employed']);
     jobType = _parseBool(json['job_type']);
     jobTypeOne = _parseBool(json['job_type_one']);
-    jobProfession = json['job_profession'];
+    jobProfession = json['job_profession']?.toString();
     jobDesignation = json['job_designation'];
     companyName = json['company_name'];
     profession = json['profession'];
@@ -177,7 +176,7 @@ class Records {
     longitude = json['longitude'];
     locationAddress = json['location_address'];
     locationUrl = _parseBool(json['location_url']);
-    faceBase64 = json['face_base64'];
+    faceBase64 = json['face_base64']?.toString() ?? '';
   }
 
   Map<String, dynamic> toJson() {
@@ -202,7 +201,10 @@ class Records {
     data['feedback_to_improve_eenadu_paper'] = feedbackToImproveEenaduPaper;
     data['read_newspaper'] = readNewspaper;
     data['current_newspaper'] = currentNewspaper;
-    data['reason_for_not_taking_eenadu_newsPaper'] = reasonForNotTakingEenaduNewsPaper;
+
+    data['reason_for_not_taking_eenadu_newsPaper'] =
+        reasonForNotTakingEenaduNewsPaper;
+
     data['reason_not_reading'] = reasonNotReading;
     data['free_offer_15_days'] = freeOffer15Days;
     data['reason_not_taking_offer'] = reasonNotTakingOffer;
