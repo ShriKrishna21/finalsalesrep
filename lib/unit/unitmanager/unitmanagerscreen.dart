@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -16,6 +17,7 @@ import 'package:http/http.dart' as http;
 
 class Unitmanagerscreen extends StatefulWidget {
   const Unitmanagerscreen({super.key});
+  // done by surajith
 
   @override
   State<Unitmanagerscreen> createState() => _UnitmanagerscreenState();
@@ -187,7 +189,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => const Profilescreen()),
+                MaterialPageRoute(builder: (context) => agentProfile()),
               );
             },
             child: Container(
@@ -295,9 +297,7 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                       Colors.grey.shade400,
                     ],
                     rows: [
-                      _InfoRow(
-                          label: Localizations.agents,
-                          value: agentCount.toString()),
+                      _InfoRow(label: "Staff", value: agentCount.toString()),
                     ],
                   ),
                 ),

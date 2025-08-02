@@ -88,11 +88,11 @@ class _ViewcreatedagentsState extends State<Viewcreatedagents> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Created Agents")),
+      appBar: AppBar(title: const Text("Created Staff")),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : agents.isEmpty
-              ? const Center(child: Text("No agents created"))
+              ? const Center(child: Text("No Staff created"))
               : Column(
                   children: [
                     // 🔍 Search bar
@@ -102,7 +102,7 @@ class _ViewcreatedagentsState extends State<Viewcreatedagents> {
                         controller: _searchController,
                         onChanged: _filterAgents,
                         decoration: InputDecoration(
-                          hintText: "Search by Agent Name or ID",
+                          hintText: "Search by Staff Name or ID",
                           prefixIcon: const Icon(Icons.search),
                           filled: true,
                           fillColor: Colors.grey[200],

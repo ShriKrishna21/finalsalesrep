@@ -431,9 +431,7 @@ class _CoustmerState extends State<Coustmer> {
                 children: [
                   const SizedBox(height: 30),
                   textformfeild(
-                      controller: agency,
-                      label: localizations.agentName,
-                      need: true),
+                      controller: agency, label: "Staff Name", need: true),
                   const SizedBox(height: 20),
                   Row(
                     children: [

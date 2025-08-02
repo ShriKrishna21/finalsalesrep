@@ -293,6 +293,14 @@ class _AgentscreenState extends State<Agentscreen> {
                                 fontSize: 18, fontWeight: FontWeight.w500))),
                     const SizedBox(height: 20),
                     Center(
+                      child: Text(
+                        "Name of the Staff: $agentname",
+                        style: const TextStyle(
+                            fontSize: 15, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    Center(
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
