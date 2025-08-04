@@ -33,8 +33,8 @@ class _CoustmerState extends State<Coustmer> {
   bool _isLoading = false;
   int offerintresetedpeople = 0;
   int offernotintresetedpeople = 0;
-  int offerintresetedpeoplecount = 0;
-  int offernotintresetedpeoplecount = 0;
+  //int offerintresetedpeoplecount = 0;
+  //int offernotintresetedpeoplecount = 0;
   int count = 0;
   int addcount = 0;
   String latitude = "";
@@ -69,7 +69,7 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController reason_for_not_reading = TextEditingController();
   TextEditingController current_newspaper = TextEditingController();
   TextEditingController reason_for_not_taking_eenadu = TextEditingController();
-  TextEditingController reason_for_not_taking_offer = TextEditingController();
+  // TextEditingController reason_for_not_taking_offer = TextEditingController();
   TextEditingController job_designation = TextEditingController();
   TextEditingController job_proffesion = TextEditingController();
   TextEditingController privateCompanyController = TextEditingController();
@@ -260,7 +260,6 @@ class _CoustmerState extends State<Coustmer> {
                 reason_for_not_taking_eenadu.text,
             "reason_not_reading": reason_for_not_reading.text,
             "free_offer_15_days": _isofferTogle,
-            "reason_not_taking_offer": reason_for_not_taking_offer.text,
             "employed": _isemployed,
             "job_type": _selectedJobType,
             "job_type_one": _selectedGovDepartment,
@@ -377,7 +376,6 @@ class _CoustmerState extends State<Coustmer> {
       reason_for_not_reading.clear();
       current_newspaper.clear();
       reason_for_not_taking_eenadu.clear();
-      reason_for_not_taking_offer.clear();
       job_designation.clear();
       job_proffesion.clear();
       privateCompanyController.clear();
@@ -433,9 +431,7 @@ class _CoustmerState extends State<Coustmer> {
                 children: [
                   const SizedBox(height: 30),
                   textformfeild(
-                      controller: agency,
-                      label: localizations.agentName,
-                      need: true),
+                      controller: agency, label: "Staff Name", need: true),
                   const SizedBox(height: 20),
                   Row(
                     children: [
@@ -701,40 +697,6 @@ class _CoustmerState extends State<Coustmer> {
                               localizations.reasonfornotreadingcannotbeempty,
                           controller: reason_for_not_reading,
                           label: localizations.reasonfornotreadingnewspaper),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(localizations.daysOfferRejected15,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
-                        ),
-                        Text(
-                            _isofferTogle
-                                ? localizations.yes
-                                : localizations.no,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: _isofferTogle ? Colors.green : Colors.red,
-                            )),
-                        Switch(
-                          inactiveThumbColor: Colors.white,
-                          activeTrackColor: Colors.green,
-                          inactiveTrackColor: Colors.red,
-                          value: _isofferTogle,
-                          onChanged: (value) {
-                            setState(() {
-                              _isofferTogle = value;
-                            });
-                          },
-                        ),
-                      ],
-                    ),
-                    if (!_isofferTogle)
-                      textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
-                          controller: reason_for_not_taking_offer,
-                          label: localizations.reasonfornottakingoffer),
                   ],
                   const SizedBox(height: 15),
                   Row(
@@ -910,22 +872,32 @@ class _CoustmerState extends State<Coustmer> {
                               }
                             },
                             child: Container(
-                              decoration: const BoxDecoration(
-                                  color: Colors.grey,
+                              decoration: BoxDecoration(
+                                  color: Colors.blue,
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(50))),
+                                      BorderRadius.all(Radius.circular(50)),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.3),
+                                      blurRadius: 5.0,
+                                      spreadRadius: 1.0,
+                                      offset: Offset(
+                                          0, 3), // changes position of shadow
+                                    )
+                                  ]),
                               height: MediaQuery.of(context).size.height / 18,
                               width: MediaQuery.of(context).size.height / 5,
                               child: Center(
-                                  child: Text(
-                                localizations.submit,
-                                style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize:
-                                        MediaQuery.of(context).size.height /
-                                            45),
-                              )),
+                                child: Text(
+                                  localizations.submit,
+                                  style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize:
+                                          MediaQuery.of(context).size.height /
+                                              45),
+                                ),
+                              ),
                             ),
                           ),
                   ),

@@ -26,7 +26,8 @@ class _CirculationHeadState extends State<CirculationHead> {
   bool isLoading = true;
   Timer? _sessionCheckTimer;
   bool _isLoggingOut = false; // Flag to prevent multiple logouts
-  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -38,7 +39,8 @@ class _CirculationHeadState extends State<CirculationHead> {
   void startTokenValidation() {
     validateToken();
     _sessionCheckTimer?.cancel();
-    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 10), (_) => validateToken());
+    _sessionCheckTimer =
+        Timer.periodic(const Duration(seconds: 10), (_) => validateToken());
   }
 
   Future<void> validateToken() async {
@@ -52,22 +54,26 @@ class _CirculationHeadState extends State<CirculationHead> {
     }
 
     try {
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse('https://salesrep.esanchaya.com/token_validation'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "params": {"token": token}
         }),
-      ).timeout(const Duration(seconds: 5), onTimeout: () {
+      )
+          .timeout(const Duration(seconds: 5), onTimeout: () {
         throw TimeoutException('Token validation timed out');
       });
 
       final result = jsonDecode(response.body)['result'];
       if (result == null || result['success'] != true) {
-        _forceLogout("Session expired. You may have logged in on another device.");
+        _forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
-      _forceLogout("Error validating session: ${e.toString()}. Please log in again.");
+      _forceLogout(
+          "Error validating session: ${e.toString()}. Please log in again.");
     }
   }
 
@@ -82,7 +88,8 @@ class _CirculationHeadState extends State<CirculationHead> {
       // Show SnackBar
       if (_scaffoldMessengerKey.currentState != null) {
         _scaffoldMessengerKey.currentState!.showSnackBar(
-          SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+          SnackBar(
+              content: Text(message), duration: const Duration(seconds: 2)),
         );
       }
 
@@ -97,7 +104,9 @@ class _CirculationHeadState extends State<CirculationHead> {
           // Fallback navigation
           Navigator.pushAndRemoveUntil(
             context,
-            MaterialPageRoute(builder: (context) => const Loginscreen()), // Replace with your actual LoginScreen widget
+            MaterialPageRoute(
+                builder: (context) =>
+                    const Loginscreen()), // Replace with your actual LoginScreen widget
             (route) => false,
           );
         }
@@ -117,13 +126,15 @@ class _CirculationHeadState extends State<CirculationHead> {
     }
 
     try {
-      final response = await http.post(
+      final response = await http
+          .post(
         Uri.parse(CommonApiClass.noOfAgents),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "params": {"token": token}
         }),
-      ).timeout(const Duration(seconds: 5), onTimeout: () {
+      )
+          .timeout(const Duration(seconds: 5), onTimeout: () {
         throw TimeoutException('Failed to fetch regional heads');
       });
 
@@ -183,7 +194,8 @@ class _CirculationHeadState extends State<CirculationHead> {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.person, size: MediaQuery.of(context).size.height / 20),
+            icon: Icon(Icons.person,
+                size: MediaQuery.of(context).size.height / 20),
             onPressed: () {
               Navigator.push(
                 context,
@@ -244,12 +256,14 @@ class _CirculationHeadState extends State<CirculationHead> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (_) => Regionheadunits(userId: head.id ?? 0),
+                            builder: (_) =>
+                                Regionheadunits(userId: head.id ?? 0),
                           ),
                         );
                       },
                       child: Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        margin: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
                           color: Colors.white,
