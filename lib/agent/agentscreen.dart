@@ -1,3 +1,4 @@
+
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
@@ -8,7 +9,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/routemap.dart';
@@ -35,8 +36,11 @@ class _AgentscreenState extends State<Agentscreen> {
   String? routeName;
   List<Record> records = [];
   bool _isLoading = true;
+  bool isWorking = false;
   Timer? _sessionCheckTimer;
   RouteMap? fullRouteMap;
+  final ImagePicker _picker = ImagePicker();
+  String? _startWorkPhotoBase64;
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
@@ -50,7 +54,175 @@ class _AgentscreenState extends State<Agentscreen> {
     startTokenValidation();
     dateController.text = DateFormat('EEE, MMM d, y').format(DateTime.now());
     loadAgentData();
+    loadWorkStatus();
     refreshData();
+  }
+
+  Future<void> loadWorkStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isWorking = prefs.getBool('isWorking') ?? false;
+    });
+  }
+
+  Future<void> saveWorkStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isWorking', status);
+  }
+
+  Future<void> startWork() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("photoRequired")),
+        );
+        return;
+      }
+
+      final bytes = await photo.readAsBytes();
+      _startWorkPhotoBase64 = base64Encode(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        debugPrint("Missing or empty API key");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+        return;
+      }
+
+      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
+      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
+
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": _startWorkPhotoBase64,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Status Code: ${response.statusCode}");
+      debugPrint("✅ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          setState(() {
+            isWorking = true;
+          });
+          await saveWorkStatus(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("workStarted")),
+          );
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("Failed to start work: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to start work: $errorMessage")),
+          );
+        }
+      } else {
+        debugPrint("Failed to start work: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to start work: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error starting work: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error starting work: $e")),
+      );
+    }
+  }
+
+  Future<void> stopWork() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("photoRequired")),
+        );
+        return;
+      }
+
+      final bytes = await photo.readAsBytes();
+      final photoBase64 = base64Encode(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        debugPrint("Missing or empty API key");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+        return;
+      }
+
+      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/end_work");
+      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${photoBase64.substring(0, 50)}...\"}}");
+
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": photoBase64,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Status Code: ${response.statusCode}");
+      debugPrint("✅ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          setState(() {
+            isWorking = false;
+            _startWorkPhotoBase64 = null;
+          });
+          await saveWorkStatus(false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("workStopped")),
+          );
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("Failed to stop work: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to stop work: $errorMessage")),
+          );
+        }
+      } else {
+        debugPrint("Failed to stop work: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to stop work: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error stopping work: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error stopping work: $e")),
+      );
+    }
   }
 
   void startTokenValidation() {
@@ -76,6 +248,7 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"token": token}
         }),
       );
+      debugPrint("🔁 Token Validation Response: ${response.body}");
       final result = jsonDecode(response.body)['result'];
       if (result == null || result['success'] != true) {
         forceLogout(
@@ -120,6 +293,8 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"user_id": userId, "token": token}
         }),
       );
+
+      debugPrint("🔁 Route Map Response: ${response.body}");
 
       if (response.statusCode == 200) {
         final data = json.decode(response.body);
@@ -190,15 +365,17 @@ class _AgentscreenState extends State<Agentscreen> {
         }),
       );
 
+      debugPrint("🔁 Fetch Target Response: ${response.body}");
+
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body);
-        if (result["result"]?["success"] == true) {
+        if (result["result"] != null && result["result"]["success"] == true) {
           setState(() {
             target = result["result"]["target"]?.toString() ?? "0";
           });
           await prefs.setString('target', target ?? "0");
         } else {
-          debugPrint("Failed to fetch target: ${result["result"]["message"]}");
+          debugPrint("Failed to fetch target: ${result["result"]?["message"] ?? "No message provided"}");
           setState(() {
             target = prefs.getString('target') ?? "0";
           });
@@ -266,18 +443,42 @@ class _AgentscreenState extends State<Agentscreen> {
         ],
       ),
       drawer: _buildDrawer(localeProvider, localizations),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.white,
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const Coustmer()),
-          );
-          await refreshData();
-        },
-        label: Text(localizations.customerform,
-            style: const TextStyle(color: Colors.black)),
-        icon: const Icon(Icons.add_box_outlined, color: Colors.black),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: "customer_form",
+            backgroundColor: Colors.white,
+            onPressed: isWorking
+                ? () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Coustmer()),
+                    );
+                    await refreshData();
+                  }
+                : null,
+            label: Text(localizations.customerform,
+                style: TextStyle(
+                    color: isWorking ? Colors.black : Colors.grey)),
+            icon: Icon(Icons.add_box_outlined,
+                color: isWorking ? Colors.black : Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            heroTag: "work_status",
+            backgroundColor: isWorking ? Colors.red : Colors.green,
+            onPressed: isWorking ? stopWork : startWork,
+            label: Text(
+              isWorking ? "stopWork ":" startWork",
+              style: const TextStyle(color: Colors.white),
+            ),
+            icon: Icon(
+              isWorking ? Icons.stop : Icons.play_arrow,
+              color: Colors.white,
+            ),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -349,7 +550,6 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     _buildInfoRow(
                         "Customers the Promoter has met", "${records.length}"),
                     GestureDetector(
@@ -361,22 +561,6 @@ class _AgentscreenState extends State<Agentscreen> {
                       child: _buildInfoRow("Houses Visited",
                           "${records.length} house${records.length == 1 ? '' : 's'} visited"),
                     ),
-                    // _buildInfoRow("Remaining Target",
-                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-
-                    // _buildInfoRow(
-                    //     localizations.todaysHouseCount, target ?? "0"),
-                    // GestureDetector(
-                    //   onTap: () => Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (_) => const Onedayhistory())),
-                    //   child: _buildInfoRow(
-                    //       localizations.houseVisited, "${records.length}"),
-                    // ),
-                    // _buildInfoRow(localizations.todaysTargetLeft,
-                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-
                     const SizedBox(height: 30),
                     Row(children: [
                       Center(
@@ -389,14 +573,14 @@ class _AgentscreenState extends State<Agentscreen> {
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
                           final token = prefs.getString('apikey');
-                          final agentId = prefs.getInt('id');
+                          final userId = prefs.getInt('id');
 
-                          if (token != null && agentId != null) {
+                          if (token != null && userId != null) {
                             await Navigator.push(
                               context,
                               MaterialPageRoute(
                                 builder: (context) => Agentaddrouite(
-                                  agentId: agentId,
+                                  agentId: userId,
                                   token: token,
                                 ),
                               ),
@@ -404,7 +588,7 @@ class _AgentscreenState extends State<Agentscreen> {
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                  content: Text("Missing Agent ID or Token")),
+                                  content: Text("Missing user ID or Token")),
                             );
                           }
                         },
