@@ -7,7 +7,6 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-
 import 'package:finalsalesrep/modelclasses/routemap.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
@@ -17,78 +16,6 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-
-class startworkselfiemodel {
-  String? jsonrpc;
-  Null? id;
-  Result? result;
-
-  startworkselfiemodel({this.jsonrpc, this.id, this.result});
-
-  startworkselfiemodel.fromJson(Map<String, dynamic> json) {
-    jsonrpc = json['jsonrpc'];
-    id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
-    }
-    return data;
-  }
-}
-
-class endworkselfiekmodel {
-  String? jsonrpc;
-  Null? id;
-  Result? result;
-
-  endworkselfiekmodel({this.jsonrpc, this.id, this.result});
-
-  endworkselfiekmodel.fromJson(Map<String, dynamic> json) {
-    jsonrpc = json['jsonrpc'];
-    id = json['id'];
-    result =
-        json['result'] != null ? new Result.fromJson(json['result']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
-    }
-    return data;
-  }
-}
-
-class Result {
-  bool? success;
-  String? message;
-  int? code;
-
-  Result({this.success, this.message, this.code});
-
-  Result.fromJson(Map<String, dynamic> json) {
-    success = json['success'];
-    message = json['message'];
-    code = json['code'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['success'] = this.success;
-    data['message'] = this.message;
-    data['code'] = this.code;
-    return data;
-  }
-}
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -105,7 +32,8 @@ class _AgentscreenState extends State<Agentscreen> {
   bool isWorking = false;
   Timer? _sessionCheckTimer;
   RouteMap? fullRouteMap;
-
+  final ImagePicker _picker = ImagePicker();
+  String? _startWorkPhotoBase64;
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
@@ -433,6 +361,59 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> refreshData() async {
     setState(() => _isLoading = true);
     await loadOnedayHistory();
+    await fetchFullRouteMap();
+    await fetchSelfieTimes();
+    setState(() => _isLoading = false);
+  }
+
+  Future<void> fetchFullRouteMap() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/user_root_maps_by_stage"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "jsonrpc": "2.0",
+          "params": {"user_id": userId, "token": token}
+        }),
+      );
+
+      debugPrint("🔁 Route Map Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final routeMap = RouteMap.fromJson(data);
+
+        final today = DateTime.now();
+        final todayOnlyRoutes = routeMap.result?.assigned?.where((assigned) {
+          final routeDate = DateTime.tryParse(assigned.date ?? '');
+          return routeDate != null &&
+              routeDate.year == today.year &&
+              routeDate.month == today.month &&
+              routeDate.day == today.day;
+        }).toList();
+
+        Assigned? latestRoute;
+        if (todayOnlyRoutes != null && todayOnlyRoutes.isNotEmpty) {
+          todayOnlyRoutes.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
+          latestRoute = todayOnlyRoutes.first;
+        }
+
+        setState(() {
+          fullRouteMap = routeMap;
+          fullRouteMap?.result?.assigned =
+              latestRoute != null ? [latestRoute] : [];
+        });
+      } else {
+        debugPrint("❌ Failed to fetch full route map: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching full route map: $e");
+    }
+  }
 
   Future<void> loadAgentData() async {
     try {
@@ -441,98 +422,7 @@ class _AgentscreenState extends State<Agentscreen> {
         agentname = prefs.getString('agentname') ?? '';
       });
     } catch (e) {
-
-    }
-  }
-
-  Future<void> _uploadSelfie(String type) async {
-    final picker = ImagePicker();
-    final image = await picker.pickImage(source: ImageSource.camera);
-
-    if (image == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No image selected')),
-      );
-      return;
-    }
-
-    final bytes = await image.readAsBytes();
-    final base64Image = base64Encode(bytes);
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final userId = prefs.getInt('id');
-
-    if (token == null || userId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid or missing token/user ID')),
-      );
-      return;
-    }
-
-    String apiUrl;
-    switch (type) {
-      case 'login':
-        apiUrl = "https://salesrep.esanchaya.com/api/start_work";
-        break;
-      case 'logout':
-        apiUrl = "https://salesrep.esanchaya.com/api/end_work";
-        break;
-      default:
-        apiUrl = "https://salesrep.esanchaya.com/api/user/today_selfies";
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse(apiUrl),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "params": {
-            "user_id": userId,
-            "token": token,
-            "type": type == 'login' || type == 'logout' ? null : type,
-            "selfie": base64Image,
-          }
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-        bool success = false;
-        String message = '';
-
-        if (type == 'login') {
-          final selfieModel = startworkselfiemodel.fromJson(responseData);
-          success = selfieModel.result?.success ?? false;
-          message = selfieModel.result?.message ?? 'Login selfie uploaded';
-        } else if (type == 'logout') {
-          final selfieModel = endworkselfiekmodel.fromJson(responseData);
-          success = selfieModel.result?.success ?? false;
-          message = selfieModel.result?.message ?? 'Logout selfie uploaded';
-        } else {
-          success = responseData['result']?['success'] ?? false;
-          message =
-              responseData['result']?['message'] ?? 'Selfie $type uploaded';
-        }
-
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(success
-                  ? '$message successfully'
-                  : 'Failed to upload selfie: $message')),
-        );
-        await refreshData();
-      } else {
-        debugPrint("Upload failed: ${response.statusCode} - ${response.body}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed to upload selfie: ${response.statusCode}')),
-        );
-      }
-    } catch (e) {
-      debugPrint("Error uploading selfie: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error uploading selfie: $e')),
-      );
+      debugPrint("❌ Error loading agent data: $e");
     }
   }
 
@@ -633,12 +523,40 @@ class _AgentscreenState extends State<Agentscreen> {
           )
         ],
       ),
-
+      drawer: _buildDrawer(),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-
+            heroTag: "customer_form",
+            backgroundColor: Colors.white,
+            onPressed: isWorking
+                ? () async {
+                    await Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (_) => const Coustmer()),
+                    );
+                    await refreshData();
+                  }
+                : null,
+            label: Text("Customer Form",
+                style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
+            icon: Icon(Icons.add_box_outlined,
+                color: isWorking ? Colors.black : Colors.grey),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            heroTag: "work_status",
+            backgroundColor: isWorking ? Colors.red : Colors.green,
+            onPressed: isWorking ? stopWork : startWork,
+            label: Text(
+              isWorking ? "Stop Work" : "Start Work",
+              style: const TextStyle(color: Colors.white),
+            ),
+            icon: Icon(
+              isWorking ? Icons.stop : Icons.play_arrow,
+              color: Colors.white,
+            ),
           ),
         ],
       ),
@@ -663,7 +581,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
+                    _buildInfoRow("Customers Met", "${records.length}"),
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -687,8 +605,158 @@ class _AgentscreenState extends State<Agentscreen> {
                         debugPrint("🔍 Entered agency: $value");
                       },
                     ),
+                    const SizedBox(height: 30),
+                    Row(children: [
+                      Center(child: _buildSectionTitle("My Route Map")),
+                      const Spacer(),
+                      TextButton.icon(
+                        icon: const Icon(Icons.assignment_outlined, size: 18),
+                        label: const Text("Route Map Assign",
+                            style: TextStyle(fontSize: 14)),
+                        onPressed: () async {
+                          final prefs = await SharedPreferences.getInstance();
+                          final token = prefs.getString('apikey');
+                          final userId = prefs.getInt('id');
 
+                          if (token != null && userId != null) {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => Agentaddrouite(
+                                  agentId: userId,
+                                  token: token,
+                                ),
+                              ),
+                            ).then((_) => refreshData());
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                  content: Text("Missing user ID or Token")),
+                            );
+                          }
+                        },
+                      ),
+                    ]),
                     const SizedBox(height: 8),
+                    if (fullRouteMap?.result?.assigned != null)
+                      ...fullRouteMap!.result!.assigned!.map((assigned) =>
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text("Route ID: ${assigned.id}",
+                                      style: const TextStyle(
+                                          fontWeight: FontWeight.bold)),
+                                  TextButton.icon(
+                                    onPressed: () {
+                                      if (assigned.id != null) {
+                                        final fromToIds = assigned.fromTo
+                                                ?.map((ft) => {
+                                                      "id": ft.id,
+                                                      "from_location":
+                                                          ft.fromLocation,
+                                                      "to_location":
+                                                          ft.toLocation,
+                                                      "extra_points": ft
+                                                          .extraPoints
+                                                          ?.map((ep) => {
+                                                                "id": ep.id,
+                                                                "name": ep.name,
+                                                              })
+                                                          .toList(),
+                                                    })
+                                                .toList() ??
+                                            [];
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder: (_) => Addextrapoint(
+                                              routeId: assigned.id!,
+                                              fromToIds: fromToIds,
+                                            ),
+                                          ),
+                                        ).then((_) {
+                                          refreshData();
+                                        });
+                                      }
+                                    },
+                                    icon: const Icon(Icons.edit, size: 18),
+                                    label: const Text("Edit Route",
+                                        style: TextStyle(fontSize: 14)),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              ...?assigned.fromTo?.map(
+                                (ft) => Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 2),
+                                  child: Row(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      const Icon(Icons.location_on_outlined,
+                                          size: 20, color: Colors.blue),
+                                      const SizedBox(width: 4),
+                                      Expanded(
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: [
+                                                  Text(ft.fromLocation ?? 'N/A',
+                                                      style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                  const Icon(
+                                                      Icons.arrow_forward,
+                                                      size: 16),
+                                                  if (ft.extraPoints != null &&
+                                                      ft.extraPoints!
+                                                          .isNotEmpty) ...[
+                                                    ...ft.extraPoints!
+                                                        .map((ep) => Row(
+                                                              children: [
+                                                                Text(
+                                                                    ep.name ??
+                                                                        '',
+                                                                    style: const TextStyle(
+                                                                        fontSize:
+                                                                            14,
+                                                                        color: Colors
+                                                                            .black)),
+                                                                const Icon(
+                                                                    Icons
+                                                                        .arrow_forward,
+                                                                    size: 16),
+                                                              ],
+                                                            )),
+                                                  ],
+                                                  Text(ft.toLocation ?? 'N/A',
+                                                      style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w600)),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          )),
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle("Reports")),
                     _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
