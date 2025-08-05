@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/modelclasses/ParticularAgentCustomerForms.dart';
@@ -18,11 +19,77 @@ class AgentDetailsScreen extends StatefulWidget {
 class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
   List<Record> records = [];
   bool isLoading = true;
+  List<Map<String, dynamic>> selfies = [];
+  bool isSelfiesLoading = true;
 
   @override
   void initState() {
     super.initState();
     fetchAgentFormDetails();
+    fetchAgentSelfies(widget.user.id!);
+  }
+
+  Future<void> fetchAgentSelfies(int agentId) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    final response = await http.post(
+      Uri.parse("https://salesrep.esanchaya.com/api/user/today_selfies"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "params": {"token": token, "user_id": agentId}
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final fetchedSelfies =
+          List<Map<String, dynamic>>.from(data['result']['selfies'] ?? []);
+      setState(() {
+        selfies = fetchedSelfies;
+        isSelfiesLoading = false;
+      });
+    } else {
+      setState(() {
+        selfies = [];
+        isSelfiesLoading = false;
+      });
+    }
+  }
+
+  Future<void> _uploadSelfie(String type) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+
+    if (image == null) return;
+
+    final bytes = await image.readAsBytes();
+    final base64Image = base64Encode(bytes);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    final response = await http.post(
+      Uri.parse("https://salesrep.esanchaya.com/api/user/upload_selfie"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "params": {
+          "type": type,
+          "token": token,
+          "selfie": base64Image,
+        }
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('$type selfie uploaded successfully')),
+      );
+      fetchAgentSelfies(widget.user.id!);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to upload $type selfie')),
+      );
+    }
   }
 
   Future<void> fetchAgentFormDetails() async {
@@ -30,7 +97,6 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
     final apiKey = prefs.getString('apikey');
 
     if (apiKey == null || widget.user.id == null) {
-      print("❌ Missing API key or user ID");
       setState(() => isLoading = false);
       return;
     }
@@ -59,11 +125,9 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
           isLoading = false;
         });
       } else {
-        print("❌ Error: ${response.statusCode} | ${response.body}");
         setState(() => isLoading = false);
       }
     } catch (e) {
-      print("❌ Exception: $e");
       setState(() => isLoading = false);
     }
   }
@@ -181,6 +245,35 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                                     label: "Employed",
                                     value: _boolToText(r.employed),
                                   ),
+                                  const SizedBox(height: 10),
+                                  const Text(
+                                    "Today's Selfies",
+                                    style: TextStyle(
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  selfies.isEmpty
+                                      ? const Text("No selfies available.")
+                                      : SizedBox(
+                                          height: 200,
+                                          child: ListView.builder(
+                                            itemCount: selfies.length,
+                                            itemBuilder: (context, index) {
+                                              final selfie = selfies[index];
+                                              return ListTile(
+                                                leading: CircleAvatar(
+                                                  backgroundImage: NetworkImage(
+                                                      selfie['image_url']),
+                                                ),
+                                                title: Text(
+                                                    "Date: ${selfie['date']}"),
+                                                subtitle: Text(
+                                                    "Time: ${selfie['time']}"),
+                                              );
+                                            },
+                                          ),
+                                        )
                                 ],
                               ),
                             ),
@@ -197,7 +290,7 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
 class InfoItem extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String value; // was: String?
+  final String value;
 
   const InfoItem({
     super.key,

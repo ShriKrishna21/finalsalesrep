@@ -8,7 +8,7 @@ import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
+import 'package:image_picker/image_picker.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/routemap.dart';
@@ -20,6 +20,78 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
+
+class startworkselfiemodel {
+  String? jsonrpc;
+  Null? id;
+  Result? result;
+
+  startworkselfiemodel({this.jsonrpc, this.id, this.result});
+
+  startworkselfiemodel.fromJson(Map<String, dynamic> json) {
+    jsonrpc = json['jsonrpc'];
+    id = json['id'];
+    result =
+        json['result'] != null ? new Result.fromJson(json['result']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['jsonrpc'] = this.jsonrpc;
+    data['id'] = this.id;
+    if (this.result != null) {
+      data['result'] = this.result!.toJson();
+    }
+    return data;
+  }
+}
+
+class endworkselfiekmodel {
+  String? jsonrpc;
+  Null? id;
+  Result? result;
+
+  endworkselfiekmodel({this.jsonrpc, this.id, this.result});
+
+  endworkselfiekmodel.fromJson(Map<String, dynamic> json) {
+    jsonrpc = json['jsonrpc'];
+    id = json['id'];
+    result =
+        json['result'] != null ? new Result.fromJson(json['result']) : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['jsonrpc'] = this.jsonrpc;
+    data['id'] = this.id;
+    if (this.result != null) {
+      data['result'] = this.result!.toJson();
+    }
+    return data;
+  }
+}
+
+class Result {
+  bool? success;
+  String? message;
+  int? code;
+
+  Result({this.success, this.message, this.code});
+
+  Result.fromJson(Map<String, dynamic> json) {
+    success = json['success'];
+    message = json['message'];
+    code = json['code'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['success'] = this.success;
+    data['message'] = this.message;
+    data['code'] = this.code;
+    return data;
+  }
+}
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -37,6 +109,7 @@ class _AgentscreenState extends State<Agentscreen> {
   bool _isLoading = true;
   Timer? _sessionCheckTimer;
   RouteMap? fullRouteMap;
+  String? selectedSelfieType;
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
@@ -101,56 +174,8 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> refreshData() async {
     setState(() => _isLoading = true);
     await loadOnedayHistory();
-    await fetchFullRouteMap();
     await fetchTarget();
     setState(() => _isLoading = false);
-  }
-
-  Future<void> fetchFullRouteMap() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final userId = prefs.getInt('id');
-
-    try {
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/api/user_root_maps_by_stage"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "jsonrpc": "2.0",
-          "params": {"user_id": userId, "token": token}
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final routeMap = RouteMap.fromJson(data);
-
-        final today = DateTime.now();
-        final todayOnlyRoutes = routeMap.result?.assigned?.where((assigned) {
-          final routeDate = DateTime.tryParse(assigned.date ?? '');
-          return routeDate != null &&
-              routeDate.year == today.year &&
-              routeDate.month == today.month &&
-              routeDate.day == today.day;
-        }).toList();
-
-        Assigned? latestRoute;
-        if (todayOnlyRoutes != null && todayOnlyRoutes.isNotEmpty) {
-          todayOnlyRoutes.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
-          latestRoute = todayOnlyRoutes.first;
-        }
-
-        setState(() {
-          fullRouteMap = routeMap;
-          fullRouteMap?.result?.assigned =
-              latestRoute != null ? [latestRoute] : [];
-        });
-      } else {
-        debugPrint("Failed to fetch full route map: ${response.statusCode}");
-      }
-    } catch (e) {
-      debugPrint("Error fetching full route map: $e");
-    }
   }
 
   Future<void> loadAgentData() async {
@@ -171,7 +196,6 @@ class _AgentscreenState extends State<Agentscreen> {
     final userId = prefs.getInt('id');
 
     if (token == null || userId == null) {
-      debugPrint("Missing token or user ID");
       setState(() {
         target = prefs.getString('target') ?? "0";
       });
@@ -198,22 +222,110 @@ class _AgentscreenState extends State<Agentscreen> {
           });
           await prefs.setString('target', target ?? "0");
         } else {
-          debugPrint("Failed to fetch target: ${result["result"]["message"]}");
           setState(() {
             target = prefs.getString('target') ?? "0";
           });
         }
       } else {
-        debugPrint("Failed to fetch target: ${response.statusCode}");
         setState(() {
           target = prefs.getString('target') ?? "0";
         });
       }
     } catch (e) {
-      debugPrint("Error fetching target: $e");
       setState(() {
         target = prefs.getString('target') ?? "0";
       });
+    }
+  }
+
+  Future<void> _uploadSelfie(String type) async {
+    final picker = ImagePicker();
+    final image = await picker.pickImage(source: ImageSource.camera);
+
+    if (image == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No image selected')),
+      );
+      return;
+    }
+
+    final bytes = await image.readAsBytes();
+    final base64Image = base64Encode(bytes);
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
+
+    if (token == null || userId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Invalid or missing token/user ID')),
+      );
+      return;
+    }
+
+    String apiUrl;
+    switch (type) {
+      case 'login':
+        apiUrl = "https://salesrep.esanchaya.com/api/start_work";
+        break;
+      case 'logout':
+        apiUrl = "https://salesrep.esanchaya.com/api/end_work";
+        break;
+      default:
+        apiUrl = "https://salesrep.esanchaya.com/api/user/today_selfies";
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "user_id": userId,
+            "token": token,
+            "type": type == 'login' || type == 'logout' ? null : type,
+            "selfie": base64Image,
+          }
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+        bool success = false;
+        String message = '';
+
+        if (type == 'login') {
+          final selfieModel = startworkselfiemodel.fromJson(responseData);
+          success = selfieModel.result?.success ?? false;
+          message = selfieModel.result?.message ?? 'Login selfie uploaded';
+        } else if (type == 'logout') {
+          final selfieModel = endworkselfiekmodel.fromJson(responseData);
+          success = selfieModel.result?.success ?? false;
+          message = selfieModel.result?.message ?? 'Logout selfie uploaded';
+        } else {
+          success = responseData['result']?['success'] ?? false;
+          message =
+              responseData['result']?['message'] ?? 'Selfie $type uploaded';
+        }
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(success
+                  ? '$message successfully'
+                  : 'Failed to upload selfie: $message')),
+        );
+        await refreshData();
+      } else {
+        debugPrint("Upload failed: ${response.statusCode} - ${response.body}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text('Failed to upload selfie: ${response.statusCode}')),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error uploading selfie: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error uploading selfie: $e')),
+      );
     }
   }
 
@@ -266,18 +378,79 @@ class _AgentscreenState extends State<Agentscreen> {
         ],
       ),
       drawer: _buildDrawer(localeProvider, localizations),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: Colors.white,
-        onPressed: () async {
-          await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (_) => const Coustmer()),
-          );
-          await refreshData();
-        },
-        label: Text(localizations.customerform,
-            style: const TextStyle(color: Colors.black)),
-        icon: const Icon(Icons.add_box_outlined, color: Colors.black),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            backgroundColor: Colors.white,
+            onPressed: () async {
+              await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const Coustmer()),
+              );
+              await refreshData();
+            },
+            label: Text(localizations.customerform,
+                style: const TextStyle(color: Colors.black)),
+            icon: const Icon(Icons.add_box_outlined, color: Colors.black),
+          ),
+          const SizedBox(height: 10),
+          FloatingActionButton.extended(
+            backgroundColor: Colors.white,
+            onPressed: () async {
+              await showDialog(
+                context: context,
+                builder: (context) => AlertDialog(
+                  title: const Text('Select Selfie Type'),
+                  content: DropdownButton<String>(
+                    value: selectedSelfieType,
+                    hint: const Text('Choose a type'),
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'login',
+                        child: Text('Login Selfie'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'lunch',
+                        child: Text('Lunch Selfie'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'after_lunch',
+                        child: Text('After Lunch Selfie'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'logout',
+                        child: Text('Logout Selfie'),
+                      ),
+                    ],
+                    onChanged: (value) {
+                      setState(() {
+                        selectedSelfieType = value;
+                      });
+                      Navigator.pop(context);
+                    },
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(context),
+                      child: const Text('Cancel'),
+                    ),
+                  ],
+                ),
+              );
+              if (selectedSelfieType != null) {
+                await _uploadSelfie(selectedSelfieType!);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Please select a selfie type')),
+                );
+              }
+            },
+            label: const Text('Take Selfie',
+                style: TextStyle(color: Colors.black)),
+            icon: const Icon(Icons.camera_alt_outlined, color: Colors.black),
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -306,10 +479,10 @@ class _AgentscreenState extends State<Agentscreen> {
                         children: [
                           Text(
                             localizations.houseVisited,
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold),
                           ),
-                          SizedBox(width: 6),
+                          const SizedBox(width: 6),
                           GestureDetector(
                             onTap: () async {
                               final prefs =
@@ -349,7 +522,6 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-
                     _buildInfoRow(
                         "Customers the Promoter has met", "${records.length}"),
                     GestureDetector(
@@ -361,175 +533,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       child: _buildInfoRow("Houses Visited",
                           "${records.length} house${records.length == 1 ? '' : 's'} visited"),
                     ),
-                    // _buildInfoRow("Remaining Target",
-                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-
-                    // _buildInfoRow(
-                    //     localizations.todaysHouseCount, target ?? "0"),
-                    // GestureDetector(
-                    //   onTap: () => Navigator.push(
-                    //       context,
-                    //       MaterialPageRoute(
-                    //           builder: (_) => const Onedayhistory())),
-                    //   child: _buildInfoRow(
-                    //       localizations.houseVisited, "${records.length}"),
-                    // ),
-                    // _buildInfoRow(localizations.todaysTargetLeft,
-                    //     "${(int.tryParse(target ?? "0") ?? 0) - records.length}"),
-
-                    const SizedBox(height: 30),
-                    Row(children: [
-                      Center(
-                          child: _buildSectionTitle(localizations.myRouteMap)),
-                      Spacer(),
-                      TextButton.icon(
-                        icon: Icon(Icons.assignment_outlined, size: 18),
-                        label: Text(localizations.routemapassign,
-                            style: TextStyle(fontSize: 14)),
-                        onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          final token = prefs.getString('apikey');
-                          final agentId = prefs.getInt('id');
-
-                          if (token != null && agentId != null) {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Agentaddrouite(
-                                  agentId: agentId,
-                                  token: token,
-                                ),
-                              ),
-                            ).then((_) => refreshData());
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Missing Agent ID or Token")),
-                            );
-                          }
-                        },
-                      ),
-                    ]),
                     const SizedBox(height: 8),
-                    if (fullRouteMap?.result?.assigned != null)
-                      ...fullRouteMap!.result!.assigned!.map((assigned) =>
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text("Route ID: ${assigned.id}",
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      if (assigned.id != null) {
-                                        final fromToIds = assigned.fromTo
-                                                ?.map((ft) => {
-                                                      "id": ft.id,
-                                                      "from_location":
-                                                          ft.fromLocation,
-                                                      "to_location":
-                                                          ft.toLocation,
-                                                      "extra_points": ft
-                                                          .extraPoints
-                                                          ?.map((ep) => {
-                                                                "id": ep.id,
-                                                                "name": ep.name,
-                                                              })
-                                                          .toList(),
-                                                    })
-                                                .toList() ??
-                                            [];
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => Addextrapoint(
-                                              routeId: assigned.id!,
-                                              fromToIds: fromToIds,
-                                            ),
-                                          ),
-                                        ).then((_) {
-                                          refreshData();
-                                        });
-                                      }
-                                    },
-                                    icon: const Icon(Icons.edit, size: 18),
-                                    label: const Text("Edit Route",
-                                        style: TextStyle(fontSize: 14)),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              ...?assigned.fromTo?.map(
-                                (ft) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.location_on_outlined,
-                                          size: 20, color: Colors.blue),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: Row(
-                                                children: [
-                                                  Text(ft.fromLocation ?? 'N/A',
-                                                      style: const TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.w600)),
-                                                  const Icon(
-                                                      Icons.arrow_forward,
-                                                      size: 16),
-                                                  if (ft.extraPoints != null &&
-                                                      ft.extraPoints!
-                                                          .isNotEmpty) ...[
-                                                    ...ft.extraPoints!
-                                                        .map((ep) => Row(
-                                                              children: [
-                                                                Text(
-                                                                    ep.name ??
-                                                                        '',
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            14,
-                                                                        color: Colors
-                                                                            .black)),
-                                                                const Icon(
-                                                                    Icons
-                                                                        .arrow_forward,
-                                                                    size: 16),
-                                                              ],
-                                                            )),
-                                                  ],
-                                                  Text(ft.toLocation ?? 'N/A',
-                                                      style: const TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.w600)),
-                                                ],
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ],
-                          )),
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle(localizations.reports)),
                     _buildBulletPoint(
