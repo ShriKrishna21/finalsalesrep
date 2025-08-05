@@ -343,11 +343,11 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black)),
+          Text(
+            title,
+            style: const TextStyle(
+                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+          ),
           const Divider(color: Colors.black),
           const SizedBox(height: 8),
           Column(children: rows),
@@ -367,10 +367,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       mainAxisSpacing: 16,
       childAspectRatio: 2.5,
       children: [
-        _buildBlackWhiteButton(localizations.assignroutemapandtarget, () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const AssignRouteScreen()));
-        }),
         _buildBlackWhiteButton(localizations.createofficestaff, () {
           Navigator.push(
               context, MaterialPageRoute(builder: (_) => const createstaff()));
@@ -451,3 +447,4 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
+//////////my code

@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Allcustomerforms extends StatefulWidget {
   const Allcustomerforms({super.key});
@@ -42,6 +43,34 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
+  }
+
+  Future<void> openGoogleMaps(
+      double? latitude, double? longitude, String? locationUrl) async {
+    String url = '';
+
+    if (latitude != null && longitude != null) {
+      url =
+          'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude';
+    } else if (locationUrl != null &&
+        locationUrl.isNotEmpty &&
+        locationUrl != 'false' &&
+        locationUrl != 'N/A') {
+      url = locationUrl;
+    }
+
+    final uri = Uri.parse(url);
+
+    try {
+      final launched =
+          await launchUrl(uri, mode: LaunchMode.externalApplication);
+      if (!launched) {
+        throw 'Could not launch';
+      }
+    } catch (e) {
+      debugPrint('Could not launch $url');
+      // Optional: show a dialog or snackbar
+    }
   }
 
   Future<void> _pickDateRange() async {
@@ -229,8 +258,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                 itemCount: filteredRecords.length,
                                 itemBuilder: (context, index) {
                                   final r = filteredRecords[index];
-                                  print(
-                                      '======================>Yes: ${localizations.yes}, type: ${localizations.yes.runtimeType}');
                                   return Card(
                                     margin: const EdgeInsets.symmetric(
                                         horizontal: 12, vertical: 8),
@@ -254,17 +281,50 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                               "${localizations.pinCode}: ${r.city ?? ''}, ${r.pinCode ?? ''}"),
                                           Text(
                                               "${localizations.phone}: ${r.mobileNumber ?? 'N/A'}"),
-                                          // Text(
-                                          //     "${_boolToText(r.eenaduNewspaper)}"),
-
-                                          Text(_boolToText(r.eenaduNewspaper) ??
-                                              'N/A'),
-
+                                          Text(
+                                              "${_boolToText(r.eenaduNewspaper)}"),
                                           Text(
                                               "${localizations.employed}: ${_boolToText(r.employed)}"),
                                           Text(
                                               "${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
-
+                                          Row(
+                                            crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                            children: [
+                                              const Text("Location URL: ",
+                                                  style: TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.w600)),
+                                              Expanded(
+                                                child: InkWell(
+                                                  onTap: () {
+                                                    openGoogleMaps(
+                                                      double.tryParse(
+                                                          r.latitude ?? ''),
+                                                      double.tryParse(
+                                                          r.longitude ?? ''),
+                                                      r.locationUrl,
+                                                    );
+                                                  },
+                                                  child: Text(
+                                                    r.locationUrl != null &&
+                                                            r.locationUrl !=
+                                                                'false' &&
+                                                            r.locationUrl !=
+                                                                'N/A'
+                                                        ? r.locationUrl!
+                                                        : 'View on Google Maps',
+                                                    style: const TextStyle(
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                      color: Colors.blue,
+                                                      //decoration: TextDecoration.underline,
+                                                    ),
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                           const SizedBox(height: 8),
                                           if (r.faceBase64 != null &&
                                               r.faceBase64!.isNotEmpty)

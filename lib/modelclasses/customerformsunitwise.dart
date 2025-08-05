@@ -64,9 +64,12 @@ class Records {
   String? city;
   String? pinCode;
   String? mobileNumber;
-  bool? eenaduNewspaper; // <-- should be bool?
+  bool? eenaduNewspaper;
   bool? employed; // <-- should be bool?
   String? faceBase64;
+  dynamic locationUrl;
+  dynamic latitude;
+  dynamic longitude;
 
   Records({
     this.id,
@@ -81,6 +84,7 @@ class Records {
     this.eenaduNewspaper,
     this.employed,
     this.faceBase64,
+    this.locationUrl,
   });
 
   Records.fromJson(Map<String, dynamic> json) {
@@ -96,6 +100,9 @@ class Records {
     eenaduNewspaper = json['eenadu_newspaper'];
     employed = json['employed'];
     faceBase64 = json['face_base64'];
+    latitude = json["latitude"]?.toString();
+    longitude = json["longitude"]?.toString();
+    locationUrl = json["location_url"];
   }
 
   Map<String, dynamic> toJson() {
@@ -112,6 +119,9 @@ class Records {
     data['eenadu_newspaper'] = eenaduNewspaper;
     data['employed'] = employed;
     data['face_base64'] = faceBase64;
+    data['latitude'] = latitude;
+    data['longitude'] = longitude;
+    data['location_url'] = locationUrl;
     return data;
   }
 }
