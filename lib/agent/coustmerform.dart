@@ -77,30 +77,22 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privateProffesionController = TextEditingController();
   TextEditingController locationUrlController = TextEditingController();
   TextEditingController faceBase64Controller = TextEditingController();
-
+   TextEditingController otherNewspaperController = TextEditingController();
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
   List<String> govDepartments = ["Central", "PSU", "State"];
   List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
   List<String> newspapers = [
-    "Eenadu",
     "Sakshi",
     "Andhra Jyothi",
-    "Andhra Bhoomi",
-    "Vaartha",
+   
     "Namasthe Telangana",
-    "Prajasakti",
-    "Nava Telangana",
-    "Andhra Prabha",
-    "Suryaa",
-    "Mana Telangana",
-    "Janam Sakshi",
-    "Visalaandhra",
+
     "Deccan Chronicle",
-    "The Hans India",
-    "Telangana Today",
-    "The Siasat Daily",
-    "Etemaad Daily"
+   "Times Of India",
+    "The Hindu",
+    "Others"
+  
   ];
   List<String> privateProfessions = [
     "IT & Software",
@@ -655,49 +647,58 @@ class _CoustmerState extends State<Coustmer> {
                         ),
                       ],
                     ),
-                    if (_isAnotherToggle)
-                      DropdownButtonFormField<String>(
-                        value: _selectedNewspaper,
-                        hint: Text(localizations.currentnewpaper),
-                        isExpanded: true,
-                        items: newspapers.map((String newspaper) {
-                          return DropdownMenuItem<String>(
-                            value: newspaper,
-                            child: Text(newspaper),
-                          );
-                        }).toList(),
-                        onChanged: (String? newValue) {
-                          setState(() {
-                            _selectedNewspaper = newValue;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) {
-                            return localizations.currentnewspapercannotbeempty;
-                          }
-                          return null;
-                        },
-                        decoration: InputDecoration(
-                          labelText: localizations.currentnewpaper,
-                          border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(10)),
-                        ),
-                      ),
-                    SizedBox(height: 10),
-                    if (_isAnotherToggle)
-                      textformfeild(
-                          hunttext:
-                              localizations.reasonfornottakingcannotbeempty,
-                          controller: reason_for_not_taking_eenadu,
-                          label:
-                              localizations.reasonfornottakingeenadunewspaper),
-                    if (!_isAnotherToggle)
-                      textformfeild(
-                          hunttext:
-                              localizations.reasonfornotreadingcannotbeempty,
-                          controller: reason_for_not_reading,
-                          label: localizations.reasonfornotreadingnewspaper),
-                  ],
+                   if (_isAnotherToggle) ...[
+  DropdownButtonFormField<String>(
+    value: _selectedNewspaper,
+    hint: Text(localizations.currentnewpaper),
+    isExpanded: true,
+    items: newspapers.map((String newspaper) {
+      return DropdownMenuItem<String>(
+        value: newspaper,
+        child: Text(newspaper),
+      );
+    }).toList(),
+    onChanged: (String? newValue) {
+      setState(() {
+        _selectedNewspaper = newValue;
+        if (newValue != "Others") {
+          otherNewspaperController.clear(); // Clear the text field if "Others" is not selected
+        }
+      });
+    },
+    validator: (value) {
+      if (value == null) {
+        return localizations.currentnewspapercannotbeempty;
+      }
+      if (value == "Others" && (otherNewspaperController.text.isEmpty)) {
+        return "localizations.pleaseenterothernewspaper";
+      }
+      return null;
+    },
+    decoration: InputDecoration(
+      labelText: localizations.currentnewpaper,
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
+    ),
+  ),
+  if (_selectedNewspaper == "Others") ...[
+    const SizedBox(height: 10),
+    textformfeild(
+      hunttext: "pleaseenterothernewspaper",
+      controller: otherNewspaperController,
+      label: "othernewspaper",
+      need: false,
+      keyboardType: TextInputType.text,
+    ),
+  ],
+  const SizedBox(height: 10),
+  textformfeild(
+    hunttext: localizations.reasonfornottakingcannotbeempty,
+    controller: reason_for_not_taking_eenadu,
+    label: localizations.reasonfornottakingeenadunewspaper,
+  ),
+],
                   const SizedBox(height: 15),
                   Row(
                     children: [
@@ -903,6 +904,7 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   const SizedBox(height: 20),
                 ],
+                ]
               ),
             ),
           ),

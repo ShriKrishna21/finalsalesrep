@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
-import 'package:finalsalesrep/agent/edittarget.dart';
-import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
+import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
+
 import 'package:finalsalesrep/modelclasses/routemap.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
@@ -103,17 +100,18 @@ class Agentscreen extends StatefulWidget {
 class _AgentscreenState extends State<Agentscreen> {
   TextEditingController dateController = TextEditingController();
   String agentname = "";
-  String? target;
-  String? routeName;
   List<Record> records = [];
   bool _isLoading = true;
+  bool isWorking = false;
   Timer? _sessionCheckTimer;
   RouteMap? fullRouteMap;
-  String? selectedSelfieType;
+
 
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
+
+  List<SelfieSession> _selfieSessions = [];
 
   final Onedayagent _onedayagent = Onedayagent();
 
@@ -123,7 +121,263 @@ class _AgentscreenState extends State<Agentscreen> {
     startTokenValidation();
     dateController.text = DateFormat('EEE, MMM d, y').format(DateTime.now());
     loadAgentData();
+    loadWorkStatus();
     refreshData();
+    fetchSelfieTimes();
+  }
+
+  Future<void> fetchSelfieTimes() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
+
+    debugPrint("🔍 Token: $token, UserId: $userId");
+
+    if (token == null || userId == null) {
+      debugPrint("❌ Missing token or userId");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Missing token or user ID")),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/user/today_selfies"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "user_id": userId,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Selfie Times Status Code: ${response.statusCode}");
+      debugPrint("🔁 Selfie Times Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint("🔍 Parsed JSON: $data");
+
+        if (data == null || data['result'] == null) {
+          debugPrint("❌ Invalid response structure: Missing 'result' key");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Invalid response from server")),
+          );
+          return;
+        }
+
+        final selfieData = SelfieTimesResponse.fromJson(data);
+
+        debugPrint("🔍 SelfieTimesResponse: success=${selfieData.success}, "
+            "sessions=${selfieData.sessions.map((s) => {
+              'startTime': s.startTime,
+              'endTime': s.endTime,
+              'startSelfie': s.startSelfie != null ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...' : null,
+              'endSelfie': s.endSelfie != null ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...' : null,
+            }).toList()}");
+
+        if (selfieData.success) {
+          try {
+            setState(() {
+              _selfieSessions = selfieData.sessions;
+            });
+          } catch (e) {
+            debugPrint("❌ Error in setState: $e");
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error updating UI: $e")),
+            );
+          }
+        } else {
+          debugPrint("❌ Selfie times fetch unsuccessful: ${selfieData.success}");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to fetch selfie times")),
+          );
+        }
+      } else {
+        debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to fetch selfie times: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching selfie times: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching selfie times: $e")),
+      );
+    }
+  }
+
+  Future<void> loadWorkStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      isWorking = prefs.getBool('isWorking') ?? false;
+    });
+  }
+
+  Future<void> saveWorkStatus(bool status) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isWorking', status);
+  }
+
+  Future<void> startWork() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Photo required")),
+        );
+        return;
+      }
+
+      final bytes = await photo.readAsBytes();
+      _startWorkPhotoBase64 = base64Encode(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        debugPrint("❌ Missing or empty API key");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+        return;
+      }
+
+      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
+      debugPrint(
+          "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
+
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": _startWorkPhotoBase64,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Status Code: ${response.statusCode}");
+      debugPrint("✅ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          setState(() {
+            isWorking = true;
+          });
+          await saveWorkStatus(true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Work started")),
+          );
+          await fetchSelfieTimes();
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("❌ Failed to start work: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to start work: $errorMessage")),
+          );
+        }
+      } else {
+        debugPrint("❌ Failed to start work: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to start work: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Error starting work: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error starting work: $e")),
+      );
+    }
+  }
+
+  Future<void> stopWork() async {
+    try {
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Photo required")),
+        );
+        return;
+      }
+
+      final bytes = await photo.readAsBytes();
+      final photoBase64 = base64Encode(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        debugPrint("❌ Missing or empty API key");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+        return;
+      }
+
+      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/end_work");
+      debugPrint(
+          "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${photoBase64.substring(0, 50)}...\"}}");
+
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": photoBase64,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Status Code: ${response.statusCode}");
+      debugPrint("✅ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          setState(() {
+            isWorking = false;
+            _startWorkPhotoBase64 = null;
+          });
+          await saveWorkStatus(false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Work stopped")),
+          );
+          await fetchSelfieTimes();
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("❌ Failed to stop work: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to stop work: $errorMessage")),
+          );
+        }
+      } else {
+        debugPrint("❌ Failed to stop work: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Failed to stop work: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Error stopping work: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error stopping work: $e")),
+      );
+    }
   }
 
   void startTokenValidation() {
@@ -136,6 +390,7 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> validateToken() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
+    final sessionId = prefs.getString('session_id');
     if (token == null || token.isEmpty) {
       forceLogout("Session expired or invalid token.");
       return;
@@ -144,11 +399,15 @@ class _AgentscreenState extends State<Agentscreen> {
     try {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/token_validation"),
-        headers: {"Content-Type": "application/json"},
+        headers: {
+          "Content-Type": "application/json",
+          "Cookie": "session_id=$sessionId",
+        },
         body: jsonEncode({
           "params": {"token": token}
         }),
       );
+      debugPrint("🔁 Token Validation Response: ${response.body}");
       final result = jsonDecode(response.body)['result'];
       if (result == null || result['success'] != true) {
         forceLogout(
@@ -174,9 +433,6 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> refreshData() async {
     setState(() => _isLoading = true);
     await loadOnedayHistory();
-    await fetchTarget();
-    setState(() => _isLoading = false);
-  }
 
   Future<void> loadAgentData() async {
     try {
@@ -184,57 +440,8 @@ class _AgentscreenState extends State<Agentscreen> {
       setState(() {
         agentname = prefs.getString('agentname') ?? '';
       });
-      await fetchTarget();
     } catch (e) {
-      debugPrint("Error loading agent data: $e");
-    }
-  }
 
-  Future<void> fetchTarget() async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final userId = prefs.getInt('id');
-
-    if (token == null || userId == null) {
-      setState(() {
-        target = prefs.getString('target') ?? "0";
-      });
-      return;
-    }
-
-    try {
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/update/target"),
-        headers: {
-          "Content-Type": "application/json",
-          "Cookie": "session_id=${prefs.getString('session_id')}",
-        },
-        body: jsonEncode({
-          "params": {"user_id": userId, "token": token}
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        if (result["result"]?["success"] == true) {
-          setState(() {
-            target = result["result"]["target"]?.toString() ?? "0";
-          });
-          await prefs.setString('target', target ?? "0");
-        } else {
-          setState(() {
-            target = prefs.getString('target') ?? "0";
-          });
-        }
-      } else {
-        setState(() {
-          target = prefs.getString('target') ?? "0";
-        });
-      }
-    } catch (e) {
-      setState(() {
-        target = prefs.getString('target') ?? "0";
-      });
     }
   }
 
@@ -339,7 +546,59 @@ class _AgentscreenState extends State<Agentscreen> {
         alreadySubscribedCount = result['already_subscribed'] ?? 0;
       });
     } catch (e) {
-      debugPrint("Error loading one day history: $e");
+      debugPrint("❌ Error loading one day history: $e");
+    }
+  }
+
+  void _showSelfieDialog(String? base64Image, String title) {
+    if (base64Image == null || base64Image.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No selfie available")),
+      );
+      return;
+    }
+
+    // Remove data URL prefix if present
+    final cleanBase64 = base64Image.startsWith('data:image')
+        ? base64Image.split(',')[1]
+        : base64Image;
+
+    try {
+      // Validate base64 string
+      base64Decode(cleanBase64);
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(title),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Image.memory(
+                  base64Decode(cleanBase64),
+                  width: 300,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => const Text(
+                    "Error loading image",
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Close"),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint("❌ Error decoding base64 image: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Invalid image data")),
+      );
     }
   }
 
@@ -352,9 +611,6 @@ class _AgentscreenState extends State<Agentscreen> {
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -362,9 +618,9 @@ class _AgentscreenState extends State<Agentscreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Center(child: Text(localizations.salesrep)),
+            const Center(child: Text("Sales Representative")),
             Center(
-              child: Text("${localizations.welcome} $agentname",
+              child: Text("Welcome $agentname",
                   style: const TextStyle(fontSize: 16)),
             ),
           ],
@@ -377,78 +633,12 @@ class _AgentscreenState extends State<Agentscreen> {
           )
         ],
       ),
-      drawer: _buildDrawer(localeProvider, localizations),
+
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            backgroundColor: Colors.white,
-            onPressed: () async {
-              await Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const Coustmer()),
-              );
-              await refreshData();
-            },
-            label: Text(localizations.customerform,
-                style: const TextStyle(color: Colors.black)),
-            icon: const Icon(Icons.add_box_outlined, color: Colors.black),
-          ),
-          const SizedBox(height: 10),
-          FloatingActionButton.extended(
-            backgroundColor: Colors.white,
-            onPressed: () async {
-              await showDialog(
-                context: context,
-                builder: (context) => AlertDialog(
-                  title: const Text('Select Selfie Type'),
-                  content: DropdownButton<String>(
-                    value: selectedSelfieType,
-                    hint: const Text('Choose a type'),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'login',
-                        child: Text('Login Selfie'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'lunch',
-                        child: Text('Lunch Selfie'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'after_lunch',
-                        child: Text('After Lunch Selfie'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'logout',
-                        child: Text('Logout Selfie'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      setState(() {
-                        selectedSelfieType = value;
-                      });
-                      Navigator.pop(context);
-                    },
-                  ),
-                  actions: [
-                    TextButton(
-                      onPressed: () => Navigator.pop(context),
-                      child: const Text('Cancel'),
-                    ),
-                  ],
-                ),
-              );
-              if (selectedSelfieType != null) {
-                await _uploadSelfie(selectedSelfieType!);
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Please select a selfie type')),
-                );
-              }
-            },
-            label: const Text('Take Selfie',
-                style: TextStyle(color: Colors.black)),
-            icon: const Icon(Icons.camera_alt_outlined, color: Colors.black),
+
           ),
         ],
       ),
@@ -473,57 +663,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    Center(
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            localizations.houseVisited,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(width: 6),
-                          GestureDetector(
-                            onTap: () async {
-                              final prefs =
-                                  await SharedPreferences.getInstance();
-                              final userId = prefs.getInt('id');
-                              final token = prefs.getString('apikey');
 
-                              if (userId != null && token != null) {
-                                final result = await Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => edittarget(
-                                      userId: userId,
-                                      token: token,
-                                    ),
-                                  ),
-                                );
-                                if (result == true) {
-                                  await fetchTarget();
-                                  setState(() {});
-                                }
-                              } else {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  const SnackBar(
-                                      content:
-                                          Text("Missing user ID or token")),
-                                );
-                              }
-                            },
-                            child: const Icon(
-                              Icons.edit,
-                              size: 20,
-                              color: Colors.blue,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    _buildInfoRow(
-                        "Customers the Promoter has met", "${records.length}"),
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -531,17 +671,193 @@ class _AgentscreenState extends State<Agentscreen> {
                             builder: (_) => const Onedayhistory()),
                       ),
                       child: _buildInfoRow("Houses Visited",
-                          "${records.length} house${records.length == 1 ? '' : 's'} visited"),
+                          "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
                     ),
+                    const SizedBox(height: 10),
+                    const Text("Agency"),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: "Enter agency name or code",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        prefixIcon: const Icon(Icons.business),
+                      ),
+                      onChanged: (value) {
+                        debugPrint("🔍 Entered agency: $value");
+                      },
+                    ),
+
                     const SizedBox(height: 8),
                     const SizedBox(height: 30),
-                    Center(child: _buildSectionTitle(localizations.reports)),
-                    _buildBulletPoint(
-                        "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
-                    _buildBulletPoint(
-                        "${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                    _buildBulletPoint(
-                        "${localizations.daysOfferRejected15}: $offerRejectedCount"),
+                    Center(child: _buildSectionTitle("Reports")),
+                    _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
+                    const SizedBox(height: 40),
+                    Center(child: _buildSectionTitle("Shift Details")),
+                    const SizedBox(height: 10),
+                    if (_selfieSessions.isNotEmpty)
+                      ..._selfieSessions.asMap().entries.map((entry) {
+                        final index = entry.key;
+                        final session = entry.value;
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                "Session ${index + 1}",
+                                style: const TextStyle(
+                                    fontSize: 16, fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  if (session.startTime != null)
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _showSelfieDialog(
+                                            session.startSelfie, "Start Selfie"),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.green.shade50,
+                                            border: Border.all(color: Colors.green),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              const Text(
+                                                "Start Time",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                              Text(
+                                                session.startTime != null
+                                                    ? DateFormat('hh:mm a').format(
+                                                        DateTime.parse(
+                                                            session.startTime!))
+                                                    : "--",
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  if (session.startTime != null &&
+                                      session.endTime != null)
+                                    const SizedBox(width: 12),
+                                  if (session.endTime != null)
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => _showSelfieDialog(
+                                            session.endSelfie, "End Selfie"),
+                                        child: Container(
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.red.shade50,
+                                            border: Border.all(color: Colors.red),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              const Text(
+                                                "End Time",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold),
+                                              ),
+                                              Text(
+                                                session.endTime != null
+                                                    ? DateFormat('hh:mm a').format(
+                                                        DateTime.parse(
+                                                            session.endTime!))
+                                                    : "--",
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              if (session.startTime != null &&
+                                  session.endTime != null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.blue.shade50,
+                                    border: Border.all(color: Colors.blue),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        "Total Working Hours",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        () {
+                                          final start = DateTime.tryParse(
+                                              session.startTime!);
+                                          final end = DateTime.tryParse(
+                                              session.endTime!);
+                                          if (start != null && end != null) {
+                                            final duration =
+                                                end.difference(start);
+                                            return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                          }
+                                          return "--";
+                                        }(),
+                                      ),
+                                    ],
+                                  ),
+                                )
+                              else if (session.startTime != null &&
+                                  session.endTime == null)
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: Colors.orange.shade50,
+                                    border: Border.all(color: Colors.orange),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const Text(
+                                        "Session Ongoing",
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      Text(
+                                        "Work in progress, end time not set",
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Colors.grey[700]),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                            ],
+                          ),
+                        );
+                      }).toList()
+                    else
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "No shift data available",
+                          style: TextStyle(fontSize: 16, color: Colors.grey),
+                        ),
+                      ),
+                    const SizedBox(height: 40),
                   ],
                 ),
               ),
@@ -549,8 +865,7 @@ class _AgentscreenState extends State<Agentscreen> {
     );
   }
 
-  Widget _buildDrawer(
-      LocalizationProvider localeProvider, AppLocalizations localizations) {
+  Widget _buildDrawer() {
     return Drawer(
       child: ListView(
         children: [
@@ -561,30 +876,13 @@ class _AgentscreenState extends State<Agentscreen> {
               children: [
                 const Icon(Icons.account_circle, size: 60),
                 const SizedBox(height: 10),
-                Text(" $agentname", style: const TextStyle(fontSize: 16)),
-              ],
-            ),
-          ),
-          ListTile(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('English'),
-                Switch(
-                  value: localeProvider.locale.languageCode == 'te',
-                  onChanged: (value) => localeProvider.toggleLocale(),
-                  activeColor: Colors.green,
-                  inactiveThumbColor: Colors.blue,
-                  activeTrackColor: Colors.green.shade200,
-                  inactiveTrackColor: Colors.blue.shade200,
-                ),
-                const Text('తెలుగు'),
+                Text(agentname, style: const TextStyle(fontSize: 16)),
               ],
             ),
           ),
           ListTile(
             leading: const Icon(Icons.history),
-            title: Text(localizations.historyPage),
+            title: const Text("History Page"),
             onTap: () => Navigator.push(context,
                 MaterialPageRoute(builder: (_) => const Historypage())),
           ),
@@ -593,11 +891,13 @@ class _AgentscreenState extends State<Agentscreen> {
     );
   }
 
-  Widget _buildSectionTitle(String title) => Text(title,
-      style: const TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          decoration: TextDecoration.underline));
+  Widget _buildSectionTitle(String title) => Text(
+        title,
+        style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            decoration: TextDecoration.underline),
+      );
 
   Widget _buildInfoRow(String label, String value) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
@@ -605,7 +905,7 @@ class _AgentscreenState extends State<Agentscreen> {
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(label, style: const TextStyle(fontSize: 16)),
-            Text(value, style: const TextStyle(fontWeight: FontWeight.bold))
+            Text(value, style: const TextStyle(fontWeight: FontWeight.bold)),
           ],
         ),
       );
