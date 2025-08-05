@@ -1,7 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
-import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
+import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart'
+    show SelfieTimesResponse, SelfieSession;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -100,11 +101,15 @@ class _AgentscreenState extends State<Agentscreen> {
 
         debugPrint("🔍 SelfieTimesResponse: success=${selfieData.success}, "
             "sessions=${selfieData.sessions.map((s) => {
-              'startTime': s.startTime,
-              'endTime': s.endTime,
-              'startSelfie': s.startSelfie != null ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...' : null,
-              'endSelfie': s.endSelfie != null ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...' : null,
-            }).toList()}");
+                  'startTime': s.startTime,
+                  'endTime': s.endTime,
+                  'startSelfie': s.startSelfie != null
+                      ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...'
+                      : null,
+                  'endSelfie': s.endSelfie != null
+                      ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...'
+                      : null,
+                }).toList()}");
 
         if (selfieData.success) {
           try {
@@ -118,7 +123,8 @@ class _AgentscreenState extends State<Agentscreen> {
             );
           }
         } else {
-          debugPrint("❌ Selfie times fetch unsuccessful: ${selfieData.success}");
+          debugPrint(
+              "❌ Selfie times fetch unsuccessful: ${selfieData.success}");
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Failed to fetch selfie times")),
           );
@@ -126,7 +132,9 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to fetch selfie times: ${response.statusCode}")),
+          SnackBar(
+              content:
+                  Text("Failed to fetch selfie times: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -178,7 +186,8 @@ class _AgentscreenState extends State<Agentscreen> {
         return;
       }
 
-      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
+      debugPrint(
+          "📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
       debugPrint(
           "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
 
@@ -217,7 +226,8 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to start work: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to start work: ${response.statusCode}")),
+          SnackBar(
+              content: Text("Failed to start work: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -297,7 +307,8 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to stop work: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to stop work: ${response.statusCode}")),
+          SnackBar(
+              content: Text("Failed to stop work: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -540,7 +551,8 @@ class _AgentscreenState extends State<Agentscreen> {
                   }
                 : null,
             label: Text("Customer Form",
-                style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
+                style:
+                    TextStyle(color: isWorking ? Colors.black : Colors.grey)),
             icon: Icon(Icons.add_box_outlined,
                 color: isWorking ? Colors.black : Colors.grey),
           ),
@@ -759,7 +771,8 @@ class _AgentscreenState extends State<Agentscreen> {
                           )),
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle("Reports")),
-                    _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
+                    _buildBulletPoint(
+                        "Already Subscribed: $alreadySubscribedCount"),
                     const SizedBox(height: 40),
                     Center(child: _buildSectionTitle("Shift Details")),
                     const SizedBox(height: 10),
@@ -784,25 +797,29 @@ class _AgentscreenState extends State<Agentscreen> {
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: () => _showSelfieDialog(
-                                            session.startSelfie, "Start Selfie"),
+                                            session.startSelfie,
+                                            "Start Selfie"),
                                         child: Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.green.shade50,
-                                            border: Border.all(color: Colors.green),
-                                            borderRadius: BorderRadius.circular(8),
+                                            border:
+                                                Border.all(color: Colors.green),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Column(
                                             children: [
                                               const Text(
                                                 "Start Time",
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                               Text(
                                                 session.startTime != null
-                                                    ? DateFormat('hh:mm a').format(
-                                                        DateTime.parse(
+                                                    ? DateFormat('hh:mm a')
+                                                        .format(DateTime.parse(
                                                             session.startTime!))
                                                     : "--",
                                               ),
@@ -823,20 +840,23 @@ class _AgentscreenState extends State<Agentscreen> {
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50,
-                                            border: Border.all(color: Colors.red),
-                                            borderRadius: BorderRadius.circular(8),
+                                            border:
+                                                Border.all(color: Colors.red),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Column(
                                             children: [
                                               const Text(
                                                 "End Time",
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                               Text(
                                                 session.endTime != null
-                                                    ? DateFormat('hh:mm a').format(
-                                                        DateTime.parse(
+                                                    ? DateFormat('hh:mm a')
+                                                        .format(DateTime.parse(
                                                             session.endTime!))
                                                     : "--",
                                               ),
