@@ -1,7 +1,9 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
-import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
+import 'package:finalsalesrep/modelclasses/agencymodel.dart';
+import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart'
+    show SelfieTimesResponse, SelfieSession;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -34,14 +36,16 @@ class _AgentscreenState extends State<Agentscreen> {
   RouteMap? fullRouteMap;
   final ImagePicker _picker = ImagePicker();
   String? _startWorkPhotoBase64;
-
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
-
   List<SelfieSession> _selfieSessions = [];
-
   final Onedayagent _onedayagent = Onedayagent();
+
+  // Agency dropdown related variables
+  List<AgencyData> _agencyList = [];
+  AgencyData? _selectedAgency;
+  bool _isLoadingAgencies = false;
 
   @override
   void initState() {
@@ -50,8 +54,149 @@ class _AgentscreenState extends State<Agentscreen> {
     dateController.text = DateFormat('EEE, MMM d, y').format(DateTime.now());
     loadAgentData();
     loadWorkStatus();
+    fetchAgencies();
     refreshData();
     fetchSelfieTimes();
+  }
+
+  Future<void> fetchAgencies() async {
+    setState(() {
+      _isLoadingAgencies = true;
+    });
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null) {
+      debugPrint("❌ Missing token");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Missing token")),
+      );
+      setState(() {
+        _isLoadingAgencies = false;
+      });
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/all_pin_locations"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Agency List Status Code: ${response.statusCode}");
+      debugPrint("🔁 Agency List Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final agencyModel = AgencyModel.fromJson(data);
+
+        if (agencyModel.result?.success == true) {
+          setState(() {
+            _agencyList = agencyModel.result?.data ?? [];
+            _isLoadingAgencies = false;
+          });
+        } else {
+          debugPrint("❌ Failed to fetch agencies");
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Failed to fetch agency list")),
+          );
+          setState(() {
+            _isLoadingAgencies = false;
+          });
+        }
+      } else {
+        debugPrint("❌ Failed to fetch agencies: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("Failed to fetch agencies: ${response.statusCode}")),
+        );
+        setState(() {
+          _isLoadingAgencies = false;
+        });
+      }
+    } catch (e) {
+      debugPrint("❌ Error fetching agencies: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error fetching agencies: $e")),
+      );
+      setState(() {
+        _isLoadingAgencies = false;
+      });
+    }
+  }
+
+  Future<void> assignPinLocation() async {
+    if (_selectedAgency == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please select an agency first")),
+      );
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
+    final pinLocationId = _selectedAgency?.id;
+
+    if (token == null || userId == null || pinLocationId == null) {
+      debugPrint("❌ Missing token, userId, or pinLocationId");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Missing required data")),
+      );
+      return;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/Pin_location_asin"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "user_id": userId,
+            "pin_lo_id": pinLocationId,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Pin Location Assign Status Code: ${response.statusCode}");
+      debugPrint("🔁 Pin Location Assign Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Agency successfully assigned")),
+          );
+          await refreshData();
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("❌ Failed to assign pin location: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to assign agency: $errorMessage")),
+          );
+        }
+      } else {
+        debugPrint("❌ Failed to assign pin location: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("Failed to assign agency: ${response.statusCode}")),
+        );
+      }
+    } catch (e) {
+      debugPrint("❌ Error assigning pin location: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error assigning agency: $e")),
+      );
+    }
   }
 
   Future<void> fetchSelfieTimes() async {
@@ -100,11 +245,15 @@ class _AgentscreenState extends State<Agentscreen> {
 
         debugPrint("🔍 SelfieTimesResponse: success=${selfieData.success}, "
             "sessions=${selfieData.sessions.map((s) => {
-              'startTime': s.startTime,
-              'endTime': s.endTime,
-              'startSelfie': s.startSelfie != null ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...' : null,
-              'endSelfie': s.endSelfie != null ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...' : null,
-            }).toList()}");
+                  'startTime': s.startTime,
+                  'endTime': s.endTime,
+                  'startSelfie': s.startSelfie != null
+                      ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...'
+                      : null,
+                  'endSelfie': s.endSelfie != null
+                      ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...'
+                      : null,
+                }).toList()}");
 
         if (selfieData.success) {
           try {
@@ -118,7 +267,8 @@ class _AgentscreenState extends State<Agentscreen> {
             );
           }
         } else {
-          debugPrint("❌ Selfie times fetch unsuccessful: ${selfieData.success}");
+          debugPrint(
+              "❌ Selfie times fetch unsuccessful: ${selfieData.success}");
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Failed to fetch selfie times")),
           );
@@ -126,7 +276,9 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to fetch selfie times: ${response.statusCode}")),
+          SnackBar(
+              content:
+                  Text("Failed to fetch selfie times: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -178,7 +330,8 @@ class _AgentscreenState extends State<Agentscreen> {
         return;
       }
 
-      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
+      debugPrint(
+          "📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
       debugPrint(
           "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
 
@@ -217,7 +370,8 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to start work: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to start work: ${response.statusCode}")),
+          SnackBar(
+              content: Text("Failed to start work: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -297,7 +451,8 @@ class _AgentscreenState extends State<Agentscreen> {
       } else {
         debugPrint("❌ Failed to stop work: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Failed to stop work: ${response.statusCode}")),
+          SnackBar(
+              content: Text("Failed to stop work: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -363,6 +518,7 @@ class _AgentscreenState extends State<Agentscreen> {
     await loadOnedayHistory();
     await fetchFullRouteMap();
     await fetchSelfieTimes();
+    await fetchAgencies();
     setState(() => _isLoading = false);
   }
 
@@ -448,13 +604,11 @@ class _AgentscreenState extends State<Agentscreen> {
       return;
     }
 
-    // Remove data URL prefix if present
     final cleanBase64 = base64Image.startsWith('data:image')
         ? base64Image.split(',')[1]
         : base64Image;
 
     try {
-      // Validate base64 string
       base64Decode(cleanBase64);
       showDialog(
         context: context,
@@ -540,7 +694,8 @@ class _AgentscreenState extends State<Agentscreen> {
                   }
                 : null,
             label: Text("Customer Form",
-                style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
+                style:
+                    TextStyle(color: isWorking ? Colors.black : Colors.grey)),
             icon: Icon(Icons.add_box_outlined,
                 color: isWorking ? Colors.black : Colors.grey),
           ),
@@ -581,7 +736,6 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildInfoRow("Customers Met", "${records.length}"),
                     GestureDetector(
                       onTap: () => Navigator.push(
                         context,
@@ -592,20 +746,64 @@ class _AgentscreenState extends State<Agentscreen> {
                           "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
                     ),
                     const SizedBox(height: 10),
-                    const Text("Agency"),
-                    TextFormField(
+                    Center(child: const Text("Agency")),
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<AgencyData>(
                       decoration: InputDecoration(
-                        hintText: "Enter agency name or code",
+                        hintText: "Select agency",
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
                         prefixIcon: const Icon(Icons.business),
                       ),
-                      onChanged: (value) {
-                        debugPrint("🔍 Entered agency: $value");
-                      },
+                      value: _selectedAgency,
+                      items: _agencyList.map((agency) {
+                        return DropdownMenuItem<AgencyData>(
+                          value: agency,
+                          child: Row(
+                            children: [
+                              Text(agency.locationName ??
+                                  agency.code ??
+                                  'Unknown'),
+                              Spacer(),
+                              Text("[${(agency.code ?? "")}]")
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: _isLoadingAgencies
+                          ? null
+                          : (AgencyData? newValue) {
+                              setState(() {
+                                _selectedAgency = newValue;
+                              });
+                              debugPrint(
+                                  "🔍 Selected agency: ${newValue?.locationName ?? newValue?.code}");
+                            },
+                      isExpanded: true,
+                      hint: _isLoadingAgencies
+                          ? const Text("Loading agencies...")
+                          : const Text("Select an agency"),
+                      validator: (value) =>
+                          value == null ? 'Please select an agency' : null,
                     ),
-                    const SizedBox(height: 30),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _isLoadingAgencies ? null : assignPinLocation,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text(
+                        "Assign Agency",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                    ),
+                    const SizedBox(height: 20),
                     Row(children: [
                       Center(child: _buildSectionTitle("My Route Map")),
                       const Spacer(),
@@ -759,7 +957,8 @@ class _AgentscreenState extends State<Agentscreen> {
                           )),
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle("Reports")),
-                    _buildBulletPoint("Already Subscribed: $alreadySubscribedCount"),
+                    _buildBulletPoint(
+                        "Already Subscribed: $alreadySubscribedCount"),
                     const SizedBox(height: 40),
                     Center(child: _buildSectionTitle("Shift Details")),
                     const SizedBox(height: 10),
@@ -784,25 +983,29 @@ class _AgentscreenState extends State<Agentscreen> {
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: () => _showSelfieDialog(
-                                            session.startSelfie, "Start Selfie"),
+                                            session.startSelfie,
+                                            "Start Selfie"),
                                         child: Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.green.shade50,
-                                            border: Border.all(color: Colors.green),
-                                            borderRadius: BorderRadius.circular(8),
+                                            border:
+                                                Border.all(color: Colors.green),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Column(
                                             children: [
                                               const Text(
                                                 "Start Time",
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                               Text(
                                                 session.startTime != null
-                                                    ? DateFormat('hh:mm a').format(
-                                                        DateTime.parse(
+                                                    ? DateFormat('hh:mm a')
+                                                        .format(DateTime.parse(
                                                             session.startTime!))
                                                     : "--",
                                               ),
@@ -823,20 +1026,23 @@ class _AgentscreenState extends State<Agentscreen> {
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
                                             color: Colors.red.shade50,
-                                            border: Border.all(color: Colors.red),
-                                            borderRadius: BorderRadius.circular(8),
+                                            border:
+                                                Border.all(color: Colors.red),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
                                           ),
                                           child: Column(
                                             children: [
                                               const Text(
                                                 "End Time",
                                                 style: TextStyle(
-                                                    fontWeight: FontWeight.bold),
+                                                    fontWeight:
+                                                        FontWeight.bold),
                                               ),
                                               Text(
                                                 session.endTime != null
-                                                    ? DateFormat('hh:mm a').format(
-                                                        DateTime.parse(
+                                                    ? DateFormat('hh:mm a')
+                                                        .format(DateTime.parse(
                                                             session.endTime!))
                                                     : "--",
                                               ),
