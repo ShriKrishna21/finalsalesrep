@@ -5,6 +5,7 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/today_overall_historyscreen.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
@@ -257,7 +258,8 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) => const Allcustomerforms()),
+                              builder: (_) =>
+                                  const TodayOverallHistoryscreen()),
                         );
                       },
                       child: _buildCard(

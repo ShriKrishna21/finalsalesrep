@@ -105,16 +105,12 @@ class Records {
     city = json['city'];
     pinCode = json['pin_code'];
     mobileNumber = json['mobile_number'];
-    eenaduNewspaper = json['eenadu_newspaper'];
-    employed = json['employed'];
-    faceBase64 = json['face_base64'];
-    latitude = json["latitude"]?.toString();
-    longitude = json["longitude"]?.toString();
-    locationUrl = json["location_url"];
-    forConsider = json['for_consider'];
-    shiftToEENADU = json['shift_to_eenadu'];
+    eenaduNewspaper = _parseBool(json['eenadu_newspaper']);
+    employed = _parseBool(json['employed']);
+    shiftToEENADU = _parseBool(json['shift_to_eenadu']);
     wouldLikeToStayWithExistingNewsPapar =
-        json['would_like_to_stay_with_existing_news_papar'];
+        _parseBool(json['would_like_to_stay_with_existing_news_papar']);
+
     startCirculating = json['start_circulating'];
   }
 

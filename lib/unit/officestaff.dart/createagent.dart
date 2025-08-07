@@ -107,14 +107,19 @@ class _CreateAgentState extends State<CreateAgent> {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
 
-        if (userdata!.result?.success == true) {
+        if (userdata?.result?.success == true) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User created successfully")),
+            SnackBar(
+                content: Text(userdata?.result?.message ??
+                    "✅ User created successfully")),
           );
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User creation failed")),
+            SnackBar(
+              content:
+                  Text(userdata?.result?.message ?? "❌ User creation failed"),
+            ),
           );
         }
       } else {
@@ -122,6 +127,7 @@ class _CreateAgentState extends State<CreateAgent> {
           SnackBar(content: Text("Server error: ${response.statusCode}")),
         );
       }
+      print("📥 Server response: ${response.body}");
     } catch (e) {
       print("❌ Error: $e");
     }
@@ -164,7 +170,7 @@ class _CreateAgentState extends State<CreateAgent> {
                     maxvalue: 10),
                 usercredentials(
                     controller: mail,
-                    hintText: localizations.email,
+                    hintText: "UserId",
                     errorText: localizations.entervalidemail,
                     keyboardType: TextInputType.emailAddress),
                 usercredentials(
@@ -192,26 +198,26 @@ class _CreateAgentState extends State<CreateAgent> {
                   },
                 ),
                 const SizedBox(height: 10),
-                uploadImageLabel(localizations.uploadAadharPhoto),
-                imagePickerBox(aadhaarImage, pickAadhaarImage),
-                const SizedBox(height: 16),
-                usercredentials(
-                  controller: pan,
-                  hintText: localizations.panNumber,
-                  errorText: localizations.invalidpannumber,
-                  maxvalue: 10,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return localizations.enterpannumber;
-                    }
-                    return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
-                            .hasMatch(value.toUpperCase())
-                        ? null
-                        : localizations.panmustbelikeABCDE1234F;
-                  },
-                ),
-                uploadImageLabel(localizations.uploadPanCardPhoto),
-                imagePickerBox(pancardImage, pickPancardImage),
+                // uploadImageLabel(localizations.uploadAadharPhoto),
+                // imagePickerBox(aadhaarImage, pickAadhaarImage),
+                // const SizedBox(height: 16),
+                // usercredentials(
+                //   controller: pan,
+                //   hintText: localizations.panNumber,
+                //   errorText: localizations.invalidpannumber,
+                //   maxvalue: 10,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return localizations.enterpannumber;
+                //     }
+                //     return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
+                //             .hasMatch(value.toUpperCase())
+                //         ? null
+                //         : localizations.panmustbelikeABCDE1234F;
+                //   },
+                // ),
+                // uploadImageLabel(localizations.uploadPanCardPhoto),
+                // imagePickerBox(pancardImage, pickPancardImage),
                 const SizedBox(height: 25),
                 SizedBox(
                   width: double.infinity,

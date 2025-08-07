@@ -129,7 +129,9 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen> {
                 color: Colors.black,
               ),
               children: [
-                TextSpan(text: localizations.office1staff),
+                TextSpan(
+                  text: "${localizations.welcome} $staffName",
+                ),
                 TextSpan(
                   text: "\n${localizations.unitName} :${unitName}",
                   style: const TextStyle(
