@@ -70,6 +70,10 @@ class Records {
   dynamic locationUrl;
   dynamic latitude;
   dynamic longitude;
+  String? forConsider;
+  bool? shiftToEENADU;
+  bool? wouldLikeToStayWithExistingNewsPapar;
+  String? startCirculating;
 
   Records({
     this.id,
@@ -85,6 +89,10 @@ class Records {
     this.employed,
     this.faceBase64,
     this.locationUrl,
+    this.forConsider,
+    this.shiftToEENADU,
+    this.wouldLikeToStayWithExistingNewsPapar,
+    this.startCirculating,
   });
 
   Records.fromJson(Map<String, dynamic> json) {
@@ -97,12 +105,13 @@ class Records {
     city = json['city'];
     pinCode = json['pin_code'];
     mobileNumber = json['mobile_number'];
-    eenaduNewspaper = json['eenadu_newspaper'];
-    employed = json['employed'];
-    faceBase64 = json['face_base64'];
-    latitude = json["latitude"]?.toString();
-    longitude = json["longitude"]?.toString();
-    locationUrl = json["location_url"];
+    eenaduNewspaper = _parseBool(json['eenadu_newspaper']);
+    employed = _parseBool(json['employed']);
+    shiftToEENADU = _parseBool(json['shift_to_eenadu']);
+    wouldLikeToStayWithExistingNewsPapar =
+        _parseBool(json['would_like_to_stay_with_existing_news_papar']);
+
+    startCirculating = json['start_circulating'];
   }
 
   Map<String, dynamic> toJson() {
@@ -122,6 +131,11 @@ class Records {
     data['latitude'] = latitude;
     data['longitude'] = longitude;
     data['location_url'] = locationUrl;
+    data['for_consider'] = forConsider;
+    data['shift_to_eenadu'] = shiftToEENADU;
+    data['would_like_to_stay_with_existing_news_paper'] =
+        wouldLikeToStayWithExistingNewsPapar;
+    data['start_circulating'] = startCirculating;
     return data;
   }
 }

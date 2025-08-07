@@ -227,26 +227,26 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         ),
                       ),
                     ),
-                    Card(
-                      margin: const EdgeInsets.all(12),
-                      color: Colors.grey[200],
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(" Summary",
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold, fontSize: 16)),
-                            const SizedBox(height: 6),
-                            Text(
-                                " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
-                            Text(
-                                " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                          ],
-                        ),
-                      ),
-                    ),
+                    // Card(
+                    //   margin: const EdgeInsets.all(12),
+                    //   color: Colors.grey[200],
+                    //   child: const Padding(
+                    //     padding: EdgeInsets.all(16),
+                    //     child: Column(
+                    //       crossAxisAlignment: CrossAxisAlignment.start,
+                    //       // children: [
+                    //       //   const Text(" Summary",
+                    //       //       style: TextStyle(
+                    //       //           fontWeight: FontWeight.bold, fontSize: 16)),
+                    //       //   const SizedBox(height: 6),
+                    //       //   Text(
+                    //       //       " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
+                    //       //   Text(
+                    //       //       " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
+                    //       // ],
+                    //     ),
+                    //   ),
+                    // ),
                     Expanded(
                       child: filteredRecords.isEmpty
                           ? Center(

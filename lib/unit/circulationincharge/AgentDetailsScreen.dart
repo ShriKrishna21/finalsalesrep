@@ -246,34 +246,34 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
                                     value: _boolToText(r.employed),
                                   ),
                                   const SizedBox(height: 10),
-                                  const Text(
-                                    "Today's Selfies",
-                                    style: TextStyle(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold),
-                                  ),
+                                  // const Text(
+                                  //   "Today's Selfies",
+                                  //   style: TextStyle(
+                                  //       fontSize: 18,
+                                  //       fontWeight: FontWeight.bold),
+                                  // ),
                                   const SizedBox(height: 10),
-                                  selfies.isEmpty
-                                      ? const Text("No selfies available.")
-                                      : SizedBox(
-                                          height: 200,
-                                          child: ListView.builder(
-                                            itemCount: selfies.length,
-                                            itemBuilder: (context, index) {
-                                              final selfie = selfies[index];
-                                              return ListTile(
-                                                leading: CircleAvatar(
-                                                  backgroundImage: NetworkImage(
-                                                      selfie['image_url']),
-                                                ),
-                                                title: Text(
-                                                    "Date: ${selfie['date']}"),
-                                                subtitle: Text(
-                                                    "Time: ${selfie['time']}"),
-                                              );
-                                            },
-                                          ),
-                                        )
+                                  // selfies.isEmpty
+                                  //     ? const Text("No selfies available.")
+                                  //     : SizedBox(
+                                  //         height: 200,
+                                  //         child: ListView.builder(
+                                  //           itemCount: selfies.length,
+                                  //           itemBuilder: (context, index) {
+                                  //             final selfie = selfies[index];
+                                  // return ListTile(
+                                  //   leading: CircleAvatar(
+                                  //     backgroundImage: NetworkImage(
+                                  //         selfie['image_url']),
+                                  //   ),
+                                  //   title: Text(
+                                  //       "Date: ${selfie['date']}"),
+                                  //   subtitle: Text(
+                                  //       "Time: ${selfie['time']}"),
+                                  // );
+                                  //     },
+                                  //   ),
+                                  // )
                                 ],
                               ),
                             ),
