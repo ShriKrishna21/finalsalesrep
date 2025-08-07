@@ -85,47 +85,58 @@ class Record {
   String? latitude;
   String? longitude;
   dynamic locationAddress;
-  final String? locationUrl;
+  String? locationUrl;
+  String? agency;
+  String? age;
+  String? customerType;
+  String? faceBase64;
+  String? startCirculating; // Added new field
 
-  Record(
-      {this.id,
-      this.agentName,
-      this.agentLogin,
-      this.unitName,
-      this.date,
-      this.time,
-      this.familyHeadName,
-      this.fatherName,
-      this.motherName,
-      this.spouseName,
-      this.houseNumber,
-      this.streetNumber,
-      this.city,
-      this.pinCode,
-      this.address,
-      this.mobileNumber,
-      this.eenaduNewspaper,
-      this.feedbackToImproveEenaduPaper,
-      this.readNewspaper,
-      this.currentNewspaper,
-      this.reasonForNotTakingEenaduNewsPaper,
-      this.reasonNotReading,
-      this.freeOffer15Days,
-      this.reasonNotTakingOffer,
-      this.employed,
-      this.jobType,
-      this.jobTypeOne,
-      this.jobProfession,
-      this.jobDesignation,
-      this.companyName,
-      this.profession,
-      this.jobWorkingState,
-      this.jobWorkingLocation,
-      this.jobDesignationOne,
-      this.latitude,
-      this.longitude,
-      this.locationAddress,
-      this.locationUrl});
+  Record({
+    this.id,
+    this.agentName,
+    this.agentLogin,
+    this.unitName,
+    this.date,
+    this.time,
+    this.familyHeadName,
+    this.fatherName,
+    this.motherName,
+    this.spouseName,
+    this.houseNumber,
+    this.streetNumber,
+    this.city,
+    this.pinCode,
+    this.address,
+    this.mobileNumber,
+    this.eenaduNewspaper,
+    this.feedbackToImproveEenaduPaper,
+    this.readNewspaper,
+    this.currentNewspaper,
+    this.reasonForNotTakingEenaduNewsPaper,
+    this.reasonNotReading,
+    this.freeOffer15Days,
+    this.reasonNotTakingOffer,
+    this.employed,
+    this.jobType,
+    this.jobTypeOne,
+    this.jobProfession,
+    this.jobDesignation,
+    this.companyName,
+    this.profession,
+    this.jobWorkingState,
+    this.jobWorkingLocation,
+    this.jobDesignationOne,
+    this.latitude,
+    this.longitude,
+    this.locationAddress,
+    this.locationUrl,
+    this.agency,
+    this.age,
+    this.customerType,
+    this.faceBase64,
+    this.startCirculating, // Include in constructor
+  });
 
   factory Record.fromJson(Map<String, dynamic> json) {
     return Record(
@@ -169,6 +180,11 @@ class Record {
       longitude: _parseString(json['longitude']),
       locationAddress: _parseString(json['location_address']),
       locationUrl: json["location_url"]?.toString() ?? "N/A",
+      agency: _parseString(json['Agency']),
+      age: _parseString(json['age']),
+      customerType: _parseString(json['customer_type']),
+      faceBase64: _parseString(json['face_base64']),
+      startCirculating: _parseString(json['Start_Circulating']), // Parse new field
     );
   }
 
@@ -212,6 +228,12 @@ class Record {
       'latitude': latitude,
       'longitude': longitude,
       'location_address': locationAddress,
+      'location_url': locationUrl,
+      'Agency': agency,
+      'age': age,
+      'customer_type': customerType,
+      'face_base64': faceBase64,
+      'Start_Circulating': startCirculating, // Serialize new field
     };
   }
 
