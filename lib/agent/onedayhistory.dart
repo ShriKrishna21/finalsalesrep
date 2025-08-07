@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
@@ -211,7 +214,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
     return Card(
       elevation: 3,
       child: ExpansionTile(
-        title: Text("Family: ${r.familyHeadName ?? 'N/A'}"),
+        title: Text("customer Name: ${r.familyHeadName ?? 'N/A'}"),
         children: [
           Padding(
             padding: const EdgeInsets.all(12),
@@ -219,20 +222,34 @@ class _OnedayhistoryState extends State<Onedayhistory> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 _detailRow(localizations.agentName, r.agentName),
-                _detailRow(localizations.agentlogin, r.agentLogin),
+                _detailRow("Agency", r.agency),
+                // _detailRow(localizations.agentlogin, r.agentLogin),
                 _detailRow(localizations.date, r.date),
                 _detailRow(localizations.time, r.time),
-                _detailRow(localizations.familyheadname, r.familyHeadName),
-                _detailRow(localizations.fathersname, r.fatherName),
-                _detailRow(localizations.mothername, r.motherName),
-                _detailRow(localizations.spousename, r.spouseName),
+                _detailRow("customer name", r.familyHeadName),
+                _detailRow("Age", r.age),
+                  _detailRow(localizations.mobilenumber, r.mobileNumber),
+                
+                  
+                   Text("News paper Details:"),
+                   _detailRow("customer type", r.customerType),
+                   
+                    _detailRow(" previous newspaper", r.currentNewspaper),
+                       _detailRow("Start circulating", r.startCirculating),
+                    // _detailRow(" Start Circulation", r.startCirculating),
+                  
+
+                // _detailRow(localizations.fathersname, r.fatherName),
+                // _detailRow(localizations.mothername, r.motherName),
+                // _detailRow(localizations.spousename, r.spouseName),
                 _detailRow(localizations.city, r.city),
                 _detailRow(localizations.address, r.address),
-                _detailRow(localizations.mobilenumber, r.mobileNumber),
-                _detailRow(localizations.eenadunewspaper,
-                    _formatBool(r.eenaduNewspaper)),
-                _detailRow(
-                    localizations.readnewspaper, _formatBool(r.readNewspaper)),
+              
+              
+                // _detailRow(localizations.eenadunewspaper,
+                //     _formatBool(r.eenaduNewspaper)),
+                // _detailRow(
+                //     localizations.readnewspaper, _formatBool(r.readNewspaper)),
                 // _detailRow(
                 //     localizations.freeoffer, _formatBool(r.freeOffer15Days)),
                 // _detailRow(localizations.reasonfornottakingoffer,
@@ -246,7 +263,8 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
                 _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
-                Padding(
+               
+                  Padding(
                   padding: const EdgeInsets.only(bottom: 6),
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -271,7 +289,6 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.blue,
-                              //decoration: TextDecoration.underline,
                             ),
                           ),
                         ),
@@ -279,12 +296,63 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                     ],
                   ),
                 ),
+                    
+                // 📷 Display image from base64 if available
+                if (r.faceBase64 != null && r.faceBase64!.isNotEmpty)
+                  _base64ImageWidget("Landmark photo", r.faceBase64!),
               ],
             ),
           )
         ],
       ),
     );
+  }
+
+  Widget _base64ImageWidget(String label, String base64String) {
+    try {
+      final cleanedBase64 = base64String.contains(',')
+          ? base64String.split(',').last
+          : base64String;
+
+      final decodedBytes = base64Decode(cleanedBase64);
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text("$label:",
+                style: const TextStyle(fontWeight: FontWeight.w600)),
+            const SizedBox(height: 6),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => FullscreenImageView(
+                      imageBytes: decodedBytes,
+                      label: label,
+                    ),
+                  ),
+                );
+              },
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: Image.memory(
+                  decodedBytes,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      debugPrint("Base64 decoding error: $e");
+      return const SizedBox.shrink();
+    }
   }
 
   /// 🔧 Fixed version to support any type (String/bool/null)

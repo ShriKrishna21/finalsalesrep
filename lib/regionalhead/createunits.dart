@@ -169,7 +169,7 @@ class _createunitsState extends State<Createincharge> {
                 ),
                 usercredentials(
                   controller: mail,
-                  hintText: localizations.emailOrUserId,
+                  hintText: "UserId",
                   errorText: localizations.enteravalidemail,
                   keyboardType: TextInputType.emailAddress,
                 ),
@@ -179,11 +179,11 @@ class _createunitsState extends State<Createincharge> {
                   errorText: localizations.pleaseenteravalidpassword,
                   keyboardType: TextInputType.visiblePassword,
                 ),
-                usercredentials(
-                  controller: state,
-                  hintText: localizations.address,
-                  errorText: localizations.addressCantBeEmpty,
-                ),
+                // usercredentials(
+                //   controller: state,
+                //   hintText: localizations.address,
+                //   errorText: localizations.addressCantBeEmpty,
+                // ),
 
                 // ✅ Role dropdown
                 Padding(
@@ -219,93 +219,93 @@ class _createunitsState extends State<Createincharge> {
                   ),
                 ),
 
-                usercredentials(
-                  controller: adhar,
-                  hintText: localizations.aadhaarnumber,
-                  errorText: localizations.invalidaadhaarnumber,
-                  keyboardType: TextInputType.number,
-                  maxvalue: 12,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return localizations.pleaseenteraadhaarnumber;
-                    }
-                    final aadhaarRegex = RegExp(r'^\d{12}$');
-                    if (!aadhaarRegex.hasMatch(value)) {
-                      return localizations.aadhaarmustbe12digits;
-                    }
-                    return null;
-                  },
-                ),
+                // usercredentials(
+                //   controller: adhar,
+                //   hintText: localizations.aadhaarnumber,
+                //   errorText: localizations.invalidaadhaarnumber,
+                //   keyboardType: TextInputType.number,
+                //   maxvalue: 12,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return localizations.pleaseenteraadhaarnumber;
+                //     }
+                //     final aadhaarRegex = RegExp(r'^\d{12}$');
+                //     if (!aadhaarRegex.hasMatch(value)) {
+                //       return localizations.aadhaarmustbe12digits;
+                //     }
+                //     return null;
+                //   },
+                // ),
 
-                SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(localizations.uploadAadharPhoto,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: pickAadhaarImage,
-                  child: Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(color: Colors.black),
-                    ),
-                    child: aadhaarImage != null
-                        ? Image.file(aadhaarImage!, fit: BoxFit.cover)
-                        : Center(
-                            child: Text(localizations.tapToSelectAadharImage),
-                          ),
-                  ),
-                ),
+                // SizedBox(height: 10),
+                // Align(
+                //   alignment: Alignment.centerLeft,
+                //   child: Text(localizations.uploadAadharPhoto,
+                //       style:
+                //           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                // ),
+                // const SizedBox(height: 8),
+                // GestureDetector(
+                //   onTap: pickAadhaarImage,
+                //   child: Container(
+                //     height: 150,
+                //     width: double.infinity,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey[300],
+                //       border: Border.all(color: Colors.black),
+                //     ),
+                //     child: aadhaarImage != null
+                //         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
+                //         : Center(
+                //             child: Text(localizations.tapToSelectAadharImage),
+                //           ),
+                //   ),
+                // ),
 
-                const SizedBox(height: 16),
-                usercredentials(
-                  controller: pan,
-                  hintText: localizations.panNumber,
-                  errorText: localizations.invalidpannumber,
-                  maxvalue: 10,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return localizations.enterpannumber;
-                    }
-                    final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
-                    if (!panRegex.hasMatch(value.toUpperCase())) {
-                      return localizations.panmustbelikeABCDE1234F;
-                    }
-                    return null;
-                  },
-                ),
+                // const SizedBox(height: 16),
+                // usercredentials(
+                //   controller: pan,
+                //   hintText: localizations.panNumber,
+                //   errorText: localizations.invalidpannumber,
+                //   maxvalue: 10,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return localizations.enterpannumber;
+                //     }
+                //     final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
+                //     if (!panRegex.hasMatch(value.toUpperCase())) {
+                //       return localizations.panmustbelikeABCDE1234F;
+                //     }
+                //     return null;
+                //   },
+                // ),
+
+                // const SizedBox(height: 10),
+                // Align(
+                //   alignment: Alignment.centerLeft,
+                //   child: Text(localizations.uploadPanCardPhoto,
+                //       style:
+                //           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                // ),
+                // const SizedBox(height: 8),
+                // GestureDetector(
+                //   onTap: pickPancardImage,
+                //   child: Container(
+                //     height: 150,
+                //     width: double.infinity,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey[300],
+                //       border: Border.all(color: Colors.black),
+                //     ),
+                //     child: pancardImage != null
+                //         ? Image.file(pancardImage!, fit: BoxFit.cover)
+                //         : Center(
+                //             child: Text(localizations.tapToSelectPanCardImage),
+                //           ),
+                //   ),
+                // ),
 
                 const SizedBox(height: 10),
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(localizations.uploadPanCardPhoto,
-                      style:
-                          TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                ),
-                const SizedBox(height: 8),
-                GestureDetector(
-                  onTap: pickPancardImage,
-                  child: Container(
-                    height: 150,
-                    width: double.infinity,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[300],
-                      border: Border.all(color: Colors.black),
-                    ),
-                    child: pancardImage != null
-                        ? Image.file(pancardImage!, fit: BoxFit.cover)
-                        : Center(
-                            child: Text(localizations.tapToSelectPanCardImage),
-                          ),
-                  ),
-                ),
-
-                const SizedBox(height: 25),
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
