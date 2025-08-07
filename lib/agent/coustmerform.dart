@@ -2,8 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/coustmermodel.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
@@ -11,7 +9,6 @@ import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -26,15 +23,11 @@ class _CoustmerState extends State<Coustmer> {
   File? faceImage;
   final ImagePicker _picker = ImagePicker();
 
-  bool _isYes = false;
-  bool _isAnotherToggle = false;
   bool _isofferTogle = false;
   bool _isemployed = false;
   bool _isLoading = false;
   int offerintresetedpeople = 0;
   int offernotintresetedpeople = 0;
-  //int offerintresetedpeoplecount = 0;
-  //int offernotintresetedpeoplecount = 0;
   int count = 0;
   int addcount = 0;
   String latitude = "";
@@ -47,9 +40,9 @@ class _CoustmerState extends State<Coustmer> {
   String? _selectedJobType;
   String? _selectedGovDepartment;
   String? _selectedproffesion;
-  String? _selectedNewspaper;
-  String?
-      _selectedPrivateProfession; // Added for private job profession dropdown
+  String? _selectedPrivateProfession;
+  String? _selectedCustomerType;
+  String? _selectedPreviousNewspaper;
   final _formKey = GlobalKey<FormState>();
 
   TextEditingController agency = TextEditingController();
@@ -65,11 +58,7 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController pincode = TextEditingController();
   TextEditingController adddress = TextEditingController();
   TextEditingController mobile = TextEditingController();
-  TextEditingController feedback_to_improve = TextEditingController();
-  TextEditingController reason_for_not_reading = TextEditingController();
-  TextEditingController current_newspaper = TextEditingController();
   TextEditingController reason_for_not_taking_eenadu = TextEditingController();
-  // TextEditingController reason_for_not_taking_offer = TextEditingController();
   TextEditingController job_designation = TextEditingController();
   TextEditingController job_proffesion = TextEditingController();
   TextEditingController privateCompanyController = TextEditingController();
@@ -77,37 +66,23 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController privateProffesionController = TextEditingController();
   TextEditingController locationUrlController = TextEditingController();
   TextEditingController faceBase64Controller = TextEditingController();
-   TextEditingController otherNewspaperController = TextEditingController();
+  TextEditingController otherNewspaperController = TextEditingController();
+  TextEditingController startCirculationController = TextEditingController();
+
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
   List<String> govDepartments = ["Central", "PSU", "State"];
   List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
-  List<String> newspapers = [
+  List<String> previousNewspapers = [
     "Sakshi",
     "Andhra Jyothi",
-   
     "Namasthe Telangana",
-
     "Deccan Chronicle",
-   "Times Of India",
+    "Times Of India",
     "The Hindu",
     "Others"
-  
   ];
-  List<String> privateProfessions = [
-    "IT & Software",
-    "Healthcare & Medical",
-    "Retail & Sales",
-    "Manufacturing & Industrial",
-    "Finance & Accounting",
-    "Telecommunications",
-    "Marketing & Advertising",
-    "Hospitality & Tourism",
-    "Creative & Design",
-    "Education & Training",
-    "Logistics & Supply Chain",
-    "Startup Ecosystem"
-  ]; // Added private professions list
+  List<String> customerTypes = ["New User", "Conversion"];
   coustmerform? data;
 
   @override
@@ -115,6 +90,7 @@ class _CoustmerState extends State<Coustmer> {
     super.initState();
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
+    startCirculationController.text = DateFormat('yyyy-MM-dd').format(DateTime.now().add(Duration(days: 1)));
     _loadSavedData();
     getCurrentLocation();
   }
@@ -244,13 +220,12 @@ class _CoustmerState extends State<Coustmer> {
             "pin_code": pincode.text,
             "address": adddress.text,
             "mobile_number": mobile.text,
-            "eenadu_newspaper": _isYes,
-            "feedback_to_improve_eenadu_paper": feedback_to_improve.text,
-            "read_newspaper": _isAnotherToggle,
-            "current_newspaper": _selectedNewspaper ?? current_newspaper.text,
             "reason_for_not_taking_eenadu_newsPaper":
                 reason_for_not_taking_eenadu.text,
-            "reason_not_reading": reason_for_not_reading.text,
+            "customer_type": _selectedCustomerType,
+            "previous_newspaper": _selectedCustomerType == "Conversion"
+                ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
+                : null,
             "free_offer_15_days": _isofferTogle,
             "employed": _isemployed,
             "job_type": _selectedJobType,
@@ -258,9 +233,7 @@ class _CoustmerState extends State<Coustmer> {
             "job_profession": job_proffesion.text,
             "job_designation": job_designation.text,
             "company_name": privateCompanyController.text,
-            "profession": _selectedPrivateProfession ??
-                privateProffesionController
-                    .text, // Updated to use dropdown value
+            "profession": _selectedPrivateProfession ?? privateProffesionController.text,
             "job_designation_one": privatedesignationController.text,
             "latitude": latitude,
             "longitude": longitude,
@@ -269,6 +242,7 @@ class _CoustmerState extends State<Coustmer> {
             "location_address": landmark,
             "location_url": locationUrlController.text,
             "face_base64": faceBase64Controller.text,
+            "start_circulation": startCirculationController.text,
           }
         }),
       );
@@ -286,7 +260,6 @@ class _CoustmerState extends State<Coustmer> {
 
           int houseVisited = prefs.getInt("house_visited") ?? 0;
           int targetLeft = prefs.getInt("target_left") ?? 0;
-          int alreadySubscribed = prefs.getInt("already_subscribed") ?? 0;
           int offerAccepted = prefs.getInt("offer_accepted") ?? 0;
           int offerRejected = prefs.getInt("offer_rejected") ?? 0;
 
@@ -294,9 +267,7 @@ class _CoustmerState extends State<Coustmer> {
           if (targetLeft > 0) {
             targetLeft -= 1;
           }
-          if (_isYes) {
-            alreadySubscribed += 1;
-          } else if (_isofferTogle) {
+          if (_isofferTogle) {
             offerAccepted += 1;
           } else {
             offerRejected += 1;
@@ -304,7 +275,6 @@ class _CoustmerState extends State<Coustmer> {
 
           await prefs.setInt("house_visited", houseVisited);
           await prefs.setInt("target_left", targetLeft);
-          await prefs.setInt("already_subscribed", alreadySubscribed);
           await prefs.setInt("offer_accepted", offerAccepted);
           await prefs.setInt("offer_rejected", offerRejected);
 
@@ -344,15 +314,14 @@ class _CoustmerState extends State<Coustmer> {
 
   Future<void> _refreshForm() async {
     setState(() {
-      _isYes = false;
-      _isAnotherToggle = false;
       _isofferTogle = false;
       _isemployed = false;
       _selectedJobType = null;
       _selectedGovDepartment = null;
       _selectedproffesion = null;
-      _selectedNewspaper = null;
-      _selectedPrivateProfession = null; // Reset private profession dropdown
+      _selectedPrivateProfession = null;
+      _selectedCustomerType = null;
+      _selectedPreviousNewspaper = null;
       agency.clear();
       familyhead.clear();
       fathersname.clear();
@@ -364,9 +333,6 @@ class _CoustmerState extends State<Coustmer> {
       pincode.clear();
       adddress.clear();
       mobile.clear();
-      feedback_to_improve.clear();
-      reason_for_not_reading.clear();
-      current_newspaper.clear();
       reason_for_not_taking_eenadu.clear();
       job_designation.clear();
       job_proffesion.clear();
@@ -375,8 +341,11 @@ class _CoustmerState extends State<Coustmer> {
       privateProffesionController.clear();
       locationUrlController.clear();
       faceBase64Controller.clear();
+      otherNewspaperController.clear();
+      startCirculationController.clear();
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
+      startCirculationController.text = DateFormat('yyyy-MM-dd').format(DateTime.now().add(Duration(days: 1)));
       latitude = "";
       longitude = "";
       street = "";
@@ -393,18 +362,29 @@ class _CoustmerState extends State<Coustmer> {
     );
   }
 
+  Future<void> _selectStartCirculationDate() async {
+    DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().add(Duration(days: 1)),
+      firstDate: DateTime.now(),
+      lastDate: DateTime(2100),
+    );
+    if (pickedDate != null) {
+      setState(() {
+        startCirculationController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
-
     return Scaffold(
       appBar: AppBar(
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
-        title: Text(
-          localizations.customerform,
-          style: const TextStyle(
+        title: const Text(
+          "Customer Form",
+          style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
           ),
@@ -424,53 +404,43 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 30),
                   textformfeild(
                       controller: agency, label: "Staff Name", need: true),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
                           child: date(
                               needed: true,
                               Dcontroller: datecontroller,
-                              date: localizations.date,
+                              date: "Date",
                               inputType: TextInputType.datetime)),
                       const SizedBox(width: 10),
                       Expanded(
                           child: date(
                               needed: true,
                               Dcontroller: timecontroller,
-                              date: localizations.time,
+                              date: "Time",
                               inputType: TextInputType.datetime)),
                     ],
                   ),
                   const SizedBox(height: 15),
-                  Text(localizations.familyDetails,
-                      style: const TextStyle(
+                  const Text("Family Details",
+                      style: TextStyle(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 5),
                   textformfeild(
                       controller: familyhead,
-                      label: localizations.name,
-                      hunttext: localizations.familyheadname),
-                  const SizedBox(height: 10),
+                      label: "Name",
+                      hunttext: "Family head name cannot be empty"),
+                  const SizedBox(height: 5),
                   textformfeild(
                       controller: fathersname,
-                      label: localizations.fathersname,
-                      hunttext: localizations.fathersnamecannotbeempty),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                      controller: mothername,
-                      label: localizations.mothername,
-                      hunttext: localizations.mothersnamecannotbeempty),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                      controller: spousename,
-                      label: localizations.spousename,
-                      hunttext: localizations.spousenamecannotbeempty),
-                  const SizedBox(height: 15),
-                  Text(localizations.addressDetails,
-                      style: const TextStyle(
+                      label: "Age",
+                      hunttext: "Father's name cannot be empty"),
+                  const SizedBox(height: 5),
+                  const Text("Address Details",
+                      style: TextStyle(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.bold)),
@@ -480,15 +450,15 @@ class _CoustmerState extends State<Coustmer> {
                       Expanded(
                           child: textformfeild(
                               controller: hno,
-                              label: localizations.houseNumber,
-                              hunttext: localizations.housenumbercannotbeempty,
+                              label: "House Number",
+                              hunttext: "House number cannot be empty",
                               keyboardType: TextInputType.text)),
                       const SizedBox(width: 10),
                       Expanded(
                           child: textformfeild(
                               controller: streetnumber,
-                              hunttext: localizations.streetnumbercannotbeempty,
-                              label: localizations.streetNo,
+                              hunttext: "Street number cannot be empty",
+                              label: "Street No",
                               keyboardType: TextInputType.number)),
                     ],
                   ),
@@ -497,38 +467,38 @@ class _CoustmerState extends State<Coustmer> {
                     children: [
                       Expanded(
                           child: textformfeild(
-                              hunttext: localizations.citycannotbeempty,
+                              hunttext: "City cannot be empty",
                               controller: city,
-                              label: localizations.city,
+                              label: "City",
                               keyboardType: TextInputType.text)),
                       const SizedBox(width: 10),
                       Expanded(
                           child: textformfeild(
-                              hunttext: localizations.pincodecannotbeempty,
+                              hunttext: "Pin code cannot be empty",
                               maxvalue: 6,
                               controller: pincode,
-                              label: localizations.pinCode,
+                              label: "Pin Code",
                               keyboardType: TextInputType.number)),
                     ],
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
-                      controller: adddress, label: localizations.address),
+                      controller: adddress, label: "Address"),
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: TextEditingController(text: street),
-                    label: localizations.streetNo,
-                    hunttext: localizations.placecannotbeempty,
+                    label: "Street",
+                    hunttext: "Street cannot be empty",
                     need: true,
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
                       controller: TextEditingController(text: landmark),
-                      label: localizations.landmark,
-                      hunttext: localizations.landmarkcannotbeempty,
+                      label: "Landmark",
+                      hunttext: "Landmark cannot be empty",
                       need: true),
                   const SizedBox(height: 10),
-                  Text("landmark photo",
+                  const Text("Landmark Photo",
                       style: TextStyle(fontWeight: FontWeight.bold)),
                   const SizedBox(height: 8),
                   GestureDetector(
@@ -546,12 +516,10 @@ class _CoustmerState extends State<Coustmer> {
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(faceImage!, fit: BoxFit.cover),
                             )
-                          : Center(child: Text("TapToSelectImage")),
+                          : const Center(child: Text("Tap to select image")),
                     ),
                   ),
-                  SizedBox(
-                    height: 20,
-                  ),
+                  const SizedBox(height: 20),
                   InkWell(
                     onTap: () {
                       openGoogleMaps(latitude, longitude);
@@ -565,149 +533,132 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  TextFormField(
-                    controller: mobile,
-                    maxLength: 10,
-                    keyboardType: TextInputType.phone,
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      labelText: localizations.mobilenumber,
-                      errorText: mobile.text.length < 10
-                          ? localizations.mobilenumbercannotbeempty
-                          : null,
-                    ),
-                  ),
                   const SizedBox(height: 15),
-                  Text(localizations.newsPaperDetails,
-                      style: const TextStyle(
+                  const Text("Newspaper Details",
+                      style: TextStyle(
                           color: Colors.black,
                           fontSize: 18,
                           fontWeight: FontWeight.bold)),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(localizations.eenadunewspaper,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 10),
+                  DropdownButtonFormField<String>(
+                    value: _selectedCustomerType,
+                    hint: const Text("Customer Type"),
+                    isExpanded: true,
+                    items: customerTypes.map((String customerType) {
+                      return DropdownMenuItem<String>(
+                        value: customerType,
+                        child: Text(customerType),
+                      );
+                    }).toList(),
+                    onChanged: (String? newValue) {
+                      setState(() {
+                        _selectedCustomerType = newValue;
+                        if (newValue != "Conversion") {
+                          _selectedPreviousNewspaper = null;
+                          otherNewspaperController.clear();
+                        }
+                      });
+                    },
+                    validator: (value) {
+                      if (value == null) {
+                        return "Please select customer type";
+                      }
+                      return null;
+                    },
+                    decoration: const InputDecoration(
+                      labelText: "Customer Type",
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                      Text(_isYes ? localizations.yes : localizations.no,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: _isYes ? Colors.green : Colors.red,
-                          )),
-                      Switch(
-                        inactiveThumbColor: Colors.white,
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: _isYes,
-                        onChanged: (value) {
-                          setState(() {
-                            _isYes = value;
-                          });
-                        },
+                    ),
+                  ),
+                  if (_selectedCustomerType == "Conversion") ...[
+                    const SizedBox(height: 10),
+                    DropdownButtonFormField<String>(
+                      value: _selectedPreviousNewspaper,
+                      hint: const Text("Previous Newspaper"),
+                      isExpanded: true,
+                      items: previousNewspapers.map((String newspaper) {
+                        return DropdownMenuItem<String>(
+                          value: newspaper,
+                          child: Text(newspaper),
+                        );
+                      }).toList(),
+                      onChanged: (String? newValue) {
+                        setState(() {
+                          _selectedPreviousNewspaper = newValue;
+                          if (newValue != "Others") {
+                            otherNewspaperController.clear();
+                          }
+                        });
+                      },
+                      validator: (value) {
+                        if (value == null) {
+                          return "Please select a newspaper";
+                        }
+                        if (value == "Others" &&
+                            otherNewspaperController.text.isEmpty) {
+                          return "Please enter other newspaper name";
+                        }
+                        return null;
+                      },
+                      decoration: const InputDecoration(
+                        labelText: "Previous Newspaper",
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
+                      ),
+                    ),
+                    if (_selectedPreviousNewspaper == "Others") ...[
+                      const SizedBox(height: 10),
+                      textformfeild(
+                        hunttext: "Please enter other newspaper name",
+                        controller: otherNewspaperController,
+                        label: "Other Newspaper",
+                        need: false,
+                        keyboardType: TextInputType.text,
                       ),
                     ],
-                  ),
-                  if (_isYes)
-                    textformfeild(
-                        hunttext: localizations.feedbackcannotbeempty,
-                        controller: feedback_to_improve,
-                        label: localizations.feedbacktoimprovepaper),
-                  if (!_isYes) ...[
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(localizations.readnewspaper,
-                              style: const TextStyle(
-                                  fontSize: 18, fontWeight: FontWeight.bold)),
+                  ],
+                  const SizedBox(height: 10),
+                  SizedBox(
+                    height: 70,
+                    width: double.infinity,
+                    child: TextFormField(
+                      controller: startCirculationController,
+                      readOnly: true,
+                      decoration: InputDecoration(
+                        labelText: "Start Circulation",
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Colors.black),
                         ),
-                        Text(
-                            _isAnotherToggle
-                                ? localizations.yes
-                                : localizations.no,
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  _isAnotherToggle ? Colors.green : Colors.red,
-                            )),
-                        Switch(
-                          inactiveThumbColor: Colors.white,
-                          activeTrackColor: Colors.green,
-                          inactiveTrackColor: Colors.red,
-                          value: _isAnotherToggle,
-                          onChanged: (value) {
-                            setState(() {
-                              _isAnotherToggle = value;
-                            });
-                          },
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(15),
+                          borderSide: const BorderSide(color: Colors.black, width: 4),
                         ),
-                      ],
+                        suffixIcon: Icon(Icons.calendar_today),
+                      ),
+                      onTap: _selectStartCirculationDate,
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return "Start circulation date cannot be empty";
+                        }
+                        return null;
+                      },
                     ),
-                   if (_isAnotherToggle) ...[
-  DropdownButtonFormField<String>(
-    value: _selectedNewspaper,
-    hint: Text(localizations.currentnewpaper),
-    isExpanded: true,
-    items: newspapers.map((String newspaper) {
-      return DropdownMenuItem<String>(
-        value: newspaper,
-        child: Text(newspaper),
-      );
-    }).toList(),
-    onChanged: (String? newValue) {
-      setState(() {
-        _selectedNewspaper = newValue;
-        if (newValue != "Others") {
-          otherNewspaperController.clear(); // Clear the text field if "Others" is not selected
-        }
-      });
-    },
-    validator: (value) {
-      if (value == null) {
-        return localizations.currentnewspapercannotbeempty;
-      }
-      if (value == "Others" && (otherNewspaperController.text.isEmpty)) {
-        return "localizations.pleaseenterothernewspaper";
-      }
-      return null;
-    },
-    decoration: InputDecoration(
-      labelText: localizations.currentnewpaper,
-      border: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-    ),
-  ),
-  if (_selectedNewspaper == "Others") ...[
-    const SizedBox(height: 10),
-    textformfeild(
-      hunttext: "pleaseenterothernewspaper",
-      controller: otherNewspaperController,
-      label: "othernewspaper",
-      need: false,
-      keyboardType: TextInputType.text,
-    ),
-  ],
-  const SizedBox(height: 10),
-  textformfeild(
-    hunttext: localizations.reasonfornottakingcannotbeempty,
-    controller: reason_for_not_taking_eenadu,
-    label: localizations.reasonfornottakingeenadunewspaper,
-  ),
-],
-                  const SizedBox(height: 15),
+                  ),
+             
+                  const SizedBox(height: 5),
                   Row(
                     children: [
-                      Expanded(
-                        child: Text(localizations.employed,
-                            style: const TextStyle(
+                      const Expanded(
+                        child: Text("Employed?",
+                            style: TextStyle(
                                 fontSize: 18, fontWeight: FontWeight.bold)),
                       ),
-                      Text(_isemployed ? localizations.yes : localizations.no,
+                      Text(
+                          _isemployed ? "Yes" : "No",
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -725,8 +676,7 @@ class _CoustmerState extends State<Coustmer> {
                             _selectedGovDepartment = null;
                             privateCompanyController.clear();
                             privateProffesionController.clear();
-                            _selectedPrivateProfession =
-                                null; // Reset private profession
+                            _selectedPrivateProfession = null;
                           });
                         },
                       ),
@@ -736,7 +686,7 @@ class _CoustmerState extends State<Coustmer> {
                   if (_isemployed)
                     DropdownButtonFormField<String>(
                       value: _selectedJobType,
-                      hint: Text(localizations.jobtype),
+                      hint: const Text("Job Type"),
                       isExpanded: true,
                       items: jobTypes.map((String job) {
                         return DropdownMenuItem<String>(
@@ -750,21 +700,20 @@ class _CoustmerState extends State<Coustmer> {
                           _selectedGovDepartment = null;
                           privateCompanyController.clear();
                           privateProffesionController.clear();
-                          _selectedPrivateProfession =
-                              null; // Reset private profession
+                          _selectedPrivateProfession = null;
                         });
                       },
-                      decoration: InputDecoration(
-                        labelText: localizations.jobtype,
+                      decoration: const InputDecoration(
+                        labelText: "Job Type",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
                       ),
                     ),
                   if (_selectedJobType == "government_job") ...[
                     const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
                       value: _selectedGovDepartment,
-                      hint: Text(localizations.selectdepartment),
+                      hint: const Text("Select Department"),
                       isExpanded: true,
                       items: govDepartments.map((String dept) {
                         return DropdownMenuItem<String>(
@@ -777,42 +726,42 @@ class _CoustmerState extends State<Coustmer> {
                           _selectedGovDepartment = newValue;
                         });
                       },
-                      decoration: InputDecoration(
-                        labelText: localizations.governmentjob,
+                      decoration: const InputDecoration(
+                        labelText: "Government Job",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
                       ),
                     ),
                     if (_selectedGovDepartment != null) ...[
                       const SizedBox(height: 10),
                       textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
+                          hunttext: "Field cannot be empty",
                           controller: job_designation,
-                          label: localizations.jobdesignation),
+                          label: "Job Designation"),
                       const SizedBox(height: 10),
                       textformfeild(
-                          hunttext: localizations.fieldcannotbeempty,
+                          hunttext: "Field cannot be empty",
                           controller: job_proffesion,
-                          label: localizations.jobdepartment),
+                          label: "Job Department"),
                     ],
                   ],
                   if (_selectedJobType == "private_job") ...[
                     const SizedBox(height: 10),
                     textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
+                        hunttext: "Field cannot be empty",
                         controller: privateCompanyController,
-                        label: localizations.companyname),
+                        label: "Company Name"),
                     const SizedBox(height: 10),
                     textformfeild(
-                        hunttext: localizations.fieldcannotbeempty,
+                        hunttext: "Field cannot be empty",
                         controller: privatedesignationController,
-                        label: localizations.designation),
+                        label: "Designation"),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: _selectedPrivateProfession,
-                      hint: Text(localizations.profession),
+                      hint: const Text("Profession"),
                       isExpanded: true,
-                      items: privateProfessions.map((String profession) {
+                      items: proffesion.map((String profession) {
                         return DropdownMenuItem<String>(
                           value: profession,
                           child: Text(profession),
@@ -825,21 +774,21 @@ class _CoustmerState extends State<Coustmer> {
                       },
                       validator: (value) {
                         if (value == null) {
-                          return localizations.fieldcannotbeempty;
+                          return "Field cannot be empty";
                         }
                         return null;
                       },
-                      decoration: InputDecoration(
-                        labelText: localizations.profession,
+                      decoration: const InputDecoration(
+                        labelText: "Profession",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
                       ),
                     ),
                   ],
                   if (!_isemployed)
                     DropdownButtonFormField<String>(
                       value: _selectedproffesion,
-                      hint: Text(localizations.profession),
+                      hint: const Text("Profession"),
                       isExpanded: true,
                       items: proffesion.map((String item) {
                         return DropdownMenuItem<String>(
@@ -852,13 +801,31 @@ class _CoustmerState extends State<Coustmer> {
                           _selectedproffesion = newValue;
                         });
                       },
-                      decoration: InputDecoration(
-                        labelText: localizations.profession,
+                      decoration: const InputDecoration(
+                        labelText: "Profession",
                         border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(10)),
+                            borderRadius: BorderRadius.all(Radius.circular(10))),
                       ),
                     ),
                   const SizedBox(height: 20),
+                     TextFormField(
+                    controller: mobile,
+                    maxLength: 10,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                      ),
+                      labelText: "Mobile Number",
+                      errorText: null,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.length < 10) {
+                        return "Mobile number must be 10 digits";
+                      }
+                      return null;
+                    },
+                  ),
                   Center(
                     child: _isLoading
                         ? const CircularProgressIndicator(
@@ -876,21 +843,20 @@ class _CoustmerState extends State<Coustmer> {
                               decoration: BoxDecoration(
                                   color: Colors.blue,
                                   borderRadius:
-                                      BorderRadius.all(Radius.circular(50)),
+                                      const BorderRadius.all(Radius.circular(50)),
                                   boxShadow: [
                                     BoxShadow(
                                       color: Colors.black.withOpacity(0.3),
                                       blurRadius: 5.0,
                                       spreadRadius: 1.0,
-                                      offset: Offset(
-                                          0, 3), // changes position of shadow
+                                      offset: const Offset(0, 3),
                                     )
                                   ]),
                               height: MediaQuery.of(context).size.height / 18,
                               width: MediaQuery.of(context).size.height / 5,
                               child: Center(
                                 child: Text(
-                                  localizations.submit,
+                                  "Submit",
                                   style: TextStyle(
                                       color: Colors.white,
                                       fontWeight: FontWeight.bold,
@@ -903,8 +869,8 @@ class _CoustmerState extends State<Coustmer> {
                           ),
                   ),
                   const SizedBox(height: 20),
+               
                 ],
-                ]
               ),
             ),
           ),
@@ -925,9 +891,9 @@ class _CoustmerState extends State<Coustmer> {
         ),
         child: image != null
             ? Image.file(image, fit: BoxFit.cover)
-            : Center(
-                child: Text(AppLocalizations.of(context)!.taptoselectimage,
-                    style: const TextStyle(color: Colors.black)),
+            : const Center(
+                child: Text("Tap to select image",
+                    style: TextStyle(color: Colors.black)),
               ),
       ),
     );
@@ -969,7 +935,7 @@ SizedBox textformfeild({
   TextInputType keyboardType = TextInputType.text,
 }) {
   return SizedBox(
-    height: label == "mobile number" ? 85 : 70,
+    height: label == "Mobile Number" ? 85 : 70,
     width: double.infinity,
     child: TextFormField(
       validator: (value) {
