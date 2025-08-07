@@ -8,7 +8,9 @@ class AgencyModel {
   AgencyModel.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
-    result = json['result'] != null ? AgencyResult.fromJson(json['result']) : null;
+    result = json['result'] != null
+        ? AgencyResult.fromJson(json['result'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -25,11 +27,13 @@ class AgencyModel {
 class AgencyResult {
   bool? success;
   List<AgencyData>? data;
+  int? code;
 
-  AgencyResult({this.success, this.data});
+  AgencyResult({this.success, this.data, this.code});
 
   AgencyResult.fromJson(Map<String, dynamic> json) {
     success = json['success'];
+    code = json['code'];
     if (json['data'] != null) {
       data = <AgencyData>[];
       json['data'].forEach((v) {
@@ -41,6 +45,7 @@ class AgencyResult {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
     data['success'] = success;
+    data['code'] = code;
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -50,7 +55,7 @@ class AgencyResult {
 
 class AgencyData {
   int? id;
-  String? name; // Changed from bool? to String?
+  String? name;
   String? code;
   String? locationName;
 
@@ -58,7 +63,7 @@ class AgencyData {
 
   AgencyData.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    name = json['name']?.toString(); // Ensure String type, handle null
+    name = json['name']?.toString();
     code = json['code']?.toString();
     locationName = json['location_name']?.toString();
   }

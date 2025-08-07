@@ -44,7 +44,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
   // Agency dropdown related variables
   List<AgencyData> _agencyList = [];
-  AgencyData? _selectedAgency;
+  String? _selectedAgencyId; // Changed to store agency ID instead of AgencyData
   bool _isLoadingAgencies = false;
 
   @override
@@ -97,10 +97,25 @@ class _AgentscreenState extends State<Agentscreen> {
         final agencyModel = AgencyModel.fromJson(data);
 
         if (agencyModel.result?.success == true) {
+          // Remove duplicates based on id
+          final uniqueAgencies = <String, AgencyData>{};
+          for (var agency in agencyModel.result?.data ?? []) {
+            if (agency.id != null) {
+              uniqueAgencies[agency.id.toString()] = agency;
+            }
+          }
+
           setState(() {
-            _agencyList = agencyModel.result?.data ?? [];
+            _agencyList = uniqueAgencies.values.toList();
             _isLoadingAgencies = false;
           });
+
+          // Log agency list to check for duplicates
+          debugPrint("🔍 Agency List: ${_agencyList.map((a) => {
+                'id': a.id,
+                'locationName': a.locationName,
+                'code': a.code
+              }).toList()}");
         } else {
           debugPrint("❌ Failed to fetch agencies");
           ScaffoldMessenger.of(context).showSnackBar(
@@ -133,7 +148,7 @@ class _AgentscreenState extends State<Agentscreen> {
   }
 
   Future<void> assignPinLocation() async {
-    if (_selectedAgency == null) {
+    if (_selectedAgencyId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Please select an agency first")),
       );
@@ -143,7 +158,7 @@ class _AgentscreenState extends State<Agentscreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-    final pinLocationId = _selectedAgency?.id;
+    final pinLocationId = int.tryParse(_selectedAgencyId!);
 
     if (token == null || userId == null || pinLocationId == null) {
       debugPrint("❌ Missing token, userId, or pinLocationId");
@@ -467,7 +482,7 @@ class _AgentscreenState extends State<Agentscreen> {
     validateToken();
     _sessionCheckTimer?.cancel();
     _sessionCheckTimer =
-        Timer.periodic(const Duration(seconds: 2), (_) => validateToken());
+        Timer.periodic(const Duration(seconds: 30), (_) => validateToken());
   }
 
   Future<void> validateToken() async {
@@ -748,7 +763,7 @@ class _AgentscreenState extends State<Agentscreen> {
                     const SizedBox(height: 10),
                     Center(child: const Text("Agency")),
                     const SizedBox(height: 10),
-                    DropdownButtonFormField<AgencyData>(
+                    DropdownButtonFormField<String>(
                       decoration: InputDecoration(
                         hintText: "Select agency",
                         border: OutlineInputBorder(
@@ -756,10 +771,10 @@ class _AgentscreenState extends State<Agentscreen> {
                         ),
                         prefixIcon: const Icon(Icons.business),
                       ),
-                      value: _selectedAgency,
+                      value: _selectedAgencyId,
                       items: _agencyList.map((agency) {
-                        return DropdownMenuItem<AgencyData>(
-                          value: agency,
+                        return DropdownMenuItem<String>(
+                          value: agency.id.toString(),
                           child: Row(
                             children: [
                               Text(agency.locationName ??
@@ -773,12 +788,12 @@ class _AgentscreenState extends State<Agentscreen> {
                       }).toList(),
                       onChanged: _isLoadingAgencies
                           ? null
-                          : (AgencyData? newValue) {
+                          : (String? newValue) {
                               setState(() {
-                                _selectedAgency = newValue;
+                                _selectedAgencyId = newValue;
                               });
                               debugPrint(
-                                  "🔍 Selected agency: ${newValue?.locationName ?? newValue?.code}");
+                                  "🔍 Selected agency ID: $newValue");
                             },
                       isExpanded: true,
                       hint: _isLoadingAgencies
@@ -791,8 +806,8 @@ class _AgentscreenState extends State<Agentscreen> {
                     ElevatedButton(
                       onPressed: _isLoadingAgencies ? null : assignPinLocation,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue,
-                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.black,
                         padding: const EdgeInsets.symmetric(vertical: 12),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(8),
