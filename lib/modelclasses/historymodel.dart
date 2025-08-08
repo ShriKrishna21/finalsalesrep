@@ -88,6 +88,11 @@ class Records {
   String? locationAddress;
   String? locationUrl;
   String? faceBase64;
+  String? startCirculating;
+  String? agency;
+  String? age;
+  String? customerType;
+  bool? occupation;
 
   Records({
     this.id,
@@ -129,6 +134,11 @@ class Records {
     this.locationAddress,
     this.locationUrl,
     this.faceBase64,
+    this.startCirculating,
+    this.agency,
+    this.age,
+    this.customerType,
+    this.occupation,
   });
 
   Records.fromJson(Map<String, dynamic> json) {
@@ -157,8 +167,8 @@ class Records {
     freeOffer15Days = _parseBool(json['free_offer_15_days']);
     reasonNotTakingOffer = _asString(json['reason_not_taking_offer']);
     employed = _parseBool(json['employed']);
-    jobType = json['job_type']?.toString();
-    jobTypeOne = json['job_type_one']?.toString();
+    jobType = _asString(json['job_type']);
+    jobTypeOne = _asString(json['job_type_one']);
     jobProfession = _asString(json['job_profession']);
     jobDesignation = _asString(json['job_designation']);
     companyName = _asString(json['company_name']);
@@ -171,6 +181,11 @@ class Records {
     locationAddress = _asString(json['location_address']);
     locationUrl = _asString(json['location_url']);
     faceBase64 = _asString(json['face_base64']);
+    startCirculating = _asString(json['Start_Circulating']);
+    agency = _asString(json['Agency']);
+    age = _asString(json['age']);
+    customerType = _asString(json['customer_type']);
+    occupation = _parseBool(json['occupation']);
   }
 
   Map<String, dynamic> toJson() {
@@ -214,6 +229,11 @@ class Records {
     data['location_address'] = locationAddress;
     data['location_url'] = locationUrl;
     data['face_base64'] = faceBase64;
+    data['Start_Circulating'] = startCirculating;
+    data['Agency'] = agency;
+    data['age'] = age;
+    data['customer_type'] = customerType;
+    data['occupation'] = occupation;
     return data;
   }
 

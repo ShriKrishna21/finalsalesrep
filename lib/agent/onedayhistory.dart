@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:finalsalesrep/agent/historypage.dart';
+import 'package:finalsalesrep/agent/historypage.dart' hide AppLocalizations;
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
@@ -221,7 +221,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _detailRow(localizations.agentName, r.agentName),
+                _detailRow("s", r.agentName),
                 _detailRow("Agency", r.agency),
                 // _detailRow(localizations.agentlogin, r.agentLogin),
                 _detailRow(localizations.date, r.date),
@@ -358,6 +358,9 @@ class _OnedayhistoryState extends State<Onedayhistory> {
   /// 🔧 Fixed version to support any type (String/bool/null)
 
   Widget _detailRow(String label, dynamic value) {
+        if (value == null || value == false || value == "") {
+    return const SizedBox.shrink(); // Return empty widget if invalid
+  }
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(

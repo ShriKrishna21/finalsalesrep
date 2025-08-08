@@ -25,7 +25,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
   final TextEditingController _searchController = TextEditingController();
 
   int offerAcceptedCount = 0;
-  // int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
 
   DateTimeRange? _selectedRange;
@@ -69,7 +68,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
       }
     } catch (e) {
       debugPrint('Could not launch $url');
-      // Optional: show a dialog or snackbar
     }
   }
 
@@ -95,10 +93,16 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         final id = record.id?.toString() ?? '';
         final mobile = record.mobileNumber?.toLowerCase() ?? '';
         final agent = record.agentName?.toLowerCase() ?? '';
+        final agency = record.agency?.toLowerCase() ?? '';
+        final age = record.age?.toLowerCase() ?? '';
+        final customerType = record.customerType?.toLowerCase() ?? '';
         return name.contains(searchQuery) ||
             id.contains(searchQuery) ||
             mobile.contains(searchQuery) ||
-            agent.contains(searchQuery);
+            agent.contains(searchQuery) ||
+            agency.contains(searchQuery) ||
+            age.contains(searchQuery) ||
+            customerType.contains(searchQuery);
       }).toList();
     });
   }
@@ -134,14 +138,12 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         "order": "asc",
       }
     };
-    print(requestBody);
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/customer_forms_filtered'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-      print(response.body);
 
       if (response.statusCode == 200) {
         final data = AllCustomerForms.fromJson(jsonDecode(response.body));
@@ -166,8 +168,7 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
         errorMessage = "Something went wrong: $e";
         isLoading = false;
       });
-      print("Error Message: $errorMessage");
-      //print( "Error fetching data: $e");
+      print("Error Message: $e");
     }
   }
 
@@ -227,26 +228,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                         ),
                       ),
                     ),
-                    // Card(
-                    //   margin: const EdgeInsets.all(12),
-                    //   color: Colors.grey[200],
-                    //   child: const Padding(
-                    //     padding: EdgeInsets.all(16),
-                    //     child: Column(
-                    //       crossAxisAlignment: CrossAxisAlignment.start,
-                    //       // children: [
-                    //       //   const Text(" Summary",
-                    //       //       style: TextStyle(
-                    //       //           fontWeight: FontWeight.bold, fontSize: 16)),
-                    //       //   const SizedBox(height: 6),
-                    //       //   Text(
-                    //       //       " ${localizations.eenaduSubscription}: $alreadySubscribedCount"),
-                    //       //   Text(
-                    //       //       " ${localizations.daysOfferAccepted15}: $offerAcceptedCount"),
-                    //       // ],
-                    //     ),
-                    //   ),
-                    // ),
                     Expanded(
                       child: filteredRecords.isEmpty
                           ? Center(
@@ -282,11 +263,15 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                           Text(
                                               "${localizations.phone}: ${r.mobileNumber ?? 'N/A'}"),
                                           Text(
-                                              "${_boolToText(r.eenaduNewspaper)}"),
+                                              "${localizations.eenaduSubscription}: ${_boolToText(r.eenaduNewspaper)}"),
                                           Text(
                                               "${localizations.employed}: ${_boolToText(r.employed)}"),
                                           Text(
                                               "${localizations.agentName}: ${r.agentName ?? 'N/A'}"),
+                                          Text("Agency: ${r.agency ?? 'N/A'}"),
+                                          Text("Age: ${r.age ?? 'N/A'}"),
+                                          Text(
+                                              "Customer Type: ${r.customerType ?? 'N/A'}"),
                                           Row(
                                             crossAxisAlignment:
                                                 CrossAxisAlignment.start,
@@ -318,7 +303,6 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                                       fontWeight:
                                                           FontWeight.bold,
                                                       color: Colors.blue,
-                                                      //decoration: TextDecoration.underline,
                                                     ),
                                                   ),
                                                 ),
@@ -333,8 +317,8 @@ class _AllcustomerformsState extends State<Allcustomerforms> {
                                                   CrossAxisAlignment.start,
                                               children: [
                                                 const Text(
-                                                  " land mark",
-                                                  style: const TextStyle(
+                                                  "Landmark",
+                                                  style: TextStyle(
                                                       fontWeight:
                                                           FontWeight.bold),
                                                 ),

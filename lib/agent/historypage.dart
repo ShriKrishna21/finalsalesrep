@@ -32,7 +32,7 @@ class _HistorypageState extends State<Historypage> {
   @override
   void initState() {
     super.initState();
-    _fetchHistory(); // If you want initial load to be empty, comment this out
+    _fetchHistory();
   }
 
   @override
@@ -174,7 +174,6 @@ class _HistorypageState extends State<Historypage> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: [
-            // Date filter card
             Card(
               margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               elevation: 2,
@@ -199,8 +198,6 @@ class _HistorypageState extends State<Historypage> {
                 ),
               ),
             ),
-
-            // Fetch button if a range is selected
             if (_selectedRange != null)
               Padding(
                 padding:
@@ -217,8 +214,6 @@ class _HistorypageState extends State<Historypage> {
                   ),
                 ),
               ),
-
-            // Search bar
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
@@ -238,8 +233,6 @@ class _HistorypageState extends State<Historypage> {
                 ),
               ),
             ),
-
-            // Stats row
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 12),
               child: Row(
@@ -254,10 +247,7 @@ class _HistorypageState extends State<Historypage> {
                 ],
               ),
             ),
-
             const Divider(height: 1),
-
-            // Show records or 'no records' message
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
             else if (_filteredRecords.isEmpty)
@@ -299,7 +289,7 @@ class _HistorypageState extends State<Historypage> {
       elevation: 3,
       child: ExpansionTile(
         title: Text(
-          "Family: ${r.familyHeadName ?? 'N/A'}",
+          "customer Name: ${r.familyHeadName ?? 'N/A'}",
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         children: [
@@ -308,61 +298,67 @@ class _HistorypageState extends State<Historypage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _detailRow(localizations.agents, r.agentName ?? ''),
-                _detailRow(localizations.date, r.date ?? ''),
-                _detailRow(localizations.time, r.time ?? ''),
-                _detailRow(
-                    localizations.subscribed, _formatBool(r.eenaduNewspaper)),
-
-                _detailRow(
-                    localizations.readnewspaper, _formatBool(r.readNewspaper)),
-                _detailRow(localizations.reasonfornottakingoffer,
-                    r.reasonNotTakingOffer ?? ''),
-                _detailRow(localizations.city, r.city ?? ''),
-                _detailRow(localizations.phone, r.mobileNumber ?? ''),
-                _detailRow(localizations.address, r.address ?? ''),
+                _detailRow("Staff", r.agentName),
+                _detailRow("Agency", r.agency),
+                _detailRow(localizations.date, r.date),
+                _detailRow(localizations.time, r.time),
+                _detailRow("customer name", r.familyHeadName),
+                _detailRow("Age", r.age),
+                _detailRow("mobile Number", r.mobileNumber),
+                Text("News-paper Details"),
+                _detailRow("Customer Type", r.customerType),
+                _detailRow("previous News-paper", r.currentNewspaper),
+                _detailRow("Start Circulating", r.startCirculating),
+                _detailRow(localizations.city, r.city),
+                _detailRow(localizations.address, r.address),
                 _detailRow(localizations.employed, _formatBool(r.employed)),
-                _detailRow(localizations.jobtype, r.jobType ?? ''),
-                _detailRow(
-                    localizations.jobWorkingstate, r.jobWorkingState ?? ''),
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text("Location URL: ",
-                          style: TextStyle(fontWeight: FontWeight.w600)),
-                      Expanded(
-                        child: InkWell(
-                          onTap: () {
-                            openGoogleMaps(
-                              double.tryParse(r.latitude ?? ''),
-                              double.tryParse(r.longitude ?? ''),
-                              r.locationUrl,
-                            );
-                          },
-                          child: Text(
-                            r.locationUrl != null &&
-                                    r.locationUrl != 'false' &&
-                                    r.locationUrl != 'N/A'
-                                ? r.locationUrl!
-                                : 'View on Google Maps',
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.blue,
+                // _detailRow(
+                //     localizations.subscribed, _formatBool(r.eenaduNewspaper)),
+                // _detailRow(
+                //     localizations.readnewspaper, _formatBool(r.readNewspaper)),
+                // _detailRow(localizations.reasonfornottakingoffer,
+                //     r.reasonNotTakingOffer),
+                _detailRow("Occupation", _formatBool(r.occupation)),
+                _detailRow(localizations.jobtype, r.jobType),
+                _detailRow(localizations.jobWorkingstate,
+                    _formatBool(r.jobWorkingState)),
+                if (r.locationUrl != null &&
+                    r.locationUrl!.isNotEmpty &&
+                    r.locationUrl != 'false' &&
+                    r.locationUrl != 'N/A')
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text("Location URL: ",
+                            style: TextStyle(fontWeight: FontWeight.w600)),
+                        Expanded(
+                          child: InkWell(
+                            onTap: () {
+                              openGoogleMaps(
+                                double.tryParse(r.latitude ?? ''),
+                                double.tryParse(r.longitude ?? ''),
+                                r.locationUrl,
+                              );
+                            },
+                            child: Text(
+                              r.locationUrl!,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.blue,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                // 📷 Display image from base64 if available
                 if (r.faceBase64 != null && r.faceBase64!.isNotEmpty)
                   _base64ImageWidget("Landmark photo", r.faceBase64!),
               ],
             ),
-          )
+          ),
         ],
       ),
     );
@@ -415,16 +411,33 @@ class _HistorypageState extends State<Historypage> {
     }
   }
 
+  bool _isValidValue(dynamic value) {
+    if (value == null) return false;
+    if (value is String)
+      return value.isNotEmpty && value != 'false' && value != 'N/A';
+    if (value is bool) return value == true;
+    return true;
+  }
+
   Widget _detailRow(String label, dynamic value) {
+    if (!_isValidValue(value)) return const SizedBox.shrink();
+
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
       child: Row(
         children: [
           Text("$label: ", style: const TextStyle(fontWeight: FontWeight.w600)),
-          Expanded(child: Text(value?.toString() ?? 'N/A')),
+          Expanded(child: Text(_formatValue(value))),
         ],
       ),
     );
+  }
+
+  String _formatValue(dynamic value) {
+    if (value is bool) {
+      return _formatBool(value);
+    }
+    return value?.toString() ?? 'N/A';
   }
 
   String _formatBool(bool? v) {
