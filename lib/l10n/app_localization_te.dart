@@ -656,11 +656,87 @@ class AppLocalizationsTe extends AppLocalizations {
   String get todayhistory => 'ఈరోజు హిస్టరీ';
 
   @override
-  String get routemapassign => 'రూట్ మ్యాప్ కేటాయింపు';
+  String get routemapassign => 'రూట్ మ్యాప్ నియమించండి';
 
   @override
   String get createregionalhead => 'ప్రాంతీయ హెడ్ సృష్టించు';
 
   @override
   String get nounitsfound => 'యూనిట్‌లు లేవు';
+
+  @override
+  String get salesrepresentative => 'సేల్స్ ప్రతినిధి';
+
+  @override
+  String get workstatus => 'పని స్థితి';
+
+  @override
+  String get startwork => 'పనిని ప్రారంభించు';
+
+  @override
+  String get stopwork => 'పనిని ఆపు';
+
+  @override
+  String get agency => ' ఏజెన్సీ';
+
+  @override
+  String get selectagency => ' ఏజెన్సీని ఎంచుకోండి';
+
+  @override
+  String get nameofthestaff => 'సిబ్బంది పేరు';
+
+  @override
+  String get houses => 'ఇల్లులు';
+
+  @override
+  String get loadingagencies => 'ఏజెన్సీలు లోడ్ అవుతున్నాయి...';
+
+  @override
+  String get selectanagency => 'ఏజెన్సీ ఎంచుకోండి';
+
+  @override
+  String get pleaseselectanagency => ' దయచేసి ఏజెన్సీ ఎంచుకోండి';
+
+  @override
+  String get assignagency => ' ఏజెన్సీని అప్పగించండి';
+
+  @override
+  String get routeid => 'రూట్ ఐడి';
+
+  @override
+  String get editroute => 'రూట్ సవరించండి';
+
+  @override
+  String get alreadysubscribed => 'ఇప్పటికే సభ్యత్వం పొందారు';
+
+  @override
+  String get shiftdetails => 'షిఫ్ట్ వివరాలు';
+
+  @override
+  String get session => 'సెషన్';
+
+  @override
+  String get startselfie => 'సెల్ఫీ ప్రారంభించండి';
+
+  @override
+  String get endselfie => ' ముగింపు సెల్ఫీ';
+
+  @override
+  String get starttime => ' ప్రారంభ సమయం';
+
+  @override
+  String get endtime => 'ముగింపు సమయం';
+
+  @override
+  String get totalworkinghours => ' పని చేసిన మొత్తం సమయం';
+
+  @override
+  String get sessionongoing => 'సెషన్ కొనసాగుతోంది';
+
+  @override
+  String get workinprogressendtimenotset =>
+      'పని జరుగుతోంది, ముగింపు సమయం సెటు చేయలేదు';
+
+  @override
+  String get noshiftdataavailable => 'షిఫ్ట్ సమాచారం అందుబాటులో లేదు';
 }

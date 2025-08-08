@@ -223,7 +223,36 @@
 "todayhistory":"Today History",
 "routemapassign":"Route Map Assign",
 "createregionalhead":"Create Regional Head",
-"nounitsfound":"noUnitsFound"
+"nounitsfound":"noUnitsFound",
+"salesrepresentative":"Sales Representative",
+"workstatus":"Work Status",
+"startwork":"Start Work",
+"stopwork":"Stop Work",
+"agency":"Agency",
+"selectagency":"Select Agency",
+"welcome":"Welcome",
+"nameofthestaff":"Name Of The Staff",
+"houses":"Houses",
+"loadingagencies":"Loading Agencies...",
+"selectanagency":"Select An Agency",
+"pleaseselectanagency":"Please Select An Agency",
+"assignagency":"Assign Agency",
+"routemapassign":"RouteMapAssign",
+"routeid":"RouteId",
+"editroute":"Edit Route",
+"alreadysubscribed":"Already Subscribed",
+"shiftdetails":"Shift Details",
+"session":"Session",
+"startselfie":"Start Selfie",
+"endselfie":"End Selfie",
+"starttime":"Start Time",
+"endtime":"End Time",
+"totalworkinghours":"Total Working Hours",
+"sessionongoing":"Session Ongoing",
+"workinprogressendtimenotset":"Work In Progress  End Time Not Set",
+"noshiftdataavailable":"No Shift Data Available"
+
+
 
 
 

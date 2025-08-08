@@ -646,11 +646,87 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todayhistory => 'Today History';
 
   @override
-  String get routemapassign => 'Route Map Assign';
+  String get routemapassign => 'RouteMapAssign';
 
   @override
   String get createregionalhead => 'Create Regional Head';
 
   @override
   String get nounitsfound => 'noUnitsFound';
+
+  @override
+  String get salesrepresentative => 'Sales Representative';
+
+  @override
+  String get workstatus => 'Work Status';
+
+  @override
+  String get startwork => 'Start Work';
+
+  @override
+  String get stopwork => 'Stop Work';
+
+  @override
+  String get agency => 'Agency';
+
+  @override
+  String get selectagency => 'Select Agency';
+
+  @override
+  String get nameofthestaff => 'Name Of The Staff';
+
+  @override
+  String get houses => 'Houses';
+
+  @override
+  String get loadingagencies => 'Loading Agencies...';
+
+  @override
+  String get selectanagency => 'Select An Agency';
+
+  @override
+  String get pleaseselectanagency => 'Please Select An Agency';
+
+  @override
+  String get assignagency => 'Assign Agency';
+
+  @override
+  String get routeid => 'RouteId';
+
+  @override
+  String get editroute => 'Edit Route';
+
+  @override
+  String get alreadysubscribed => 'Already Subscribed';
+
+  @override
+  String get shiftdetails => 'Shift Details';
+
+  @override
+  String get session => 'Session';
+
+  @override
+  String get startselfie => 'Start Selfie';
+
+  @override
+  String get endselfie => 'End Selfie';
+
+  @override
+  String get starttime => 'Start Time';
+
+  @override
+  String get endtime => 'End Time';
+
+  @override
+  String get totalworkinghours => 'Total Working Hours';
+
+  @override
+  String get sessionongoing => 'Session Ongoing';
+
+  @override
+  String get workinprogressendtimenotset =>
+      'Work In Progress  End Time Not Set';
+
+  @override
+  String get noshiftdataavailable => 'No Shift Data Available';
 }

@@ -227,7 +227,58 @@
 "todayhistory":"ఈరోజు హిస్టరీ",
 "routemapassign":"రూట్ మ్యాప్ కేటాయింపు",
 "createregionalhead":"ప్రాంతీయ హెడ్ సృష్టించు",
-"nounitsfound":"యూనిట్‌లు లేవు"
+"nounitsfound":"యూనిట్‌లు లేవు",
+"salesrepresentative":"సేల్స్ ప్రతినిధి",
+"workstatus":"పని స్థితి",
+"startwork":"పనిని ప్రారంభించు",
+"stopwork":"పనిని ఆపు",
+"agency":" ఏజెన్సీ",
+"selectagency":" ఏజెన్సీని ఎంచుకోండి",
+"welcome":"స్వాగతం",
+"nameofthestaff":"సిబ్బంది పేరు",
+"houses":"ఇల్లులు",
+"loadingagencies":"ఏజెన్సీలు లోడ్ అవుతున్నాయి...",
+"selectanagency":"ఏజెన్సీ ఎంచుకోండి",
+"pleaseselectanagency":" దయచేసి ఏజెన్సీ ఎంచుకోండి",
+"assignagency":" ఏజెన్సీని అప్పగించండి",
+"routemapassign":"రూట్ మ్యాప్ నియమించండి",
+"routeid":"రూట్ ఐడి",
+"editroute":"రూట్ సవరించండి",
+"alreadysubscribed":"ఇప్పటికే సభ్యత్వం పొందారు",
+"shiftdetails":"షిఫ్ట్ వివరాలు",
+"session":"సెషన్",
+"startselfie":"సెల్ఫీ ప్రారంభించండి",
+"endselfie":" ముగింపు సెల్ఫీ",
+"starttime":" ప్రారంభ సమయం",
+"endtime":"ముగింపు సమయం",
+"totalworkinghours":" పని చేసిన మొత్తం సమయం",
+"sessionongoing":"సెషన్ కొనసాగుతోంది",
+"workinprogressendtimenotset":"పని జరుగుతోంది, ముగింపు సమయం సెటు చేయలేదు",
+"noshiftdataavailable":"షిఫ్ట్ సమాచారం అందుబాటులో లేదు"
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
