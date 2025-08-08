@@ -1355,7 +1355,7 @@ abstract class AppLocalizations {
   /// No description provided for @routemapassign.
   ///
   /// In en, this message translates to:
-  /// **'Route Map Assign'**
+  /// **'RouteMapAssign'**
   String get routemapassign;
 
   /// No description provided for @createregionalhead.
@@ -1369,6 +1369,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'noUnitsFound'**
   String get nounitsfound;
+
+  /// No description provided for @salesrepresentative.
+  ///
+  /// In en, this message translates to:
+  /// **'Sales Representative'**
+  String get salesrepresentative;
+
+  /// No description provided for @workstatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Status'**
+  String get workstatus;
+
+  /// No description provided for @startwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Work'**
+  String get startwork;
+
+  /// No description provided for @stopwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Stop Work'**
+  String get stopwork;
+
+  /// No description provided for @agency.
+  ///
+  /// In en, this message translates to:
+  /// **'Agency'**
+  String get agency;
+
+  /// No description provided for @selectagency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select Agency'**
+  String get selectagency;
+
+  /// No description provided for @nameofthestaff.
+  ///
+  /// In en, this message translates to:
+  /// **'Name Of The Staff'**
+  String get nameofthestaff;
+
+  /// No description provided for @houses.
+  ///
+  /// In en, this message translates to:
+  /// **'Houses'**
+  String get houses;
+
+  /// No description provided for @loadingagencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading Agencies...'**
+  String get loadingagencies;
+
+  /// No description provided for @selectanagency.
+  ///
+  /// In en, this message translates to:
+  /// **'Select An Agency'**
+  String get selectanagency;
+
+  /// No description provided for @pleaseselectanagency.
+  ///
+  /// In en, this message translates to:
+  /// **'Please Select An Agency'**
+  String get pleaseselectanagency;
+
+  /// No description provided for @assignagency.
+  ///
+  /// In en, this message translates to:
+  /// **'Assign Agency'**
+  String get assignagency;
+
+  /// No description provided for @routeid.
+  ///
+  /// In en, this message translates to:
+  /// **'RouteId'**
+  String get routeid;
+
+  /// No description provided for @editroute.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Route'**
+  String get editroute;
+
+  /// No description provided for @alreadysubscribed.
+  ///
+  /// In en, this message translates to:
+  /// **'Already Subscribed'**
+  String get alreadysubscribed;
+
+  /// No description provided for @shiftdetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift Details'**
+  String get shiftdetails;
+
+  /// No description provided for @session.
+  ///
+  /// In en, this message translates to:
+  /// **'Session'**
+  String get session;
+
+  /// No description provided for @startselfie.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Selfie'**
+  String get startselfie;
+
+  /// No description provided for @endselfie.
+  ///
+  /// In en, this message translates to:
+  /// **'End Selfie'**
+  String get endselfie;
+
+  /// No description provided for @starttime.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Time'**
+  String get starttime;
+
+  /// No description provided for @endtime.
+  ///
+  /// In en, this message translates to:
+  /// **'End Time'**
+  String get endtime;
+
+  /// No description provided for @totalworkinghours.
+  ///
+  /// In en, this message translates to:
+  /// **'Total Working Hours'**
+  String get totalworkinghours;
+
+  /// No description provided for @sessionongoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Session Ongoing'**
+  String get sessionongoing;
+
+  /// No description provided for @workinprogressendtimenotset.
+  ///
+  /// In en, this message translates to:
+  /// **'Work In Progress  End Time Not Set'**
+  String get workinprogressendtimenotset;
+
+  /// No description provided for @noshiftdataavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No Shift Data Available'**
+  String get noshiftdataavailable;
 }
 
 class _AppLocalizationsDelegate

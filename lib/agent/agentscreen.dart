@@ -1,12 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart'
     show SelfieTimesResponse, SelfieSession;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:finalsalesrep/modelclasses/routemap.dart';
@@ -202,8 +205,7 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to assign pin location: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-              content:
-                  Text("Failed to assign agency: ${response.statusCode}")),
+              content: Text("Failed to assign agency: ${response.statusCode}")),
         );
       }
     } catch (e) {
@@ -670,6 +672,9 @@ class _AgentscreenState extends State<Agentscreen> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.white,
@@ -677,9 +682,9 @@ class _AgentscreenState extends State<Agentscreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Center(child: Text("Sales Representative")),
+            Center(child: Text(localizations.salesrepresentative)),
             Center(
-              child: Text("Welcome $agentname",
+              child: Text("${localizations.welcome} $agentname",
                   style: const TextStyle(fontSize: 16)),
             ),
           ],
@@ -692,12 +697,12 @@ class _AgentscreenState extends State<Agentscreen> {
           )
         ],
       ),
-      drawer: _buildDrawer(),
+      drawer: _buildDrawer(localeProvider, localizations),
       floatingActionButton: Column(
         mainAxisAlignment: MainAxisAlignment.end,
         children: [
           FloatingActionButton.extended(
-            heroTag: "customer_form",
+            heroTag: localizations.customerform,
             backgroundColor: Colors.white,
             onPressed: isWorking
                 ? () async {
@@ -708,7 +713,7 @@ class _AgentscreenState extends State<Agentscreen> {
                     await refreshData();
                   }
                 : null,
-            label: Text("Customer Form",
+            label: Text(localizations.customerform,
                 style:
                     TextStyle(color: isWorking ? Colors.black : Colors.grey)),
             icon: Icon(Icons.add_box_outlined,
@@ -716,11 +721,11 @@ class _AgentscreenState extends State<Agentscreen> {
           ),
           const SizedBox(height: 10),
           FloatingActionButton.extended(
-            heroTag: "work_status",
+            heroTag: localizations.workstatus,
             backgroundColor: isWorking ? Colors.red : Colors.green,
             onPressed: isWorking ? stopWork : startWork,
             label: Text(
-              isWorking ? "Stop Work" : "Start Work",
+              isWorking ? localizations.stopwork : localizations.startwork,
               style: const TextStyle(color: Colors.white),
             ),
             icon: Icon(
@@ -745,7 +750,7 @@ class _AgentscreenState extends State<Agentscreen> {
                     const SizedBox(height: 20),
                     Center(
                       child: Text(
-                        "Name of the Staff: $agentname",
+                        "${localizations.nameofthestaff}: $agentname",
                         style: const TextStyle(
                             fontSize: 15, fontWeight: FontWeight.bold),
                       ),
@@ -757,15 +762,15 @@ class _AgentscreenState extends State<Agentscreen> {
                         MaterialPageRoute(
                             builder: (_) => const Onedayhistory()),
                       ),
-                      child: _buildInfoRow("Houses Visited",
+                      child: _buildInfoRow(localizations.houseVisited,
                           "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
                     ),
                     const SizedBox(height: 10),
-                    Center(child: const Text("Agency")),
+                    Center(child: Text(localizations.agency)),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       decoration: InputDecoration(
-                        hintText: "Select agency",
+                        hintText: localizations.selectagency,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
                         ),
@@ -792,15 +797,15 @@ class _AgentscreenState extends State<Agentscreen> {
                               setState(() {
                                 _selectedAgencyId = newValue;
                               });
-                              debugPrint(
-                                  "🔍 Selected agency ID: $newValue");
+                              // debugPrint("🔍 Selected agency ID: $newValue");
                             },
                       isExpanded: true,
                       hint: _isLoadingAgencies
-                          ? const Text("Loading agencies...")
-                          : const Text("Select an agency"),
-                      validator: (value) =>
-                          value == null ? 'Please select an agency' : null,
+                          ? Text(localizations.loadingagencies)
+                          : Text(localizations.selectanagency),
+                      validator: (value) => value == null
+                          ? localizations.pleaseselectanagency
+                          : null,
                     ),
                     const SizedBox(height: 10),
                     ElevatedButton(
@@ -813,18 +818,19 @@ class _AgentscreenState extends State<Agentscreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                       ),
-                      child: const Text(
-                        "Assign Agency",
+                      child: Text(
+                        localizations.assignagency,
                         style: TextStyle(fontSize: 16),
                       ),
                     ),
                     const SizedBox(height: 20),
                     Row(children: [
-                      Center(child: _buildSectionTitle("My Route Map")),
+                      Center(
+                          child: _buildSectionTitle(localizations.myRouteMap)),
                       const Spacer(),
                       TextButton.icon(
                         icon: const Icon(Icons.assignment_outlined, size: 18),
-                        label: const Text("Route Map Assign",
+                        label: Text(localizations.routemapassign,
                             style: TextStyle(fontSize: 14)),
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
@@ -861,8 +867,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  Text("Route ID: ${assigned.id}",
-                                      style: const TextStyle(
+                                  Text(localizations.routeid,
+                                      style: TextStyle(
                                           fontWeight: FontWeight.bold)),
                                   TextButton.icon(
                                     onPressed: () {
@@ -898,7 +904,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                       }
                                     },
                                     icon: const Icon(Icons.edit, size: 18),
-                                    label: const Text("Edit Route",
+                                    label: Text(localizations.editroute,
                                         style: TextStyle(fontSize: 14)),
                                   ),
                                 ],
@@ -971,11 +977,12 @@ class _AgentscreenState extends State<Agentscreen> {
                             ],
                           )),
                     const SizedBox(height: 30),
-                    Center(child: _buildSectionTitle("Reports")),
+                    Center(child: _buildSectionTitle(localizations.reports)),
                     _buildBulletPoint(
-                        "Already Subscribed: $alreadySubscribedCount"),
+                        "${localizations.alreadysubscribed}: $alreadySubscribedCount"),
                     const SizedBox(height: 40),
-                    Center(child: _buildSectionTitle("Shift Details")),
+                    Center(
+                        child: _buildSectionTitle(localizations.shiftdetails)),
                     const SizedBox(height: 10),
                     if (_selfieSessions.isNotEmpty)
                       ..._selfieSessions.asMap().entries.map((entry) {
@@ -987,7 +994,7 @@ class _AgentscreenState extends State<Agentscreen> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "Session ${index + 1}",
+                                "${localizations.session} ${index + 1}",
                                 style: const TextStyle(
                                     fontSize: 16, fontWeight: FontWeight.bold),
                               ),
@@ -999,7 +1006,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                       child: GestureDetector(
                                         onTap: () => _showSelfieDialog(
                                             session.startSelfie,
-                                            "Start Selfie"),
+                                            localizations.startselfie),
                                         child: Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
@@ -1011,8 +1018,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                           ),
                                           child: Column(
                                             children: [
-                                              const Text(
-                                                "Start Time",
+                                              Text(
+                                                localizations.starttime,
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -1036,7 +1043,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                     Expanded(
                                       child: GestureDetector(
                                         onTap: () => _showSelfieDialog(
-                                            session.endSelfie, "End Selfie"),
+                                            session.endSelfie,
+                                            localizations.endselfie),
                                         child: Container(
                                           padding: const EdgeInsets.all(12),
                                           decoration: BoxDecoration(
@@ -1048,8 +1056,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                           ),
                                           child: Column(
                                             children: [
-                                              const Text(
-                                                "End Time",
+                                              Text(
+                                                localizations.endtime,
                                                 style: TextStyle(
                                                     fontWeight:
                                                         FontWeight.bold),
@@ -1081,8 +1089,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                   ),
                                   child: Column(
                                     children: [
-                                      const Text(
-                                        "Total Working Hours",
+                                      Text(
+                                        localizations.totalworkinghours,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
@@ -1115,13 +1123,14 @@ class _AgentscreenState extends State<Agentscreen> {
                                   ),
                                   child: Column(
                                     children: [
-                                      const Text(
-                                        "Session Ongoing",
+                                      Text(
+                                        localizations.sessionongoing,
                                         style: TextStyle(
                                             fontWeight: FontWeight.bold),
                                       ),
                                       Text(
-                                        "Work in progress, end time not set",
+                                        localizations
+                                            .workinprogressendtimenotset,
                                         style: TextStyle(
                                             fontSize: 14,
                                             color: Colors.grey[700]),
@@ -1141,8 +1150,8 @@ class _AgentscreenState extends State<Agentscreen> {
                           border: Border.all(color: Colors.grey),
                           borderRadius: BorderRadius.circular(8),
                         ),
-                        child: const Text(
-                          "No shift data available",
+                        child: Text(
+                          localizations.noshiftdataavailable,
                           style: TextStyle(fontSize: 16, color: Colors.grey),
                         ),
                       ),
@@ -1154,26 +1163,39 @@ class _AgentscreenState extends State<Agentscreen> {
     );
   }
 
-  Widget _buildDrawer() {
+  Widget _buildDrawer(
+      LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
       child: ListView(
         children: [
           DrawerHeader(
-            decoration: BoxDecoration(color: Colors.blue.shade100),
+            decoration: const BoxDecoration(color: Colors.blue),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.account_circle, size: 60),
+                // Image.asset('assets/logo.png'),
+                const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text(agentname, style: const TextStyle(fontSize: 16)),
+                Text("${localizations.salesrepresentative}    ",
+                    style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
           ListTile(
-            leading: const Icon(Icons.history),
-            title: const Text("History Page"),
-            onTap: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const Historypage())),
+            title: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('English'),
+                Switch(
+                  value: localeProvider.locale.languageCode == 'te',
+                  onChanged: (value) => localeProvider.toggleLocale(),
+                  activeColor: Colors.green,
+                  inactiveThumbColor: Colors.blue,
+                  activeTrackColor: Colors.green.shade200,
+                  inactiveTrackColor: Colors.blue.shade200,
+                ),
+                const Text('తెలుగు'),
+              ],
+            ),
           ),
         ],
       ),
