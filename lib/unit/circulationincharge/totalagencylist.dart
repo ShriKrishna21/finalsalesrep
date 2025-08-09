@@ -1,5 +1,6 @@
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agency_oneday_customerforms.dart';
+import 'package:finalsalesrep/unit/circulationincharge/agency_total_customerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -7,19 +8,19 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   runApp(const MaterialApp(
-    home: Agencylist(),
+    home: totalagencylist(),
     debugShowCheckedModeBanner: false,
   ));
 }
 
-class Agencylist extends StatefulWidget {
-  const Agencylist({super.key});
+class totalagencylist extends StatefulWidget {
+  const totalagencylist({super.key});
 
   @override
-  State<Agencylist> createState() => _AgencylistState();
+  State<totalagencylist> createState() => _totalagencylistState();
 }
 
-class _AgencylistState extends State<Agencylist> {
+class _totalagencylistState extends State<totalagencylist> {
   List<AgencyData> agencies = [];
   bool isLoading = true;
 
@@ -94,7 +95,7 @@ class _AgencylistState extends State<Agencylist> {
   Navigator.push(
     context,
     MaterialPageRoute(
-      builder: (context) => AgencyOnedayCustomerforms(
+      builder: (context) => AgencyTotalCustomerforms(
         agencyName: agencyName,
       ),
     ),

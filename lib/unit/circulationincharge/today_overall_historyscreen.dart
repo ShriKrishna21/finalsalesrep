@@ -1,6 +1,8 @@
 import 'package:finalsalesrep/agent/onedayhistory.dart';
 import 'package:finalsalesrep/modelclasses/customerformsunitwise.dart';
-import 'package:finalsalesrep/unit/circulationincharge/agencylist.dart';
+import 'package:finalsalesrep/unit/circulationincharge/agency_total_customerforms.dart';
+import 'package:finalsalesrep/unit/circulationincharge/todayagencylist.dart';
+import 'package:finalsalesrep/unit/circulationincharge/totalagencylist.dart';
 import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 
@@ -60,7 +62,7 @@ class _TodayOverallHistoryscreenState extends State<TodayOverallHistoryscreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Agencylist(),
+                      builder: (context) => todayagencylist(),
                     ),
                   );
                 },
@@ -79,7 +81,7 @@ class _TodayOverallHistoryscreenState extends State<TodayOverallHistoryscreen> {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => Allcustomerforms(),
+                      builder: (context) =>totalagencylist(),
                     ),
                   );
                 },
