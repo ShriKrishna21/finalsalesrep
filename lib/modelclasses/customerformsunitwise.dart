@@ -1,3 +1,4 @@
+
 class AllCustomerForms {
   String? jsonrpc;
   dynamic id;
@@ -116,14 +117,14 @@ class Records {
     employed = _parseBool(json['employed']);
     faceBase64 = _asString(json['face_base64']);
     locationUrl = _asString(json['location_url']);
-    latitude = _asString(json['latitude']);
+    // latitude = _asСтрока(json['latitude']);
     longitude = _asString(json['longitude']);
     forConsider = _asString(json['for_consider']);
     shiftToEENADU = _parseBool(json['shift_to_eenadu']);
     wouldLikeToStayWithExistingNewsPapar =
         _parseBool(json['would_like_to_stay_with_existing_news_papar']);
     startCirculating = _asString(json['start_circulating']);
-    agency = _asString(json['Agency']); // Capital 'A' to match API
+    agency = _asString(json['Agency']);
     age = _asString(json['age']);
     customerType = _asString(json['customer_type']);
   }
