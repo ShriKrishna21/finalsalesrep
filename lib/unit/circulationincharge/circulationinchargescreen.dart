@@ -272,20 +272,20 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildCard(
-                      title: localizations.subscriptionDetails,
-                      rows: [
-                        _InfoRow(
-                            label: localizations.housesVisited,
-                            value: customerFormCount.toString()),
-                        _InfoRow(
-                            label: localizations.eenaduSubscription,
-                            value: alreadySubscribedCount.toString()),
-                        _InfoRow(
-                            label: localizations.willingToChange,
-                            value: offerAcceptedCount.toString()),
-                      ],
-                    ),
+                    // _buildCard(
+                    //   title: localizations.subscriptionDetails,
+                    //   rows: [
+                    //     _InfoRow(
+                    //         label: localizations.housesVisited,
+                    //         value: customerFormCount.toString()),
+                    //     _InfoRow(
+                    //         label: localizations.eenaduSubscription,
+                    //         value: alreadySubscribedCount.toString()),
+                    //     _InfoRow(
+                    //         label: localizations.willingToChange,
+                    //         value: offerAcceptedCount.toString()),
+                    //   ],
+                    // ),
                     const SizedBox(height: 30),
                     _buildGridButtons()
                   ],
@@ -381,10 +381,10 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
-        _buildBlackWhiteButton("Staff working route ", () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ApproveAgents()));
-        }),
+        // _buildBlackWhiteButton("Staff working route ", () {
+        //   Navigator.push(context,
+        //       MaterialPageRoute(builder: (_) => const ApproveAgents()));
+        // }),
       ],
     );
   }

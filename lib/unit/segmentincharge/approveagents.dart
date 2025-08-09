@@ -130,7 +130,7 @@ class _ApproveAgentsState extends State<ApproveAgents> {
     final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(loc.approveagents)),
+      appBar: AppBar(title: Text("Approve Staff")),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : error != null
