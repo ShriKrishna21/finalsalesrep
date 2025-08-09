@@ -305,7 +305,7 @@ class _AgentscreenState extends State<Agentscreen> {
       );
     }
   }
-
+  
   Future<void> loadWorkStatus() async {
     final prefs = await SharedPreferences.getInstance();
     setState(() {
@@ -1181,19 +1181,29 @@ class _AgentscreenState extends State<Agentscreen> {
             ),
           ),
           ListTile(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            title: Column(
               children: [
-                const Text('English'),
-                Switch(
-                  value: localeProvider.locale.languageCode == 'te',
-                  onChanged: (value) => localeProvider.toggleLocale(),
-                  activeColor: Colors.green,
-                  inactiveThumbColor: Colors.blue,
-                  activeTrackColor: Colors.green.shade200,
-                  inactiveTrackColor: Colors.blue.shade200,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('English'),
+                    Switch(
+                      value: localeProvider.locale.languageCode == 'te',
+                      onChanged: (value) => localeProvider.toggleLocale(),
+                      activeColor: Colors.green,
+                      inactiveThumbColor: Colors.blue,
+                      activeTrackColor: Colors.green.shade200,
+                      inactiveTrackColor: Colors.blue.shade200,
+                    ),
+                    const Text('తెలుగు'),
+                    
+                  ],
                 ),
-                const Text('తెలుగు'),
+                GestureDetector(
+                      onTap: () {
+                        Navigator.push(context, MaterialPageRoute(builder: (context) => Historypage(),));    
+                      },
+                      child: Text("Total History")),
               ],
             ),
           ),

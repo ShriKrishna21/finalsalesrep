@@ -108,7 +108,7 @@ class _approvedagentsState extends State<approvedagents> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
-      appBar: AppBar(title: Text(localizations.approvedagents)),
+      appBar: AppBar(title: Text("Approved Staff")),
       body: loading
           ? const Center(child: CircularProgressIndicator())
           : error != null

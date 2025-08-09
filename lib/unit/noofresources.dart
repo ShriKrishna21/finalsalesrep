@@ -69,25 +69,6 @@ class _NoofresourcesState extends State<Noofresources> {
     }
   }
 
-  Future<List<Map<String, dynamic>>> fetchAgentSelfies(int agentId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-
-    final response = await http.post(
-      Uri.parse("https://salesrep.esanchaya.com/api/user/today_selfies"),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "params": {"token": token, "user_id": agentId}
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      return List<Map<String, dynamic>>.from(data['result']['selfies'] ?? []);
-    } else {
-      return [];
-    }
-  }
 
   @override
   void initState() {
