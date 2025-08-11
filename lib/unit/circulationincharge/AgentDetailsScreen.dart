@@ -1,3 +1,6 @@
+import 'package:finalsalesrep/unit/circulationincharge/toaday_customerforms_agent.dart';
+import 'package:finalsalesrep/unit/circulationincharge/total_customerform_agency.dart';
+import 'package:finalsalesrep/unit/today_customerforms_agencylist.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/today_staff_attendance.dart';
@@ -41,6 +44,26 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
               context,
               MaterialPageRoute(
                 builder: (_) => TotalStaffAttendance(user: widget.user),
+              ),
+            );
+          }),
+                    const SizedBox(height: 20),
+
+          _buildBlackWhiteButton("Today customer forms", () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => todaycustomerformagencylist(user: widget.user),
+              ),
+            );
+          }),
+                    const SizedBox(height: 20),
+
+            _buildBlackWhiteButton("Total customer forms", () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => TotalCustomerformAgency(user: widget.user),
               ),
             );
           }),
