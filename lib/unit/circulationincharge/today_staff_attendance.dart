@@ -84,24 +84,26 @@ void initState() {
                       : null,
                 }).toList()}");
 
-        if (selfieData.success) {
-          try {
-            setState(() {
-              _selfieSessions = selfieData.sessions;
-            });
-          } catch (e) {
-            debugPrint("❌ Error in setState: $e");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error updating UI: $e")),
-            );
-          }
-        } else {
-          debugPrint(
-              "❌ Selfie times fetch unsuccessful: ${selfieData.success}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to fetch selfie times")),
-          );
-        }
+     if (selfieData.success) {
+  try {
+    final today = DateTime.now();
+    setState(() {
+      _selfieSessions = selfieData.sessions.where((session) {
+        if (session.startTime == null) return false;
+        final sessionDate = DateTime.parse(session.startTime!);
+        return sessionDate.year == today.year &&
+            sessionDate.month == today.month &&
+            sessionDate.day == today.day;
+      }).toList();
+    });
+  } catch (e) {
+    debugPrint("❌ Error in setState: $e");
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text("Error updating UI: $e")),
+    );
+  }
+}
+
       } else {
         debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
         ScaffoldMessenger.of(context).showSnackBar(
@@ -203,19 +205,19 @@ void initState() {
                                       fontSize: 16, fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 8),
-                                Row(
-                                  children: [
-                                    Text("Date:"),
-                                     Text(
-                                                  session.startTime != null
-                                                      ? DateFormat('dd-mm.yyyy')
-                                                          .format(DateTime.parse(
-                                                              session.startTime!))
-                                                      : "--",
-                                                ),
+                                // Row(
+                                //   children: [
+                                //     Text("Date:"),
+                                //      Text(
+                                //                   session.startTime != null
+                                //                       ? DateFormat('dd-mm.yyyy')
+                                //                           .format(DateTime.parse(
+                                //                               session.startTime!))
+                                //                       : "--",
+                                //                 ),
 
-                                  ],
-                                ),
+                                //   ],
+                                // ),
                                 Row(
                                   children: [
                                     if (session.startTime != null)
