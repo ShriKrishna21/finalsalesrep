@@ -3,6 +3,7 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/usersunit.dart';
 import 'package:finalsalesrep/regionalhead/customerformsscreen.dart';
+import 'package:finalsalesrep/regionalhead/unitwisepromoters.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -104,30 +105,42 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
                         )),
 
                     // Agent container
-                    if (agentUsers.isNotEmpty)
-                      Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Card(
-                          child: ExpansionTile(
-                            title: Text(
-                              localizations.agents,
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            initiallyExpanded: false,
-                            children: agentUsers.map((user) {
-                              return ListTile(
-                                leading: const Icon(Icons.person),
-                                title: Text(user.name ?? "No Name"),
-                                subtitle: Text(
-                                    "${user.role ?? "No Role"} - ${user.email ?? ""}"),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
+                   if (agentUsers.isNotEmpty)
+  Padding(
+    padding: const EdgeInsets.all(8.0),
+    child: Card(
+      child: ExpansionTile(
+        title: Text(
+          localizations.agents,
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        initiallyExpanded: false,
+        children: agentUsers.map((user) {
+          return ListTile(
+            leading: const Icon(Icons.person),
+            title: Text(user.name ?? "No Name"),
+            subtitle:
+                Text("${user.role ?? "No Role"} - ${user.email ?? ""}"),
+           onTap: () {
+  Navigator.push(
+    context,
+    MaterialPageRoute(
+      builder: (context) => unitwisepromoters(
+        id: user.id ?? 0, // match the constructor parameter name
+        name: user.name ?? "No Name",
+      ),
+    ),
+  );
+},
+
+          );
+        }).toList(),
+      ),
+    ),
+  ),
                     Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: GestureDetector(
