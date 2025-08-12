@@ -3,6 +3,7 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/usersunit.dart';
 import 'package:finalsalesrep/regionalhead/customerformsscreen.dart';
+import 'package:finalsalesrep/regionalhead/todaycustomerformscreen.dart';
 import 'package:finalsalesrep/regionalhead/unitwisepromoters.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -111,7 +112,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
     child: Card(
       child: ExpansionTile(
         title: Text(
-          localizations.agents,
+          "Promoters",
           style: TextStyle(
             fontSize: 18,
             fontWeight: FontWeight.bold,
@@ -158,7 +159,32 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
                           elevation: 3,
                           child: ListTile(
                             title: Text(
-                              localizations.ustomerformsofunit,
+                              "Total Customer Forms of Unit",
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            trailing: Icon(Icons.arrow_forward_ios),
+                          ),
+                        ),
+                      ),
+                    ),
+                     Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  Todaycustomerformscreen(unitName: widget.unitName),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          color: Colors.lightBlue[50],
+                          elevation: 3,
+                          child: ListTile(
+                            title: Text(
+                              "Today Customer Forms of Unit",
                               style: TextStyle(fontWeight: FontWeight.bold),
                             ),
                             trailing: Icon(Icons.arrow_forward_ios),
