@@ -7,7 +7,7 @@ class Users {
   String? createUid;
   String? unitName;
   String? phone;
-  String? state;
+  bool? state; // Using bool? internally, but parsed dynamically
   String? panNumber;
   String? aadharNumber;
   String? role;
@@ -29,18 +29,22 @@ class Users {
   });
 
   factory Users.fromJson(Map<String, dynamic> json) => Users(
-        id: json['id'],
-        name: json['name'],
-        email: json['email'],
-        login: json['login'],
-        createUid: json['create_uid'],
-        unitName: json['unit_name'],
-        phone: json['phone'],
-        state: json['state'],
-        panNumber: json['pan_number'],
-        aadharNumber: json['aadhar_number'],
-        role: json['role'],
-        status: json['status'],
+        id: json['id'] as int?,
+        name: json['name'] as String?,
+        email: json['email'] as String?,
+        login: json['login'] as String?,
+        createUid: json['create_uid'] as String?,
+        unitName: json['unit_name'] as String?,
+        phone: json['phone'] as String?,
+        state: json['state'] is bool
+            ? json['state'] as bool?
+            : json['state'] is String
+                ? json['state'].toLowerCase() == 'true'
+                : null, // Convert string "true"/"false" to bool, or null for other strings
+        panNumber: json['pan_number'] as String?,
+        aadharNumber: json['aadhar_number'] as String?,
+        role: json['role'] as String?,
+        status: json['status'] as String?,
       );
 }
 
@@ -53,7 +57,7 @@ class UserById {
   UserById({this.jsonrpc, this.id, this.result});
 
   factory UserById.fromJson(Map<String, dynamic> json) => UserById(
-        jsonrpc: json['jsonrpc'],
+        jsonrpc: json['jsonrpc'] as String?,
         id: json['id'],
         result: json['result'] != null ? Result.fromJson(json['result']) : null,
       );
@@ -66,7 +70,7 @@ class Result {
   Result({this.status, this.users});
 
   factory Result.fromJson(Map<String, dynamic> json) => Result(
-        status: json['status'],
+        status: json['status'] as int?,
         users: (json['users'] as List?)?.map((e) => Users.fromJson(e)).toList(),
       );
 }
