@@ -155,6 +155,123 @@ class _AgentProfileState extends State<agentProfile> {
     }
   }
 
+  Future<bool> stopWork() async {
+    try {
+      final picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Photo required")),
+        );
+        return false;
+      }
+
+      final bytes = await photo.readAsBytes();
+      final photoBase64 = base64Encode(bytes);
+
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        print("❌ Missing or empty API key");
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+        return false;
+      }
+
+      print("📡 Hitting API: https://salesrep.esanchaya.com/api/end_work");
+
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": photoBase64,
+          }
+        }),
+      );
+
+      print("🔁 Status Code: ${response.statusCode}");
+      print("✅ Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          await prefs.setBool('isWorking', false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Work stopped")),
+          );
+          return true;
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          print("❌ Failed to stop work: $errorMessage");
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to stop work: $errorMessage")),
+          );
+          return false;
+        }
+      } else {
+        print("❌ Failed to stop work: ${response.statusCode}");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text("Failed to stop work: ${response.statusCode}")),
+        );
+        return false;
+      }
+    } catch (e) {
+      print("❌ Error stopping work: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error stopping work: $e")),
+      );
+      return false;
+    }
+  }
+
+  Future<void> handleLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    final bool? isWorking = prefs.getBool('isWorking');
+
+    if (isWorking == true) {
+      final bool? confirmStop = await showDialog<bool>(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text("stopworkrequired"),
+            content: Text("needtostopworkbeforelogout"),
+            actions: [
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.cancel,
+                    style: const TextStyle(color: Colors.black)),
+                onPressed: () => Navigator.of(context).pop(false),
+              ),
+              TextButton(
+                child: Text(AppLocalizations.of(context)!.stopwork,
+                    style: const TextStyle(color: Colors.red)),
+                onPressed: () => Navigator.of(context).pop(true),
+              ),
+            ],
+          );
+        },
+      );
+
+      if (confirmStop == true) {
+        final bool stopped = await stopWork();
+        if (stopped) {
+          agentLogout();
+        }
+      }
+    } else {
+      agentLogout();
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -296,7 +413,7 @@ class _AgentProfileState extends State<agentProfile> {
                                   style: const TextStyle(color: Colors.red)),
                               onPressed: () {
                                 Navigator.of(context).pop();
-                                agentLogout();
+                                handleLogout();
                               },
                             ),
                           ],
