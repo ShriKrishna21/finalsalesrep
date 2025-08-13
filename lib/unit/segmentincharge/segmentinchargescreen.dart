@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
+import 'package:finalsalesrep/unit/circulationincharge/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -300,23 +300,23 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildCard(
-                  title: localizations.subscriptionDetails,
-                  rows: [
-                    _InfoRow(
-                        label: localizations.housesVisited,
-                        value: customerFormCount.toString()),
-                    _InfoRow(
-                        label: localizations.eenaduSubscription,
-                        value: alreadySubscribedCount.toString()),
-                    _InfoRow(
-                        label: localizations.willingToChange,
-                        value: offerAcceptedCount.toString()),
-                    _InfoRow(
-                        label: localizations.notInterested,
-                        value: offerRejectedCount.toString()),
-                  ],
-                ),
+                // _buildCard(
+                //   title: localizations.subscriptionDetails,
+                //   rows: [
+                //     _InfoRow(
+                //         label: localizations.housesVisited,
+                //         value: customerFormCount.toString()),
+                //     _InfoRow(
+                //         label: localizations.eenaduSubscription,
+                //         value: alreadySubscribedCount.toString()),
+                //     _InfoRow(
+                //         label: localizations.willingToChange,
+                //         value: offerAcceptedCount.toString()),
+                //     _InfoRow(
+                //         label: localizations.notInterested,
+                //         value: offerRejectedCount.toString()),
+                //   ],
+                // ),
               ],
             ),
           ),
