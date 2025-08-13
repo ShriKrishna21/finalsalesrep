@@ -9,7 +9,6 @@ import 'package:finalsalesrep/unit/circulationincharge/today_overall_historyscre
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
@@ -259,7 +258,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                           context,
                           MaterialPageRoute(
                               builder: (_) =>
-                                  const TodayOverallHistoryscreen()),
+                                  const Allcustomerforms()),
                         );
                       },
                       child: _buildCard(

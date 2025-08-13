@@ -3,43 +3,18 @@ import 'package:finalsalesrep/modelclasses/customerformsunitwise.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agency_total_customerforms.dart';
 import 'package:finalsalesrep/unit/circulationincharge/todayagencylist.dart';
 import 'package:finalsalesrep/unit/circulationincharge/totalagencylist.dart';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:flutter/material.dart';
 
-// Dummy screens (replace these with your actual screen widgets)
-class TodayHistoryScreen extends StatelessWidget {
-  const TodayHistoryScreen({super.key});
+
+class Allcustomerforms extends StatefulWidget {
+  const Allcustomerforms({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Today History')),
-      body: const Center(child: Text('Today History Details')),
-    );
-  }
+  State<Allcustomerforms> createState() =>
+      _AllcustomerformsState();
 }
 
-class OverallHistoryScreen extends StatelessWidget {
-  const OverallHistoryScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Overall History')),
-      body: const Center(child: Text('Overall History Details')),
-    );
-  }
-}
-
-class TodayOverallHistoryscreen extends StatefulWidget {
-  const TodayOverallHistoryscreen({super.key});
-
-  @override
-  State<TodayOverallHistoryscreen> createState() =>
-      _TodayOverallHistoryscreenState();
-}
-
-class _TodayOverallHistoryscreenState extends State<TodayOverallHistoryscreen> {
+class _AllcustomerformsState extends State<Allcustomerforms> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
