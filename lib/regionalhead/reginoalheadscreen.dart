@@ -25,7 +25,10 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
   List<String> unitNames = [];
   List<Users> allUsers = [];
   bool isLoading = true;
-  Timer? tokenTimer;
+  Timer? _sessionCheckTimer;
+  bool _isLoggingOut = false; // Flag to prevent multiple logouts
+  final GlobalKey<ScaffoldMessengerState> _scaffoldMessengerKey =
+      GlobalKey<ScaffoldMessengerState>();
 
   @override
   void initState() {
@@ -34,64 +37,82 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
     startTokenValidation();
   }
 
-  @override
-  void dispose() {
-    tokenTimer?.cancel();
-    super.dispose();
-  }
-
-  Future<void> startTokenValidation() async {
-    tokenTimer = Timer.periodic(const Duration(seconds: 3), (_) {
-      validateToken();
-    });
+  void startTokenValidation() {
+    validateToken();
+    _sessionCheckTimer?.cancel();
+    _sessionCheckTimer =
+        Timer.periodic(const Duration(seconds: 10), (_) => validateToken());
   }
 
   Future<void> validateToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    final currentToken = prefs.getString('apikey') ?? '';
+    if (_isLoggingOut) return; // Prevent multiple logout attempts
 
-    if (currentToken.isEmpty) {
-      print("No token found. Skipping validation.");
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    if (token == null || token.isEmpty) {
+      _forceLogout("Session expired or invalid token.");
       return;
     }
 
-    final url =
-        Uri.parse('https://salesrep.esanchaya.com/api/token_validation');
-
     try {
-      final response = await http.post(
-        url,
+      final response = await http
+          .post(
+        Uri.parse('https://salesrep.esanchaya.com/token_validation'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
-          "params": {"token": currentToken}
+          "params": {"token": token}
         }),
-      );
+      )
+          .timeout(const Duration(seconds: 5), onTimeout: () {
+        throw TimeoutException('Token validation timed out');
+      });
 
-      print("Token validation response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body);
-        if (result['result'] != true) {
-          print("Invalid token, triggering logout.");
-          logoutUser();
-        }
-      } else {
-        print("Token validation failed with status: ${response.statusCode}");
+      final result = jsonDecode(response.body)['result'];
+      if (result == null || result['success'] != true) {
+        _forceLogout(
+            "Session expired. You may have logged in on another device.");
       }
     } catch (e) {
-      print("Token validation error: $e");
+      _forceLogout(
+          "Error validating session: ${e.toString()}. Please log in again.");
     }
   }
 
-  void logoutUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.clear();
+  Future<void> _forceLogout(String message) async {
+    if (_isLoggingOut) return; // Prevent re-entrant logout
+    setState(() => _isLoggingOut = true);
 
-    if (!mounted) return;
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute(builder: (_) => const Loginscreen()),
-      (route) => false,
-    );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('apikey'); // Clear only the token
+
+      // Show SnackBar
+      if (_scaffoldMessengerKey.currentState != null) {
+        _scaffoldMessengerKey.currentState!.showSnackBar(
+          SnackBar(
+              content: Text(message), duration: const Duration(seconds: 2)),
+        );
+      }
+
+      // Delay navigation to allow SnackBar to be visible
+      await Future.delayed(const Duration(seconds: 2));
+
+      if (mounted) {
+        try {
+          Navigator.pushReplacementNamed(context, '/login');
+        } catch (e) {
+          print('Navigation error: $e');
+          // Fallback navigation
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (context) => const Loginscreen()),
+            (route) => false,
+          );
+        }
+      }
+    } finally {
+      setState(() => _isLoggingOut = false);
+    }
   }
 
   Future<void> loadUserDataAndFetchUnits() async {
@@ -111,19 +132,14 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         body: jsonEncode({
           "params": {"token": token}
         }),
-      );
-
-      print("Response Body: ${response.body}");
+      ).timeout(const Duration(seconds: 2), onTimeout: () {
+        throw TimeoutException('Failed to fetch units');
+      });
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final unitData = unitwiseusers.fromJson(data);
         final users = unitData.result?.users ?? [];
-
-        print("Total users: ${users.length}");
-        for (var user in users) {
-          print("User: ${user.name}, Unit: ${user.unitName}");
-        }
 
         final units = users
             .map((user) => user.unitName ?? '')
@@ -138,13 +154,27 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
           isLoading = false;
         });
       } else {
-        print("Error: ${response.statusCode}");
         setState(() => isLoading = false);
+        if (_scaffoldMessengerKey.currentState != null) {
+          _scaffoldMessengerKey.currentState!.showSnackBar(
+            const SnackBar(content: Text('Failed to load units')),
+          );
+        }
       }
     } catch (e) {
-      print("Fetch units error: $e");
       setState(() => isLoading = false);
+      if (_scaffoldMessengerKey.currentState != null) {
+        _scaffoldMessengerKey.currentState!.showSnackBar(
+          SnackBar(content: Text('Error: ${e.toString()}')),
+        );
+      }
     }
+  }
+
+  @override
+  void dispose() {
+    _sessionCheckTimer?.cancel();
+    super.dispose();
   }
 
   @override
@@ -153,6 +183,8 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
     final localizations = AppLocalizations.of(context)!;
 
     return Scaffold(
+      key: _scaffoldMessengerKey,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         toolbarHeight: MediaQuery.of(context).size.height / 12,
         automaticallyImplyLeading: true,
@@ -179,13 +211,13 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         ],
         title: Center(
           child: RichText(
-            textAlign: TextAlign.center, // 👈 Add this line
+            textAlign: TextAlign.center,
             text: TextSpan(
               text: localizations.regionalHead,
               style: TextStyle(
                 fontSize: MediaQuery.of(context).size.height / 40,
                 fontWeight: FontWeight.bold,
-                color: Colors.black, // Ensure a visible color is set here
+                color: Colors.black,
               ),
               children: <TextSpan>[
                 TextSpan(
@@ -242,7 +274,7 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
         ),
       ),
       body: isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Center(child: CircularProgressIndicator(color: Colors.black))
           : Column(
               children: [
                 const SizedBox(height: 10),
@@ -277,11 +309,14 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
               ],
             ),
       floatingActionButton: FloatingActionButton.extended(
-        onPressed: () {
-          Navigator.push(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        onPressed: () async {
+          await Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => const Createincharge()),
           );
+          loadUserDataAndFetchUnits(); // Refresh units after creating a new one
         },
         icon: const Icon(Icons.add),
         label: Text(localizations.createincharge),
