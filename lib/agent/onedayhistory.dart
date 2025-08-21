@@ -261,7 +261,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 _detailRow(localizations.companyname, r.companyName),
                 _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
-                _detailRow(localizations.profession, r.profession),
+                // _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
                
                   Padding(
