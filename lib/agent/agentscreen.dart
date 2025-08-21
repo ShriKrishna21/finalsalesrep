@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -21,7 +22,6 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-import 'package:connectivity_plus/connectivity_plus.dart';
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
@@ -50,6 +50,11 @@ class _AgentscreenState extends State<Agentscreen> {
   List<AgencyData> _agencyList = [];
   String? _selectedAgencyId;
   bool _isLoadingAgencies = false;
+  // Controllers for "Other Agency" input fields
+  final TextEditingController _agencyNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+  final TextEditingController _unitController = TextEditingController();
 
   @override
   void initState() {
@@ -110,6 +115,14 @@ class _AgentscreenState extends State<Agentscreen> {
             }
           }
 
+          // Add "Other Agency" option to the agency list
+          uniqueAgencies['other_agency'] = AgencyData(
+            id: 'other_agency',
+            locationName: 'Other Agency',
+            code: 'OTHER',
+            unit: 'N/A',
+          );
+
           if (mounted) {
             setState(() {
               _agencyList = uniqueAgencies.values.toList();
@@ -120,7 +133,8 @@ class _AgentscreenState extends State<Agentscreen> {
           debugPrint("🔍 Agency List: ${_agencyList.map((a) => {
                 'id': a.id,
                 'locationName': a.locationName,
-                'code': a.code
+                'code': a.code,
+                'unit': a.unit
               }).toList()}");
         } else {
           debugPrint("❌ Failed to fetch agencies");
@@ -172,13 +186,104 @@ class _AgentscreenState extends State<Agentscreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-    final pinLocationId = int.tryParse(_selectedAgencyId!);
 
-    if (token == null || userId == null || pinLocationId == null) {
-      debugPrint("❌ Missing token, userId, or pinLocationId");
+    if (token == null || userId == null) {
+      debugPrint("❌ Missing token or userId");
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Missing required data")),
+        );
+      }
+      return;
+    }
+
+    if (_selectedAgencyId == 'other_agency') {
+      // Handle "Other Agency" case
+      if (_agencyNameController.text.isEmpty ||
+          _phoneController.text.isEmpty ||
+          _codeController.text.isEmpty ||
+          _unitController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Please fill all agency details")),
+          );
+        }
+        return;
+      }
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://salesrep.esanchaya.com/api/create_pin_location"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "params": {
+             
+              "token": token,
+              "code": _codeController.text,
+              "location_name": _agencyNameController.text,
+              "phone": _phoneController.text,
+              "unit_name": _unitController.text,
+            }
+          }),
+        );
+
+        debugPrint("🔁 Create Pin Location Status Code: ${response.statusCode}");
+        debugPrint("🔁 Create Pin Location Response: ${response.body}");
+
+        if (response.statusCode == 200) {
+          final result = jsonDecode(response.body)['result'];
+          if (result != null && result['success'] == true) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("New agency created successfully")),
+              );
+            }
+            await fetchAgencies(); // Refresh agency list
+            setState(() {
+              _selectedAgencyId = null;
+              _agencyNameController.clear();
+              _phoneController.clear();
+              _codeController.clear();
+              _unitController.clear();
+            });
+          } else {
+            final errorMessage = result?['message'] ?? 'Unknown error';
+            debugPrint("❌ Failed to create new agency: $errorMessage");
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to create agency: $errorMessage")),
+              );
+            }
+          }
+        } else {
+          debugPrint("❌ Failed to create agency: ${response.statusCode}");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text("Failed to create agency: ${response.statusCode}")),
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint("❌ Error creating new agency: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error creating agency: $e")),
+          );
+        }
+      }
+      return;
+    }
+
+    // Handle existing agency case
+    final pinLocationId = int.tryParse(_selectedAgencyId!);
+
+    if (pinLocationId == null) {
+      debugPrint("❌ Invalid pinLocationId: $_selectedAgencyId");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid agency ID")),
         );
       }
       return;
@@ -550,7 +655,7 @@ class _AgentscreenState extends State<Agentscreen> {
     final connectivityResult = await Connectivity().checkConnectivity();
     if (connectivityResult == ConnectivityResult.none) {
       debugPrint("❌ No network connection");
-      return; // Avoid making API call if no network
+      return;
     }
 
     final prefs = await SharedPreferences.getInstance();
@@ -586,7 +691,7 @@ class _AgentscreenState extends State<Agentscreen> {
             statusCode: response.statusCode,
           );
         }
-        return; // Success, exit the function
+        return;
       } catch (e) {
         retryCount++;
         debugPrint("❌ Token validation failed (attempt $retryCount): $e");
@@ -596,8 +701,7 @@ class _AgentscreenState extends State<Agentscreen> {
             responseBody: e.toString(),
           );
         } else {
-          await Future.delayed(
-              const Duration(seconds: 30)); // Wait before retry
+          await Future.delayed(const Duration(seconds: 30));
         }
       }
     }
@@ -775,6 +879,10 @@ class _AgentscreenState extends State<Agentscreen> {
   void dispose() {
     _sessionCheckTimer?.cancel();
     dateController.dispose();
+    _agencyNameController.dispose();
+    _phoneController.dispose();
+    _codeController.dispose();
+    _unitController.dispose();
     super.dispose();
   }
 
@@ -904,6 +1012,12 @@ class _AgentscreenState extends State<Agentscreen> {
                           : (String? newValue) {
                               setState(() {
                                 _selectedAgencyId = newValue;
+                                if (newValue != 'other_agency') {
+                                  _agencyNameController.clear();
+                                  _phoneController.clear();
+                                  _codeController.clear();
+                                  _unitController.clear();
+                                }
                               });
                             },
                       isExpanded: true,
@@ -914,6 +1028,69 @@ class _AgentscreenState extends State<Agentscreen> {
                           ? localizations.pleaseselectanagency
                           : null,
                     ),
+                    if (_selectedAgencyId == 'other_agency') ...[
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _agencyNameController,
+                        decoration: InputDecoration(
+                          labelText: localizations.agencyname ?? 'Agency Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.business),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "pleaseenteragencyname" ??
+                                'Please enter agency name'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: localizations.phone ?? 'Phone',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.phone),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) => value == null || value.isEmpty
+                            ?"pleaseenterphone" ??
+                                'Please enter phone number'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _codeController,
+                        decoration: InputDecoration(
+                          labelText: "code" ?? 'Code',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.code),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "pleaseentercode" ??
+                                'Please enter code'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _unitController,
+                        decoration: InputDecoration(
+                          labelText:"unit" ?? 'Unit',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.apartment),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ?" pleaseenterunit" ??
+                                'Please enter unit'
+                            : null,
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: _isLoadingAgencies ? null : assignPinLocation,
@@ -1088,12 +1265,11 @@ class _AgentscreenState extends State<Agentscreen> {
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle(localizations.reports)),
                     _buildBulletPoint(
-                        "${localizations.alreadysubscribed}: $alreadySubscribedCount"),
+                        "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
                     const SizedBox(height: 40),
                     Center(
                         child: _buildSectionTitle(localizations.shiftdetails)),
                     const SizedBox(height: 10),
-                    // Modified section to filter sessions by today's date
                     () {
                       final today = DateTime.now();
                       final todaySessions = _selfieSessions.where((session) {
@@ -1260,7 +1436,8 @@ class _AgentscreenState extends State<Agentscreen> {
                                           decoration: BoxDecoration(
                                             color: Colors.orange.shade50,
                                             border: Border.all(
-                                                color: Colors.orange),
+                                                color: const Color.fromARGB(
+                                                    255, 0, 0, 0)),
                                             borderRadius:
                                                 BorderRadius.circular(8),
                                           ),
