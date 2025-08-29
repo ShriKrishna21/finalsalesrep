@@ -1,3 +1,9 @@
+import 'package:finalsalesrep/regionalhead/unittodaycustomerforms.dart';
+import 'package:finalsalesrep/regionalhead/unittodaystaffattendance.dart';
+import 'package:finalsalesrep/regionalhead/unittotalcustomerforms.dart';
+
+import 'package:finalsalesrep/regionalhead/unittotalstaffattendance.dart';
+import 'package:flutter/material.dart';
 import 'package:finalsalesrep/unit/circulationincharge/toaday_customerforms_agent.dart';
 import 'package:finalsalesrep/unit/circulationincharge/total_customerform_agency.dart';
 import 'package:finalsalesrep/unit/today_customerforms_agencylist.dart';
@@ -6,22 +12,27 @@ import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/today_staff_attendance.dart';
 import 'package:finalsalesrep/unit/circulationincharge/total_staff_attendance.dart';
 
-class AgentDetailsScreen extends StatefulWidget {
-  final User user;
+class unitwisepromoters extends StatefulWidget {
+  final int id;
+  final String name;
 
-  const AgentDetailsScreen({super.key, required this.user});
+  const unitwisepromoters({
+    super.key,
+    required this.id,
+    required this.name,
+  });
 
   @override
-  State<AgentDetailsScreen> createState() => _AgentDetailsScreenState();
+  State<unitwisepromoters> createState() => _unitwisepromotersState();
 }
 
-class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
+class _unitwisepromotersState extends State<unitwisepromoters> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          "Staff: ${widget.user.name ?? 'Unknown'}",
+          "Staff: ${widget.name} (${widget.id})",
           overflow: TextOverflow.ellipsis,
         ),
         backgroundColor: Colors.black,
@@ -29,44 +40,43 @@ class _AgentDetailsScreenState extends State<AgentDetailsScreen> {
       ),
       body: Column(
         children: [
-          const SizedBox(height: 20),
-          _buildBlackWhiteButton("Staff Today's Attendance", () {
+          SizedBox(height: 20),
+          _buildBlackWhiteButton("${widget.name} Total Attendance", () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => TodayStaffAttendance(user: widget.user),
+                builder: (_) => unittotalstaffattendance(userid: widget.id),
               ),
             );
           }),
-          const SizedBox(height: 20),
-          _buildBlackWhiteButton("Staff Total Attendance", () {
+          SizedBox(height: 20),
+          _buildBlackWhiteButton("${widget.name} Today Attendance", () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => TotalStaffAttendance(user: widget.user),
+                builder: (_) => unittodaystaffattendance(userid: widget.id),
               ),
             );
           }),
-                    const SizedBox(height: 20),
-
-          _buildBlackWhiteButton("Today customer forms", () {
+          SizedBox(height: 20),
+          _buildBlackWhiteButton("${widget.name} Today Customerforms", () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => todaycustomerformagencylist(user: widget.user),
+                builder: (_) => Unittodaycustomerforms(userid: widget.id),
               ),
             );
           }),
-                    const SizedBox(height: 20),
-
-            _buildBlackWhiteButton("Total customer forms", () {
+          SizedBox(height: 20),
+          _buildBlackWhiteButton("${widget.name} Total Customerforms", () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (_) => TotalCustomerformAgency(user: widget.user),
+                builder: (_) => unittotalcustomerforms(userid: widget.id),
               ),
             );
           }),
+          SizedBox(height: 20),
         ],
       ),
     );

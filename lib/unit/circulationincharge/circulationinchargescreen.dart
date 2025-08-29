@@ -5,11 +5,10 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
-import 'package:finalsalesrep/unit/circulationincharge/today_overall_historyscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
 import 'package:flutter/material.dart';
@@ -259,7 +258,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                           context,
                           MaterialPageRoute(
                               builder: (_) =>
-                                  const TodayOverallHistoryscreen()),
+                                  const Allcustomerforms()),
                         );
                       },
                       child: _buildCard(
@@ -272,20 +271,20 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    _buildCard(
-                      title: localizations.subscriptionDetails,
-                      rows: [
-                        _InfoRow(
-                            label: localizations.housesVisited,
-                            value: customerFormCount.toString()),
-                        _InfoRow(
-                            label: localizations.eenaduSubscription,
-                            value: alreadySubscribedCount.toString()),
-                        _InfoRow(
-                            label: localizations.willingToChange,
-                            value: offerAcceptedCount.toString()),
-                      ],
-                    ),
+                    // _buildCard(
+                    //   title: localizations.subscriptionDetails,
+                    //   rows: [
+                    //     _InfoRow(
+                    //         label: localizations.housesVisited,
+                    //         value: customerFormCount.toString()),
+                    //     _InfoRow(
+                    //         label: localizations.eenaduSubscription,
+                    //         value: alreadySubscribedCount.toString()),
+                    //     _InfoRow(
+                    //         label: localizations.willingToChange,
+                    //         value: offerAcceptedCount.toString()),
+                    //   ],
+                    // ),
                     const SizedBox(height: 30),
                     _buildGridButtons()
                   ],
@@ -381,10 +380,10 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
-        _buildBlackWhiteButton("Staff working route ", () {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (_) => const ApproveAgents()));
-        }),
+        // _buildBlackWhiteButton("Staff working route ", () {
+        //   Navigator.push(context,
+        //       MaterialPageRoute(builder: (_) => const ApproveAgents()));
+        // }),
       ],
     );
   }

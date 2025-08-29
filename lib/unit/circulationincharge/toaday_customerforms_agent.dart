@@ -1,22 +1,28 @@
 import 'dart:convert';
 
 import 'package:finalsalesrep/agent/historypage.dart' hide AppLocalizations;
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Onedayhistory extends StatefulWidget {
-  const Onedayhistory({super.key});
+class ToadayCustomerformsAgent extends StatefulWidget {
+  final User user;
+  final String? agencyName;
+  const ToadayCustomerformsAgent({super.key, required this.user, this.agencyName});
 
   @override
-  State<Onedayhistory> createState() => _OnedayhistoryState();
+  State<ToadayCustomerformsAgent> createState() => _ToadayCustomerformsAgentState();
 }
 
-class _OnedayhistoryState extends State<Onedayhistory> {
+class _ToadayCustomerformsAgentState extends State<ToadayCustomerformsAgent> {
   List<Record> records = [];
   List<Record> filteredRecords = [];
   bool _isLoading = true;
@@ -33,23 +39,114 @@ class _OnedayhistoryState extends State<Onedayhistory> {
     super.initState();
     loadOnedayHistory();
   }
+ Future<Map<String, dynamic>> fetchOnedayHistoryy() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apikey = prefs.getString('apikey');
+    // final userid = prefs.getInt('id');
 
-// 8566682
-  Future<void> loadOnedayHistory() async {
-    setState(() => _isLoading = true);
-    final result = await _onedayagent.fetchOnedayHistory();
-    print('API Response: $result');
+    if (apikey == null || widget.user.id == null) {
+      print("❌ Missing user credentials: apikey or id is null");
+      return {'error': 'Missing credentials'};
+    }
 
-    setState(() {
-      final fetchedRecords = (result['records'] as List<Record>?) ?? [];
-      records = fetchedRecords.reversed.toList();
-      filteredRecords = List.from(records);
-      offerAcceptedCount = result['offer_accepted'] ?? 0;
-      offerRejectedCount = result['offer_rejected'] ?? 0;
-      alreadySubscribedCount = result['already_subscribed'] ?? 0;
-      _isLoading = false;
-    });
+    final apiUrl = CommonApiClass.oneDayAgent;
+
+    print("📡 Hitting API: $apiUrl");
+    print("📦 Payload: ${jsonEncode({
+      "params": {
+        "user_id": widget.user.id,
+        "token": apikey,
+      }
+    })}");
+
+    try {
+      final response = await http.post(
+        Uri.parse(apiUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          "params": {
+            "user_id": widget.user.id,
+            "token": apikey,
+          }
+        }),
+      ).timeout(const Duration(seconds: 30));
+
+      print("🔁 Status Code: ${response.statusCode}");
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        print("✅ Response: $jsonResponse");
+
+        final historyoneday = OneDayHistory.fromJson(jsonResponse);
+        final records = historyoneday.result?.records ?? [];
+
+        int subscribed = 0;
+        int accepted = 0;
+        int rejected = 0;
+
+        for (var record in records) {
+          final isSubscribed = record.eenaduNewspaper == true;
+          final isAccepted = record.freeOffer15Days == true;
+          final isRejected = record.freeOffer15Days == false;
+
+          if (isSubscribed) {
+            subscribed++;
+          } else {
+            if (isAccepted) accepted++;
+            if (isRejected) rejected++;
+          }
+        }
+
+        print("📊 Final Counts → Subscribed: $subscribed, Accepted: $accepted, Rejected: $rejected");
+
+        // Save locally
+        await prefs.setInt('today_count', records.length);
+        await prefs.setInt('offer_accepted', accepted);
+        await prefs.setInt('offer_rejected', rejected);
+        await prefs.setInt('already_subscribed', subscribed);
+
+        print("✅ Saved all counts to SharedPreferences");
+
+        return {
+          'records': records,
+          'offer_accepted': accepted,
+          'offer_rejected': rejected,
+          'already_subscribed': subscribed,
+        };
+      } else {
+        print("❌ Server returned error: ${response.statusCode}");
+        print("❌ Body: ${response.body}");
+        return {'error': 'Server error: ${response.statusCode}'};
+      }
+    } catch (e) {
+      print("❌ Network/Parsing error: $e");
+      return {'error': 'Network or unexpected error'};
+    }
   }
+// 8566682
+Future<void> loadOnedayHistory() async {
+  setState(() => _isLoading = true);
+  final result = await fetchOnedayHistoryy();
+  print('API Response: $result');
+
+  List<Record> fetchedRecords = (result['records'] as List<Record>?) ?? [];
+
+  // If agencyName is given, filter records by agencyName (case-insensitive)
+  if (widget.agencyName != null && widget.agencyName!.isNotEmpty) {
+    fetchedRecords = fetchedRecords.where((record) {
+      return (record.agency ?? '').toLowerCase() == widget.agencyName!.toLowerCase();
+    }).toList();
+  }
+
+  setState(() {
+    records = fetchedRecords.reversed.toList();
+    filteredRecords = List.from(records);
+    offerAcceptedCount = result['offer_accepted'] ?? 0;
+    offerRejectedCount = result['offer_rejected'] ?? 0;
+    alreadySubscribedCount = result['already_subscribed'] ?? 0;
+    _isLoading = false;
+  });
+}
 
   Future<void> openGoogleMaps(
       double? latitude, double? longitude, String? locationUrl) async {
@@ -159,12 +256,12 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           children: [
-                            _buildStat(localizations.accepted,
-                                offerAcceptedCount, Colors.green),
-                            _buildStat(localizations.rejected,
-                                offerRejectedCount, Colors.red),
-                            _buildStat(localizations.subscribed,
-                                alreadySubscribedCount, Colors.blue),
+                            // _buildStat(localizations.accepted,
+                            //     offerAcceptedCount, Colors.green),
+                            // _buildStat(localizations.rejected,
+                            //     offerRejectedCount, Colors.red),
+                            // _buildStat(localizations.subscribed,
+                            //     alreadySubscribedCount, Colors.blue),
                           ],
                         ),
                       ),
@@ -261,7 +358,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                 _detailRow(localizations.companyname, r.companyName),
                 _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
-                // _detailRow(localizations.profession, r.profession),
+                _detailRow(localizations.profession, r.profession),
                 _detailRow(localizations.jobWorkingstate, r.jobWorkingState),
                
                   Padding(

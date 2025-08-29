@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:finalsalesrep/agent/agentaddrouite.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -47,8 +48,13 @@ class _AgentscreenState extends State<Agentscreen> {
 
   // Agency dropdown related variables
   List<AgencyData> _agencyList = [];
-  String? _selectedAgencyId; // Changed to store agency ID instead of AgencyData
+  String? _selectedAgencyId;
   bool _isLoadingAgencies = false;
+  // Controllers for "Other Agency" input fields
+  final TextEditingController _agencyNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+  final TextEditingController _unitController = TextEditingController();
 
   @override
   void initState() {
@@ -72,9 +78,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
     if (token == null) {
       debugPrint("❌ Missing token");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Missing token")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing token")),
+        );
+      }
       setState(() {
         _isLoadingAgencies = false;
       });
@@ -100,7 +108,6 @@ class _AgentscreenState extends State<Agentscreen> {
         final agencyModel = AgencyModel.fromJson(data);
 
         if (agencyModel.result?.success == true) {
-          // Remove duplicates based on id
           final uniqueAgencies = <String, AgencyData>{};
           for (var agency in agencyModel.result?.data ?? []) {
             if (agency.id != null) {
@@ -108,42 +115,58 @@ class _AgentscreenState extends State<Agentscreen> {
             }
           }
 
-          setState(() {
-            _agencyList = uniqueAgencies.values.toList();
-            _isLoadingAgencies = false;
-          });
+          // Add "Other Agency" option to the agency list
+          uniqueAgencies['other_agency'] = AgencyData(
+            id: 'other_agency',
+            locationName: 'Other Agency',
+            code: 'OTHER',
+            unit: 'N/A',
+          );
 
-          // Log agency list to check for duplicates
+          if (mounted) {
+            setState(() {
+              _agencyList = uniqueAgencies.values.toList();
+              _isLoadingAgencies = false;
+            });
+          }
+
           debugPrint("🔍 Agency List: ${_agencyList.map((a) => {
                 'id': a.id,
                 'locationName': a.locationName,
-                'code': a.code
+                'code': a.code,
+                'unit': a.unit
               }).toList()}");
         } else {
           debugPrint("❌ Failed to fetch agencies");
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to fetch agency list")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Failed to fetch agency list")),
+            );
+          }
           setState(() {
             _isLoadingAgencies = false;
           });
         }
       } else {
         debugPrint("❌ Failed to fetch agencies: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text("Failed to fetch agencies: ${response.statusCode}")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text("Failed to fetch agencies: ${response.statusCode}")),
+          );
+        }
         setState(() {
           _isLoadingAgencies = false;
         });
       }
     } catch (e) {
       debugPrint("❌ Error fetching agencies: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching agencies: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error fetching agencies: $e")),
+        );
+      }
       setState(() {
         _isLoadingAgencies = false;
       });
@@ -152,22 +175,117 @@ class _AgentscreenState extends State<Agentscreen> {
 
   Future<void> assignPinLocation() async {
     if (_selectedAgencyId == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please select an agency first")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Please select an agency first")),
+        );
+      }
       return;
     }
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
+
+    if (token == null || userId == null) {
+      debugPrint("❌ Missing token or userId");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing required data")),
+        );
+      }
+      return;
+    }
+
+    if (_selectedAgencyId == 'other_agency') {
+      // Handle "Other Agency" case
+      if (_agencyNameController.text.isEmpty ||
+          _phoneController.text.isEmpty ||
+          _codeController.text.isEmpty ||
+          _unitController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Please fill all agency details")),
+          );
+        }
+        return;
+      }
+
+      try {
+        final response = await http.post(
+          Uri.parse("https://salesrep.esanchaya.com/api/create_pin_location"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "params": {
+             
+              "token": token,
+              "code": _codeController.text,
+              "location_name": _agencyNameController.text,
+              "phone": _phoneController.text,
+              "unit_name": _unitController.text,
+            }
+          }),
+        );
+
+        debugPrint("🔁 Create Pin Location Status Code: ${response.statusCode}");
+        debugPrint("🔁 Create Pin Location Response: ${response.body}");
+
+        if (response.statusCode == 200) {
+          final result = jsonDecode(response.body)['result'];
+          if (result != null && result['success'] == true) {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text("New agency created successfully")),
+              );
+            }
+            await fetchAgencies(); // Refresh agency list
+            setState(() {
+              _selectedAgencyId = null;
+              _agencyNameController.clear();
+              _phoneController.clear();
+              _codeController.clear();
+              _unitController.clear();
+            });
+          } else {
+            final errorMessage = result?['message'] ?? 'Unknown error';
+            debugPrint("❌ Failed to create new agency: $errorMessage");
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Failed to create agency: $errorMessage")),
+              );
+            }
+          }
+        } else {
+          debugPrint("❌ Failed to create agency: ${response.statusCode}");
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                  content:
+                      Text("Failed to create agency: ${response.statusCode}")),
+            );
+          }
+        }
+      } catch (e) {
+        debugPrint("❌ Error creating new agency: $e");
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Error creating agency: $e")),
+          );
+        }
+      }
+      return;
+    }
+
+    // Handle existing agency case
     final pinLocationId = int.tryParse(_selectedAgencyId!);
 
-    if (token == null || userId == null || pinLocationId == null) {
-      debugPrint("❌ Missing token, userId, or pinLocationId");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Missing required data")),
-      );
+    if (pinLocationId == null) {
+      debugPrint("❌ Invalid pinLocationId: $_selectedAgencyId");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid agency ID")),
+        );
+      }
       return;
     }
 
@@ -190,29 +308,38 @@ class _AgentscreenState extends State<Agentscreen> {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result != null && result['success'] == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Agency successfully assigned")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Agency successfully assigned")),
+            );
+          }
           await refreshData();
         } else {
           final errorMessage = result?['message'] ?? 'Unknown error';
           debugPrint("❌ Failed to assign pin location: $errorMessage");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to assign agency: $errorMessage")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to assign agency: $errorMessage")),
+            );
+          }
         }
       } else {
         debugPrint("❌ Failed to assign pin location: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Failed to assign agency: ${response.statusCode}")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content:
+                    Text("Failed to assign agency: ${response.statusCode}")),
+          );
+        }
       }
     } catch (e) {
       debugPrint("❌ Error assigning pin location: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error assigning agency: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error assigning agency: $e")),
+        );
+      }
     }
   }
 
@@ -225,9 +352,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
     if (token == null || userId == null) {
       debugPrint("❌ Missing token or userId");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Missing token or user ID")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing token or user ID")),
+        );
+      }
       return;
     }
 
@@ -252,9 +381,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
         if (data == null || data['result'] == null) {
           debugPrint("❌ Invalid response structure: Missing 'result' key");
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Invalid response from server")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Invalid response from server")),
+            );
+          }
           return;
         }
 
@@ -273,44 +404,47 @@ class _AgentscreenState extends State<Agentscreen> {
                 }).toList()}");
 
         if (selfieData.success) {
-          try {
+          if (mounted) {
             setState(() {
               _selfieSessions = selfieData.sessions;
             });
-          } catch (e) {
-            debugPrint("❌ Error in setState: $e");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error updating UI: $e")),
-            );
           }
         } else {
           debugPrint(
               "❌ Selfie times fetch unsuccessful: ${selfieData.success}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to fetch selfie times")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Failed to fetch selfie times")),
+            );
+          }
         }
       } else {
         debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content:
-                  Text("Failed to fetch selfie times: ${response.statusCode}")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    "Failed to fetch selfie times: ${response.statusCode}")),
+          );
+        }
       }
     } catch (e) {
       debugPrint("❌ Error fetching selfie times: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching selfie times: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error fetching selfie times: $e")),
+        );
+      }
     }
   }
 
   Future<void> loadWorkStatus() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      isWorking = prefs.getBool('isWorking') ?? false;
-    });
+    if (mounted) {
+      setState(() {
+        isWorking = prefs.getBool('isWorking') ?? false;
+      });
+    }
   }
 
   Future<void> saveWorkStatus(bool status) async {
@@ -327,9 +461,11 @@ class _AgentscreenState extends State<Agentscreen> {
       );
 
       if (photo == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Photo required")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Photo required")),
+          );
+        }
         return;
       }
 
@@ -341,9 +477,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
       if (token == null || token.isEmpty) {
         debugPrint("❌ Missing or empty API key");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Missing or invalid API key")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Missing or invalid API key")),
+          );
+        }
         return;
       }
 
@@ -369,33 +507,44 @@ class _AgentscreenState extends State<Agentscreen> {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result != null && result['success'] == true) {
-          setState(() {
-            isWorking = true;
-          });
+          if (mounted) {
+            setState(() {
+              isWorking = true;
+            });
+          }
           await saveWorkStatus(true);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Work started")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Work started")),
+            );
+          }
           await fetchSelfieTimes();
         } else {
           final errorMessage = result?['message'] ?? 'Unknown error';
           debugPrint("❌ Failed to start work: $errorMessage");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to start work: $errorMessage")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to start work: $errorMessage")),
+            );
+          }
         }
       } else {
         debugPrint("❌ Failed to start work: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Failed to start work: ${response.statusCode}")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    "Failed to start work: ${response.statusCode} - ${response.body}")),
+          );
+        }
       }
     } catch (e) {
       debugPrint("❌ Error starting work: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error starting work: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error starting work: $e")),
+        );
+      }
     }
   }
 
@@ -408,9 +557,11 @@ class _AgentscreenState extends State<Agentscreen> {
       );
 
       if (photo == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Photo required")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Photo required")),
+          );
+        }
         return;
       }
 
@@ -422,9 +573,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
       if (token == null || token.isEmpty) {
         debugPrint("❌ Missing or empty API key");
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("Missing or invalid API key")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Missing or invalid API key")),
+          );
+        }
         return;
       }
 
@@ -449,34 +602,45 @@ class _AgentscreenState extends State<Agentscreen> {
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result != null && result['success'] == true) {
-          setState(() {
-            isWorking = false;
-            _startWorkPhotoBase64 = null;
-          });
+          if (mounted) {
+            setState(() {
+              isWorking = false;
+              _startWorkPhotoBase64 = null;
+            });
+          }
           await saveWorkStatus(false);
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Work stopped")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Work stopped")),
+            );
+          }
           await fetchSelfieTimes();
         } else {
           final errorMessage = result?['message'] ?? 'Unknown error';
           debugPrint("❌ Failed to stop work: $errorMessage");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to stop work: $errorMessage")),
-          );
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to stop work: $errorMessage")),
+            );
+          }
         }
       } else {
         debugPrint("❌ Failed to stop work: ${response.statusCode}");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Failed to stop work: ${response.statusCode}")),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+                content: Text(
+                    "Failed to stop work: ${response.statusCode} - ${response.body}")),
+          );
+        }
       }
     } catch (e) {
       debugPrint("❌ Error stopping work: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error stopping work: $e")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Error stopping work: $e")),
+        );
+      }
     }
   }
 
@@ -488,6 +652,12 @@ class _AgentscreenState extends State<Agentscreen> {
   }
 
   Future<void> validateToken() async {
+    final connectivityResult = await Connectivity().checkConnectivity();
+    if (connectivityResult == ConnectivityResult.none) {
+      debugPrint("❌ No network connection");
+      return;
+    }
+
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final sessionId = prefs.getString('session_id');
@@ -496,47 +666,77 @@ class _AgentscreenState extends State<Agentscreen> {
       return;
     }
 
-    try {
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/token_validation"),
-        headers: {
-          "Content-Type": "application/json",
-          "Cookie": "session_id=$sessionId",
-        },
-        body: jsonEncode({
-          "params": {"token": token}
-        }),
-      );
-      debugPrint("🔁 Token Validation Response: ${response.body}");
-      final result = jsonDecode(response.body)['result'];
-      if (result == null || result['success'] != true) {
-        forceLogout(
-            "Session expired. You may have logged in on another device.");
+    const maxRetries = 3;
+    int retryCount = 0;
+
+    while (retryCount < maxRetries) {
+      try {
+        final response = await http.post(
+          Uri.parse("https://salesrep.esanchaya.com/token_validation"),
+          headers: {
+            "Content-Type": "application/json",
+            "Cookie": "session_id=$sessionId",
+          },
+          body: jsonEncode({
+            "params": {"token": token}
+          }),
+        );
+        debugPrint("🔁 Token Validation Response: ${response.body}");
+
+        final result = jsonDecode(response.body)['result'];
+        if (result == null || result['success'] != true) {
+          forceLogout(
+            "Session expired. You may have logged in on another device.",
+            responseBody: response.body,
+            statusCode: response.statusCode,
+          );
+        }
+        return;
+      } catch (e) {
+        retryCount++;
+        debugPrint("❌ Token validation failed (attempt $retryCount): $e");
+        if (retryCount >= maxRetries) {
+          forceLogout(
+            "Error validating session after $maxRetries attempts. Please log in again.",
+            responseBody: e.toString(),
+          );
+        } else {
+          await Future.delayed(const Duration(seconds: 30));
+        }
       }
-    } catch (e) {
-      forceLogout("Error validating session. Please log in again.");
     }
   }
 
-  void forceLogout(String message) async {
+  void forceLogout(String message,
+      {String? responseBody, int? statusCode}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
-    if (!mounted) return;
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
-    Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const Loginscreen()),
-        (route) => false);
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            "$message${statusCode != null ? ' (Status: $statusCode)' : ''}${responseBody != null ? ' Response: $responseBody' : ''}",
+          ),
+        ),
+      );
+      Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (_) => const Loginscreen()),
+          (route) => false);
+    }
   }
 
   Future<void> refreshData() async {
-    setState(() => _isLoading = true);
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
     await loadOnedayHistory();
     await fetchFullRouteMap();
     await fetchSelfieTimes();
     await fetchAgencies();
-    setState(() => _isLoading = false);
+    if (mounted) {
+      setState(() => _isLoading = false);
+    }
   }
 
   Future<void> fetchFullRouteMap() async {
@@ -575,11 +775,13 @@ class _AgentscreenState extends State<Agentscreen> {
           latestRoute = todayOnlyRoutes.first;
         }
 
-        setState(() {
-          fullRouteMap = routeMap;
-          fullRouteMap?.result?.assigned =
-              latestRoute != null ? [latestRoute] : [];
-        });
+        if (mounted) {
+          setState(() {
+            fullRouteMap = routeMap;
+            fullRouteMap?.result?.assigned =
+                latestRoute != null ? [latestRoute] : [];
+          });
+        }
       } else {
         debugPrint("❌ Failed to fetch full route map: ${response.statusCode}");
       }
@@ -591,9 +793,11 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> loadAgentData() async {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
-      setState(() {
-        agentname = prefs.getString('agentname') ?? '';
-      });
+      if (mounted) {
+        setState(() {
+          agentname = prefs.getString('agentname') ?? '';
+        });
+      }
     } catch (e) {
       debugPrint("❌ Error loading agent data: $e");
     }
@@ -602,12 +806,14 @@ class _AgentscreenState extends State<Agentscreen> {
   Future<void> loadOnedayHistory() async {
     try {
       final result = await _onedayagent.fetchOnedayHistory();
-      setState(() {
-        records = (result['records'] as List<dynamic>?)?.cast<Record>() ?? [];
-        offerAcceptedCount = result['offer_accepted'] ?? 0;
-        offerRejectedCount = result['offer_rejected'] ?? 0;
-        alreadySubscribedCount = result['already_subscribed'] ?? 0;
-      });
+      if (mounted) {
+        setState(() {
+          records = (result['records'] as List<dynamic>?)?.cast<Record>() ?? [];
+          offerAcceptedCount = result['offer_accepted'] ?? 0;
+          offerRejectedCount = result['offer_rejected'] ?? 0;
+          alreadySubscribedCount = result['already_subscribed'] ?? 0;
+        });
+      }
     } catch (e) {
       debugPrint("❌ Error loading one day history: $e");
     }
@@ -615,9 +821,11 @@ class _AgentscreenState extends State<Agentscreen> {
 
   void _showSelfieDialog(String? base64Image, String title) {
     if (base64Image == null || base64Image.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("No selfie available")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No selfie available")),
+        );
+      }
       return;
     }
 
@@ -627,39 +835,43 @@ class _AgentscreenState extends State<Agentscreen> {
 
     try {
       base64Decode(cleanBase64);
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text(title),
-          content: SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Image.memory(
-                  base64Decode(cleanBase64),
-                  width: 300,
-                  fit: BoxFit.contain,
-                  errorBuilder: (context, error, stackTrace) => const Text(
-                    "Error loading image",
-                    style: TextStyle(color: Colors.red),
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text(title),
+            content: SingleChildScrollView(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Image.memory(
+                    base64Decode(cleanBase64),
+                    width: 300,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Text(
+                      "Error loading image",
+                      style: TextStyle(color: Colors.red),
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("Close"),
+              ),
+            ],
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text("Close"),
-            ),
-          ],
-        ),
-      );
+        );
+      }
     } catch (e) {
       debugPrint("❌ Error decoding base64 image: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Invalid image data")),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid image data")),
+        );
+      }
     }
   }
 
@@ -667,6 +879,10 @@ class _AgentscreenState extends State<Agentscreen> {
   void dispose() {
     _sessionCheckTimer?.cancel();
     dateController.dispose();
+    _agencyNameController.dispose();
+    _phoneController.dispose();
+    _codeController.dispose();
+    _unitController.dispose();
     super.dispose();
   }
 
@@ -785,7 +1001,7 @@ class _AgentscreenState extends State<Agentscreen> {
                               Text(agency.locationName ??
                                   agency.code ??
                                   'Unknown'),
-                              Spacer(),
+                              const Spacer(),
                               Text("[${(agency.code ?? "")}]")
                             ],
                           ),
@@ -796,8 +1012,13 @@ class _AgentscreenState extends State<Agentscreen> {
                           : (String? newValue) {
                               setState(() {
                                 _selectedAgencyId = newValue;
+                                if (newValue != 'other_agency') {
+                                  _agencyNameController.clear();
+                                  _phoneController.clear();
+                                  _codeController.clear();
+                                  _unitController.clear();
+                                }
                               });
-                              // debugPrint("🔍 Selected agency ID: $newValue");
                             },
                       isExpanded: true,
                       hint: _isLoadingAgencies
@@ -807,6 +1028,69 @@ class _AgentscreenState extends State<Agentscreen> {
                           ? localizations.pleaseselectanagency
                           : null,
                     ),
+                    if (_selectedAgencyId == 'other_agency') ...[
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _agencyNameController,
+                        decoration: InputDecoration(
+                          labelText: localizations.agencyname ?? 'Agency Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.business),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "pleaseenteragencyname" ??
+                                'Please enter agency name'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: localizations.phone ?? 'Phone',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.phone),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) => value == null || value.isEmpty
+                            ?"pleaseenterphone" ??
+                                'Please enter phone number'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _codeController,
+                        decoration: InputDecoration(
+                          labelText: "code" ?? 'Code',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.code),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ? "pleaseentercode" ??
+                                'Please enter code'
+                            : null,
+                      ),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _unitController,
+                        decoration: InputDecoration(
+                          labelText:"unit" ?? 'Unit',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          prefixIcon: const Icon(Icons.apartment),
+                        ),
+                        validator: (value) => value == null || value.isEmpty
+                            ?" pleaseenterunit" ??
+                                'Please enter unit'
+                            : null,
+                      ),
+                    ],
                     const SizedBox(height: 10),
                     ElevatedButton(
                       onPressed: _isLoadingAgencies ? null : assignPinLocation,
@@ -820,7 +1104,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       ),
                       child: Text(
                         localizations.assignagency,
-                        style: TextStyle(fontSize: 16),
+                        style: const TextStyle(fontSize: 16),
                       ),
                     ),
                     const SizedBox(height: 20),
@@ -831,7 +1115,7 @@ class _AgentscreenState extends State<Agentscreen> {
                       TextButton.icon(
                         icon: const Icon(Icons.assignment_outlined, size: 18),
                         label: Text(localizations.routemapassign,
-                            style: TextStyle(fontSize: 14)),
+                            style: const TextStyle(fontSize: 14)),
                         onPressed: () async {
                           final prefs = await SharedPreferences.getInstance();
                           final token = prefs.getString('apikey');
@@ -848,10 +1132,12 @@ class _AgentscreenState extends State<Agentscreen> {
                               ),
                             ).then((_) => refreshData());
                           } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                  content: Text("Missing user ID or Token")),
-                            );
+                            if (mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                    content: Text("Missing user ID or Token")),
+                              );
+                            }
                           }
                         },
                       ),
@@ -868,7 +1154,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                     MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(localizations.routeid,
-                                      style: TextStyle(
+                                      style: const TextStyle(
                                           fontWeight: FontWeight.bold)),
                                   TextButton.icon(
                                     onPressed: () {
@@ -905,7 +1191,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                     },
                                     icon: const Icon(Icons.edit, size: 18),
                                     label: Text(localizations.editroute,
-                                        style: TextStyle(fontSize: 14)),
+                                        style: const TextStyle(fontSize: 14)),
                                   ),
                                 ],
                               ),
@@ -979,182 +1265,219 @@ class _AgentscreenState extends State<Agentscreen> {
                     const SizedBox(height: 30),
                     Center(child: _buildSectionTitle(localizations.reports)),
                     _buildBulletPoint(
-                        "${localizations.alreadysubscribed}: $alreadySubscribedCount"),
+                        "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
                     const SizedBox(height: 40),
                     Center(
                         child: _buildSectionTitle(localizations.shiftdetails)),
                     const SizedBox(height: 10),
-                    if (_selfieSessions.isNotEmpty)
-                      ..._selfieSessions.asMap().entries.map((entry) {
-                        final index = entry.key;
-                        final session = entry.value;
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "${localizations.session} ${index + 1}",
+                    () {
+                      final today = DateTime.now();
+                      final todaySessions = _selfieSessions.where((session) {
+                        final startTime =
+                            DateTime.tryParse(session.startTime ?? '');
+                        return startTime != null &&
+                            startTime.year == today.year &&
+                            startTime.month == today.month &&
+                            startTime.day == today.day;
+                      }).toList();
+
+                      return todaySessions.isNotEmpty
+                          ? Column(
+                              children:
+                                  todaySessions.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final session = entry.value;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        "${localizations.session} ${index + 1}",
+                                        style: const TextStyle(
+                                            fontSize: 16,
+                                            fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          if (session.startTime != null)
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () => _showSelfieDialog(
+                                                    session.startSelfie,
+                                                    localizations.startselfie),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.green.shade50,
+                                                    border: Border.all(
+                                                        color: Colors.green),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        localizations.starttime,
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Text(
+                                                        session.startTime !=
+                                                                null
+                                                            ? DateFormat(
+                                                                    'hh:mm a')
+                                                                .format(DateTime
+                                                                    .parse(session
+                                                                        .startTime!))
+                                                            : "--",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                          if (session.startTime != null &&
+                                              session.endTime != null)
+                                            const SizedBox(width: 12),
+                                          if (session.endTime != null)
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () => _showSelfieDialog(
+                                                    session.endSelfie,
+                                                    localizations.endselfie),
+                                                child: Container(
+                                                  padding:
+                                                      const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(
+                                                    color: Colors.red.shade50,
+                                                    border: Border.all(
+                                                        color: Colors.red),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            8),
+                                                  ),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(
+                                                        localizations.endtime,
+                                                        style: const TextStyle(
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                      Text(
+                                                        session.endTime != null
+                                                            ? DateFormat(
+                                                                    'hh:mm a')
+                                                                .format(DateTime
+                                                                    .parse(session
+                                                                        .endTime!))
+                                                            : "--",
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 12),
+                                      if (session.startTime != null &&
+                                          session.endTime != null)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.blue.shade50,
+                                            border:
+                                                Border.all(color: Colors.blue),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                localizations.totalworkinghours,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                () {
+                                                  final start =
+                                                      DateTime.tryParse(
+                                                          session.startTime!);
+                                                  final end = DateTime.tryParse(
+                                                      session.endTime!);
+                                                  if (start != null &&
+                                                      end != null) {
+                                                    final duration =
+                                                        end.difference(start);
+                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                  }
+                                                  return "--";
+                                                }(),
+                                              ),
+                                            ],
+                                          ),
+                                        )
+                                      else if (session.startTime != null &&
+                                          session.endTime == null)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(
+                                            color: Colors.orange.shade50,
+                                            border: Border.all(
+                                                color: const Color.fromARGB(
+                                                    255, 0, 0, 0)),
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                          ),
+                                          child: Column(
+                                            children: [
+                                              Text(
+                                                localizations.sessionongoing,
+                                                style: const TextStyle(
+                                                    fontWeight:
+                                                        FontWeight.bold),
+                                              ),
+                                              Text(
+                                                localizations
+                                                    .workinprogressendtimenotset,
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.grey[700]),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                color: Colors.grey.shade100,
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                localizations.noshiftdataavailable,
                                 style: const TextStyle(
-                                    fontSize: 16, fontWeight: FontWeight.bold),
+                                    fontSize: 16, color: Colors.grey),
                               ),
-                              const SizedBox(height: 8),
-                              Row(
-                                children: [
-                                  if (session.startTime != null)
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => _showSelfieDialog(
-                                            session.startSelfie,
-                                            localizations.startselfie),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.green.shade50,
-                                            border:
-                                                Border.all(color: Colors.green),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                localizations.starttime,
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text(
-                                                session.startTime != null
-                                                    ? DateFormat('hh:mm a')
-                                                        .format(DateTime.parse(
-                                                            session.startTime!))
-                                                    : "--",
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  if (session.startTime != null &&
-                                      session.endTime != null)
-                                    const SizedBox(width: 12),
-                                  if (session.endTime != null)
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => _showSelfieDialog(
-                                            session.endSelfie,
-                                            localizations.endselfie),
-                                        child: Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.red.shade50,
-                                            border:
-                                                Border.all(color: Colors.red),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                localizations.endtime,
-                                                style: TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text(
-                                                session.endTime != null
-                                                    ? DateFormat('hh:mm a')
-                                                        .format(DateTime.parse(
-                                                            session.endTime!))
-                                                    : "--",
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              if (session.startTime != null &&
-                                  session.endTime != null)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.blue.shade50,
-                                    border: Border.all(color: Colors.blue),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        localizations.totalworkinghours,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        () {
-                                          final start = DateTime.tryParse(
-                                              session.startTime!);
-                                          final end = DateTime.tryParse(
-                                              session.endTime!);
-                                          if (start != null && end != null) {
-                                            final duration =
-                                                end.difference(start);
-                                            return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                          }
-                                          return "--";
-                                        }(),
-                                      ),
-                                    ],
-                                  ),
-                                )
-                              else if (session.startTime != null &&
-                                  session.endTime == null)
-                                Container(
-                                  width: double.infinity,
-                                  padding: const EdgeInsets.all(12),
-                                  decoration: BoxDecoration(
-                                    color: Colors.orange.shade50,
-                                    border: Border.all(color: Colors.orange),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        localizations.sessionongoing,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      Text(
-                                        localizations
-                                            .workinprogressendtimenotset,
-                                        style: TextStyle(
-                                            fontSize: 14,
-                                            color: Colors.grey[700]),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        );
-                      }).toList()
-                    else
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.grey.shade100,
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          localizations.noshiftdataavailable,
-                          style: TextStyle(fontSize: 16, color: Colors.grey),
-                        ),
-                      ),
+                            );
+                    }(),
                     const SizedBox(height: 40),
                   ],
                 ),
@@ -1172,7 +1495,6 @@ class _AgentscreenState extends State<Agentscreen> {
             decoration: const BoxDecoration(color: Colors.blue),
             child: Column(
               children: [
-                // Image.asset('assets/logo.png'),
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
                 Text("${localizations.salesrepresentative}    ",
@@ -1181,19 +1503,32 @@ class _AgentscreenState extends State<Agentscreen> {
             ),
           ),
           ListTile(
-            title: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            title: Column(
               children: [
-                const Text('English'),
-                Switch(
-                  value: localeProvider.locale.languageCode == 'te',
-                  onChanged: (value) => localeProvider.toggleLocale(),
-                  activeColor: Colors.green,
-                  inactiveThumbColor: Colors.blue,
-                  activeTrackColor: Colors.green.shade200,
-                  inactiveTrackColor: Colors.blue.shade200,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('English'),
+                    Switch(
+                      value: localeProvider.locale.languageCode == 'te',
+                      onChanged: (value) => localeProvider.toggleLocale(),
+                      activeColor: Colors.green,
+                      inactiveThumbColor: Colors.blue,
+                      activeTrackColor: Colors.green.shade200,
+                      inactiveTrackColor: Colors.blue.shade200,
+                    ),
+                    const Text('తెలుగు'),
+                  ],
                 ),
-                const Text('తెలుగు'),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const Historypage()));
+                  },
+                  child: const Text("Total History"),
+                ),
               ],
             ),
           ),

@@ -3,19 +3,25 @@ import 'dart:typed_data';
 
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/modelclasses/noofagents.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/commonclasses/total_history.dart';
 import 'package:finalsalesrep/modelclasses/historymodel.dart';
+import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class Historypage extends StatefulWidget {
-  const Historypage({super.key});
+class TotalCustomerformsAgent extends StatefulWidget {
+  final User user;
+  final String? agencyName;
+  const TotalCustomerformsAgent({super.key, required this.user, required this.agencyName});
+
   @override
-  State<Historypage> createState() => _HistorypageState();
+  State<TotalCustomerformsAgent> createState() => _TotalCustomerformsAgentState();
 }
 
-class _HistorypageState extends State<Historypage> {
+class _TotalCustomerformsAgentState extends State<TotalCustomerformsAgent> {
   List<Records> _records = [];
   List<Records> _filteredRecords = [];
   bool _isLoading = true;
@@ -68,20 +74,100 @@ class _HistorypageState extends State<Historypage> {
     }
   }
 
+  Future<Map<String, Object>?> fetchCustomerForm() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apikey = prefs.getString('apikey');
+
+    if (apikey == null || widget.user.id == null) {
+      print("Missing user credentials: apiKey=$apikey, userId=${widget.user.id}");
+      return null;
+    }
+
+    try {
+      print(
+          "📍 Calling API at https://salesrep.esanchaya.com/api/customer_forms_info_id with userId=${widget.user.id}");
+
+      final response = await http
+          .post(
+            Uri.parse(
+                "https://salesrep.esanchaya.com/api/customer_forms_info_id"),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              "params": {
+                "user_id": widget.user.id.toString(),
+                "token": apikey,
+              }
+            }),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final historyData = Historymodel.fromJson(jsonResponse);
+        final records = historyData.result?.records ?? [];
+
+        int subscribed = 0;
+        int accepted = 0;
+        int rejected = 0;
+
+        for (var record in records) {
+          if (record.eenaduNewspaper == true) {
+            subscribed++;
+          } else {
+            if (record.freeOffer15Days == true) {
+              accepted++;
+            } else if (record.freeOffer15Days == false &&
+                record.eenaduNewspaper == false) {
+              rejected++;
+            }
+          }
+        }
+
+        await prefs.setInt('today_count', records.length);
+        await prefs.setInt('offer_accepted', accepted);
+        await prefs.setInt('offer_rejected', rejected);
+        await prefs.setInt('already_subscribed', subscribed);
+
+        return {
+          'records': records,
+          'offer_accepted': accepted,
+          'offer_rejected': rejected,
+          'already_subscribed': subscribed,
+        };
+      } else {
+        print("❌ API Error: ${response.statusCode} ${response.reasonPhrase}");
+        return null;
+      }
+    } catch (error) {
+      print("❌ Fetch error: $error");
+      return null;
+    }
+  }
+
   Future<void> _fetchHistory() async {
     setState(() => _isLoading = true);
-    final result = await _historyFetcher.fetchCustomerForm();
+    final result = await fetchCustomerForm();
     if (result != null) {
       final all = result['records'] as List<Records>;
       final accepted = result['offer_accepted'] as int;
       final rejected = result['offer_rejected'] as int;
       final subscribed = result['already_subscribed'] as int;
 
+      // Filter by agencyName if provided
       var filtered = all;
+      if (widget.agencyName != null && widget.agencyName!.trim().isNotEmpty) {
+        final agencyFilter = widget.agencyName!.trim().toLowerCase();
+        filtered = filtered.where((r) {
+          final agencyValue = r.agency?.trim().toLowerCase() ?? '';
+          return agencyValue == agencyFilter;
+        }).toList();
+      }
+
+      // Filter by date range if selected
       if (_selectedRange != null) {
         final s = _selectedRange!.start;
         final e = _selectedRange!.end.add(const Duration(days: 1));
-        filtered = all.where((r) {
+        filtered = filtered.where((r) {
           final dt = _combineDateTime(r.date, r.time);
           return dt.isAfter(s.subtract(const Duration(milliseconds: 1))) &&
               dt.isBefore(e);
@@ -305,19 +391,13 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow("customer name", r.familyHeadName),
                 _detailRow("Age", r.age),
                 _detailRow("mobile Number", r.mobileNumber),
-                Text("News-paper Details"),
+                const Text("News-paper Details"),
                 _detailRow("Customer Type", r.customerType),
                 _detailRow("previous News-paper", r.currentNewspaper),
                 _detailRow("Start Circulating", r.startCirculating),
                 _detailRow(localizations.city, r.city),
                 _detailRow(localizations.address, r.address),
                 _detailRow(localizations.employed, _formatBool(r.employed)),
-                // _detailRow(
-                //     localizations.subscribed, _formatBool(r.eenaduNewspaper)),
-                // _detailRow(
-                //     localizations.readnewspaper, _formatBool(r.readNewspaper)),
-                // _detailRow(localizations.reasonfornottakingoffer,
-                //     r.reasonNotTakingOffer),
                 _detailRow("Occupation", _formatBool(r.occupation)),
                 _detailRow(localizations.jobtype, r.jobType),
                 _detailRow(localizations.jobWorkingstate,

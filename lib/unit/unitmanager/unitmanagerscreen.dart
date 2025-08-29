@@ -5,10 +5,10 @@ import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/officestaff.dart/createagent.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/unitmanager/agentservice.dart';
-import 'package:finalsalesrep/unit/unitmanager/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/unitmanager/profilescreen.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -324,27 +324,27 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                _buildCard(
-                  title: Localizations.subscriptionDetails,
-                  gradientColors: [
-                    Colors.grey.shade200,
-                    Colors.grey.shade400,
-                  ],
-                  rows: [
-                    _InfoRow(
-                        label: Localizations.houseVisited,
-                        value: customerFormCount.toString()),
-                    _InfoRow(
-                        label: Localizations.eenaduSubscription,
-                        value: alreadySubscribedCount.toString()),
-                    _InfoRow(
-                        label: Localizations.willingToChange,
-                        value: offerAcceptedCount.toString()),
-                    _InfoRow(
-                        label: Localizations.notInterested,
-                        value: offerRejectedCount.toString()),
-                  ],
-                ),
+                // _buildCard(
+                //   title: Localizations.subscriptionDetails,
+                //   gradientColors: [
+                //     Colors.grey.shade200,
+                //     Colors.grey.shade400,
+                //   ],
+                //   rows: [
+                //     _InfoRow(
+                //         label: Localizations.houseVisited,
+                //         value: customerFormCount.toString()),
+                //     _InfoRow(
+                //         label: Localizations.eenaduSubscription,
+                //         value: alreadySubscribedCount.toString()),
+                //     _InfoRow(
+                //         label: Localizations.willingToChange,
+                //         value: offerAcceptedCount.toString()),
+                //     _InfoRow(
+                //         label: Localizations.notInterested,
+                //         value: offerRejectedCount.toString()),
+                //   ],
+                // ),
                 const SizedBox(height: 20),
               ],
             ),

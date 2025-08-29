@@ -1,33 +1,30 @@
 import 'dart:convert';
 import 'dart:typed_data';
-
-import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
-import 'package:finalsalesrep/commonclasses/total_history.dart';
-import 'package:finalsalesrep/modelclasses/historymodel.dart';
-import 'package:provider/provider.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/modelclasses/customerformsunitwise.dart';
 
-class Historypage extends StatefulWidget {
-  const Historypage({super.key});
+class Todaycustomerformscreen extends StatefulWidget {
+  final String? unitName;
+  const Todaycustomerformscreen({super.key, required this.unitName});
+
   @override
-  State<Historypage> createState() => _HistorypageState();
+  State<Todaycustomerformscreen> createState() => _TodaycustomerformscreenState();
 }
 
-class _HistorypageState extends State<Historypage> {
+class _TodaycustomerformscreenState extends State<Todaycustomerformscreen> {
   List<Records> _records = [];
   List<Records> _filteredRecords = [];
-  bool _isLoading = true;
-
+  bool _isLoading = false;
+  final TextEditingController _searchController = TextEditingController();
   int offerAcceptedCount = 0;
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
-
-  final TotalHistory _historyFetcher = TotalHistory();
-
-  DateTimeRange? _selectedRange;
-  final TextEditingController _searchController = TextEditingController();
+  String? _selectedAgency;
+  List<String> _agencies = [];
 
   @override
   void initState() {
@@ -68,25 +65,117 @@ class _HistorypageState extends State<Historypage> {
     }
   }
 
+  Future<Map<String, Object>?> fetchCustomerForm() async {
+    final prefs = await SharedPreferences.getInstance();
+    final apikey = prefs.getString('apikey');
+
+    if (apikey == null || widget.unitName == null) {
+      print("Missing credentials: apiKey=$apikey, unitName=${widget.unitName}");
+      return null;
+    }
+
+    // Set fromDate and toDate to today's date
+    final today = DateTime.now();
+    final fromDate = today.toIso8601String().split('T')[0];
+    final toDate = fromDate;
+
+    try {
+      const apiUrl =
+          'https://salesrep.esanchaya.com/api/customer_forms_filtered';
+      final params = {
+        'token': apikey,
+        'from_date': fromDate,
+        'to_date': toDate,
+        'unit_name': widget.unitName,
+        'order': 'desc',
+      };
+
+      print(
+          "📍 Calling API at $apiUrl with params: ${jsonEncode({'params': params})}");
+
+      final response = await http
+          .post(
+            Uri.parse(apiUrl),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({'params': params}),
+          )
+          .timeout(const Duration(seconds: 30));
+
+      if (response.statusCode == 200) {
+        final jsonResponse = jsonDecode(response.body);
+        final data = AllCustomerForms.fromJson(jsonResponse);
+        if (data.result?.success == true && data.result?.records != null) {
+          final records = data.result!.records!;
+
+          // Filter out records where agency is 'false' or empty
+          final filteredRecords = records
+              .where((r) =>
+                  r.agency != null &&
+                  r.agency!.isNotEmpty &&
+                  r.agency!.toLowerCase() != 'false')
+              .toList();
+
+          int subscribed = 0;
+          int accepted = 0;
+          int rejected = 0;
+
+          // Calculate counts (uncomment and adjust as needed, using filteredRecords)
+          // for (var record in filteredRecords) {
+          //   if (record.eenaduNewspaper == true) {
+          //     subscribed++;
+          //   } else {
+          //     if (record.freeOffer15Days == true) {
+          //       accepted++;
+          //     } else if (record.freeOffer15Days == false &&
+          //         record.eenaduNewspaper == false) {
+          //       rejected++;
+          //     }
+          //   }
+          // }
+
+          // Extract unique agency names from filtered records
+          final agencies = filteredRecords
+              .map((r) => r.agency!)
+              .toSet()
+              .toList();
+
+          await prefs.setInt('today_count', filteredRecords.length);
+          await prefs.setInt('offer_accepted', accepted);
+          await prefs.setInt('offer_rejected', rejected);
+          await prefs.setInt('already_subscribed', subscribed);
+
+          return {
+            'records': filteredRecords,
+            'offer_accepted': accepted,
+            'offer_rejected': rejected,
+            'already_subscribed': subscribed,
+            'agencies': agencies,
+          };
+        } else {
+          print("No records or success false: ${data.result?.code}");
+          return null;
+        }
+      } else {
+        print("❌ API Error: ${response.statusCode} ${response.reasonPhrase}");
+        return null;
+      }
+    } catch (error) {
+      print("❌ Fetch error: $error");
+      return null;
+    }
+  }
+
   Future<void> _fetchHistory() async {
     setState(() => _isLoading = true);
-    final result = await _historyFetcher.fetchCustomerForm();
+    final result = await fetchCustomerForm();
     if (result != null) {
       final all = result['records'] as List<Records>;
       final accepted = result['offer_accepted'] as int;
       final rejected = result['offer_rejected'] as int;
       final subscribed = result['already_subscribed'] as int;
+      final agencies = result['agencies'] as List<String>;
 
       var filtered = all;
-      if (_selectedRange != null) {
-        final s = _selectedRange!.start;
-        final e = _selectedRange!.end.add(const Duration(days: 1));
-        filtered = all.where((r) {
-          final dt = _combineDateTime(r.date, r.time);
-          return dt.isAfter(s.subtract(const Duration(milliseconds: 1))) &&
-              dt.isBefore(e);
-        }).toList();
-      }
 
       filtered.sort((a, b) {
         final idA = int.tryParse(a.id.toString()) ?? 0;
@@ -96,6 +185,8 @@ class _HistorypageState extends State<Historypage> {
 
       setState(() {
         _records = filtered;
+        _agencies = ['All', ...agencies];
+        _selectedAgency = 'All';
         _filteredRecords = filtered;
         offerAcceptedCount = accepted;
         offerRejectedCount = rejected;
@@ -107,49 +198,21 @@ class _HistorypageState extends State<Historypage> {
     }
   }
 
-  DateTime _combineDateTime(String? date, String? time) {
-    if (date == null || date.isEmpty) return DateTime(1970);
-    try {
-      final datePart = DateTime.parse(date);
-      if (time != null && time.isNotEmpty && time.contains(":")) {
-        final parts = time.split(":");
-        final hour = int.tryParse(parts[0]) ?? 0;
-        final minute = int.tryParse(parts[1]) ?? 0;
-        final second = parts.length > 2 ? int.tryParse(parts[2]) ?? 0 : 0;
-        return DateTime(
-          datePart.year,
-          datePart.month,
-          datePart.day,
-          hour,
-          minute,
-          second,
-        );
-      }
-      return datePart;
-    } catch (_) {
-      return DateTime(1970);
-    }
-  }
-
-  Future<void> _pickDateRange() async {
-    final picked = await showDateRangePicker(
-      context: context,
-      firstDate: DateTime(2000),
-      lastDate: DateTime.now(),
-      initialDateRange: _selectedRange,
-    );
-    if (picked != null) {
-      setState(() => _selectedRange = picked);
-    }
-  }
-
   void _filterRecords(String query) {
     setState(() {
-      if (query.isEmpty) {
-        _filteredRecords = List.from(_records);
-      } else {
+      var filtered = _records;
+
+      // Apply agency filter
+      if (_selectedAgency != null && _selectedAgency != 'All') {
+        filtered = filtered
+            .where((r) => r.agency == _selectedAgency)
+            .toList();
+      }
+
+      // Apply search query filter
+      if (query.isNotEmpty) {
         final lower = query.toLowerCase();
-        _filteredRecords = _records.where((r) {
+        filtered = filtered.where((r) {
           final idMatch =
               r.id?.toString().toLowerCase().contains(lower) ?? false;
           final familyNameMatch =
@@ -157,6 +220,15 @@ class _HistorypageState extends State<Historypage> {
           return idMatch || familyNameMatch;
         }).toList();
       }
+
+      _filteredRecords = filtered;
+    });
+  }
+
+  void _onAgencySelected(String? agency) {
+    setState(() {
+      _selectedAgency = agency;
+      _filterRecords(_searchController.text);
     });
   }
 
@@ -174,46 +246,28 @@ class _HistorypageState extends State<Historypage> {
         child: ListView(
           padding: const EdgeInsets.only(bottom: 16),
           children: [
-            Card(
-              margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-              elevation: 2,
-              child: Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                child: GestureDetector(
-                  onTap: _pickDateRange,
-                  child: Row(
-                    children: [
-                      const Icon(Icons.date_range, color: Colors.blue),
-                      const SizedBox(width: 8),
-                      Text(
-                        _selectedRange == null
-                            ? localizations.alldates
-                            : "${_selectedRange!.start.toLocal().toString().split(' ')[0]} → ${_selectedRange!.end.toLocal().toString().split(' ')[0]}",
-                        style: const TextStyle(
-                            fontSize: 16, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: DropdownButtonFormField<String>(
+                value: _selectedAgency,
+                decoration: InputDecoration(
+                  labelText: 'Agency (${_agencies.length - 1})',
+                  filled: true,
+                  fillColor: Colors.grey[200],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: BorderSide.none,
                   ),
                 ),
+                items: _agencies.map((agency) {
+                  return DropdownMenuItem<String>(
+                    value: agency,
+                    child: Text(agency),
+                  );
+                }).toList(),
+                onChanged: _onAgencySelected,
               ),
             ),
-            if (_selectedRange != null)
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.filter_center_focus),
-                    label: Text(localizations.fetchcustomerforms),
-                    onPressed: _fetchHistory,
-                    style: ElevatedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                    ),
-                  ),
-                ),
-              ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
               child: TextField(
@@ -233,20 +287,20 @@ class _HistorypageState extends State<Historypage> {
                 ),
               ),
             ),
-            // Padding(
-            //   padding: const EdgeInsets.symmetric(vertical: 12),
-            //   child: Row(
-            //     mainAxisAlignment: MainAxisAlignment.spaceAround,
-            //     children: [
-            //       _buildStat(
-            //           localizations.accepted, offerAcceptedCount, Colors.green),
-            //       _buildStat(
-            //           localizations.rejected, offerRejectedCount, Colors.red),
-            //       _buildStat(localizations.subscribed, alreadySubscribedCount,
-            //           Colors.blue),
-            //     ],
-            //   ),
-            // ),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                children: [
+                  // _buildStat(
+                  //     localizations.accepted, offerAcceptedCount, Colors.green),
+                  // _buildStat(
+                  //     localizations.rejected, offerRejectedCount, Colors.red),
+                  // _buildStat(localizations.subscribed, alreadySubscribedCount,
+                  //     Colors.blue),
+                ],
+              ),
+            ),
             const Divider(height: 1),
             if (_isLoading)
               const Center(child: CircularProgressIndicator())
@@ -289,7 +343,7 @@ class _HistorypageState extends State<Historypage> {
       elevation: 3,
       child: ExpansionTile(
         title: Text(
-          "customer Name: ${r.familyHeadName ?? 'N/A'}",
+          "Customer Name: ${r.familyHeadName ?? 'N/A'}",
           style: const TextStyle(fontWeight: FontWeight.w600),
         ),
         children: [
@@ -301,27 +355,15 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow("Staff", r.agentName),
                 _detailRow("Agency", r.agency),
                 _detailRow(localizations.date, r.date),
-                _detailRow(localizations.time, r.time),
-                _detailRow("customer name", r.familyHeadName),
+                _detailRow("Customer Name", r.familyHeadName),
                 _detailRow("Age", r.age),
-                _detailRow("mobile Number", r.mobileNumber),
-                Text("News-paper Details"),
+                _detailRow("Mobile Number", r.mobileNumber),
+                const Text("News-paper Details"),
                 _detailRow("Customer Type", r.customerType),
-                _detailRow("previous News-paper", r.currentNewspaper),
                 _detailRow("Start Circulating", r.startCirculating),
                 _detailRow(localizations.city, r.city),
                 _detailRow(localizations.address, r.address),
                 _detailRow(localizations.employed, _formatBool(r.employed)),
-                // _detailRow(
-                //     localizations.subscribed, _formatBool(r.eenaduNewspaper)),
-                // _detailRow(
-                //     localizations.readnewspaper, _formatBool(r.readNewspaper)),
-                // _detailRow(localizations.reasonfornottakingoffer,
-                //     r.reasonNotTakingOffer),
-                _detailRow("Occupation", _formatBool(r.occupation)),
-                _detailRow(localizations.jobtype, r.jobType),
-                _detailRow(localizations.jobWorkingstate,
-                    _formatBool(r.jobWorkingState)),
                 if (r.locationUrl != null &&
                     r.locationUrl!.isNotEmpty &&
                     r.locationUrl != 'false' &&
