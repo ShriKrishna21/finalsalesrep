@@ -258,7 +258,7 @@ class _CoustmerState extends State<Coustmer> {
             agencyModel.result?.data != null) {
           final agencyData = agencyModel.result!.data!;
           final agencyText =
-              "${agencyData.locationName ?? 'Unknown'} [${agencyData.code ?? 'Unknown'}]";
+              "${agencyData.locationName ?? 'Unknown'} ";
           setState(() {
             agency.text = agencyText;
           });

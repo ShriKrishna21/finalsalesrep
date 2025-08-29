@@ -124,7 +124,7 @@ class _UnitUsersScreenState extends State<UnitUsersScreen> {
             leading: const Icon(Icons.person),
             title: Text(user.name ?? "No Name"),
             subtitle:
-                Text("${user.role ?? "No Role"} - ${user.email ?? ""}"),
+                Text("${ "Staff"} - ${user.email ?? ""}"),
            onTap: () {
   Navigator.push(
     context,
