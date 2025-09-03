@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:finalsalesrep/Daily_History_Screen.dart';
 import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
@@ -257,8 +258,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (_) =>
-                                  const Allcustomerforms()),
+                              builder: (_) => const Allcustomerforms()),
                         );
                       },
                       child: _buildCard(
@@ -380,10 +380,10 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
-        // _buildBlackWhiteButton("Staff working route ", () {
-        //   Navigator.push(context,
-        //       MaterialPageRoute(builder: (_) => const ApproveAgents()));
-        // }),
+        _buildBlackWhiteButton("Daily History Screen", () {
+          Navigator.push(context,
+              MaterialPageRoute(builder: (_) => const DailyHistoryScreen()));
+        }),
       ],
     );
   }
