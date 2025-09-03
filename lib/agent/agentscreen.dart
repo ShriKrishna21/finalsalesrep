@@ -217,7 +217,6 @@ class _AgentscreenState extends State<Agentscreen> {
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "params": {
-             
               "token": token,
               "code": _codeController.text,
               "location_name": _agencyNameController.text,
@@ -227,7 +226,8 @@ class _AgentscreenState extends State<Agentscreen> {
           }),
         );
 
-        debugPrint("🔁 Create Pin Location Status Code: ${response.statusCode}");
+        debugPrint(
+            "🔁 Create Pin Location Status Code: ${response.statusCode}");
         debugPrint("🔁 Create Pin Location Response: ${response.body}");
 
         if (response.statusCode == 200) {
@@ -235,7 +235,8 @@ class _AgentscreenState extends State<Agentscreen> {
           if (result != null && result['success'] == true) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text("New agency created successfully")),
+                const SnackBar(
+                    content: Text("New agency created successfully")),
               );
             }
             await fetchAgencies(); // Refresh agency list
@@ -251,7 +252,8 @@ class _AgentscreenState extends State<Agentscreen> {
             debugPrint("❌ Failed to create new agency: $errorMessage");
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("Failed to create agency: $errorMessage")),
+                SnackBar(
+                    content: Text("Failed to create agency: $errorMessage")),
               );
             }
           }
@@ -935,7 +937,7 @@ class _AgentscreenState extends State<Agentscreen> {
             icon: Icon(Icons.add_box_outlined,
                 color: isWorking ? Colors.black : Colors.grey),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 12),
           FloatingActionButton.extended(
             heroTag: localizations.workstatus,
             backgroundColor: isWorking ? Colors.red : Colors.green,
@@ -1056,8 +1058,7 @@ class _AgentscreenState extends State<Agentscreen> {
                         ),
                         keyboardType: TextInputType.phone,
                         validator: (value) => value == null || value.isEmpty
-                            ?"pleaseenterphone" ??
-                                'Please enter phone number'
+                            ? "pleaseenterphone" ?? 'Please enter phone number'
                             : null,
                       ),
                       const SizedBox(height: 10),
@@ -1071,23 +1072,21 @@ class _AgentscreenState extends State<Agentscreen> {
                           prefixIcon: const Icon(Icons.code),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ? "pleaseentercode" ??
-                                'Please enter code'
+                            ? "pleaseentercode" ?? 'Please enter code'
                             : null,
                       ),
                       const SizedBox(height: 10),
                       TextFormField(
                         controller: _unitController,
                         decoration: InputDecoration(
-                          labelText:"unit" ?? 'Unit',
+                          labelText: "unit" ?? 'Unit',
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(8),
                           ),
                           prefixIcon: const Icon(Icons.apartment),
                         ),
                         validator: (value) => value == null || value.isEmpty
-                            ?" pleaseenterunit" ??
-                                'Please enter unit'
+                            ? " pleaseenterunit" ?? 'Please enter unit'
                             : null,
                       ),
                     ],
