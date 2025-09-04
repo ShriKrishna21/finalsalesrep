@@ -5,8 +5,7 @@ import 'package:finalsalesrep/agent/agentaddrouite.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
-import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart'
-    show SelfieTimesResponse, SelfieSession;
+import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -50,11 +49,13 @@ class _AgentscreenState extends State<Agentscreen> {
   List<AgencyData> _agencyList = [];
   String? _selectedAgencyId;
   bool _isLoadingAgencies = false;
-  // Controllers for "Other Agency" input fields
+  // Controllers for "Other Agency" input fields and selected agency display
   final TextEditingController _agencyNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _codeController = TextEditingController();
   final TextEditingController _unitController = TextEditingController();
+  final TextEditingController _selectedAgencyController = TextEditingController();
+  AgencyData? _selectedAgency;
 
   @override
   void initState() {
@@ -75,6 +76,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
+    final storedUnit = prefs.getString('unit');
 
     if (token == null) {
       debugPrint("❌ Missing token");
@@ -84,6 +86,28 @@ class _AgentscreenState extends State<Agentscreen> {
         );
       }
       setState(() {
+        _isLoadingAgencies = false;
+      });
+      return;
+    }
+
+    if (storedUnit == null || storedUnit.isEmpty) {
+      debugPrint("❌ No unit found in SharedPreferences");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No unit assigned to this user")),
+        );
+      }
+      setState(() {
+        _agencyList = [
+          AgencyData(
+            id: 'other_agency',
+            locationName: 'Other Agency',
+            code: 'OTHER',
+            unit: 'N/A',
+            phone: null,
+          )
+        ];
         _isLoadingAgencies = false;
       });
       return;
@@ -110,17 +134,17 @@ class _AgentscreenState extends State<Agentscreen> {
         if (agencyModel.result?.success == true) {
           final uniqueAgencies = <String, AgencyData>{};
           for (var agency in agencyModel.result?.data ?? []) {
-            if (agency.id != null) {
+            if (agency.id != null && agency.unit?.toLowerCase() == storedUnit.toLowerCase()) {
               uniqueAgencies[agency.id.toString()] = agency;
             }
           }
 
-          // Add "Other Agency" option to the agency list
           uniqueAgencies['other_agency'] = AgencyData(
             id: 'other_agency',
             locationName: 'Other Agency',
             code: 'OTHER',
-            unit: 'N/A',
+            unit: storedUnit,
+            phone: null,
           );
 
           if (mounted) {
@@ -130,12 +154,14 @@ class _AgentscreenState extends State<Agentscreen> {
             });
           }
 
-          debugPrint("🔍 Agency List: ${_agencyList.map((a) => {
-                'id': a.id,
-                'locationName': a.locationName,
-                'code': a.code,
-                'unit': a.unit
-              }).toList()}");
+          if (_agencyList.length == 1 && _agencyList[0].id == 'other_agency') {
+            debugPrint("⚠️ No agencies found matching unit: $storedUnit");
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("No agencies found for unit: $storedUnit. Only 'Other Agency' option available.")),
+              );
+            }
+          }
         } else {
           debugPrint("❌ Failed to fetch agencies");
           if (mounted) {
@@ -144,6 +170,15 @@ class _AgentscreenState extends State<Agentscreen> {
             );
           }
           setState(() {
+            _agencyList = [
+              AgencyData(
+                id: 'other_agency',
+                locationName: 'Other Agency',
+                code: 'OTHER',
+                unit: storedUnit ?? 'N/A',
+                phone: null,
+              )
+            ];
             _isLoadingAgencies = false;
           });
         }
@@ -151,12 +186,19 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to fetch agencies: ${response.statusCode}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text("Failed to fetch agencies: ${response.statusCode}")),
+            SnackBar(content: Text("Failed to fetch agencies: ${response.statusCode}")),
           );
         }
         setState(() {
+          _agencyList = [
+            AgencyData(
+              id: 'other_agency',
+              locationName: 'Other Agency',
+              code: 'OTHER',
+              unit: storedUnit ?? 'N/A',
+              phone: null,
+            )
+          ];
           _isLoadingAgencies = false;
         });
       }
@@ -168,6 +210,15 @@ class _AgentscreenState extends State<Agentscreen> {
         );
       }
       setState(() {
+        _agencyList = [
+          AgencyData(
+            id: 'other_agency',
+            locationName: 'Other Agency',
+            code: 'OTHER',
+            unit: storedUnit ?? 'N/A',
+            phone: null,
+          )
+        ];
         _isLoadingAgencies = false;
       });
     }
@@ -198,7 +249,6 @@ class _AgentscreenState extends State<Agentscreen> {
     }
 
     if (_selectedAgencyId == 'other_agency') {
-      // Handle "Other Agency" case
       if (_agencyNameController.text.isEmpty ||
           _phoneController.text.isEmpty ||
           _codeController.text.isEmpty ||
@@ -226,8 +276,7 @@ class _AgentscreenState extends State<Agentscreen> {
           }),
         );
 
-        debugPrint(
-            "🔁 Create Pin Location Status Code: ${response.statusCode}");
+        debugPrint("🔁 Create Pin Location Status Code: ${response.statusCode}");
         debugPrint("🔁 Create Pin Location Response: ${response.body}");
 
         if (response.statusCode == 200) {
@@ -235,25 +284,25 @@ class _AgentscreenState extends State<Agentscreen> {
           if (result != null && result['success'] == true) {
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                    content: Text("New agency created successfully")),
+                const SnackBar(content: Text("New agency created successfully")),
               );
             }
-            await fetchAgencies(); // Refresh agency list
+            await fetchAgencies();
             setState(() {
               _selectedAgencyId = null;
+              _selectedAgency = null;
               _agencyNameController.clear();
               _phoneController.clear();
               _codeController.clear();
               _unitController.clear();
+              _selectedAgencyController.clear();
             });
           } else {
             final errorMessage = result?['message'] ?? 'Unknown error';
             debugPrint("❌ Failed to create new agency: $errorMessage");
             if (mounted) {
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                    content: Text("Failed to create agency: $errorMessage")),
+                SnackBar(content: Text("Failed to create agency: $errorMessage")),
               );
             }
           }
@@ -261,9 +310,7 @@ class _AgentscreenState extends State<Agentscreen> {
           debugPrint("❌ Failed to create agency: ${response.statusCode}");
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                  content:
-                      Text("Failed to create agency: ${response.statusCode}")),
+              SnackBar(content: Text("Failed to create agency: ${response.statusCode}")),
             );
           }
         }
@@ -278,7 +325,6 @@ class _AgentscreenState extends State<Agentscreen> {
       return;
     }
 
-    // Handle existing agency case
     final pinLocationId = int.tryParse(_selectedAgencyId!);
 
     if (pinLocationId == null) {
@@ -329,9 +375,7 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to assign pin location: ${response.statusCode}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text("Failed to assign agency: ${response.statusCode}")),
+            SnackBar(content: Text("Failed to assign agency: ${response.statusCode}")),
           );
         }
       }
@@ -393,17 +437,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
         final selfieData = SelfieTimesResponse.fromJson(data);
 
-        debugPrint("🔍 SelfieTimesResponse: success=${selfieData.success}, "
-            "sessions=${selfieData.sessions.map((s) => {
-                  'startTime': s.startTime,
-                  'endTime': s.endTime,
-                  'startSelfie': s.startSelfie != null
-                      ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...'
-                      : null,
-                  'endSelfie': s.endSelfie != null
-                      ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...'
-                      : null,
-                }).toList()}");
+        debugPrint("🔍 SelfieTimesResponse: success=${selfieData.success}, sessions=${selfieData.sessions.map((s) => {'startTime': s.startTime, 'endTime': s.endTime, 'startSelfie': s.startSelfie != null ? '${s.startSelfie!.substring(0, s.startSelfie!.length > 50 ? 50 : s.startSelfie!.length)}...' : null, 'endSelfie': s.endSelfie != null ? '${s.endSelfie!.substring(0, s.endSelfie!.length > 50 ? 50 : s.endSelfie!.length)}...' : null,}).toList()}");
 
         if (selfieData.success) {
           if (mounted) {
@@ -412,8 +446,7 @@ class _AgentscreenState extends State<Agentscreen> {
             });
           }
         } else {
-          debugPrint(
-              "❌ Selfie times fetch unsuccessful: ${selfieData.success}");
+          debugPrint("❌ Selfie times fetch unsuccessful: ${selfieData.success}");
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text("Failed to fetch selfie times")),
@@ -424,9 +457,7 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to fetch selfie times: ${response.statusCode}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    "Failed to fetch selfie times: ${response.statusCode}")),
+            SnackBar(content: Text("Failed to fetch selfie times: ${response.statusCode}")),
           );
         }
       }
@@ -487,10 +518,8 @@ class _AgentscreenState extends State<Agentscreen> {
         return;
       }
 
-      debugPrint(
-          "📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
-      debugPrint(
-          "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
+      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
+      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
 
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
@@ -534,9 +563,7 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to start work: ${response.statusCode}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    "Failed to start work: ${response.statusCode} - ${response.body}")),
+            SnackBar(content: Text("Failed to start work: ${response.statusCode} - ${response.body}")),
           );
         }
       }
@@ -584,8 +611,7 @@ class _AgentscreenState extends State<Agentscreen> {
       }
 
       debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/end_work");
-      debugPrint(
-          "📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${photoBase64.substring(0, 50)}...\"}}");
+      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${photoBase64.substring(0, 50)}...\"}}");
 
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
@@ -630,9 +656,7 @@ class _AgentscreenState extends State<Agentscreen> {
         debugPrint("❌ Failed to stop work: ${response.statusCode}");
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(
-                    "Failed to stop work: ${response.statusCode} - ${response.body}")),
+            SnackBar(content: Text("Failed to stop work: ${response.statusCode} - ${response.body}")),
           );
         }
       }
@@ -649,8 +673,7 @@ class _AgentscreenState extends State<Agentscreen> {
   void startTokenValidation() {
     validateToken();
     _sessionCheckTimer?.cancel();
-    _sessionCheckTimer =
-        Timer.periodic(const Duration(seconds: 30), (_) => validateToken());
+    _sessionCheckTimer = Timer.periodic(const Duration(seconds: 30), (_) => validateToken());
   }
 
   Future<void> validateToken() async {
@@ -687,21 +710,14 @@ class _AgentscreenState extends State<Agentscreen> {
 
         final result = jsonDecode(response.body)['result'];
         if (result == null || result['success'] != true) {
-          forceLogout(
-            "Session expired. You may have logged in on another device.",
-            responseBody: response.body,
-            statusCode: response.statusCode,
-          );
+          forceLogout("Session expired. You may have logged in on another device.", responseBody: response.body, statusCode: response.statusCode);
         }
         return;
       } catch (e) {
         retryCount++;
         debugPrint("❌ Token validation failed (attempt $retryCount): $e");
         if (retryCount >= maxRetries) {
-          forceLogout(
-            "Error validating session after $maxRetries attempts. Please log in again.",
-            responseBody: e.toString(),
-          );
+          forceLogout("Error validating session after $maxRetries attempts. Please log in again.", responseBody: e.toString());
         } else {
           await Future.delayed(const Duration(seconds: 30));
         }
@@ -709,22 +725,16 @@ class _AgentscreenState extends State<Agentscreen> {
     }
   }
 
-  void forceLogout(String message,
-      {String? responseBody, int? statusCode}) async {
+  void forceLogout(String message, {String? responseBody, int? statusCode}) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            "$message${statusCode != null ? ' (Status: $statusCode)' : ''}${responseBody != null ? ' Response: $responseBody' : ''}",
-          ),
+          content: Text("$message${statusCode != null ? ' (Status: $statusCode)' : ''}${responseBody != null ? ' Response: $responseBody' : ''}"),
         ),
       );
-      Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const Loginscreen()),
-          (route) => false);
+      Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const Loginscreen()), (route) => false);
     }
   }
 
@@ -765,10 +775,7 @@ class _AgentscreenState extends State<Agentscreen> {
         final today = DateTime.now();
         final todayOnlyRoutes = routeMap.result?.assigned?.where((assigned) {
           final routeDate = DateTime.tryParse(assigned.date ?? '');
-          return routeDate != null &&
-              routeDate.year == today.year &&
-              routeDate.month == today.month &&
-              routeDate.day == today.day;
+          return routeDate != null && routeDate.year == today.year && routeDate.month == today.month && routeDate.day == today.day;
         }).toList();
 
         Assigned? latestRoute;
@@ -780,8 +787,7 @@ class _AgentscreenState extends State<Agentscreen> {
         if (mounted) {
           setState(() {
             fullRouteMap = routeMap;
-            fullRouteMap?.result?.assigned =
-                latestRoute != null ? [latestRoute] : [];
+            fullRouteMap?.result?.assigned = latestRoute != null ? [latestRoute] : [];
           });
         }
       } else {
@@ -831,9 +837,7 @@ class _AgentscreenState extends State<Agentscreen> {
       return;
     }
 
-    final cleanBase64 = base64Image.startsWith('data:image')
-        ? base64Image.split(',')[1]
-        : base64Image;
+    final cleanBase64 = base64Image.startsWith('data:image') ? base64Image.split(',')[1] : base64Image;
 
     try {
       base64Decode(cleanBase64);
@@ -850,10 +854,7 @@ class _AgentscreenState extends State<Agentscreen> {
                     base64Decode(cleanBase64),
                     width: 300,
                     fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) => const Text(
-                      "Error loading image",
-                      style: TextStyle(color: Colors.red),
-                    ),
+                    errorBuilder: (context, error, stackTrace) => const Text("Error loading image", style: TextStyle(color: Colors.red)),
                   ),
                 ],
               ),
@@ -876,617 +877,311 @@ class _AgentscreenState extends State<Agentscreen> {
       }
     }
   }
+@override
+Widget build(BuildContext context) {
+  final localeProvider = Provider.of<LocalizationProvider>(context);
+  final localizations = AppLocalizations.of(context)!;
 
-  @override
-  void dispose() {
-    _sessionCheckTimer?.cancel();
-    dateController.dispose();
-    _agencyNameController.dispose();
-    _phoneController.dispose();
-    _codeController.dispose();
-    _unitController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
-
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(child: Text(localizations.salesrepresentative)),
-            Center(
-              child: Text("${localizations.welcome} $agentname",
-                  style: const TextStyle(fontSize: 16)),
-            ),
-          ],
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.person),
-            onPressed: () => Navigator.push(context,
-                MaterialPageRoute(builder: (_) => const agentProfile())),
-          )
-        ],
-      ),
-      drawer: _buildDrawer(localeProvider, localizations),
-      floatingActionButton: Column(
-        mainAxisAlignment: MainAxisAlignment.end,
+  return Scaffold(
+    appBar: AppBar(
+      backgroundColor: Colors.white,
+      foregroundColor: Colors.black,
+      title: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          FloatingActionButton.extended(
-            heroTag: localizations.customerform,
-            backgroundColor: Colors.white,
-            onPressed: isWorking
-                ? () async {
-                    await Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const Coustmer()),
-                    );
-                    await refreshData();
-                  }
-                : null,
-            label: Text(localizations.customerform,
-                style:
-                    TextStyle(color: isWorking ? Colors.black : Colors.grey)),
-            icon: Icon(Icons.add_box_outlined,
-                color: isWorking ? Colors.black : Colors.grey),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton.extended(
-            heroTag: localizations.workstatus,
-            backgroundColor: isWorking ? Colors.red : Colors.green,
-            onPressed: isWorking ? stopWork : startWork,
-            label: Text(
-              isWorking ? localizations.stopwork : localizations.startwork,
-              style: const TextStyle(color: Colors.white),
-            ),
-            icon: Icon(
-              isWorking ? Icons.stop : Icons.play_arrow,
-              color: Colors.white,
-            ),
-          ),
+          Center(child: Text(localizations.salesrepresentative)),
+          Center(child: Text("${localizations.welcome} $agentname", style: const TextStyle(fontSize: 16))),
         ],
       ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: refreshData,
-              child: Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: ListView(
-                  children: [
-                    Center(
-                        child: Text(dateController.text,
-                            style: const TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.w500))),
-                    const SizedBox(height: 20),
-                    Center(
-                      child: Text(
-                        "${localizations.nameofthestaff}: $agentname",
-                        style: const TextStyle(
-                            fontSize: 15, fontWeight: FontWeight.bold),
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (_) => const Onedayhistory()),
-                      ),
-                      child: _buildInfoRow(localizations.houseVisited,
-                          "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
-                    ),
-                    const SizedBox(height: 10),
-                    Center(child: Text(localizations.agency)),
-                    const SizedBox(height: 10),
-                    DropdownButtonFormField<String>(
-                      decoration: InputDecoration(
-                        hintText: localizations.selectagency,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.person),
+          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const agentProfile())),
+        )
+      ],
+    ),
+    drawer: _buildDrawer(localeProvider, localizations),
+    floatingActionButton: Column(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        FloatingActionButton.extended(
+          heroTag: localizations.customerform,
+          backgroundColor: Colors.white,
+          onPressed: isWorking
+              ? () async {
+                  await Navigator.push(context, MaterialPageRoute(builder: (_) => const Coustmer()));
+                  await refreshData();
+                }
+              : null,
+          label: Text(localizations.customerform, style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
+          icon: Icon(Icons.add_box_outlined, color: isWorking ? Colors.black : Colors.grey),
+        ),
+        const SizedBox(height: 12),
+        FloatingActionButton.extended(
+          heroTag: localizations.workstatus,
+          backgroundColor: isWorking ? Colors.red : Colors.green,
+          onPressed: isWorking ? stopWork : startWork,
+          label: Text(isWorking ? localizations.stopwork : localizations.startwork, style: const TextStyle(color: Colors.white)),
+          icon: Icon(isWorking ? Icons.stop : Icons.play_arrow, color: Colors.white),
+        ),
+      ],
+    ),
+    body: _isLoading
+        ? const Center(child: CircularProgressIndicator())
+        : RefreshIndicator(
+            onRefresh: refreshData,
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: ListView(
+                children: [
+                  Center(child: Text(dateController.text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
+                  const SizedBox(height: 20),
+                  Center(child: Text("${localizations.nameofthestaff}: $agentname", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const Onedayhistory())),
+                    child: _buildInfoRow(localizations.houseVisited, "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
+                  ),
+                  const SizedBox(height: 10),
+                  Center(child: Text(localizations.agency)),
+                  const SizedBox(height: 10),
+                  Autocomplete<AgencyData>(
+                    optionsBuilder: (TextEditingValue textEditingValue) {
+                      if (textEditingValue.text.isEmpty) {
+                        return _agencyList;
+                      }
+                      final query = textEditingValue.text.toLowerCase();
+                      final queryWords = query.split(' ');
+                      return _agencyList.where((agency) => queryWords.any((word) => (agency.locationName?.toLowerCase().contains(word) ?? false) || (agency.code?.toLowerCase().contains(word) ?? false))).toList();
+                    },
+                    displayStringForOption: (AgencyData agency) => agency.locationName ?? agency.code ?? 'Unknown',
+                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                      fieldTextEditingController.text = _selectedAgencyController.text; // Sync with selected agency
+                      return TextFormField(
+                        controller: fieldTextEditingController,
+                        focusNode: fieldFocusNode,
+                        decoration: InputDecoration(
+                          labelText: localizations.agency,
+                          hintText: _isLoadingAgencies ? localizations.loadingagencies :"searchorselectagency",
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.search),
                         ),
+                        validator: (value) => value == null || value.isEmpty ? localizations.pleaseselectanagency : null,
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedAgencyId = null; // Reset selection when typing
+                            _selectedAgencyController.text = value; // Update selected agency controller
+                          });
+                        },
+                        // Ensure the field is editable
+                        enabled: true,
+                      );
+                    },
+                    onSelected: (AgencyData selection) {
+                      setState(() {
+                        _selectedAgencyId = selection.id.toString();
+                        _selectedAgencyController.text = selection.locationName ?? selection.code ?? 'Unknown';
+                        _agencyNameController.text = selection.locationName ?? '';
+                        _phoneController.text = selection.phone ?? '';
+                        _codeController.text = selection.code ?? '';
+                        _unitController.text = selection.unit ?? '';
+                        _selectedAgency = selection;
+                      });
+                    },
+                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AgencyData> onSelected, Iterable<AgencyData> options) {
+                      return Align(
+                        alignment: Alignment.topLeft,
+                        child: Material(
+                          elevation: 4.0,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxHeight: 200, maxWidth: MediaQuery.of(context).size.width - 32),
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final AgencyData option = options.elementAt(index);
+                                return GestureDetector(
+                                  onTap: () {
+                                    onSelected(option);
+                                  },
+                                  child: ListTile(
+                                    title: Text(option.locationName ?? option.code ?? 'Unknown'),
+                                    subtitle: Text("[${option.code ?? ''}]"),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  if (_selectedAgencyId == 'other_agency') ...[
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _agencyNameController,
+                      decoration: InputDecoration(
+                        labelText: localizations.agencyname ?? 'Agency Name',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
                         prefixIcon: const Icon(Icons.business),
                       ),
-                      value: _selectedAgencyId,
-                      items: _agencyList.map((agency) {
-                        return DropdownMenuItem<String>(
-                          value: agency.id.toString(),
-                          child: Row(
-                            children: [
-                              Text(agency.locationName ??
-                                  agency.code ??
-                                  'Unknown'),
-                              const Spacer(),
-                              Text("[${(agency.code ?? "")}]")
-                            ],
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: _isLoadingAgencies
-                          ? null
-                          : (String? newValue) {
-                              setState(() {
-                                _selectedAgencyId = newValue;
-                                if (newValue != 'other_agency') {
-                                  _agencyNameController.clear();
-                                  _phoneController.clear();
-                                  _codeController.clear();
-                                  _unitController.clear();
-                                }
-                              });
-                            },
-                      isExpanded: true,
-                      hint: _isLoadingAgencies
-                          ? Text(localizations.loadingagencies)
-                          : Text(localizations.selectanagency),
-                      validator: (value) => value == null
-                          ? localizations.pleaseselectanagency
-                          : null,
+                      validator: (value) => value == null || value.isEmpty ? "pleaseenteragencyname" ?? 'Please enter agency name' : null,
                     ),
-                    if (_selectedAgencyId == 'other_agency') ...[
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _agencyNameController,
-                        decoration: InputDecoration(
-                          labelText: localizations.agencyname ?? 'Agency Name',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.business),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "pleaseenteragencyname" ??
-                                'Please enter agency name'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _phoneController,
-                        decoration: InputDecoration(
-                          labelText: localizations.phone ?? 'Phone',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.phone),
-                        ),
-                        keyboardType: TextInputType.phone,
-                        validator: (value) => value == null || value.isEmpty
-                            ? "pleaseenterphone" ?? 'Please enter phone number'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _codeController,
-                        decoration: InputDecoration(
-                          labelText: "code" ?? 'Code',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.code),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? "pleaseentercode" ?? 'Please enter code'
-                            : null,
-                      ),
-                      const SizedBox(height: 10),
-                      TextFormField(
-                        controller: _unitController,
-                        decoration: InputDecoration(
-                          labelText: "unit" ?? 'Unit',
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          prefixIcon: const Icon(Icons.apartment),
-                        ),
-                        validator: (value) => value == null || value.isEmpty
-                            ? " pleaseenterunit" ?? 'Please enter unit'
-                            : null,
-                      ),
-                    ],
                     const SizedBox(height: 10),
-                    ElevatedButton(
-                      onPressed: _isLoadingAgencies ? null : assignPinLocation,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.grey,
-                        foregroundColor: Colors.black,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
+                    TextFormField(
+                      controller: _phoneController,
+                      decoration: InputDecoration(
+                        labelText: localizations.phone ?? 'Phone',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        prefixIcon: const Icon(Icons.phone),
                       ),
-                      child: Text(
-                        localizations.assignagency,
-                        style: const TextStyle(fontSize: 16),
-                      ),
+                      keyboardType: TextInputType.phone,
+                      validator: (value) => value == null || value.isEmpty ? "pleaseenterphone" ?? 'Please enter phone number' : null,
                     ),
-                    const SizedBox(height: 20),
-                    Row(children: [
-                      Center(
-                          child: _buildSectionTitle(localizations.myRouteMap)),
-                      const Spacer(),
-                      TextButton.icon(
-                        icon: const Icon(Icons.assignment_outlined, size: 18),
-                        label: Text(localizations.routemapassign,
-                            style: const TextStyle(fontSize: 14)),
-                        onPressed: () async {
-                          final prefs = await SharedPreferences.getInstance();
-                          final token = prefs.getString('apikey');
-                          final userId = prefs.getInt('id');
-
-                          if (token != null && userId != null) {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => Agentaddrouite(
-                                  agentId: userId,
-                                  token: token,
-                                ),
-                              ),
-                            ).then((_) => refreshData());
-                          } else {
-                            if (mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(
-                                    content: Text("Missing user ID or Token")),
-                              );
-                            }
-                          }
-                        },
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _codeController,
+                      decoration: InputDecoration(
+                        labelText: "code" ?? 'Code',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        prefixIcon: const Icon(Icons.code),
                       ),
-                    ]),
-                    const SizedBox(height: 8),
-                    if (fullRouteMap?.result?.assigned != null)
-                      ...fullRouteMap!.result!.assigned!.map((assigned) =>
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(localizations.routeid,
-                                      style: const TextStyle(
-                                          fontWeight: FontWeight.bold)),
-                                  TextButton.icon(
-                                    onPressed: () {
-                                      if (assigned.id != null) {
-                                        final fromToIds = assigned.fromTo
-                                                ?.map((ft) => {
-                                                      "id": ft.id,
-                                                      "from_location":
-                                                          ft.fromLocation,
-                                                      "to_location":
-                                                          ft.toLocation,
-                                                      "extra_points": ft
-                                                          .extraPoints
-                                                          ?.map((ep) => {
-                                                                "id": ep.id,
-                                                                "name": ep.name,
-                                                              })
-                                                          .toList(),
-                                                    })
-                                                .toList() ??
-                                            [];
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (_) => Addextrapoint(
-                                              routeId: assigned.id!,
-                                              fromToIds: fromToIds,
-                                            ),
-                                          ),
-                                        ).then((_) {
-                                          refreshData();
-                                        });
-                                      }
-                                    },
-                                    icon: const Icon(Icons.edit, size: 18),
-                                    label: Text(localizations.editroute,
-                                        style: const TextStyle(fontSize: 14)),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              ...?assigned.fromTo?.map(
-                                (ft) => Padding(
-                                  padding:
-                                      const EdgeInsets.symmetric(vertical: 2),
-                                  child: Row(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      const Icon(Icons.location_on_outlined,
-                                          size: 20, color: Colors.blue),
-                                      const SizedBox(width: 4),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
-                                          children: [
-                                            SingleChildScrollView(
-                                              scrollDirection: Axis.horizontal,
-                                              child: Row(
-                                                children: [
-                                                  Text(ft.fromLocation ?? 'N/A',
-                                                      style: const TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.w600)),
-                                                  const Icon(
-                                                      Icons.arrow_forward,
-                                                      size: 16),
-                                                  if (ft.extraPoints != null &&
-                                                      ft.extraPoints!
-                                                          .isNotEmpty) ...[
-                                                    ...ft.extraPoints!
-                                                        .map((ep) => Row(
-                                                              children: [
-                                                                Text(
-                                                                    ep.name ??
-                                                                        '',
-                                                                    style: const TextStyle(
-                                                                        fontSize:
-                                                                            14,
-                                                                        color: Colors
-                                                                            .black)),
-                                                                const Icon(
-                                                                    Icons
-                                                                        .arrow_forward,
-                                                                    size: 16),
-                                                              ],
-                                                            )),
+                      validator: (value) => value == null || value.isEmpty ?" pleaseentercode "?? 'Please enter code' : null,
+                    ),
+                    const SizedBox(height: 10),
+                    TextFormField(
+                      controller: _unitController,
+                      decoration: InputDecoration(
+                        labelText: "unit "?? 'Unit',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                        prefixIcon: const Icon(Icons.apartment),
+                      ),
+                      validator: (value) => value == null || value.isEmpty ? "pleaseenterunit "?? 'Please enter unit' : null,
+                    ),
+                  ],
+                  const SizedBox(height: 10),
+                  ElevatedButton(
+                    onPressed: _isLoadingAgencies ? null : assignPinLocation,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey,
+                      foregroundColor: Colors.black,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text(localizations.assignagency, style: const TextStyle(fontSize: 16)),
+                  ),
+                  const SizedBox(height: 20),
+                  Center(child: _buildSectionTitle(localizations.shiftdetails)),
+                  const SizedBox(height: 13),
+                  () {
+                    final today = DateTime.now();
+                    final todaySessions = _selfieSessions.where((session) {
+                      final startTime = DateTime.tryParse(session.startTime ?? '');
+                      return startTime != null && startTime.year == today.year && startTime.month == today.month && startTime.day == today.day;
+                    }).toList();
+
+                    return todaySessions.isNotEmpty
+                        ? Column(
+                            children: todaySessions.asMap().entries.map((entry) {
+                              final index = entry.key;
+                              final session = entry.value;
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text("${localizations.session} ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      children: [
+                                        if (session.startTime != null)
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => _showSelfieDialog(session.startSelfie, localizations.startselfie),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(12),
+                                                decoration: BoxDecoration(color: Colors.green.shade50, border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(8)),
+                                                child: Column(
+                                                  children: [
+                                                    Text(localizations.starttime, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                    Text(session.startTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.startTime!)) : "--"),
                                                   ],
-                                                  Text(ft.toLocation ?? 'N/A',
-                                                      style: const TextStyle(
-                                                          fontSize: 15,
-                                                          fontWeight:
-                                                              FontWeight.w600)),
-                                                ],
+                                                ),
                                               ),
                                             ),
+                                          ),
+                                        if (session.startTime != null && session.endTime != null) const SizedBox(width: 12),
+                                        if (session.endTime != null)
+                                          Expanded(
+                                            child: GestureDetector(
+                                              onTap: () => _showSelfieDialog(session.endSelfie, localizations.endselfie),
+                                              child: Container(
+                                                padding: const EdgeInsets.all(12),
+                                                decoration: BoxDecoration(color: Colors.red.shade50, border: Border.all(color: Colors.red), borderRadius: BorderRadius.circular(8)),
+                                                child: Column(
+                                                  children: [
+                                                    Text(localizations.endtime, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                    Text(session.endTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.endTime!)) : "--"),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    if (session.startTime != null && session.endTime != null)
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(color: Colors.blue.shade50, border: Border.all(color: Colors.blue), borderRadius: BorderRadius.circular(8)),
+                                        child: Column(
+                                          children: [
+                                            Text(localizations.totalworkinghours, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(() {
+                                              final start = DateTime.tryParse(session.startTime!);
+                                              final end = DateTime.tryParse(session.endTime!);
+                                              if (start != null && end != null) {
+                                                final duration = end.difference(start);
+                                                return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                              }
+                                              return "--";
+                                            }()),
+                                          ],
+                                        ),
+                                      )
+                                    else if (session.startTime != null && session.endTime == null)
+                                      Container(
+                                        width: double.infinity,
+                                        padding: const EdgeInsets.all(12),
+                                        decoration: BoxDecoration(color: Colors.orange.shade50, border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)), borderRadius: BorderRadius.circular(8)),
+                                        child: Column(
+                                          children: [
+                                            Text(localizations.sessionongoing, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            Text(localizations.workinprogressendtimenotset, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
                                           ],
                                         ),
                                       ),
-                                    ],
-                                  ),
+                                  ],
                                 ),
-                              ),
-                            ],
-                          )),
-                    const SizedBox(height: 30),
-                    Center(child: _buildSectionTitle(localizations.reports)),
-                    _buildBulletPoint(
-                        "${localizations.alreadySubscribed}: $alreadySubscribedCount"),
-                    const SizedBox(height: 40),
-                    Center(
-                        child: _buildSectionTitle(localizations.shiftdetails)),
-                    const SizedBox(height: 10),
-                    () {
-                      final today = DateTime.now();
-                      final todaySessions = _selfieSessions.where((session) {
-                        final startTime =
-                            DateTime.tryParse(session.startTime ?? '');
-                        return startTime != null &&
-                            startTime.year == today.year &&
-                            startTime.month == today.month &&
-                            startTime.day == today.day;
-                      }).toList();
-
-                      return todaySessions.isNotEmpty
-                          ? Column(
-                              children:
-                                  todaySessions.asMap().entries.map((entry) {
-                                final index = entry.key;
-                                final session = entry.value;
-                                return Padding(
-                                  padding: const EdgeInsets.only(bottom: 16),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "${localizations.session} ${index + 1}",
-                                        style: const TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          if (session.startTime != null)
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () => _showSelfieDialog(
-                                                    session.startSelfie,
-                                                    localizations.startselfie),
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.green.shade50,
-                                                    border: Border.all(
-                                                        color: Colors.green),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        localizations.starttime,
-                                                        style: const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      Text(
-                                                        session.startTime !=
-                                                                null
-                                                            ? DateFormat(
-                                                                    'hh:mm a')
-                                                                .format(DateTime
-                                                                    .parse(session
-                                                                        .startTime!))
-                                                            : "--",
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                          if (session.startTime != null &&
-                                              session.endTime != null)
-                                            const SizedBox(width: 12),
-                                          if (session.endTime != null)
-                                            Expanded(
-                                              child: GestureDetector(
-                                                onTap: () => _showSelfieDialog(
-                                                    session.endSelfie,
-                                                    localizations.endselfie),
-                                                child: Container(
-                                                  padding:
-                                                      const EdgeInsets.all(12),
-                                                  decoration: BoxDecoration(
-                                                    color: Colors.red.shade50,
-                                                    border: Border.all(
-                                                        color: Colors.red),
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            8),
-                                                  ),
-                                                  child: Column(
-                                                    children: [
-                                                      Text(
-                                                        localizations.endtime,
-                                                        style: const TextStyle(
-                                                            fontWeight:
-                                                                FontWeight
-                                                                    .bold),
-                                                      ),
-                                                      Text(
-                                                        session.endTime != null
-                                                            ? DateFormat(
-                                                                    'hh:mm a')
-                                                                .format(DateTime
-                                                                    .parse(session
-                                                                        .endTime!))
-                                                            : "--",
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                            ),
-                                        ],
-                                      ),
-                                      const SizedBox(height: 12),
-                                      if (session.startTime != null &&
-                                          session.endTime != null)
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.blue.shade50,
-                                            border:
-                                                Border.all(color: Colors.blue),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                localizations.totalworkinghours,
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text(
-                                                () {
-                                                  final start =
-                                                      DateTime.tryParse(
-                                                          session.startTime!);
-                                                  final end = DateTime.tryParse(
-                                                      session.endTime!);
-                                                  if (start != null &&
-                                                      end != null) {
-                                                    final duration =
-                                                        end.difference(start);
-                                                    return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                                  }
-                                                  return "--";
-                                                }(),
-                                              ),
-                                            ],
-                                          ),
-                                        )
-                                      else if (session.startTime != null &&
-                                          session.endTime == null)
-                                        Container(
-                                          width: double.infinity,
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: Colors.orange.shade50,
-                                            border: Border.all(
-                                                color: const Color.fromARGB(
-                                                    255, 0, 0, 0)),
-                                            borderRadius:
-                                                BorderRadius.circular(8),
-                                          ),
-                                          child: Column(
-                                            children: [
-                                              Text(
-                                                localizations.sessionongoing,
-                                                style: const TextStyle(
-                                                    fontWeight:
-                                                        FontWeight.bold),
-                                              ),
-                                              Text(
-                                                localizations
-                                                    .workinprogressendtimenotset,
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.grey[700]),
-                                              ),
-                                            ],
-                                          ),
-                                        ),
-                                    ],
-                                  ),
-                                );
-                              }).toList(),
-                            )
-                          : Container(
-                              padding: const EdgeInsets.all(12),
-                              decoration: BoxDecoration(
-                                color: Colors.grey.shade100,
-                                border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                localizations.noshiftdataavailable,
-                                style: const TextStyle(
-                                    fontSize: 16, color: Colors.grey),
-                              ),
-                            );
-                    }(),
-                    const SizedBox(height: 40),
-                  ],
-                ),
+                              );
+                            }).toList(),
+                          )
+                        : Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(color: Colors.grey.shade100, border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
+                            child: Text(localizations.noshiftdataavailable, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                          );
+                  }(),
+                  const SizedBox(height: 40),
+                ],
               ),
             ),
-    );
-  }
+          ),
+  );
+}
 
-  Widget _buildDrawer(
-      LocalizationProvider localeProvider, AppLocalizations localizations) {
+  Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
       child: ListView(
         children: [
@@ -1496,8 +1191,7 @@ class _AgentscreenState extends State<Agentscreen> {
               children: [
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text("${localizations.salesrepresentative}    ",
-                    style: const TextStyle(color: Colors.white)),
+                Text("${localizations.salesrepresentative}    ", style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),
@@ -1521,10 +1215,7 @@ class _AgentscreenState extends State<Agentscreen> {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const Historypage()));
+                    Navigator.push(context, MaterialPageRoute(builder: (context) => const Historypage()));
                   },
                   child: const Text("Total History"),
                 ),
@@ -1538,10 +1229,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
   Widget _buildSectionTitle(String title) => Text(
         title,
-        style: const TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            decoration: TextDecoration.underline),
+        style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, decoration: TextDecoration.underline),
       );
 
   Widget _buildInfoRow(String label, String value) => Padding(
@@ -1565,4 +1253,16 @@ class _AgentscreenState extends State<Agentscreen> {
           ],
         ),
       );
+
+  @override
+  void dispose() {
+    _sessionCheckTimer?.cancel();
+    dateController.dispose();
+    _agencyNameController.dispose();
+    _phoneController.dispose();
+    _codeController.dispose();
+    _unitController.dispose();
+    _selectedAgencyController.dispose();
+    super.dispose();
+  }
 }

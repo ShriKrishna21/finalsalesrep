@@ -15,10 +15,10 @@ class Createincharge extends StatefulWidget {
   const Createincharge({super.key});
 
   @override
-  State<Createincharge> createState() => _createunitsState();
+  State<Createincharge> createState() => _CreateinchargeState();
 }
 
-class _createunitsState extends State<Createincharge> {
+class _CreateinchargeState extends State<Createincharge> {
   createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
 
@@ -70,8 +70,15 @@ class _createunitsState extends State<Createincharge> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? userlog = prefs.getString('apikey');
 
+    if (userlog == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("API token is missing")),
+      );
+      return;
+    }
+
     try {
-      final url = CommonApiClass.createregionalhead;
+      final url = "https://salesrep.esanchaya.com/sales_rep_user_creation";
 
       final String aadhaarBase64 = aadhaarImage != null
           ? base64Encode(await aadhaarImage!.readAsBytes())
@@ -86,7 +93,7 @@ class _createunitsState extends State<Createincharge> {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "params": {
-            "token": userlog.toString(),
+            "token": userlog,
             "name": name.text,
             "email": mail.text,
             "password": password.text,
@@ -103,6 +110,9 @@ class _createunitsState extends State<Createincharge> {
         }),
       );
 
+      print("Response status: ${response.statusCode}");
+      print("Response body: ${response.body}");
+
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         userdata = createUserModel.fromJson(jsonResponse);
@@ -113,12 +123,23 @@ class _createunitsState extends State<Createincharge> {
           );
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("User creation failed")),
+            SnackBar(
+                content: Text(
+                    "User creation failed: ${userdata!.result?.message ?? 'Unknown error'}")),
           );
         }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content:
+                  Text("API error: ${response.statusCode} - ${response.body}")),
+        );
       }
     } catch (error) {
       print("Error in creating user: $error");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error creating user: $error")),
+      );
     }
   }
 
@@ -166,26 +187,130 @@ class _createunitsState extends State<Createincharge> {
                   controller: phone,
                   hintText: localizations.phone,
                   errorText: localizations.enteravalidphonenumber,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return localizations.enteravalidphonenumber;
+                    }
+                    final phoneRegex = RegExp(r'^\d{10}$');
+                    if (!phoneRegex.hasMatch(value)) {
+                      return localizations.enteravalidphonenumber;
+                    }
+                    return null;
+                  },
                 ),
                 usercredentials(
                   controller: mail,
                   hintText: "UserId",
                   errorText: localizations.enteravalidemail,
                   keyboardType: TextInputType.emailAddress,
+                 
                 ),
                 usercredentials(
                   controller: password,
                   hintText: localizations.password,
                   errorText: localizations.pleaseenteravalidpassword,
                   keyboardType: TextInputType.visiblePassword,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return localizations.pleaseenteravalidpassword;
+                    }
+                    if (value.length < 6) {
+                      return "passwordmustbe6characters";
+                    }
+                    return null;
+                  },
+                ),
+                usercredentials(
+                  controller: state,
+                  hintText: localizations.address,
+                  errorText: localizations.addressCantBeEmpty,
                 ),
                 // usercredentials(
-                //   controller: state,
-                //   hintText: localizations.address,
-                //   errorText: localizations.addressCantBeEmpty,
+                //   controller: adhar,
+                //   hintText: localizations.aadhaarnumber,
+                //   errorText: localizations.invalidaadhaarnumber,
+                //   keyboardType: TextInputType.number,
+                //   maxvalue: 12,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return null; // Aadhaar is optional
+                //     }
+                //     final aadhaarRegex = RegExp(r'^\d{12}$');
+                //     if (!aadhaarRegex.hasMatch(value)) {
+                //       return localizations.aadhaarmustbe12digits;
+                //     }
+                //     return null;
+                //   },
                 // ),
-
-                // ✅ Role dropdown
+                // const SizedBox(height: 10),
+                // Align(
+                //   alignment: Alignment.centerLeft,
+                //   child: Text(
+                //     localizations.uploadAadharPhoto,
+                //     style: const TextStyle(
+                //         fontWeight: FontWeight.bold, fontSize: 16),
+                //   ),
+                // ),
+                // const SizedBox(height: 8),
+                // GestureDetector(
+                //   onTap: pickAadhaarImage,
+                //   child: Container(
+                //     height: 150,
+                //     width: double.infinity,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey[300],
+                //       border: Border.all(color: Colors.black),
+                //     ),
+                //     child: aadhaarImage != null
+                //         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
+                //         : Center(
+                //             child: Text(localizations.tapToSelectAadharImage),
+                //           ),
+                //   ),
+                // ),
+                // const SizedBox(height: 16),
+                // usercredentials(
+                //   controller: pan,
+                //   hintText: localizations.panNumber,
+                //   errorText: localizations.invalidpannumber,
+                //   maxvalue: 10,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return null; // PAN is optional
+                //     }
+                //     final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
+                //     if (!panRegex.hasMatch(value.toUpperCase())) {
+                //       return localizations.panmustbelikeABCDE1234F;
+                //     }
+                //     return null;
+                //   },
+                // ),
+                // const SizedBox(height: 10),
+                // Align(
+                //   alignment: Alignment.centerLeft,
+                //   child: Text(
+                //     localizations.uploadPanCardPhoto,
+                //     style: const TextStyle(
+                //         fontWeight: FontWeight.bold, fontSize: 16),
+                //   ),
+                // ),
+                // const SizedBox(height: 8),
+                // GestureDetector(
+                //   onTap: pickPancardImage,
+                //   child: Container(
+                //     height: 150,
+                //     width: double.infinity,
+                //     decoration: BoxDecoration(
+                //       color: Colors.grey[300],
+                //       border: Border.all(color: Colors.black),
+                //     ),
+                //     child: pancardImage != null
+                //         ? Image.file(pancardImage!, fit: BoxFit.cover)
+                //         : Center(
+                //             child: Text(localizations.tapToSelectPanCardImage),
+                //           ),
+                //   ),
+                // ),
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   child: DropdownButtonFormField<String>(
@@ -218,94 +343,7 @@ class _createunitsState extends State<Createincharge> {
                     ),
                   ),
                 ),
-
-                // usercredentials(
-                //   controller: adhar,
-                //   hintText: localizations.aadhaarnumber,
-                //   errorText: localizations.invalidaadhaarnumber,
-                //   keyboardType: TextInputType.number,
-                //   maxvalue: 12,
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return localizations.pleaseenteraadhaarnumber;
-                //     }
-                //     final aadhaarRegex = RegExp(r'^\d{12}$');
-                //     if (!aadhaarRegex.hasMatch(value)) {
-                //       return localizations.aadhaarmustbe12digits;
-                //     }
-                //     return null;
-                //   },
-                // ),
-
-                // SizedBox(height: 10),
-                // Align(
-                //   alignment: Alignment.centerLeft,
-                //   child: Text(localizations.uploadAadharPhoto,
-                //       style:
-                //           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                // ),
-                // const SizedBox(height: 8),
-                // GestureDetector(
-                //   onTap: pickAadhaarImage,
-                //   child: Container(
-                //     height: 150,
-                //     width: double.infinity,
-                //     decoration: BoxDecoration(
-                //       color: Colors.grey[300],
-                //       border: Border.all(color: Colors.black),
-                //     ),
-                //     child: aadhaarImage != null
-                //         ? Image.file(aadhaarImage!, fit: BoxFit.cover)
-                //         : Center(
-                //             child: Text(localizations.tapToSelectAadharImage),
-                //           ),
-                //   ),
-                // ),
-
-                // const SizedBox(height: 16),
-                // usercredentials(
-                //   controller: pan,
-                //   hintText: localizations.panNumber,
-                //   errorText: localizations.invalidpannumber,
-                //   maxvalue: 10,
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return localizations.enterpannumber;
-                //     }
-                //     final panRegex = RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$');
-                //     if (!panRegex.hasMatch(value.toUpperCase())) {
-                //       return localizations.panmustbelikeABCDE1234F;
-                //     }
-                //     return null;
-                //   },
-                // ),
-
-                // const SizedBox(height: 10),
-                // Align(
-                //   alignment: Alignment.centerLeft,
-                //   child: Text(localizations.uploadPanCardPhoto,
-                //       style:
-                //           TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                // ),
-                // const SizedBox(height: 8),
-                // GestureDetector(
-                //   onTap: pickPancardImage,
-                //   child: Container(
-                //     height: 150,
-                //     width: double.infinity,
-                //     decoration: BoxDecoration(
-                //       color: Colors.grey[300],
-                //       border: Border.all(color: Colors.black),
-                //     ),
-                //     child: pancardImage != null
-                //         ? Image.file(pancardImage!, fit: BoxFit.cover)
-                //         : Center(
-                //             child: Text(localizations.tapToSelectPanCardImage),
-                //           ),
-                //   ),
-                // ),
-
-                const SizedBox(height: 10),
+                const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
@@ -324,7 +362,7 @@ class _createunitsState extends State<Createincharge> {
                       child: Text(
                         localizations.createUser,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
+                        style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -333,6 +371,7 @@ class _createunitsState extends State<Createincharge> {
                     ),
                   ),
                 ),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -342,7 +381,6 @@ class _createunitsState extends State<Createincharge> {
   }
 }
 
-// 🔁 Reusable Input Field Widget
 class usercredentials extends StatelessWidget {
   final TextEditingController controller;
   final String hintText;
