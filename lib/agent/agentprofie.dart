@@ -380,7 +380,7 @@ class _AgentProfileState extends State<agentProfile> {
                   ProfileItem(
                       title: localizations.userid, value: userid ?? "-"),
                   ProfileItem(
-                      title: localizations.jobRole, value: jobrole ?? "-"),
+                      title: localizations.jobRole, value: "staff"),
                   ProfileItem(
                       title: localizations.unitName, value: unitname ?? "-"),
                 ],

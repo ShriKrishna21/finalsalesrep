@@ -221,7 +221,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _detailRow("s", r.agentName),
+                _detailRow("staff", r.agentName),
                 _detailRow("Agency", r.agency),
                 // _detailRow(localizations.agentlogin, r.agentLogin),
                 _detailRow(localizations.date, r.date),
