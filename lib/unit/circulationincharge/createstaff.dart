@@ -212,49 +212,49 @@ class _createstaffState extends State<createstaff> {
                   ),
                 ),
 
-                usercredentials(
-                  controller: adhar,
-                  hintText: Localizations.aadharNumber,
-                  errorText: Localizations.invalidaadhaarnumber,
-                  keyboardType: TextInputType.number,
-                  maxvalue: 12,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return Localizations.aadhaarnumber;
-                    }
-                    if (!RegExp(r'^\d{12}$').hasMatch(value)) {
-                      return "Must be 12 digits";
-                    }
-                    return null;
-                  },
-                ),
+                // usercredentials(
+                //   controller: adhar,
+                //   hintText: Localizations.aadharNumber,
+                //   errorText: Localizations.invalidaadhaarnumber,
+                //   keyboardType: TextInputType.number,
+                //   maxvalue: 12,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return Localizations.aadhaarnumber;
+                //     }
+                //     if (!RegExp(r'^\d{12}$').hasMatch(value)) {
+                //       return "Must be 12 digits";
+                //     }
+                //     return null;
+                //   },
+                // ),
 
-                const SizedBox(height: 10),
-                _uploadLabel(Localizations.uploadAadharPhoto),
-                _imageSelector(aadhaarImage, pickAadhaarImage),
+                // const SizedBox(height: 10),
+                // _uploadLabel(Localizations.uploadAadharPhoto),
+                // _imageSelector(aadhaarImage, pickAadhaarImage),
 
-                const SizedBox(height: 16),
-                usercredentials(
-                  controller: pan,
-                  hintText: Localizations.panNumber,
-                  errorText: Localizations.invalidpannumber,
-                  maxvalue: 10,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return "Enter PAN number";
-                    }
-                    if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
-                        .hasMatch(value.toUpperCase())) {
-                      return "Format: ABCDE1234F";
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 10),
-                _uploadLabel(Localizations.uploadPanCardPhoto),
-                _imageSelector(pancardImage, pickPancardImage),
+                // const SizedBox(height: 16),
+                // usercredentials(
+                //   controller: pan,
+                //   hintText: Localizations.panNumber,
+                //   errorText: Localizations.invalidpannumber,
+                //   maxvalue: 10,
+                //   validator: (value) {
+                //     if (value == null || value.isEmpty) {
+                //       return "Enter PAN number";
+                //     }
+                //     if (!RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
+                //         .hasMatch(value.toUpperCase())) {
+                //       return "Format: ABCDE1234F";
+                //     }
+                //     return null;
+                //   },
+                // ),
+                // const SizedBox(height: 10),
+                // _uploadLabel(Localizations.uploadPanCardPhoto),
+                // _imageSelector(pancardImage, pickPancardImage),
 
-                const SizedBox(height: 25),
+                // const SizedBox(height: 25),
                 GestureDetector(
                   onTap: () async {
                     if (_formKey.currentState?.validate() ?? false) {
