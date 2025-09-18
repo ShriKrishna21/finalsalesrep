@@ -6,6 +6,7 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
+import 'package:finalsalesrep/offline/savedformscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -44,6 +45,7 @@ class _AgentscreenState extends State<Agentscreen> {
   int alreadySubscribedCount = 0;
   List<SelfieSession> _selfieSessions = [];
   final Onedayagent _onedayagent = Onedayagent();
+  bool _isSyncing = false;
 
   // Agency dropdown related variables
   List<AgencyData> _agencyList = [];
@@ -678,15 +680,17 @@ class _AgentscreenState extends State<Agentscreen> {
 
   Future<void> validateToken() async {
     final connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult == ConnectivityResult.none) {
-      debugPrint("❌ No network connection");
-      return;
+    if (connectivityResult.contains(ConnectivityResult.none)) {
+      debugPrint("🌐 Offline mode: Skipping token validation");
+      return; // Do not logout when offline
     }
 
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final sessionId = prefs.getString('session_id');
+
     if (token == null || token.isEmpty) {
+      debugPrint("❌ Missing or empty token");
       forceLogout("Session expired or invalid token.");
       return;
     }
@@ -719,13 +723,160 @@ class _AgentscreenState extends State<Agentscreen> {
         if (retryCount >= maxRetries) {
           forceLogout("Error validating session after $maxRetries attempts. Please log in again.", responseBody: e.toString());
         } else {
-          await Future.delayed(const Duration(seconds: 30));
+          await Future.delayed(const Duration(seconds: 5));
         }
       }
     }
   }
 
+  
+Future<void> syncPendingForms() async {
+  final connectivityResult = await Connectivity().checkConnectivity();
+  if (connectivityResult.contains(ConnectivityResult.none)) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No internet connection. Please connect to sync forms.")),
+      );
+    }
+    return;
+  }
+
+  if (mounted) {
+    setState(() {
+      _isSyncing = true;
+    });
+  }
+
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('apikey');
+  final pendingFormsJson = prefs.getString('pending_forms');
+
+  debugPrint("🔍 Checking pending_forms: '$pendingFormsJson'");
+
+  if (token == null || token.isEmpty) {
+    debugPrint("❌ Missing or empty token");
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Missing or invalid token")),
+      );
+      setState(() {
+        _isSyncing = false;}
+      );
+    }
+    return;
+  }
+
+  if (pendingFormsJson == null || pendingFormsJson.isEmpty || pendingFormsJson == '[]') {
+    debugPrint("✅ No pending forms to sync (pendingFormsJson: '$pendingFormsJson')");
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("No pending forms to sync")),
+      );
+      setState(() {
+        _isSyncing = false;}
+      );
+    }
+    return;
+  }
+
+  try {
+    final List<dynamic> pendingForms = jsonDecode(pendingFormsJson);
+    debugPrint("🔄 Found ${pendingForms.length} pending forms to sync: $pendingForms");
+
+    if (pendingForms.isEmpty) {
+      debugPrint("✅ No pending forms after parsing (parsed as empty list)");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No pending forms to sync")),
+        );
+        setState(() {
+          _isSyncing = false;
+        });
+      }
+      await prefs.remove('pending_forms'); // Clear empty pending_forms
+      return;
+    }
+
+    bool allSyncedSuccessfully = true;
+    for (var form in pendingForms) {
+      debugPrint("🔄 Syncing form: $form");
+      final response = await http.post(
+        Uri.parse("https://salesrep.esanchaya.com/api/customer_form"),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            ...form,
+          }
+        }),
+      );
+
+      debugPrint("🔁 Form Sync Status Code: ${response.statusCode}");
+      debugPrint("🔁 Form Sync Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+        if (result != null && result['success'] == true) {
+          debugPrint("✅ Form synced successfully: ${form['family_head_name'] ?? 'Unknown'}");
+        } else {
+          final errorMessage = result?['message'] ?? 'Unknown error';
+          debugPrint("❌ Failed to sync form: $errorMessage");
+          allSyncedSuccessfully = false;
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Failed to sync form: $errorMessage")),
+            );
+          }
+        }
+      } else {
+        debugPrint("❌ Failed to sync form: ${response.statusCode} - ${response.body}");
+        allSyncedSuccessfully = false;
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to sync form: ${response.statusCode}")),
+          );
+        }
+      }
+    }
+
+    if (allSyncedSuccessfully) {
+      debugPrint("✅ All forms synced successfully, clearing pending_forms");
+      await prefs.remove('pending_forms');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("All forms synced successfully")),
+        );
+      }
+    } else {
+      debugPrint("⚠️ Some forms failed to sync, not clearing pending_forms");
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Some forms failed to sync")),
+        );
+      }
+    }
+
+    // Refresh data to update Onedayhistory
+    await refreshData();
+
+  } catch (e) {
+    debugPrint("❌ Error syncing forms: $e");
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error syncing forms: $e")),
+      );
+    }
+  } finally {
+    if (mounted) {
+      setState(() {
+        _isSyncing = false;
+      });
+    }
+  }
+}
+
   void forceLogout(String message, {String? responseBody, int? statusCode}) async {
+    debugPrint("🚨 Force Logout: $message, Status: $statusCode, Response: $responseBody");
     final prefs = await SharedPreferences.getInstance();
     await prefs.clear();
     if (mounted) {
@@ -877,309 +1028,324 @@ class _AgentscreenState extends State<Agentscreen> {
       }
     }
   }
-@override
-Widget build(BuildContext context) {
-  final localeProvider = Provider.of<LocalizationProvider>(context);
-  final localizations = AppLocalizations.of(context)!;
 
-  return Scaffold(
-    appBar: AppBar(
-      backgroundColor: Colors.white,
-      foregroundColor: Colors.black,
-      title: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Center(child: Text(localizations.salesrepresentative)),
-          Center(child: Text("${localizations.welcome} $agentname", style: const TextStyle(fontSize: 16))),
+  @override
+  Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context)!;
+
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(child: Text(localizations.salesrepresentative)),
+            Center(child: Text("${localizations.welcome} $agentname", style: const TextStyle(fontSize: 16))),
+          ],
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.person),
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const agentProfile())),
+          )
         ],
       ),
-      actions: [
-        IconButton(
-          icon: const Icon(Icons.person),
-          onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const agentProfile())),
-        )
-      ],
-    ),
-    drawer: _buildDrawer(localeProvider, localizations),
-    floatingActionButton: Column(
-      mainAxisAlignment: MainAxisAlignment.end,
-      children: [
-        FloatingActionButton.extended(
-          heroTag: localizations.customerform,
-          backgroundColor: Colors.white,
-          onPressed: isWorking
-              ? () async {
-                  await Navigator.push(context, MaterialPageRoute(builder: (_) => const Coustmer()));
-                  await refreshData();
-                }
-              : null,
-          label: Text(localizations.customerform, style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
-          icon: Icon(Icons.add_box_outlined, color: isWorking ? Colors.black : Colors.grey),
-        ),
-        const SizedBox(height: 12),
-        FloatingActionButton.extended(
-          heroTag: localizations.workstatus,
-          backgroundColor: isWorking ? Colors.red : Colors.green,
-          onPressed: isWorking ? stopWork : startWork,
-          label: Text(isWorking ? localizations.stopwork : localizations.startwork, style: const TextStyle(color: Colors.white)),
-          icon: Icon(isWorking ? Icons.stop : Icons.play_arrow, color: Colors.white),
-        ),
-      ],
-    ),
-    body: _isLoading
-        ? const Center(child: CircularProgressIndicator())
-        : RefreshIndicator(
-            onRefresh: refreshData,
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
-                children: [
-                  Center(child: Text(dateController.text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
-                  const SizedBox(height: 20),
-                  Center(child: Text("${localizations.nameofthestaff}: $agentname", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
-                  const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const Onedayhistory())),
-                    child: _buildInfoRow(localizations.houseVisited, "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
-                  ),
-                  const SizedBox(height: 10),
-                  Center(child: Text(localizations.agency)),
-                  const SizedBox(height: 10),
-                  Autocomplete<AgencyData>(
-                    optionsBuilder: (TextEditingValue textEditingValue) {
-                      if (textEditingValue.text.isEmpty) {
-                        return _agencyList;
-                      }
-                      final query = textEditingValue.text.toLowerCase();
-                      final queryWords = query.split(' ');
-                      return _agencyList.where((agency) => queryWords.any((word) => (agency.locationName?.toLowerCase().contains(word) ?? false) || (agency.code?.toLowerCase().contains(word) ?? false))).toList();
-                    },
-                    displayStringForOption: (AgencyData agency) => agency.locationName ?? agency.code ?? 'Unknown',
-                    fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
-                      fieldTextEditingController.text = _selectedAgencyController.text; // Sync with selected agency
-                      return TextFormField(
-                        controller: fieldTextEditingController,
-                        focusNode: fieldFocusNode,
-                        decoration: InputDecoration(
-                          labelText: localizations.agency,
-                          hintText: _isLoadingAgencies ? localizations.loadingagencies :"searchorselectagency",
-                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                          prefixIcon: const Icon(Icons.search),
-                        ),
-                        validator: (value) => value == null || value.isEmpty ? localizations.pleaseselectanagency : null,
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedAgencyId = null; // Reset selection when typing
-                            _selectedAgencyController.text = value; // Update selected agency controller
-                          });
-                        },
-                        // Ensure the field is editable
-                        enabled: true,
-                      );
-                    },
-                    onSelected: (AgencyData selection) {
-                      setState(() {
-                        _selectedAgencyId = selection.id.toString();
-                        _selectedAgencyController.text = selection.locationName ?? selection.code ?? 'Unknown';
-                        _agencyNameController.text = selection.locationName ?? '';
-                        _phoneController.text = selection.phone ?? '';
-                        _codeController.text = selection.code ?? '';
-                        _unitController.text = selection.unit ?? '';
-                        _selectedAgency = selection;
-                      });
-                    },
-                    optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AgencyData> onSelected, Iterable<AgencyData> options) {
-                      return Align(
-                        alignment: Alignment.topLeft,
-                        child: Material(
-                          elevation: 4.0,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxHeight: 200, maxWidth: MediaQuery.of(context).size.width - 32),
-                            child: ListView.builder(
-                              shrinkWrap: true,
-                              itemCount: options.length,
-                              itemBuilder: (BuildContext context, int index) {
-                                final AgencyData option = options.elementAt(index);
-                                return GestureDetector(
-                                  onTap: () {
-                                    onSelected(option);
-                                  },
-                                  child: ListTile(
-                                    title: Text(option.locationName ?? option.code ?? 'Unknown'),
-                                    subtitle: Text("[${option.code ?? ''}]"),
-                                  ),
-                                );
-                              },
+      drawer: _buildDrawer(localeProvider, localizations),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton.extended(
+            heroTag: localizations.customerform,
+            backgroundColor: Colors.white,
+            onPressed: isWorking
+                ? () async {
+                    await Navigator.push(context, MaterialPageRoute(builder: (_) => const Coustmer()));
+                    await refreshData();
+                  }
+                : null,
+            label: Text(localizations.customerform, style: TextStyle(color: isWorking ? Colors.black : Colors.grey)),
+            icon: Icon(Icons.add_box_outlined, color: isWorking ? Colors.black : Colors.grey),
+          ),
+          const SizedBox(height: 12),
+      //     FloatingActionButton.extended(
+      //       heroTag: "sync_offline_forms",
+      //       backgroundColor: _isSyncing ? Colors.grey : Colors.blue,
+      //       onPressed: _isSyncing ? null : syncPendingForms,
+      //       label: Text(
+      //   _isSyncing ? "Syncing..." : "Sync Offline Forms",
+      //   style: const TextStyle(color: Colors.white),
+      // ),
+      //       icon: Icon(_isSyncing ? Icons.hourglass_empty : Icons.sync, color: Colors.white),
+      //     ),
+          const SizedBox(height: 12),
+          FloatingActionButton.extended(
+            heroTag: localizations.workstatus,
+            backgroundColor: isWorking ? Colors.red : Colors.green,
+            onPressed: isWorking ? stopWork : startWork,
+            label: Text(isWorking ? localizations.stopwork : localizations.startwork, style: const TextStyle(color: Colors.white)),
+            icon: Icon(isWorking ? Icons.stop : Icons.play_arrow, color: Colors.white),
+          ),
+        ],
+      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : RefreshIndicator(
+              onRefresh: refreshData,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ListView(
+                  children: [
+                    Center(child: Text(dateController.text, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w500))),
+                    const SizedBox(height: 20),
+                    Center(child: Text("${localizations.nameofthestaff}: $agentname", style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold))),
+                    const SizedBox(height: 20),
+                    GestureDetector(
+                      onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const Onedayhistory())),
+                      child: _buildInfoRow(localizations.houseVisited, "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
+                    
+                    ),
+                    ElevatedButton(onPressed: (){
+Navigator.push(context, MaterialPageRoute(builder: (context) => SavedFormsScreen(),));
+                    }, child: Text("View")),
+                    const SizedBox(height: 10),
+                    Center(child: Text(localizations.agency)),
+                    const SizedBox(height: 10),
+                    Autocomplete<AgencyData>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return _agencyList;
+                        }
+                        final query = textEditingValue.text.toLowerCase();
+                        final queryWords = query.split(' ');
+                        return _agencyList.where((agency) => queryWords.any((word) => (agency.locationName?.toLowerCase().contains(word) ?? false) || (agency.code?.toLowerCase().contains(word) ?? false))).toList();
+                      },
+                      displayStringForOption: (AgencyData agency) => agency.locationName ?? agency.code ?? 'Unknown',
+                      fieldViewBuilder: (BuildContext context, TextEditingController fieldTextEditingController, FocusNode fieldFocusNode, VoidCallback onFieldSubmitted) {
+                        fieldTextEditingController.text = _selectedAgencyController.text; // Sync with selected agency
+                        return TextFormField(
+                          controller: fieldTextEditingController,
+                          focusNode: fieldFocusNode,
+                          decoration: InputDecoration(
+                            labelText: localizations.agency,
+                            hintText: _isLoadingAgencies ? localizations.loadingagencies : "searchorselectagency",
+                            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                            prefixIcon: const Icon(Icons.search),
+                          ),
+                          validator: (value) => value == null || value.isEmpty ? localizations.pleaseselectanagency : null,
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedAgencyId = null; // Reset selection when typing
+                              _selectedAgencyController.text = value; // Update selected agency controller
+                            });
+                          },
+                          enabled: true,
+                        );
+                      },
+                      onSelected: (AgencyData selection) {
+                        setState(() {
+                          _selectedAgencyId = selection.id.toString();
+                          _selectedAgencyController.text = selection.locationName ?? selection.code ?? 'Unknown';
+                          _agencyNameController.text = selection.locationName ?? '';
+                          _phoneController.text = selection.phone ?? '';
+                          _codeController.text = selection.code ?? '';
+                          _unitController.text = selection.unit ?? '';
+                          _selectedAgency = selection;
+                        });
+                      },
+                      optionsViewBuilder: (BuildContext context, AutocompleteOnSelected<AgencyData> onSelected, Iterable<AgencyData> options) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4.0,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(maxHeight: 200, maxWidth: MediaQuery.of(context).size.width - 32),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final AgencyData option = options.elementAt(index);
+                                  return GestureDetector(
+                                    onTap: () {
+                                      onSelected(option);
+                                    },
+                                    child: ListTile(
+                                      title: Text(option.locationName ?? option.code ?? 'Unknown'),
+                                      subtitle: Text("[${option.code ?? ''}]"),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
+                        );
+                      },
+                    ),
+                    if (_selectedAgencyId == 'other_agency') ...[
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _agencyNameController,
+                        decoration: InputDecoration(
+                          labelText: localizations.agencyname ?? 'Agency Name',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.business),
                         ),
-                      );
-                    },
-                  ),
-                  if (_selectedAgencyId == 'other_agency') ...[
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _agencyNameController,
-                      decoration: InputDecoration(
-                        labelText: localizations.agencyname ?? 'Agency Name',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        prefixIcon: const Icon(Icons.business),
+                        validator: (value) => value == null || value.isEmpty ? "pleaseenteragencyname" ?? 'Please enter agency name' : null,
                       ),
-                      validator: (value) => value == null || value.isEmpty ? "pleaseenteragencyname" ?? 'Please enter agency name' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _phoneController,
-                      decoration: InputDecoration(
-                        labelText: localizations.phone ?? 'Phone',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        prefixIcon: const Icon(Icons.phone),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _phoneController,
+                        decoration: InputDecoration(
+                          labelText: localizations.phone ?? 'Phone',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.phone),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (value) => value == null || value.isEmpty ? "pleaseenterphone" ?? 'Please enter phone number' : null,
                       ),
-                      keyboardType: TextInputType.phone,
-                      validator: (value) => value == null || value.isEmpty ? "pleaseenterphone" ?? 'Please enter phone number' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _codeController,
-                      decoration: InputDecoration(
-                        labelText: "code" ?? 'Code',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        prefixIcon: const Icon(Icons.code),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _codeController,
+                        decoration: InputDecoration(
+                          labelText: "code" ?? 'Code',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.code),
+                        ),
+                        validator: (value) => value == null || value.isEmpty ? "pleaseentercode" ?? 'Please enter code' : null,
                       ),
-                      validator: (value) => value == null || value.isEmpty ?" pleaseentercode "?? 'Please enter code' : null,
-                    ),
-                    const SizedBox(height: 10),
-                    TextFormField(
-                      controller: _unitController,
-                      decoration: InputDecoration(
-                        labelText: "unit "?? 'Unit',
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        prefixIcon: const Icon(Icons.apartment),
+                      const SizedBox(height: 10),
+                      TextFormField(
+                        controller: _unitController,
+                        decoration: InputDecoration(
+                          labelText: "unit" ?? 'Unit',
+                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+                          prefixIcon: const Icon(Icons.apartment),
+                        ),
+                        validator: (value) => value == null || value.isEmpty ? "pleaseenterunit" ?? 'Please enter unit' : null,
                       ),
-                      validator: (value) => value == null || value.isEmpty ? "pleaseenterunit "?? 'Please enter unit' : null,
+                    ],
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: _isLoadingAgencies ? null : assignPinLocation,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey,
+                        foregroundColor: Colors.black,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                      ),
+                      child: Text(localizations.assignagency, style: const TextStyle(fontSize: 16)),
                     ),
-                  ],
-                  const SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: _isLoadingAgencies ? null : assignPinLocation,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey,
-                      foregroundColor: Colors.black,
-                      padding: const EdgeInsets.symmetric(vertical: 12),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    ),
-                    child: Text(localizations.assignagency, style: const TextStyle(fontSize: 16)),
-                  ),
-                  const SizedBox(height: 20),
-                  Center(child: _buildSectionTitle(localizations.shiftdetails)),
-                  const SizedBox(height: 13),
-                  () {
-                    final today = DateTime.now();
-                    final todaySessions = _selfieSessions.where((session) {
-                      final startTime = DateTime.tryParse(session.startTime ?? '');
-                      return startTime != null && startTime.year == today.year && startTime.month == today.month && startTime.day == today.day;
-                    }).toList();
+                    const SizedBox(height: 20),
+                    Center(child: _buildSectionTitle(localizations.shiftdetails)),
+                    const SizedBox(height: 13),
+                    () {
+                      final today = DateTime.now();
+                      final todaySessions = _selfieSessions.where((session) {
+                        final startTime = DateTime.tryParse(session.startTime ?? '');
+                        return startTime != null && startTime.year == today.year && startTime.month == today.month && startTime.day == today.day;
+                      }).toList();
 
-                    return todaySessions.isNotEmpty
-                        ? Column(
-                            children: todaySessions.asMap().entries.map((entry) {
-                              final index = entry.key;
-                              final session = entry.value;
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text("${localizations.session} ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                                    const SizedBox(height: 8),
-                                    Row(
-                                      children: [
-                                        if (session.startTime != null)
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: () => _showSelfieDialog(session.startSelfie, localizations.startselfie),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(color: Colors.green.shade50, border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(8)),
-                                                child: Column(
-                                                  children: [
-                                                    Text(localizations.starttime, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                                    Text(session.startTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.startTime!)) : "--"),
-                                                  ],
+                      return todaySessions.isNotEmpty
+                          ? Column(
+                              children: todaySessions.asMap().entries.map((entry) {
+                                final index = entry.key;
+                                final session = entry.value;
+                                return Padding(
+                                  padding: const EdgeInsets.only(bottom: 16),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text("${localizations.session} ${index + 1}", style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                                      const SizedBox(height: 8),
+                                      Row(
+                                        children: [
+                                          if (session.startTime != null)
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () => _showSelfieDialog(session.startSelfie, localizations.startselfie),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(color: Colors.green.shade50, border: Border.all(color: Colors.green), borderRadius: BorderRadius.circular(8)),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(localizations.starttime, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                      Text(session.startTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.startTime!)) : "--"),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                        if (session.startTime != null && session.endTime != null) const SizedBox(width: 12),
-                                        if (session.endTime != null)
-                                          Expanded(
-                                            child: GestureDetector(
-                                              onTap: () => _showSelfieDialog(session.endSelfie, localizations.endselfie),
-                                              child: Container(
-                                                padding: const EdgeInsets.all(12),
-                                                decoration: BoxDecoration(color: Colors.red.shade50, border: Border.all(color: Colors.red), borderRadius: BorderRadius.circular(8)),
-                                                child: Column(
-                                                  children: [
-                                                    Text(localizations.endtime, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                                    Text(session.endTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.endTime!)) : "--"),
-                                                  ],
+                                          if (session.startTime != null && session.endTime != null) const SizedBox(width: 12),
+                                          if (session.endTime != null)
+                                            Expanded(
+                                              child: GestureDetector(
+                                                onTap: () => _showSelfieDialog(session.endSelfie, localizations.endselfie),
+                                                child: Container(
+                                                  padding: const EdgeInsets.all(12),
+                                                  decoration: BoxDecoration(color: Colors.red.shade50, border: Border.all(color: Colors.red), borderRadius: BorderRadius.circular(8)),
+                                                  child: Column(
+                                                    children: [
+                                                      Text(localizations.endtime, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                      Text(session.endTime != null ? DateFormat('hh:mm a').format(DateTime.parse(session.endTime!)) : "--"),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
                                             ),
-                                          ),
-                                      ],
-                                    ),
-                                    const SizedBox(height: 12),
-                                    if (session.startTime != null && session.endTime != null)
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(color: Colors.blue.shade50, border: Border.all(color: Colors.blue), borderRadius: BorderRadius.circular(8)),
-                                        child: Column(
-                                          children: [
-                                            Text(localizations.totalworkinghours, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            Text(() {
-                                              final start = DateTime.tryParse(session.startTime!);
-                                              final end = DateTime.tryParse(session.endTime!);
-                                              if (start != null && end != null) {
-                                                final duration = end.difference(start);
-                                                return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
-                                              }
-                                              return "--";
-                                            }()),
-                                          ],
-                                        ),
-                                      )
-                                    else if (session.startTime != null && session.endTime == null)
-                                      Container(
-                                        width: double.infinity,
-                                        padding: const EdgeInsets.all(12),
-                                        decoration: BoxDecoration(color: Colors.orange.shade50, border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)), borderRadius: BorderRadius.circular(8)),
-                                        child: Column(
-                                          children: [
-                                            Text(localizations.sessionongoing, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            Text(localizations.workinprogressendtimenotset, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
-                                          ],
-                                        ),
+                                        ],
                                       ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          )
-                        : Container(
-                            padding: const EdgeInsets.all(12),
-                            decoration: BoxDecoration(color: Colors.grey.shade100, border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
-                            child: Text(localizations.noshiftdataavailable, style: const TextStyle(fontSize: 16, color: Colors.grey)),
-                          );
-                  }(),
-                  const SizedBox(height: 40),
-                ],
+                                      const SizedBox(height: 12),
+                                      if (session.startTime != null && session.endTime != null)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(color: Colors.blue.shade50, border: Border.all(color: Colors.blue), borderRadius: BorderRadius.circular(8)),
+                                          child: Column(
+                                            children: [
+                                              Text(localizations.totalworkinghours, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                              Text(() {
+                                                final start = DateTime.tryParse(session.startTime!);
+                                                final end = DateTime.tryParse(session.endTime!);
+                                                if (start != null && end != null) {
+                                                  final duration = end.difference(start);
+                                                  return "${duration.inHours}h ${duration.inMinutes.remainder(60)}m";
+                                                }
+                                                return "--";
+                                              }()),
+                                            ],
+                                          ),
+                                        )
+                                      else if (session.startTime != null && session.endTime == null)
+                                        Container(
+                                          width: double.infinity,
+                                          padding: const EdgeInsets.all(12),
+                                          decoration: BoxDecoration(color: Colors.orange.shade50, border: Border.all(color: const Color.fromARGB(255, 0, 0, 0)), borderRadius: BorderRadius.circular(8)),
+                                          child: Column(
+                                            children: [
+                                              Text(localizations.sessionongoing, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                              Text(localizations.workinprogressendtimenotset, style: TextStyle(fontSize: 14, color: Colors.grey[700])),
+                                            ],
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                            )
+                          : Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(color: Colors.grey.shade100, border: Border.all(color: Colors.grey), borderRadius: BorderRadius.circular(8)),
+                              child: Text(localizations.noshiftdataavailable, style: const TextStyle(fontSize: 16, color: Colors.grey)),
+                            );
+                    }(),
+                    const SizedBox(height: 40),
+                  ],
+                ),
               ),
             ),
-          ),
-  );
-}
+    );
+  }
 
   Widget _buildDrawer(LocalizationProvider localeProvider, AppLocalizations localizations) {
     return Drawer(
@@ -1191,7 +1357,7 @@ Widget build(BuildContext context) {
               children: [
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
-                Text("${localizations.salesrepresentative}    ", style: const TextStyle(color: Colors.white)),
+                Text("${localizations.salesrepresentative}", style: const TextStyle(color: Colors.white)),
               ],
             ),
           ),

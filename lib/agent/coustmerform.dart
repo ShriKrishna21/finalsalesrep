@@ -4,6 +4,9 @@ import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/modelclasses/assignagency.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
+import 'package:finalsalesrep/offline/connecticityhelper.dart';
+import 'package:finalsalesrep/offline/localdb.dart';
+import 'package:finalsalesrep/offline/syncmanager.dart';
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -24,9 +27,9 @@ class coustmerform {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -44,9 +47,9 @@ class Result {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['code'] = this.code;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['code'] = code;
+    data['message'] = message;
     return data;
   }
 }
@@ -54,7 +57,7 @@ class Result {
 // OTP model class
 class otp {
   String? jsonrpc;
-  Null? id;
+  Null id;
   OtpResult? result;
 
   otp({this.jsonrpc, this.id, this.result});
@@ -66,11 +69,11 @@ class otp {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['jsonrpc'] = this.jsonrpc;
-    data['id'] = this.id;
-    if (this.result != null) {
-      data['result'] = this.result!.toJson();
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['jsonrpc'] = jsonrpc;
+    data['id'] = id;
+    if (result != null) {
+      data['result'] = result!.toJson();
     }
     return data;
   }
@@ -88,9 +91,9 @@ class OtpResult {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['status'] = this.status;
-    data['message'] = this.message;
+    final Map<String, dynamic> data = <String, dynamic>{};
+    data['status'] = status;
+    data['message'] = message;
     return data;
   }
 }
@@ -105,6 +108,7 @@ class Coustmer extends StatefulWidget {
 class _CoustmerState extends State<Coustmer> {
   File? faceImage;
   final ImagePicker _picker = ImagePicker();
+  bool _isOnline = false;
 
   bool _isofferTogle = false;
   bool _isemployed = false;
@@ -115,9 +119,6 @@ class _CoustmerState extends State<Coustmer> {
   int addcount = 0;
   String latitude = "";
   String longitude = "";
-  String street = "";
-  String place = "";
-  String landmark = "";
   String? locationUrl = "";
   File? locationImage;
   String? _selectedJobType;
@@ -130,6 +131,8 @@ class _CoustmerState extends State<Coustmer> {
   final TextEditingController _otpController = TextEditingController();
 
   TextEditingController agency = TextEditingController();
+  TextEditingController streetController = TextEditingController();
+  TextEditingController landmarkController = TextEditingController();
   TextEditingController promoter = TextEditingController();
   TextEditingController age = TextEditingController();
   TextEditingController datecontroller = TextEditingController();
@@ -190,15 +193,106 @@ class _CoustmerState extends State<Coustmer> {
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
     startCirculationController.text =
-        DateFormat('yyyy-MM-dd').format(DateTime.now().add(Duration(days: 1)));
+        DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 1)));
     _loadSavedData();
     getCurrentLocation();
+    ConnectivityHelper().startListening((online) {
+      setState(() {
+        _isOnline = online;
+      });
+      if (online) {
+        // Automatically try to sync pending forms
+        _syncPending();
+      }
+    });
+  }
+
+  Future<void> _syncPending() async {
+    final prefs = await SharedPreferences.getInstance();
+    final agentapi = prefs.getString('apikey');
+    if (agentapi != null) {
+      await SyncManager().syncPendingForms(agentapi);
+    }
+  }
+
+  Future<void> handleSubmit() async {
+    final isValid = _formKey.currentState?.validate() ?? false;
+    if (!isValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    // Collect all form values into a Map
+    Map<String, dynamic> formMap = {
+      "agent_name": agents,
+      "agent_login": await SharedPreferences.getInstance().then((p) => p.getString('agentlogin')),
+      "unit_name": await SharedPreferences.getInstance().then((p) => p.getString('unit')),
+      "Agency": agency.text,
+      "promoter": promoter.text,
+      "date": datecontroller.text,
+      "time": timecontroller.text,
+      "family_head_name": familyhead.text,
+      "father_name": fathersname.text,
+      "mother_name": mothername.text,
+      "spouse_name": spousename.text,
+      "age": age.text,
+      "house_number": hno.text,
+      "street_number": streetnumber.text,
+      "city": city.text,
+      "pin_code": pincode.text,
+      "address": adddress.text,
+      "mobile_number": mobile.text,
+      "reason_for_not_taking_eenadu_newsPaper": reason_for_not_taking_eenadu.text,
+      "customer_type": _selectedCustomerType,
+      "current_newspaper": _selectedCustomerType == "Conversion"
+          ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
+          : null,
+      "free_offer_15_days": _isofferTogle,
+      "employed": _isemployed,
+      "job_type": _selectedJobType,
+      "job_type_one": _selectedGovDepartment,
+      "job_profession": job_proffesion.text,
+      "job_designation": job_designation.text,
+      "company_name": privateCompanyController.text,
+      "profession": _selectedPrivateProfession == "Other"
+          ? privateProffesionController.text
+          : _selectedPrivateProfession ?? "",
+      "job_designation_one": privatedesignationController.text,
+      "latitude": latitude,
+      "longitude": longitude,
+      "street": streetController.text,
+      "place": city.text,
+      "location_address": landmarkController.text,
+      "location_url": locationUrlController.text,
+      "face_base64": faceBase64Controller.text,
+      "Start_Circulating": startCirculationController.text,
+    };
+
+    if (!_isOnline) {
+      // Offline: Save directly to local database without OTP
+      await LocalDb().insertForm(formMap);
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No internet: Form saved locally')),
+      );
+      // Clear the form or navigate back as needed
+      await _refreshForm();
+      return;
+    }
+
+    // Online: Proceed with OTP verification
+    bool otpSent = await _sendOtp();
+    if (!otpSent) return;
+    _showOtpDialog();
   }
 
   @override
   void dispose() {
     _otpController.dispose();
     agency.dispose();
+    streetController.dispose();
+    landmarkController.dispose();
     promoter.dispose();
     age.dispose();
     datecontroller.dispose();
@@ -234,52 +328,56 @@ class _CoustmerState extends State<Coustmer> {
       promoter.text = agents;
     });
 
-    try {
-      final response = await http.post(
-        Uri.parse(
-            "https://salesrep.esanchaya.com/api/get_current_pin_location"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "params": {
-            "token": agentapi,
+    if (_isOnline) {
+      try {
+        final response = await http.post(
+          Uri.parse("https://salesrep.esanchaya.com/api/get_current_pin_location"),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "params": {
+              "token": agentapi,
+            }
+          }),
+        );
+
+        debugPrint("🔁 get_current_pin_location Status Code: ${response.statusCode}");
+        debugPrint("🔁 get_current_pin_location Response: ${response.body}");
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final agencyModel = assignagencymodel.fromJson(data);
+
+          if (agencyModel.result?.success == true && agencyModel.result?.data != null) {
+            final agencyData = agencyModel.result!.data!;
+            final agencyText = "${agencyData.locationName ?? 'Unknown'} ";
+            setState(() {
+              if (agency.text.isEmpty) {
+                agency.text = agencyText;
+              }
+            });
+          } else {
+            debugPrint("❌ No agency data found or API returned failure");
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Failed to fetch agency data")),
+            );
           }
-        }),
-      );
-
-      debugPrint(
-          "🔁 get_current_pin_location Status Code: ${response.statusCode}");
-      debugPrint("🔁 get_current_pin_location Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final agencyModel = assignagencymodel.fromJson(data);
-
-        if (agencyModel.result?.success == true &&
-            agencyModel.result?.data != null) {
-          final agencyData = agencyModel.result!.data!;
-          final agencyText =
-              "${agencyData.locationName ?? 'Unknown'} ";
-          setState(() {
-            agency.text = agencyText;
-          });
         } else {
-          debugPrint("❌ No agency data found or API returned failure");
+          debugPrint("❌ Failed to fetch agency: ${response.statusCode}");
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Failed to fetch agency data")),
+            SnackBar(content: Text("Failed to fetch agency: ${response.statusCode}")),
           );
         }
-      } else {
-        debugPrint("❌ Failed to fetch agency: ${response.statusCode}");
+      } catch (e) {
+        debugPrint("❌ Error fetching agency: $e");
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text("Failed to fetch agency: ${response.statusCode}")),
+          SnackBar(content: Text("Error fetching agency: $e")),
         );
       }
-    } catch (e) {
-      debugPrint("❌ Error fetching agency: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error fetching agency: $e")),
-      );
+    } else {
+      // Offline: Allow manual input for agency
+      setState(() {
+        agency.text = '';
+      });
     }
   }
 
@@ -301,44 +399,59 @@ class _CoustmerState extends State<Coustmer> {
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.denied ||
-        permission == LocationPermission.deniedForever) {
-      print("Location Denied");
+    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
       await Geolocator.requestPermission();
-    } else {
-      Position currentPosition = await Geolocator.getCurrentPosition(
-          desiredAccuracy: LocationAccuracy.high);
+      return;
+    }
 
-      try {
-        List<Placemark> placemarks = await placemarkFromCoordinates(
-            currentPosition.latitude, currentPosition.longitude);
-        Placemark placemark = placemarks[0];
-        String? fetchedStreet = placemark.street ?? "";
-        String? fetchedPlace = placemark.locality ?? "";
-        String? fetchedLandmark = placemark.name ?? "";
-        String googleMapsUrl =
-            "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
-        setState(() {
-          latitude = currentPosition.latitude.toString();
-          longitude = currentPosition.longitude.toString();
-          street = fetchedStreet;
-          place = fetchedPlace;
-          landmark = fetchedLandmark;
-          locationUrl = googleMapsUrl;
+    // If offline, do nothing to preserve user-entered data
+    if (!_isOnline) {
+      return;
+    }
+
+    // Online: Fetch location and autofill only empty fields
+    try {
+      Position currentPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      String googleMapsUrl =
+          "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
+
+      setState(() {
+        latitude = currentPosition.latitude.toString();
+        longitude = currentPosition.longitude.toString();
+        locationUrl = googleMapsUrl;
+        if (locationUrlController.text.isEmpty) {
           locationUrlController.text = googleMapsUrl;
-          adddress.text = "$fetchedStreet, $fetchedPlace";
+        }
+      });
+
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(currentPosition.latitude, currentPosition.longitude);
+      Placemark placemark = placemarks[0];
+
+      setState(() {
+        if (streetController.text.isEmpty) {
+          streetController.text = placemark.street ?? "";
+        }
+        if (city.text.isEmpty) {
           city.text = placemark.locality ?? "";
+        }
+        if (landmarkController.text.isEmpty) {
+          landmarkController.text = placemark.name ?? "";
+        }
+        if (adddress.text.isEmpty) {
+          final s = placemark.street ?? "";
+          final l = placemark.locality ?? "";
+          adddress.text = [s, l].where((e) => e.isNotEmpty).join(", ");
+        }
+        if (pincode.text.isEmpty) {
           pincode.text = placemark.postalCode ?? "";
-        });
-        print("Generated Google Maps URL: $googleMapsUrl");
-        print("Street: $street");
-        print("Place: $place");
-        print("LandMark: $landmark");
-        print("Google Maps URL: $googleMapsUrl");
-      } catch (e) {
-        print("Error fetching address: $e");
+        }
+      });
+    } catch (e) {
+      if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Error fetching address: $e")));
+          SnackBar(content: Text("Error fetching address: $e")),
+        );
       }
     }
   }
@@ -443,22 +556,18 @@ class _CoustmerState extends State<Coustmer> {
 
         if (otpResponse.result?.status == "success") {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(otpResponse.result?.message ??
-                    'OTP verified successfully')),
+            SnackBar(content: Text(otpResponse.result?.message ?? 'OTP verified successfully')),
           );
           return true;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
+            SnackBar(content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
           );
           return false;
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed to verify OTP: ${response.statusCode}')),
+          SnackBar(content: Text('Failed to verify OTP: ${response.statusCode}')),
         );
         return false;
       }
@@ -500,8 +609,7 @@ class _CoustmerState extends State<Coustmer> {
                   : () async {
                       if (_otpController.text.isNotEmpty) {
                         setState(() => _isLoading = true);
-                        final isVerified =
-                            await _verifyOtp(_otpController.text);
+                        final isVerified = await _verifyOtp(_otpController.text);
                         setState(() => _isLoading = false);
                         Navigator.of(context).pop();
                         _otpController.clear();
@@ -527,8 +635,7 @@ class _CoustmerState extends State<Coustmer> {
                       setState(() => _isLoading = false);
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('OTP resent successfully')),
+                          const SnackBar(content: Text('OTP resent successfully')),
                         );
                       }
                     },
@@ -551,7 +658,7 @@ class _CoustmerState extends State<Coustmer> {
     final String? unit = prefs.getString('unit');
 
     try {
-      final url = 'https://salesrep.esanchaya.com/api/customer_form';
+      const url = 'https://salesrep.esanchaya.com/api/customer_form';
       final response = await http.post(
         Uri.parse(url),
         headers: {
@@ -578,8 +685,7 @@ class _CoustmerState extends State<Coustmer> {
             "pin_code": pincode.text,
             "address": adddress.text,
             "mobile_number": mobile.text,
-            "reason_for_not_taking_eenadu_newsPaper":
-                reason_for_not_taking_eenadu.text,
+            "reason_for_not_taking_eenadu_newsPaper": reason_for_not_taking_eenadu.text,
             "customer_type": _selectedCustomerType,
             "current_newspaper": _selectedCustomerType == "Conversion"
                 ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
@@ -597,9 +703,9 @@ class _CoustmerState extends State<Coustmer> {
             "job_designation_one": privatedesignationController.text,
             "latitude": latitude,
             "longitude": longitude,
-            "street": street,
-            "place": place,
-            "location_address": landmark,
+            "street": streetController.text,
+            "place": city.text,
+            "location_address": landmarkController.text,
             "location_url": locationUrlController.text,
             "face_base64": faceBase64Controller.text,
             "Start_Circulating": startCirculationController.text,
@@ -645,8 +751,7 @@ class _CoustmerState extends State<Coustmer> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(
-                    "Failed to submit form: ${data?.result?.message ?? 'Unknown error'}")),
+                content: Text("Failed to submit form: ${data?.result?.message ?? 'Unknown error'}")),
           );
         }
       } else {
@@ -671,21 +776,32 @@ class _CoustmerState extends State<Coustmer> {
       setState(() {
         _isLoading = true;
       });
-      await getCurrentLocation();
-      final success = await _sendOtp();
-      setState(() {
-        _isLoading = false;
-      });
-      if (success) {
-        _showOtpDialog();
+
+      if (_isOnline) {
+        // Online: Proceed with OTP flow
+        final success = await _sendOtp();
+        setState(() {
+          _isLoading = false;
+        });
+        if (success) {
+          _showOtpDialog();
+        }
+      } else {
+        // Offline: Save directly to local DB
+        await handleSubmit();
+        setState(() {
+          _isLoading = false;
+        });
       }
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
     }
   }
 
   void openGoogleMaps(String? latitude, String? longitude) {
-    final Uri url = Uri.parse(
-      'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude',
-    );
+    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
     _launchUrl(url);
   }
 
@@ -722,15 +838,14 @@ class _CoustmerState extends State<Coustmer> {
       faceBase64Controller.clear();
       otherNewspaperController.clear();
       startCirculationController.clear();
+      streetController.clear();
+      landmarkController.clear();
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-      startCirculationController.text = DateFormat('yyyy-MM-dd')
-          .format(DateTime.now().add(Duration(days: 1)));
+      startCirculationController.text =
+          DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 1)));
       latitude = "";
       longitude = "";
-      street = "";
-      place = "";
-      landmark = "";
       locationUrl = "";
     });
 
@@ -745,14 +860,13 @@ class _CoustmerState extends State<Coustmer> {
   Future<void> _selectStartCirculationDate() async {
     DateTime? pickedDate = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().add(Duration(days: 1)),
+      initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
     if (pickedDate != null) {
       setState(() {
-        startCirculationController.text =
-            DateFormat('yyyy-MM-dd').format(pickedDate);
+        startCirculationController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
       });
     }
   }
@@ -784,113 +898,143 @@ class _CoustmerState extends State<Coustmer> {
                 children: [
                   const SizedBox(height: 30),
                   textformfeild(
-                      controller: agency,
-                      label: "Agency",
-                      need: true,
-                      readOnly: true,
-                      hunttext: "Agency cannot be empty"),
+                    controller: agency,
+                    label: "Agency",
+                    need: true,
+                    readOnly: _isOnline,
+                    hunttext: "Agency cannot be empty",
+                  ),
                   const SizedBox(height: 10),
                   textformfeild(
-                      controller: promoter,
-                      label: "Promoter Name",
-                      need: true,
-                      hunttext: "Promoter cannot be empty"),
+                    controller: promoter,
+                    label: "Promoter Name",
+                    need: true,
+                    hunttext: "Promoter cannot be empty",
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                          child: date(
-                              needed: true,
-                              Dcontroller: datecontroller,
-                              date: "Date",
-                              inputType: TextInputType.datetime)),
+                        child: date(
+                          needed: true,
+                          Dcontroller: datecontroller,
+                          date: "Date",
+                          inputType: TextInputType.datetime,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                          child: date(
-                              needed: true,
-                              Dcontroller: timecontroller,
-                              date: "Time",
-                              inputType: TextInputType.datetime)),
+                        child: date(
+                          needed: true,
+                          Dcontroller: timecontroller,
+                          date: "Time",
+                          inputType: TextInputType.datetime,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 15),
-                  const Text("Family Details",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Family Details",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 5),
                   textformfeild(
-                      controller: familyhead,
-                      label: "Name",
-                      hunttext: "Family head name cannot be empty"),
+                    controller: familyhead,
+                    label: "Name",
+                    hunttext: "Family head name cannot be empty",
+                  ),
                   const SizedBox(height: 5),
                   textformfeild(
-                      controller: age,
-                      label: "Age",
-                      hunttext: "Age cannot be empty",
-                      keyboardType: TextInputType.number),
+                    controller: age,
+                    label: "Age",
+                    hunttext: "Age cannot be empty",
+                    keyboardType: TextInputType.number,
+                  ),
                   const SizedBox(height: 5),
-                  const Text("Address Details",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Address Details",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                          child: textformfeild(
-                              controller: hno,
-                              label: "House Number",
-                              hunttext: "House number cannot be empty",
-                              keyboardType: TextInputType.text)),
+                        child: textformfeild(
+                          controller: hno,
+                          label: "House Number",
+                          hunttext: "House number cannot be empty",
+                          keyboardType: TextInputType.text,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                          child: textformfeild(
-                              controller: streetnumber,
-                              hunttext: "Street number cannot be empty",
-                              label: "Street No",
-                              keyboardType: TextInputType.text)),
+                        child: textformfeild(
+                          controller: streetnumber,
+                          hunttext: "Street number cannot be empty",
+                          label: "Street No",
+                          keyboardType: TextInputType.text,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
                       Expanded(
-                          child: textformfeild(
-                              hunttext: "City cannot be empty",
-                              controller: city,
-                              label: "City",
-                              keyboardType: TextInputType.text)),
+                        child: textformfeild(
+                          hunttext: "City cannot be empty",
+                          controller: city,
+                          label: "City",
+                          keyboardType: TextInputType.text,
+                        ),
+                      ),
                       const SizedBox(width: 10),
                       Expanded(
-                          child: textformfeild(
-                              hunttext: "Pin code cannot be empty",
-                              maxvalue: 6,
-                              controller: pincode,
-                              label: "Pin Code",
-                              keyboardType: TextInputType.number)),
+                        child: textformfeild(
+                          hunttext: "Pin code cannot be empty",
+                          maxvalue: 6,
+                          controller: pincode,
+                          label: "Pin Code",
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  textformfeild(controller: adddress, label: "Address"),
+                  textformfeild(
+                    controller: adddress,
+                    label: "Address",
+                  ),
                   const SizedBox(height: 10),
                   textformfeild(
-                    controller: TextEditingController(text: street),
+                    controller: streetController,
                     label: "Street",
                     hunttext: "Street cannot be empty",
                     need: true,
+                    readOnly: _isOnline,
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
-                      controller: TextEditingController(text: landmark),
-                      label: "Landmark",
-                      hunttext: "Landmark cannot be empty",
-                      need: true),
+                    controller: landmarkController,
+                    label: "Landmark",
+                    hunttext: "Landmark cannot be empty",
+                    need: true,
+                    readOnly: _isOnline,
+                  ),
                   const SizedBox(height: 10),
-                  const Text("Landmark Photo",
-                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Landmark Photo",
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
                   GestureDetector(
                     onTap: pickFaceImage,
@@ -925,11 +1069,14 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   const SizedBox(height: 10),
                   const SizedBox(height: 15),
-                  const Text("Newspaper Details",
-                      style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold)),
+                  const Text(
+                    "Newspaper Details",
+                    style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _selectedCustomerType,
@@ -987,8 +1134,7 @@ class _CoustmerState extends State<Coustmer> {
                         if (value == null) {
                           return "Please select a newspaper";
                         }
-                        if (value == "Others" &&
-                            otherNewspaperController.text.isEmpty) {
+                        if (value == "Others" && otherNewspaperController.text.isEmpty) {
                           return "Please enter other newspaper name";
                         }
                         return null;
@@ -1026,10 +1172,9 @@ class _CoustmerState extends State<Coustmer> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
-                          borderSide:
-                              const BorderSide(color: Colors.black, width: 4),
+                          borderSide: const BorderSide(color: Colors.black, width: 4),
                         ),
-                        suffixIcon: Icon(Icons.calendar_today),
+                        suffixIcon: const Icon(Icons.calendar_today),
                       ),
                       onTap: _selectStartCirculationDate,
                       validator: (value) {
@@ -1044,16 +1189,19 @@ class _CoustmerState extends State<Coustmer> {
                   Row(
                     children: [
                       const Expanded(
-                        child: Text("Employed?",
-                            style: TextStyle(
-                                fontSize: 18, fontWeight: FontWeight.bold)),
+                        child: Text(
+                          "Employed?",
+                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                        ),
                       ),
-                      Text(_isemployed ? "Yes" : "No",
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: _isemployed ? Colors.green : Colors.red,
-                          )),
+                      Text(
+                        _isemployed ? "Yes" : "No",
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: _isemployed ? Colors.green : Colors.red,
+                        ),
+                      ),
                       Switch(
                         inactiveThumbColor: Colors.white,
                         activeTrackColor: Colors.green,
@@ -1096,8 +1244,8 @@ class _CoustmerState extends State<Coustmer> {
                       decoration: const InputDecoration(
                         labelText: "Job Type",
                         border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                       ),
                     ),
                   if (_selectedJobType == "government_job") ...[
@@ -1120,34 +1268,38 @@ class _CoustmerState extends State<Coustmer> {
                       decoration: const InputDecoration(
                         labelText: "Government Job",
                         border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                       ),
                     ),
                     if (_selectedGovDepartment != null) ...[
                       const SizedBox(height: 10),
                       textformfeild(
-                          hunttext: "Field cannot be empty",
-                          controller: job_designation,
-                          label: "Job Designation"),
+                        hunttext: "Field cannot be empty",
+                        controller: job_designation,
+                        label: "Job Designation",
+                      ),
                       const SizedBox(height: 10),
                       textformfeild(
-                          hunttext: "Field cannot be empty",
-                          controller: job_proffesion,
-                          label: "Job Department"),
+                        hunttext: "Field cannot be empty",
+                        controller: job_proffesion,
+                        label: "Job Department",
+                      ),
                     ],
                   ],
                   if (_selectedJobType == "private_job") ...[
                     const SizedBox(height: 10),
                     textformfeild(
-                        hunttext: "Field cannot be empty",
-                        controller: privateCompanyController,
-                        label: "Company Name"),
+                      hunttext: "Field cannot be empty",
+                      controller: privateCompanyController,
+                      label: "Company Name",
+                    ),
                     const SizedBox(height: 10),
                     textformfeild(
-                        hunttext: "Field cannot be empty",
-                        controller: privatedesignationController,
-                        label: "Designation"),
+                      hunttext: "Field cannot be empty",
+                      controller: privatedesignationController,
+                      label: "Designation",
+                    ),
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: _selectedPrivateProfession,
@@ -1171,8 +1323,7 @@ class _CoustmerState extends State<Coustmer> {
                         if (value == null) {
                           return "Please select a profession";
                         }
-                        if (value == "Other" &&
-                            privateProffesionController.text.isEmpty) {
+                        if (value == "Other" && privateProffesionController.text.isEmpty) {
                           return "Please enter other profession";
                         }
                         return null;
@@ -1180,8 +1331,8 @@ class _CoustmerState extends State<Coustmer> {
                       decoration: const InputDecoration(
                         labelText: "Profession",
                         border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                       ),
                     ),
                     if (_selectedPrivateProfession == "Other") ...[
@@ -1214,8 +1365,8 @@ class _CoustmerState extends State<Coustmer> {
                       decoration: const InputDecoration(
                         labelText: "Profession",
                         border: OutlineInputBorder(
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(10))),
+                          borderRadius: BorderRadius.all(Radius.circular(10)),
+                        ),
                       ),
                     ),
                   const SizedBox(height: 20),
@@ -1241,8 +1392,7 @@ class _CoustmerState extends State<Coustmer> {
                   Center(
                     child: _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
                           )
                         : GestureDetector(
                             onTap: () async {
@@ -1250,28 +1400,27 @@ class _CoustmerState extends State<Coustmer> {
                             },
                             child: Container(
                               decoration: BoxDecoration(
-                                  color: Colors.blue,
-                                  borderRadius: const BorderRadius.all(
-                                      Radius.circular(50)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withOpacity(0.3),
-                                      blurRadius: 5.0,
-                                      spreadRadius: 1.0,
-                                      offset: const Offset(0, 3),
-                                    )
-                                  ]),
+                                color: Colors.blue,
+                                borderRadius: const BorderRadius.all(Radius.circular(50)),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withOpacity(0.3),
+                                    blurRadius: 5.0,
+                                    spreadRadius: 1.0,
+                                    offset: const Offset(0, 3),
+                                  )
+                                ],
+                              ),
                               height: MediaQuery.of(context).size.height / 18,
                               width: MediaQuery.of(context).size.height / 5,
                               child: Center(
                                 child: Text(
                                   "Submit",
                                   style: TextStyle(
-                                      color: Colors.white,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize:
-                                          MediaQuery.of(context).size.height /
-                                              45),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: MediaQuery.of(context).size.height / 45,
+                                  ),
                                 ),
                               ),
                             ),
@@ -1300,8 +1449,10 @@ class _CoustmerState extends State<Coustmer> {
         child: image != null
             ? Image.file(image, fit: BoxFit.cover)
             : const Center(
-                child: Text("Tap to select image",
-                    style: TextStyle(color: Colors.black)),
+                child: Text(
+                  "Tap to select image",
+                  style: TextStyle(color: Colors.black),
+                ),
               ),
       ),
     );
@@ -1322,13 +1473,16 @@ SizedBox date({
       controller: Dcontroller,
       readOnly: needed,
       decoration: InputDecoration(
-          labelText: date,
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black)),
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black, width: 4))),
+        labelText: date,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black, width: 4),
+        ),
+      ),
     ),
   );
 }
@@ -1347,25 +1501,30 @@ SizedBox textformfeild({
     height: label == "Mobile Number" ? 85 : 70,
     width: double.infinity,
     child: TextFormField(
-      validator: (value) {
-        if (value == null || value.isEmpty) {
-          return hunttext;
-        }
-        return null;
-      },
-      readOnly: need || readOnly,
+      validator: need
+          ? (value) {
+              if (value == null || value.isEmpty) {
+                return hunttext;
+              }
+              return null;
+            }
+          : null,
+      readOnly: readOnly,
       keyboardType: keyboardType,
       controller: controller,
       maxLength: maxvalue,
       decoration: InputDecoration(
-          counterText: textForCounter,
-          labelText: label,
-          focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black)),
-          border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(15),
-              borderSide: const BorderSide(color: Colors.black, width: 4))),
+        counterText: textForCounter,
+        labelText: label,
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black),
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(15),
+          borderSide: const BorderSide(color: Colors.black, width: 4),
+        ),
+      ),
     ),
   );
 }

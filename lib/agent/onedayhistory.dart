@@ -154,20 +154,20 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                       ),
 
                       // 📊 Stats Row
-                      Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildStat(localizations.accepted,
-                                offerAcceptedCount, Colors.green),
-                            _buildStat(localizations.rejected,
-                                offerRejectedCount, Colors.red),
-                            _buildStat(localizations.subscribed,
-                                alreadySubscribedCount, Colors.blue),
-                          ],
-                        ),
-                      ),
+                      // Padding(
+                      //   padding: const EdgeInsets.symmetric(vertical: 12),
+                      //   child: Row(
+                      //     mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      //     children: [
+                      //       _buildStat(localizations.accepted,
+                      //           offerAcceptedCount, Colors.green),
+                      //       _buildStat(localizations.rejected,
+                      //           offerRejectedCount, Colors.red),
+                      //       _buildStat(localizations.subscribed,
+                      //           alreadySubscribedCount, Colors.blue),
+                      //     ],
+                      //   ),
+                      // ),
 
                       const Divider(height: 1),
 
