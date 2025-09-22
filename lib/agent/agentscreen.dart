@@ -6,6 +6,8 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart' show SelfieTimesResponse, SelfieSession;
+import 'package:finalsalesrep/offline/attendance/localdbattendance.dart';
+import 'package:finalsalesrep/offline/attendance/offlineattendance.dart';
 import 'package:finalsalesrep/offline/savedformscreen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -22,15 +24,20 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
+import 'dart:io';
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
 
   @override
   State<Agentscreen> createState() => _AgentscreenState();
+  
 }
 
 class _AgentscreenState extends State<Agentscreen> {
+  StreamSubscription<List<ConnectivityResult>>? _connSub; // matches latest connectivity_plus
+bool _syncingActions = false;
+
   TextEditingController dateController = TextEditingController();
   String agentname = "";
   List<Record> records = [];
@@ -69,7 +76,80 @@ class _AgentscreenState extends State<Agentscreen> {
     fetchAgencies();
     refreshData();
     fetchSelfieTimes();
+      _connSub = Connectivity()
+      .onConnectivityChanged
+      .listen((List<ConnectivityResult> results) async {
+    final isOnline = results.any((r) =>
+        r == ConnectivityResult.mobile || r == ConnectivityResult.wifi);
+    if (isOnline) {
+      await _trySyncPendingActions(); // sync start/stop queue
+      await syncPendingForms();        // you already had this for forms
+    }
+  });
   }
+
+  Future<bool> _isOnline() async {
+  try {
+    final res = await Connectivity().checkConnectivity();
+    return !res.contains(ConnectivityResult.none);
+  } catch (_) {
+    return false;
+  }
+}
+
+/// Sync start/stop actions stored in the local queue to your API
+Future<void> _trySyncPendingActions() async {
+  if (_syncingActions) return;
+  _syncingActions = true;
+  try {
+    final actions = await LocalDbattendance.instance.pendingActions();
+    if (actions.isEmpty) return;
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) return;
+
+    for (final a in actions) {
+      final id = a['id'] as int;
+      final action = a['action'] as String;
+      final selfie = a['selfie'] as String?;
+      final uri = action == 'startWork'
+          ? Uri.parse("https://salesrep.esanchaya.com/api/start_work")
+          : Uri.parse("https://salesrep.esanchaya.com/api/end_work");
+
+      try {
+        final resp = await http.post(
+          uri,
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "params": {"token": token, "selfie": selfie}
+          }),
+        );
+
+        if (resp.statusCode == 200) {
+          final result = jsonDecode(resp.body)['result'];
+          if (result != null && result['success'] == true) {
+            await LocalDbattendance.instance.markAsSynced(id);
+          } else {
+            await LocalDbattendance.instance.markAsFailed(id);
+          }
+        } else {
+          // leave as pending to retry later if transient server failure
+          break;
+        }
+      } on SocketException {
+        // offline again, stop trying
+        break;
+      } catch (_) {
+        await LocalDbattendance.instance.markAsFailed(id);
+      }
+    }
+  } finally {
+    _syncingActions = false;
+  }
+}
+
 
   Future<void> fetchAgencies() async {
     setState(() {
@@ -487,190 +567,234 @@ class _AgentscreenState extends State<Agentscreen> {
     await prefs.setBool('isWorking', status);
   }
 
-  Future<void> startWork() async {
-    try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 800,
-        imageQuality: 80,
-      );
-
-      if (photo == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Photo required")),
-          );
-        }
-        return;
-      }
-
-      final bytes = await photo.readAsBytes();
-      _startWorkPhotoBase64 = base64Encode(bytes);
-
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('apikey');
-
-      if (token == null || token.isEmpty) {
-        debugPrint("❌ Missing or empty API key");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Missing or invalid API key")),
-          );
-        }
-        return;
-      }
-
-      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/start_work");
-      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${_startWorkPhotoBase64!.substring(0, 50)}...\"}}");
-
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "params": {
-            "token": token,
-            "selfie": _startWorkPhotoBase64,
-          }
-        }),
-      );
-
-      debugPrint("🔁 Status Code: ${response.statusCode}");
-      debugPrint("✅ Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body)['result'];
-        if (result != null && result['success'] == true) {
-          if (mounted) {
-            setState(() {
-              isWorking = true;
-            });
-          }
-          await saveWorkStatus(true);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Work started")),
-            );
-          }
-          await fetchSelfieTimes();
-        } else {
-          final errorMessage = result?['message'] ?? 'Unknown error';
-          debugPrint("❌ Failed to start work: $errorMessage");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Failed to start work: $errorMessage")),
-            );
-          }
-        }
-      } else {
-        debugPrint("❌ Failed to start work: ${response.statusCode}");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to start work: ${response.statusCode} - ${response.body}")),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint("❌ Error starting work: $e");
+Future<void> startWork() async {
+  try {
+    final XFile? photo = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (photo == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error starting work: $e")),
+          const SnackBar(content: Text("Photo required")),
+        );
+      }
+      return;
+    }
+
+    final bytes = await photo.readAsBytes();
+    _startWorkPhotoBase64 = base64Encode(bytes);
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+      }
+      return;
+    }
+
+    // If offline → enqueue & flip UI to 'working'
+    if (!await _isOnline()) {
+      await LocalDbattendance.instance.enqueueAction(
+        type: PendingActionType.startWork,
+        selfieBase64: _startWorkPhotoBase64,
+      );
+      await saveWorkStatus(true);
+      if (mounted) {
+        setState(() => isWorking = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Work started (offline). Will sync when online.")),
+        );
+      }
+      return;
+    }
+
+    // Online → call API
+    final response = await http.post(
+      Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "params": {"token": token, "selfie": _startWorkPhotoBase64}
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body)['result'];
+      if (result != null && result['success'] == true) {
+        if (mounted) {
+          setState(() => isWorking = true);
+        }
+        await saveWorkStatus(true);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Work started")),
+          );
+        }
+        await fetchSelfieTimes();
+      } else {
+        final errorMessage = result?['message'] ?? 'Unknown error';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to start work: $errorMessage")),
+          );
+        }
+      }
+    } else {
+      // Network/server issue while "online": degrade to offline queue
+      await LocalDbattendance.instance.enqueueAction(
+        type: PendingActionType.startWork,
+        selfieBase64: _startWorkPhotoBase64,
+      );
+      await saveWorkStatus(true);
+      if (mounted) {
+        setState(() => isWorking = true);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Work started (queued). Server ${response.statusCode}. Will sync later."),
+          ),
         );
       }
     }
+  } catch (e) {
+    // Any exception → queue offline
+    await LocalDbattendance.instance.enqueueAction(
+      type: PendingActionType.startWork,
+      selfieBase64: _startWorkPhotoBase64,
+    );
+    await saveWorkStatus(true);
+    if (mounted) {
+      setState(() => isWorking = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Work started (offline). Sync pending. Error: $e")),
+      );
+    }
   }
-
-  Future<void> stopWork() async {
-    try {
-      final XFile? photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        maxWidth: 800,
-        imageQuality: 80,
-      );
-
-      if (photo == null) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Photo required")),
-          );
-        }
-        return;
-      }
-
-      final bytes = await photo.readAsBytes();
-      final photoBase64 = base64Encode(bytes);
-
-      final prefs = await SharedPreferences.getInstance();
-      final token = prefs.getString('apikey');
-
-      if (token == null || token.isEmpty) {
-        debugPrint("❌ Missing or empty API key");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Missing or invalid API key")),
-          );
-        }
-        return;
-      }
-
-      debugPrint("📡 Hitting API: https://salesrep.esanchaya.com/api/end_work");
-      debugPrint("📦 Payload: {\"params\":{\"token\":\"$token\",\"selfie\":\"${photoBase64.substring(0, 50)}...\"}}");
-
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "params": {
-            "token": token,
-            "selfie": photoBase64,
-          }
-        }),
-      );
-
-      debugPrint("🔁 Status Code: ${response.statusCode}");
-      debugPrint("✅ Response: ${response.body}");
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body)['result'];
-        if (result != null && result['success'] == true) {
-          if (mounted) {
-            setState(() {
-              isWorking = false;
-              _startWorkPhotoBase64 = null;
-            });
-          }
-          await saveWorkStatus(false);
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Work stopped")),
-            );
-          }
-          await fetchSelfieTimes();
-        } else {
-          final errorMessage = result?['message'] ?? 'Unknown error';
-          debugPrint("❌ Failed to stop work: $errorMessage");
-          if (mounted) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Failed to stop work: $errorMessage")),
-            );
-          }
-        }
-      } else {
-        debugPrint("❌ Failed to stop work: ${response.statusCode}");
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to stop work: ${response.statusCode} - ${response.body}")),
-          );
-        }
-      }
-    } catch (e) {
-      debugPrint("❌ Error stopping work: $e");
+}
+Future<void> stopWork() async {
+  try {
+    final XFile? photo = await _picker.pickImage(
+      source: ImageSource.camera,
+      maxWidth: 800,
+      imageQuality: 80,
+    );
+    if (photo == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error stopping work: $e")),
+          const SnackBar(content: Text("Photo required")),
+        );
+      }
+      return;
+    }
+
+    final bytes = await photo.readAsBytes();
+    final photoBase64 = base64Encode(bytes);
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+
+    if (token == null || token.isEmpty) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Missing or invalid API key")),
+        );
+      }
+      return;
+    }
+
+    // If offline → enqueue & flip UI to 'not working'
+    if (!await _isOnline()) {
+      await LocalDbattendance.instance.enqueueAction(
+        type: PendingActionType.stopWork,
+        selfieBase64: photoBase64,
+      );
+      await saveWorkStatus(false);
+      if (mounted) {
+        setState(() {
+          isWorking = false;
+          _startWorkPhotoBase64 = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Work stopped (offline). Will sync when online.")),
+        );
+      }
+      return;
+    }
+
+    // Online → call API
+    final response = await http.post(
+      Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "params": {"token": token, "selfie": photoBase64}
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final result = jsonDecode(response.body)['result'];
+      if (result != null && result['success'] == true) {
+        if (mounted) {
+          setState(() {
+            isWorking = false;
+            _startWorkPhotoBase64 = null;
+          });
+        }
+        await saveWorkStatus(false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text("Work stopped")),
+          );
+        }
+        await fetchSelfieTimes();
+      } else {
+        final errorMessage = result?['message'] ?? 'Unknown error';
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Failed to stop work: $errorMessage")),
+          );
+        }
+      }
+    } else {
+      // Network/server issue: degrade to offline queue
+      await LocalDbattendance.instance.enqueueAction(
+        type: PendingActionType.stopWork,
+        selfieBase64: photoBase64,
+      );
+      await saveWorkStatus(false);
+      if (mounted) {
+        setState(() {
+          isWorking = false;
+          _startWorkPhotoBase64 = null;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text("Work stopped (queued). Server ${response.statusCode}. Will sync later."),
+          ),
         );
       }
     }
+  } catch (e) {
+    // Any exception → queue offline
+    await LocalDbattendance.instance.enqueueAction(
+      type: PendingActionType.stopWork,
+      selfieBase64: null,
+    );
+    await saveWorkStatus(false);
+    if (mounted) {
+      setState(() {
+        isWorking = false;
+        _startWorkPhotoBase64 = null;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Work stopped (offline). Sync pending. Error: $e")),
+      );
+    }
   }
+}
 
   void startTokenValidation() {
     validateToken();
@@ -1108,7 +1232,11 @@ Future<void> syncPendingForms() async {
                     ),
                     ElevatedButton(onPressed: (){
 Navigator.push(context, MaterialPageRoute(builder: (context) => SavedFormsScreen(),));
-                    }, child: Text("View")),
+                    }, child: Text("View offline forms")),
+                    const SizedBox(height: 10),
+                        ElevatedButton(onPressed: (){
+Navigator.push(context, MaterialPageRoute(builder: (context) => OfflineAttendanceView(),));
+                    }, child: Text("View offline attendance")),
                     const SizedBox(height: 10),
                     Center(child: Text(localizations.agency)),
                     const SizedBox(height: 10),
@@ -1422,6 +1550,7 @@ Navigator.push(context, MaterialPageRoute(builder: (context) => SavedFormsScreen
 
   @override
   void dispose() {
+      _connSub?.cancel();
     _sessionCheckTimer?.cancel();
     dateController.dispose();
     _agencyNameController.dispose();
