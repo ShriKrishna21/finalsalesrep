@@ -56,7 +56,7 @@ class _AgentProfileState extends State<agentProfile> {
     print("User ID: $userId");
     print("Image size: ${base64Image.length}");
 
-    final url = 'https://salesrep.esanchaya.com/api/upload_user_image';
+    const url = 'https://salesrep.esanchaya.com/api/upload_user_image';
 
     try {
       final response = await http.post(
@@ -243,8 +243,8 @@ class _AgentProfileState extends State<agentProfile> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text("stopworkrequired"),
-            content: Text("needtostopworkbeforelogout"),
+            title: const Text("stopworkrequired"),
+            content: const Text("needtostopworkbeforelogout"),
             actions: [
               TextButton(
                 child: Text(AppLocalizations.of(context)!.cancel,

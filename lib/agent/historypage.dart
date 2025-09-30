@@ -305,7 +305,7 @@ class _HistorypageState extends State<Historypage> {
                 _detailRow("customer name", r.familyHeadName),
                 _detailRow("Age", r.age),
                 _detailRow("mobile Number", r.mobileNumber),
-                Text("News-paper Details"),
+                const Text("News-paper Details"),
                 _detailRow("Customer Type", r.customerType),
                 _detailRow("previous News-paper", r.currentNewspaper),
                 _detailRow("Start Circulating", r.startCirculating),
@@ -413,8 +413,9 @@ class _HistorypageState extends State<Historypage> {
 
   bool _isValidValue(dynamic value) {
     if (value == null) return false;
-    if (value is String)
+    if (value is String) {
       return value.isNotEmpty && value != 'false' && value != 'N/A';
+    }
     if (value is bool) return value == true;
     return true;
   }

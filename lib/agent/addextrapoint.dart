@@ -8,10 +8,10 @@ class Addextrapoint extends StatefulWidget {
   final List<Map<String, dynamic>> fromToIds;
 
   const Addextrapoint({
-    Key? key,
+    super.key,
     required this.routeId,
     required this.fromToIds,
-  }) : super(key: key);
+  });
 
   @override
   State<Addextrapoint> createState() => _AddextrapointState();
@@ -124,7 +124,7 @@ class _AddextrapointState extends State<Addextrapoint> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit Route - ID: ${widget.routeId}'),
-        actions: [
+        actions: const [
         
         ],
       ),
@@ -188,7 +188,7 @@ class _AddextrapointState extends State<Addextrapoint> {
                         onPressed: () => addExtraPointField(index),
                       ),
                     ),
-                    Center(child: ElevatedButton(onPressed:  saveExtraPoints, child: Text("Update route")))
+                    Center(child: ElevatedButton(onPressed:  saveExtraPoints, child: const Text("Update route")))
                   ],
                 ),
               ),

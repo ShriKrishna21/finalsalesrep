@@ -1,3 +1,4 @@
+import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agency_oneday_customerforms.dart';
 import 'package:finalsalesrep/unit/circulationincharge/agency_total_customerforms.dart';
@@ -89,18 +90,18 @@ class _totalagencylistState extends State<totalagencylist> {
                   // ),
                   //title: Text(agency.name ?? 'No Name'),
                   subtitle: GestureDetector(
-                   onTap: () {
-  final agencyName =
-      '${agency.locationName ?? ''} [${agency.code ?? ''}]'; // match filter format
-  Navigator.push(
-    context,
-    MaterialPageRoute(
-      builder: (context) => AgencyTotalCustomerforms(
-        agencyName: agencyName,
-      ),
-    ),
-  );
-},
+                    onTap: () {
+                      final agencyName =
+                          '${agency.locationName ?? ''} [${agency.code ?? ''}]'; // match filter format
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AgencyTotalCustomerforms(
+                            agencyName: agencyName,
+                          ),
+                        ),
+                      );
+                    },
                     child: Text(
                       'Code: ${agency.code ?? 'N/A'}\nLocation: ${agency.locationName ?? 'N/A'}',
                     ),

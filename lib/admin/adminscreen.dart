@@ -1,4 +1,3 @@
-import 'package:finalsalesrep/circulationhead/createregionalhead.dart';
 import 'package:flutter/material.dart';
 
 class Adminscreen extends StatefulWidget {
