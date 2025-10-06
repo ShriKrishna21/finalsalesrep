@@ -195,7 +195,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     } catch (e) {
       print("❌ Customer form fetch error: $e");
     }
-  }
+  } 
 
   bool? _parseBool(dynamic value) {
     if (value is bool) return value;
@@ -246,21 +246,26 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         _loadData();
                       },
                       child: _buildCard(
-                        title: "Number Of Staff",
+                        title: "",
                         rows: [
                           _InfoRow(
-                              label: "Staff Count", value: agentCount.toString())
+                              label: "Staff Count",
+                              value: agentCount.toString(),
+                              bold: true),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
                     _buildCard(
-                      title: localizations.viewallcustomerforms,
+                      title: "",
                       rows: [
                         _InfoRow(
-                            label: localizations.customerforms,
-                            value: customerFormCount.toString()),
-                        const SizedBox(height: 16),
+                            label: "All CustomerForms",
+                            value: customerFormCount.toString(),
+                            bold: true),
+                        const SizedBox(height: 8),
+                        const Divider(color: Colors.black), // Added Divider
+                        const SizedBox(height: 8),
                         Row(
                           children: [
                             Expanded(
@@ -278,7 +283,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                                   'Today History',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    // ,
                                     color: Colors.black,
                                   ),
                                   textAlign: TextAlign.center,
@@ -301,7 +305,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                                   'Overall History',
                                   style: TextStyle(
                                     fontSize: 18,
-                                    // fontWeight: FontWeight.bold,
                                     color: Colors.black,
                                   ),
                                   textAlign: TextAlign.center,
@@ -312,21 +315,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 20),
-                    // _buildCard(
-                    //   title: localizations.subscriptionDetails,
-                    //   rows: [
-                    //     _InfoRow(
-                    //         label: localizations.housesVisited,
-                    //         value: customerFormCount.toString()),
-                    //     _InfoRow(
-                    //         label: localizations.eenaduSubscription,
-                    //         value: alreadySubscribedCount.toString()),
-                    //     _InfoRow(
-                    //         label: localizations.willingToChange,
-                    //         value: offerAcceptedCount.toString()),
-                    //   ],
-                    // ),
+                    // const SizedBox(height: 10),
                     const SizedBox(height: 30),
                     _buildGridButtons()
                   ],
@@ -385,13 +374,15 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 8),
+          if (title.isNotEmpty) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 8),
+          ],
           Column(children: rows),
         ],
       ),
