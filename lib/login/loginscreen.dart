@@ -15,6 +15,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Loginscreen extends StatefulWidget {
   const Loginscreen({super.key});
+
   @override
   State<Loginscreen> createState() => _LoginscreenState();
 }
@@ -112,8 +113,9 @@ class _LoginscreenState extends State<Loginscreen> {
         return;
       }
 
+      // ✅ Show clear error if wrong credentials
       if (result.code != "200") {
-        _showSnack('Login failed: ${result.code}');
+        _showSnack('Username or Password is wrong');
         setState(() => _isLoading = false);
         return;
       }
@@ -206,9 +208,19 @@ class _LoginscreenState extends State<Loginscreen> {
     }
   }
 
-  void _showSnack(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+  // ✅ Improved snackbar with red color for error
+  void _showSnack(String message, {Color background = Colors.red}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          message,
+          style: const TextStyle(color: Colors.white, fontSize: 16),
+        ),
+        backgroundColor: background,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 2),
+      ),
+    );
   }
 
   @override
@@ -282,8 +294,9 @@ class _LoginscreenState extends State<Loginscreen> {
                             onPressed: _isLoading
                                 ? null
                                 : () {
-                                    if (_formKey.currentState!.validate())
+                                    if (_formKey.currentState!.validate()) {
                                       loginUser();
+                                    }
                                   },
                             child: _isLoading
                                 ? const CircularProgressIndicator(
