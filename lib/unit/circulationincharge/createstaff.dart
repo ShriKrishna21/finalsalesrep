@@ -152,10 +152,10 @@ class _createstaffState extends State<createstaff> {
             key: _formKey,
             child: Column(
               children: [
-                usercredentials(
-                    controller: name,
-                    hintText: Localizations.name,
-                    errorText: Localizations.enteravalidname),
+                // usercredentials(
+                //     controller: name,
+                //     hintText: Localizations.name,
+                //     errorText: Localizations.enteravalidname),
                 usercredentials(
                     controller: unit,
                     hintText: Localizations.unitName,

@@ -192,8 +192,8 @@ class _CoustmerState extends State<Coustmer> {
     super.initState();
     datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
     timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-    startCirculationController.text =
-        DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 1)));
+    startCirculationController.text = DateFormat('yyyy-MM-dd')
+        .format(DateTime.now().add(const Duration(days: 1)));
     _loadSavedData();
     getCurrentLocation();
     ConnectivityHelper().startListening((online) {
@@ -227,8 +227,10 @@ class _CoustmerState extends State<Coustmer> {
     // Collect all form values into a Map
     Map<String, dynamic> formMap = {
       "agent_name": agents,
-      "agent_login": await SharedPreferences.getInstance().then((p) => p.getString('agentlogin')),
-      "unit_name": await SharedPreferences.getInstance().then((p) => p.getString('unit')),
+      "agent_login": await SharedPreferences.getInstance()
+          .then((p) => p.getString('agentlogin')),
+      "unit_name": await SharedPreferences.getInstance()
+          .then((p) => p.getString('unit')),
       "Agency": agency.text,
       "promoter": promoter.text,
       "date": datecontroller.text,
@@ -244,7 +246,8 @@ class _CoustmerState extends State<Coustmer> {
       "pin_code": pincode.text,
       "address": adddress.text,
       "mobile_number": mobile.text,
-      "reason_for_not_taking_eenadu_newsPaper": reason_for_not_taking_eenadu.text,
+      "reason_for_not_taking_eenadu_newsPaper":
+          reason_for_not_taking_eenadu.text,
       "customer_type": _selectedCustomerType,
       "current_newspaper": _selectedCustomerType == "Conversion"
           ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
@@ -331,7 +334,8 @@ class _CoustmerState extends State<Coustmer> {
     if (_isOnline) {
       try {
         final response = await http.post(
-          Uri.parse("https://salesrep.esanchaya.com/api/get_current_pin_location"),
+          Uri.parse(
+              "https://salesrep.esanchaya.com/api/get_current_pin_location"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
             "params": {
@@ -340,14 +344,16 @@ class _CoustmerState extends State<Coustmer> {
           }),
         );
 
-        debugPrint("🔁 get_current_pin_location Status Code: ${response.statusCode}");
+        debugPrint(
+            "🔁 get_current_pin_location Status Code: ${response.statusCode}");
         debugPrint("🔁 get_current_pin_location Response: ${response.body}");
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final agencyModel = assignagencymodel.fromJson(data);
 
-          if (agencyModel.result?.success == true && agencyModel.result?.data != null) {
+          if (agencyModel.result?.success == true &&
+              agencyModel.result?.data != null) {
             final agencyData = agencyModel.result!.data!;
             final agencyText = "${agencyData.locationName ?? 'Unknown'} ";
             setState(() {
@@ -364,7 +370,9 @@ class _CoustmerState extends State<Coustmer> {
         } else {
           debugPrint("❌ Failed to fetch agency: ${response.statusCode}");
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text("Failed to fetch agency: ${response.statusCode}")),
+            SnackBar(
+                content:
+                    Text("Failed to fetch agency: ${response.statusCode}")),
           );
         }
       } catch (e) {
@@ -399,7 +407,8 @@ class _CoustmerState extends State<Coustmer> {
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
 
-    if (permission == LocationPermission.denied || permission == LocationPermission.deniedForever) {
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
       await Geolocator.requestPermission();
       return;
     }
@@ -411,7 +420,8 @@ class _CoustmerState extends State<Coustmer> {
 
     // Online: Fetch location and autofill only empty fields
     try {
-      Position currentPosition = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+      Position currentPosition = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high);
       String googleMapsUrl =
           "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
 
@@ -424,8 +434,8 @@ class _CoustmerState extends State<Coustmer> {
         }
       });
 
-      List<Placemark> placemarks =
-          await placemarkFromCoordinates(currentPosition.latitude, currentPosition.longitude);
+      List<Placemark> placemarks = await placemarkFromCoordinates(
+          currentPosition.latitude, currentPosition.longitude);
       Placemark placemark = placemarks[0];
 
       setState(() {
@@ -556,18 +566,22 @@ class _CoustmerState extends State<Coustmer> {
 
         if (otpResponse.result?.status == "success") {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(otpResponse.result?.message ?? 'OTP verified successfully')),
+            SnackBar(
+                content: Text(otpResponse.result?.message ??
+                    'OTP verified successfully')),
           );
           return true;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
+            SnackBar(
+                content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
           );
           return false;
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to verify OTP: ${response.statusCode}')),
+          SnackBar(
+              content: Text('Failed to verify OTP: ${response.statusCode}')),
         );
         return false;
       }
@@ -609,7 +623,8 @@ class _CoustmerState extends State<Coustmer> {
                   : () async {
                       if (_otpController.text.isNotEmpty) {
                         setState(() => _isLoading = true);
-                        final isVerified = await _verifyOtp(_otpController.text);
+                        final isVerified =
+                            await _verifyOtp(_otpController.text);
                         setState(() => _isLoading = false);
                         Navigator.of(context).pop();
                         _otpController.clear();
@@ -635,7 +650,8 @@ class _CoustmerState extends State<Coustmer> {
                       setState(() => _isLoading = false);
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('OTP resent successfully')),
+                          const SnackBar(
+                              content: Text('OTP resent successfully')),
                         );
                       }
                     },
@@ -685,7 +701,8 @@ class _CoustmerState extends State<Coustmer> {
             "pin_code": pincode.text,
             "address": adddress.text,
             "mobile_number": mobile.text,
-            "reason_for_not_taking_eenadu_newsPaper": reason_for_not_taking_eenadu.text,
+            "reason_for_not_taking_eenadu_newsPaper":
+                reason_for_not_taking_eenadu.text,
             "customer_type": _selectedCustomerType,
             "current_newspaper": _selectedCustomerType == "Conversion"
                 ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
@@ -751,7 +768,8 @@ class _CoustmerState extends State<Coustmer> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text("Failed to submit form: ${data?.result?.message ?? 'Unknown error'}")),
+                content: Text(
+                    "Failed to submit form: ${data?.result?.message ?? 'Unknown error'}")),
           );
         }
       } else {
@@ -801,7 +819,8 @@ class _CoustmerState extends State<Coustmer> {
   }
 
   void openGoogleMaps(String? latitude, String? longitude) {
-    final Uri url = Uri.parse('https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+    final Uri url = Uri.parse(
+        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
     _launchUrl(url);
   }
 
@@ -842,8 +861,8 @@ class _CoustmerState extends State<Coustmer> {
       landmarkController.clear();
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-      startCirculationController.text =
-          DateFormat('yyyy-MM-dd').format(DateTime.now().add(const Duration(days: 1)));
+      startCirculationController.text = DateFormat('yyyy-MM-dd')
+          .format(DateTime.now().add(const Duration(days: 1)));
       latitude = "";
       longitude = "";
       locationUrl = "";
@@ -866,7 +885,8 @@ class _CoustmerState extends State<Coustmer> {
     );
     if (pickedDate != null) {
       setState(() {
-        startCirculationController.text = DateFormat('yyyy-MM-dd').format(pickedDate);
+        startCirculationController.text =
+            DateFormat('yyyy-MM-dd').format(pickedDate);
       });
     }
   }
@@ -1134,7 +1154,8 @@ class _CoustmerState extends State<Coustmer> {
                         if (value == null) {
                           return "Please select a newspaper";
                         }
-                        if (value == "Others" && otherNewspaperController.text.isEmpty) {
+                        if (value == "Others" &&
+                            otherNewspaperController.text.isEmpty) {
                           return "Please enter other newspaper name";
                         }
                         return null;
@@ -1172,7 +1193,8 @@ class _CoustmerState extends State<Coustmer> {
                         ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.black, width: 4),
+                          borderSide:
+                              const BorderSide(color: Colors.black, width: 4),
                         ),
                         suffixIcon: const Icon(Icons.calendar_today),
                       ),
@@ -1191,7 +1213,8 @@ class _CoustmerState extends State<Coustmer> {
                       const Expanded(
                         child: Text(
                           "Employed?",
-                          style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Text(
@@ -1323,7 +1346,8 @@ class _CoustmerState extends State<Coustmer> {
                         if (value == null) {
                           return "Please select a profession";
                         }
-                        if (value == "Other" && privateProffesionController.text.isEmpty) {
+                        if (value == "Other" &&
+                            privateProffesionController.text.isEmpty) {
                           return "Please enter other profession";
                         }
                         return null;
@@ -1392,7 +1416,8 @@ class _CoustmerState extends State<Coustmer> {
                   Center(
                     child: _isLoading
                         ? const CircularProgressIndicator(
-                            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                            valueColor:
+                                AlwaysStoppedAnimation<Color>(Colors.blue),
                           )
                         : GestureDetector(
                             onTap: () async {
@@ -1401,7 +1426,8 @@ class _CoustmerState extends State<Coustmer> {
                             child: Container(
                               decoration: BoxDecoration(
                                 color: Colors.blue,
-                                borderRadius: const BorderRadius.all(Radius.circular(50)),
+                                borderRadius:
+                                    const BorderRadius.all(Radius.circular(50)),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withOpacity(0.3),
@@ -1419,7 +1445,8 @@ class _CoustmerState extends State<Coustmer> {
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
-                                    fontSize: MediaQuery.of(context).size.height / 45,
+                                    fontSize:
+                                        MediaQuery.of(context).size.height / 45,
                                   ),
                                 ),
                               ),
