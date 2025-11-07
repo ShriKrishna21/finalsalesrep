@@ -1172,6 +1172,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         title: Column(
@@ -1216,7 +1217,7 @@ class _AgentscreenState extends State<Agentscreen> {
             backgroundColor: _isSyncing ? Colors.grey : Colors.blue,
             onPressed: _isSyncing ? null : syncPendingForms,
             label: Text(
-              _isSyncing ? "Syncing..." : "Sync Offline Forms",
+              _isSyncing ? "Syncing..." : "Sync Offline Agencies",
               style: const TextStyle(color: Colors.white),
             ),
             icon: Icon(_isSyncing ? Icons.hourglass_empty : Icons.sync,
