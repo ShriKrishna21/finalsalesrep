@@ -1,6 +1,6 @@
 import 'dart:async';
-import 'package:sqflite/sqflite.dart';
 import 'package:path/path.dart' as p;
+import 'package:sqflite/sqflite.dart';
 
 enum PendingActionType { startWork, stopWork }
 
@@ -64,11 +64,13 @@ class LocalDbattendance {
 
   Future<void> markAsSynced(int id) async {
     final d = await db;
-    await d.update('pending_actions', {'status': 'synced'}, where: 'id = ?', whereArgs: [id]);
+    await d.update('pending_actions', {'status': 'synced'},
+        where: 'id = ?', whereArgs: [id]);
   }
 
   Future<void> markAsFailed(int id) async {
     final d = await db;
-    await d.update('pending_actions', {'status': 'failed'}, where: 'id = ?', whereArgs: [id]);
+    await d.update('pending_actions', {'status': 'failed'},
+        where: 'id = ?', whereArgs: [id]);
   }
 }

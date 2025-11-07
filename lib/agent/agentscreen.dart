@@ -92,6 +92,7 @@ class _AgentscreenState extends State<Agentscreen> {
   List<SelfieSession> _selfieSessions = [];
   final Onedayagent _onedayagent = Onedayagent();
   bool _isSyncing = false;
+  //bool _isSyncing = false;
 
   // Agency dropdown related variables
   List<AgencyData> _agencyList = [];
@@ -1197,8 +1198,8 @@ class _AgentscreenState extends State<Agentscreen> {
             backgroundColor: Colors.white,
             onPressed: isWorking
                 ? () async {
-                    await Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Coustmer()));
+                    await Navigator.push(
+                        context, MaterialPageRoute(builder: (_) => Coustmer()));
                     await refreshData();
                   }
                 : null,

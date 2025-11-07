@@ -16,10 +16,10 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-// Placeholder coustmerform class
+// ==================== MODEL CLASSES ====================
+
 class coustmerform {
   Result? result;
-
   coustmerform({this.result});
 
   coustmerform.fromJson(Map<String, dynamic> json) {
@@ -38,7 +38,6 @@ class coustmerform {
 class Result {
   String? code;
   String? message;
-
   Result({this.code, this.message});
 
   Result.fromJson(Map<String, dynamic> json) {
@@ -54,12 +53,10 @@ class Result {
   }
 }
 
-// OTP model class
 class otp {
   String? jsonrpc;
-  Null id;
+  Null? id;
   OtpResult? result;
-
   otp({this.jsonrpc, this.id, this.result});
 
   otp.fromJson(Map<String, dynamic> json) {
@@ -82,7 +79,6 @@ class otp {
 class OtpResult {
   String? status;
   String? message;
-
   OtpResult({this.status, this.message});
 
   OtpResult.fromJson(Map<String, dynamic> json) {
@@ -109,59 +105,59 @@ class _CoustmerState extends State<Coustmer> {
   File? faceImage;
   final ImagePicker _picker = ImagePicker();
   bool _isOnline = false;
-
   bool _isofferTogle = false;
   bool _isemployed = false;
   bool _isLoading = false;
-  int offerintresetedpeople = 0;
-  int offernotintresetedpeople = 0;
-  int count = 0;
-  int addcount = 0;
+
   String latitude = "";
   String longitude = "";
   String? locationUrl = "";
   File? locationImage;
+
   String? _selectedJobType;
   String? _selectedGovDepartment;
   String? _selectedproffesion;
   String? _selectedPrivateProfession;
   String? _selectedCustomerType;
   String? _selectedPreviousNewspaper;
+
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _otpController = TextEditingController();
 
-  TextEditingController agency = TextEditingController();
-  TextEditingController streetController = TextEditingController();
-  TextEditingController landmarkController = TextEditingController();
-  TextEditingController promoter = TextEditingController();
-  TextEditingController age = TextEditingController();
-  TextEditingController datecontroller = TextEditingController();
-  TextEditingController timecontroller = TextEditingController();
-  TextEditingController familyhead = TextEditingController();
-  TextEditingController fathersname = TextEditingController();
-  TextEditingController mothername = TextEditingController();
-  TextEditingController spousename = TextEditingController();
-  TextEditingController hno = TextEditingController();
-  TextEditingController streetnumber = TextEditingController();
-  TextEditingController city = TextEditingController();
-  TextEditingController pincode = TextEditingController();
-  TextEditingController adddress = TextEditingController();
-  TextEditingController mobile = TextEditingController();
-  TextEditingController reason_for_not_taking_eenadu = TextEditingController();
-  TextEditingController job_designation = TextEditingController();
-  TextEditingController job_proffesion = TextEditingController();
-  TextEditingController privateCompanyController = TextEditingController();
-  TextEditingController privatedesignationController = TextEditingController();
-  TextEditingController privateProffesionController = TextEditingController();
-  TextEditingController locationUrlController = TextEditingController();
-  TextEditingController faceBase64Controller = TextEditingController();
-  TextEditingController otherNewspaperController = TextEditingController();
-  TextEditingController startCirculationController = TextEditingController();
+  // Controllers
+  late TextEditingController agency;
+  late TextEditingController promoter;
+  late TextEditingController age;
+  late TextEditingController datecontroller;
+  late TextEditingController timecontroller;
+  late TextEditingController familyhead;
+  late TextEditingController fathersname;
+  late TextEditingController mothername;
+  late TextEditingController spousename;
+  late TextEditingController hno;
+  late TextEditingController streetnumber;
+  late TextEditingController city;
+  late TextEditingController pincode;
+  late TextEditingController adddress;
+  late TextEditingController mobile;
+  late TextEditingController reason_for_not_taking_eenadu;
+  late TextEditingController job_designation;
+  late TextEditingController job_proffesion;
+  late TextEditingController privateCompanyController;
+  late TextEditingController privatedesignationController;
+  late TextEditingController privateProffesionController;
+  late TextEditingController locationUrlController;
+  late TextEditingController faceBase64Controller;
+  late TextEditingController otherNewspaperController;
+  late TextEditingController startCirculationController;
+  late TextEditingController streetController;
+  late TextEditingController landmarkController;
 
   String agents = '';
-  List<String> jobTypes = ["government_job", "private_job"];
-  List<String> govDepartments = ["Central", "PSU", "State"];
-  List<String> privateJobProfessions = [
+
+  final List<String> jobTypes = ["government_job", "private_job"];
+  final List<String> govDepartments = ["Central", "PSU", "State"];
+  final List<String> privateJobProfessions = [
     "Software Engineer",
     "Accountant",
     "Marketing Manager",
@@ -174,8 +170,14 @@ class _CoustmerState extends State<Coustmer> {
     "Engineer",
     "Other"
   ];
-  List<String> proffesion = ["farmer", "doctor", "teacher", "lawyer", "Artist"];
-  List<String> previousNewspapers = [
+  final List<String> proffesion = [
+    "farmer",
+    "doctor",
+    "teacher",
+    "lawyer",
+    "Artist"
+  ];
+  final List<String> previousNewspapers = [
     "Sakshi",
     "Andhra Jyothi",
     "Namasthe Telangana",
@@ -184,27 +186,55 @@ class _CoustmerState extends State<Coustmer> {
     "The Hindu",
     "Others"
   ];
-  List<String> customerTypes = ["New User", "Conversion"];
+  final List<String> customerTypes = ["New User", "Conversion"];
+
   coustmerform? data;
 
   @override
   void initState() {
     super.initState();
-    datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-    startCirculationController.text = DateFormat('yyyy-MM-dd')
-        .format(DateTime.now().add(const Duration(days: 1)));
+    _initializeControllers();
     _loadSavedData();
     getCurrentLocation();
+
     ConnectivityHelper().startListening((online) {
-      setState(() {
-        _isOnline = online;
-      });
-      if (online) {
-        // Automatically try to sync pending forms
-        _syncPending();
-      }
+      setState(() => _isOnline = online);
+      if (online) _syncPending();
     });
+  }
+
+  void _initializeControllers() {
+    agency = TextEditingController();
+    promoter = TextEditingController();
+    age = TextEditingController();
+    datecontroller = TextEditingController()
+      ..text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    timecontroller = TextEditingController()
+      ..text = DateFormat('hh:mm a').format(DateTime.now());
+    familyhead = TextEditingController();
+    fathersname = TextEditingController();
+    mothername = TextEditingController();
+    spousename = TextEditingController();
+    hno = TextEditingController();
+    streetnumber = TextEditingController();
+    city = TextEditingController();
+    pincode = TextEditingController();
+    adddress = TextEditingController();
+    mobile = TextEditingController();
+    reason_for_not_taking_eenadu = TextEditingController();
+    job_designation = TextEditingController();
+    job_proffesion = TextEditingController();
+    privateCompanyController = TextEditingController();
+    privatedesignationController = TextEditingController();
+    privateProffesionController = TextEditingController();
+    locationUrlController = TextEditingController();
+    faceBase64Controller = TextEditingController();
+    otherNewspaperController = TextEditingController();
+    startCirculationController = TextEditingController()
+      ..text = DateFormat('yyyy-MM-dd')
+          .format(DateTime.now().add(const Duration(days: 1)));
+    streetController = TextEditingController();
+    landmarkController = TextEditingController();
   }
 
   Future<void> _syncPending() async {
@@ -216,21 +246,17 @@ class _CoustmerState extends State<Coustmer> {
   }
 
   Future<void> handleSubmit() async {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) {
+    if (!(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
       );
       return;
     }
 
-    // Collect all form values into a Map
     Map<String, dynamic> formMap = {
       "agent_name": agents,
-      "agent_login": await SharedPreferences.getInstance()
-          .then((p) => p.getString('agentlogin')),
-      "unit_name": await SharedPreferences.getInstance()
-          .then((p) => p.getString('unit')),
+      "agent_login": await _getPref('agentlogin'),
+      "unit_name": await _getPref('unit'),
       "Agency": agency.text,
       "promoter": promoter.text,
       "date": datecontroller.text,
@@ -274,28 +300,27 @@ class _CoustmerState extends State<Coustmer> {
     };
 
     if (!_isOnline) {
-      // Offline: Save directly to local database without OTP
       await LocalDb().insertForm(formMap);
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('No internet: Form saved locally')),
       );
-      // Clear the form or navigate back as needed
       await _refreshForm();
       return;
     }
 
-    // Online: Proceed with OTP verification
     bool otpSent = await _sendOtp();
-    if (!otpSent) return;
-    _showOtpDialog();
+    if (otpSent) _showOtpDialog();
+  }
+
+  Future<String?> _getPref(String key) async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getString(key);
   }
 
   @override
   void dispose() {
     _otpController.dispose();
     agency.dispose();
-    streetController.dispose();
-    landmarkController.dispose();
     promoter.dispose();
     age.dispose();
     datecontroller.dispose();
@@ -320,72 +345,47 @@ class _CoustmerState extends State<Coustmer> {
     faceBase64Controller.dispose();
     otherNewspaperController.dispose();
     startCirculationController.dispose();
+    streetController.dispose();
+    landmarkController.dispose();
     super.dispose();
   }
 
   Future<void> _loadSavedData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     setState(() {
       agents = prefs.getString('name') ?? '';
       promoter.text = agents;
     });
 
-    if (_isOnline) {
+    if (_isOnline && agentapi != null) {
       try {
         final response = await http.post(
           Uri.parse(
               "https://salesrep.esanchaya.com/api/get_current_pin_location"),
           headers: {"Content-Type": "application/json"},
           body: jsonEncode({
-            "params": {
-              "token": agentapi,
-            }
+            "params": {"token": agentapi}
           }),
         );
-
-        debugPrint(
-            "🔁 get_current_pin_location Status Code: ${response.statusCode}");
-        debugPrint("🔁 get_current_pin_location Response: ${response.body}");
 
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final agencyModel = assignagencymodel.fromJson(data);
-
           if (agencyModel.result?.success == true &&
               agencyModel.result?.data != null) {
-            final agencyData = agencyModel.result!.data!;
-            final agencyText = "${agencyData.locationName ?? 'Unknown'} ";
-            setState(() {
-              if (agency.text.isEmpty) {
-                agency.text = agencyText;
-              }
-            });
-          } else {
-            debugPrint("❌ No agency data found or API returned failure");
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Failed to fetch agency data")),
-            );
+            final agencyText =
+                "${agencyModel.result!.data!.locationName ?? 'Unknown'} ";
+            if (agency.text.isEmpty) {
+              setState(() => agency.text = agencyText);
+            }
           }
-        } else {
-          debugPrint("❌ Failed to fetch agency: ${response.statusCode}");
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content:
-                    Text("Failed to fetch agency: ${response.statusCode}")),
-          );
         }
       } catch (e) {
-        debugPrint("❌ Error fetching agency: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching agency: $e")),
-        );
+        debugPrint("Error fetching agency: $e");
       }
     } else {
-      // Offline: Allow manual input for agency
-      setState(() {
-        agency.text = '';
-      });
+      agency.text = '';
     }
   }
 
@@ -406,90 +406,59 @@ class _CoustmerState extends State<Coustmer> {
 
   Future<void> getCurrentLocation() async {
     LocationPermission permission = await Geolocator.checkPermission();
-
     if (permission == LocationPermission.denied ||
         permission == LocationPermission.deniedForever) {
       await Geolocator.requestPermission();
       return;
     }
 
-    // If offline, do nothing to preserve user-entered data
-    if (!_isOnline) {
-      return;
-    }
+    if (!_isOnline) return;
 
-    // Online: Fetch location and autofill only empty fields
     try {
-      Position currentPosition = await Geolocator.getCurrentPosition(
+      Position position = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       String googleMapsUrl =
-          "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
+          "https://www.google.com/maps/search/?api=1&query=${position.latitude},${position.longitude}";
 
       setState(() {
-        latitude = currentPosition.latitude.toString();
-        longitude = currentPosition.longitude.toString();
+        latitude = position.latitude.toString();
+        longitude = position.longitude.toString();
         locationUrl = googleMapsUrl;
         if (locationUrlController.text.isEmpty) {
           locationUrlController.text = googleMapsUrl;
         }
       });
 
-      List<Placemark> placemarks = await placemarkFromCoordinates(
-          currentPosition.latitude, currentPosition.longitude);
-      Placemark placemark = placemarks[0];
+      List<Placemark> placemarks =
+          await placemarkFromCoordinates(position.latitude, position.longitude);
+      Placemark place = placemarks[0];
 
       setState(() {
-        if (streetController.text.isEmpty) {
-          streetController.text = placemark.street ?? "";
-        }
-        if (city.text.isEmpty) {
-          city.text = placemark.locality ?? "";
-        }
-        if (landmarkController.text.isEmpty) {
-          landmarkController.text = placemark.name ?? "";
-        }
+        if (streetController.text.isEmpty)
+          streetController.text = place.street ?? "";
+        if (city.text.isEmpty) city.text = place.locality ?? "";
+        if (landmarkController.text.isEmpty)
+          landmarkController.text = place.name ?? "";
+        if (pincode.text.isEmpty) pincode.text = place.postalCode ?? "";
         if (adddress.text.isEmpty) {
-          final s = placemark.street ?? "";
-          final l = placemark.locality ?? "";
-          adddress.text = [s, l].where((e) => e.isNotEmpty).join(", ");
-        }
-        if (pincode.text.isEmpty) {
-          pincode.text = placemark.postalCode ?? "";
+          adddress.text = [place.street, place.locality]
+              .where((e) => e != null && e.isNotEmpty)
+              .join(", ");
         }
       });
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error fetching address: $e")),
-        );
-      }
+      debugPrint("Location error: $e");
     }
   }
 
   Future<void> _launchUrl(Uri url) async {
-    try {
-      if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
-        throw Exception('Could not launch $url');
-      }
-    } catch (e) {
-      print('Launch error: $e');
-    }
-  }
-
-  Future<void> faceBaseImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.camera);
-    if (image != null) {
-      final bytes = await image.readAsBytes();
-      final base64Image = base64Encode(bytes);
-      setState(() {
-        locationImage = File(image.path);
-        faceBase64Controller.text = base64Image;
-      });
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      throw Exception('Could not launch $url');
     }
   }
 
   Future<bool> _sendOtp() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String phone = mobile.text.trim();
 
@@ -500,18 +469,13 @@ class _CoustmerState extends State<Coustmer> {
       return false;
     }
 
-    final requestBody = {
-      "params": {
-        "token": agentapi,
-        "phone": int.tryParse(phone) ?? 0,
-      }
-    };
-
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/send_otp'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
+        body: jsonEncode({
+          "params": {"token": agentapi, "phone": int.parse(phone)}
+        }),
       );
 
       if (response.statusCode == 200) {
@@ -519,18 +483,13 @@ class _CoustmerState extends State<Coustmer> {
           const SnackBar(content: Text('OTP sent successfully')),
         );
         return true;
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to send OTP: ${response.statusCode}')),
-        );
-        return false;
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error sending OTP: $e')),
+        SnackBar(content: Text('Error: $e')),
       );
-      return false;
     }
+    return false;
   }
 
   Future<bool> _verifyOtp(String otpCode) async {
@@ -538,148 +497,95 @@ class _CoustmerState extends State<Coustmer> {
     final String? agentapi = prefs.getString('apikey');
     final String phone = mobile.text.trim();
 
-    if (agentapi == null || phone.isEmpty || otpCode.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Invalid token, phone, or OTP')),
-      );
-      return false;
-    }
-
-    final requestBody = {
-      "params": {
-        "token": agentapi,
-        "phone": phone,
-        "otp": otpCode,
-      }
-    };
+    if (agentapi == null || phone.isEmpty || otpCode.isEmpty) return false;
 
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/verify_otp'),
         headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(requestBody),
+        body: jsonEncode({
+          "params": {"token": agentapi, "phone": phone, "otp": otpCode}
+        }),
       );
 
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final otpResponse = otp.fromJson(jsonResponse);
-
         if (otpResponse.result?.status == "success") {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(otpResponse.result?.message ??
-                    'OTP verified successfully')),
+                content: Text(otpResponse.result?.message ?? 'OTP verified')),
           );
           return true;
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
-          );
-          return false;
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text('Failed to verify OTP: ${response.statusCode}')),
-        );
-        return false;
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error verifying OTP: $e')),
-      );
-      return false;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
     }
+    return false;
   }
 
   void _showOtpDialog() {
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Enter OTP'),
-          content: TextField(
-            controller: _otpController,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(
-              labelText: 'OTP',
-              border: OutlineInputBorder(),
-            ),
-            maxLength: 6,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                _otpController.clear();
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: _isLoading
-                  ? null
-                  : () async {
-                      if (_otpController.text.isNotEmpty) {
-                        setState(() => _isLoading = true);
-                        final isVerified =
-                            await _verifyOtp(_otpController.text);
-                        setState(() => _isLoading = false);
-                        Navigator.of(context).pop();
-                        _otpController.clear();
-                        if (isVerified) {
-                          await _submitForm();
-                        }
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Please enter OTP')),
-                        );
-                      }
-                    },
-              child: _isLoading
-                  ? const CircularProgressIndicator()
-                  : const Text('Verify'),
-            ),
-            TextButton(
-              onPressed: _isLoading
-                  ? null
-                  : () async {
+      builder: (_) => AlertDialog(
+        title: const Text('Enter OTP'),
+        content: TextField(
+          controller: _otpController,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          decoration: const InputDecoration(
+              labelText: 'OTP', border: OutlineInputBorder()),
+        ),
+        actions: [
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          ElevatedButton(
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    if (_otpController.text.isNotEmpty) {
                       setState(() => _isLoading = true);
-                      final success = await _sendOtp();
+                      final verified = await _verifyOtp(_otpController.text);
                       setState(() => _isLoading = false);
-                      if (success) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                              content: Text('OTP resent successfully')),
-                        );
-                      }
-                    },
-              child: const Text('Resend OTP'),
-            ),
-          ],
-        );
-      },
+                      Navigator.pop(context);
+                      _otpController.clear();
+                      if (verified) await _submitForm();
+                    }
+                  },
+            child: _isLoading
+                ? const CircularProgressIndicator()
+                : const Text('Verify'),
+          ),
+          TextButton(
+            onPressed: _isLoading
+                ? null
+                : () async {
+                    setState(() => _isLoading = true);
+                    await _sendOtp();
+                    setState(() => _isLoading = false);
+                  },
+            child: const Text('Resend'),
+          ),
+        ],
+      ),
     );
   }
 
   Future<void> _submitForm() async {
-    setState(() {
-      _isLoading = true;
-    });
-
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() => _isLoading = true);
+    final prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String? agentlog = prefs.getString('agentlogin');
     final String? unit = prefs.getString('unit');
 
     try {
-      const url = 'https://salesrep.esanchaya.com/api/customer_form';
       final response = await http.post(
-        Uri.parse(url),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        Uri.parse('https://salesrep.esanchaya.com/api/customer_form'),
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "params": {
             "token": agentapi,
@@ -731,97 +637,64 @@ class _CoustmerState extends State<Coustmer> {
       );
 
       if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        setState(() {
-          data = coustmerform.fromJson(jsonResponse);
-        });
+        final jsonResponse = jsonDecode(response.body);
+        data = coustmerform.fromJson(jsonResponse);
 
         if (data?.result?.code == "200") {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text("Form submitted successfully")),
-          );
+          final houseVisited = (prefs.getInt("house_visited") ?? 0) + 1;
+          final targetLeft = (prefs.getInt("target_left") ?? 0) - 1;
+          final offerAccepted =
+              (prefs.getInt("offer_accepted") ?? 0) + (_isofferTogle ? 1 : 0);
+          final offerRejected =
+              (prefs.getInt("offer_rejected") ?? 0) + (_isofferTogle ? 0 : 1);
 
-          int houseVisited = prefs.getInt("house_visited") ?? 0;
-          int targetLeft = prefs.getInt("target_left") ?? 0;
-          int offerAccepted = prefs.getInt("offer_accepted") ?? 0;
-          int offerRejected = prefs.getInt("offer_rejected") ?? 0;
-
-          houseVisited += 1;
-          if (targetLeft > 0) {
-            targetLeft -= 1;
-          }
-          if (_isofferTogle) {
-            offerAccepted += 1;
-          } else {
-            offerRejected += 1;
-          }
-
-          await prefs.setInt("house_visited", houseVisited);
-          await prefs.setInt("target_left", targetLeft);
-          await prefs.setInt("offer_accepted", offerAccepted);
-          await prefs.setInt("offer_rejected", offerRejected);
+          await Future.wait([
+            prefs.setInt("house_visited", houseVisited),
+            prefs.setInt("target_left", targetLeft > 0 ? targetLeft : 0),
+            prefs.setInt("offer_accepted", offerAccepted),
+            prefs.setInt("offer_rejected", offerRejected),
+          ]);
 
           Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const Agentscreen()),
-          );
+              context, MaterialPageRoute(builder: (_) => const Agentscreen()));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-                content: Text(
-                    "Failed to submit form: ${data?.result?.message ?? 'Unknown error'}")),
+                content: Text(data?.result?.message ?? 'Submission failed')),
           );
         }
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error: ${response.statusCode}")),
-        );
       }
-    } catch (error) {
-      print("Error submitting form: $error");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error: $error")),
-      );
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Error: $e')));
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
   Future<void> uploaddata() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-
-      if (_isOnline) {
-        // Online: Proceed with OTP flow
-        final success = await _sendOtp();
-        setState(() {
-          _isLoading = false;
-        });
-        if (success) {
-          _showOtpDialog();
-        }
-      } else {
-        // Offline: Save directly to local DB
-        await handleSubmit();
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } else {
+    if (!(_formKey.currentState?.validate() ?? false)) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please fill all required fields')),
       );
+      return;
     }
+    setState(() => _isLoading = true);
+    if (_isOnline) {
+      final sent = await _sendOtp();
+      if (sent) _showOtpDialog();
+    } else {
+      await handleSubmit();
+    }
+    setState(() => _isLoading = false);
   }
 
-  void openGoogleMaps(String? latitude, String? longitude) {
-    final Uri url = Uri.parse(
-        'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
-    _launchUrl(url);
+  void openGoogleMaps() {
+    if (latitude.isNotEmpty && longitude.isNotEmpty) {
+      final url = Uri.parse(
+          'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
+      _launchUrl(url);
+    }
   }
 
   Future<void> _refreshForm() async {
@@ -834,6 +707,9 @@ class _CoustmerState extends State<Coustmer> {
       _selectedPrivateProfession = null;
       _selectedCustomerType = null;
       _selectedPreviousNewspaper = null;
+      faceImage = null;
+      faceBase64Controller.clear();
+      // Clear all controllers
       agency.clear();
       promoter.clear();
       age.clear();
@@ -854,40 +730,29 @@ class _CoustmerState extends State<Coustmer> {
       privatedesignationController.clear();
       privateProffesionController.clear();
       locationUrlController.clear();
-      faceBase64Controller.clear();
       otherNewspaperController.clear();
-      startCirculationController.clear();
       streetController.clear();
       landmarkController.clear();
       datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
       timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
       startCirculationController.text = DateFormat('yyyy-MM-dd')
-          .format(DateTime.now().add(const Duration(days: 1)));
+          .format(DateTime.now().add(Duration(days: 1)));
       latitude = "";
       longitude = "";
-      locationUrl = "";
     });
-
     await _loadSavedData();
     await getCurrentLocation();
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Form refreshed successfully")),
-    );
   }
 
   Future<void> _selectStartCirculationDate() async {
-    DateTime? pickedDate = await showDatePicker(
+    final picked = await showDatePicker(
       context: context,
       initialDate: DateTime.now().add(const Duration(days: 1)),
       firstDate: DateTime.now(),
       lastDate: DateTime(2100),
     );
-    if (pickedDate != null) {
-      setState(() {
-        startCirculationController.text =
-            DateFormat('yyyy-MM-dd').format(pickedDate);
-      });
+    if (picked != null) {
+      startCirculationController.text = DateFormat('yyyy-MM-dd').format(picked);
     }
   }
 
@@ -897,13 +762,8 @@ class _CoustmerState extends State<Coustmer> {
       appBar: AppBar(
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
-        title: const Text(
-          "Customer Form",
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 30,
-          ),
-        ),
+        title: const Text("Customer Form",
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 30)),
       ),
       body: RefreshIndicator(
         onRefresh: _refreshForm,
@@ -916,544 +776,263 @@ class _CoustmerState extends State<Coustmer> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 30),
-                  textformfeild(
-                    controller: agency,
-                    label: "Agency",
-                    need: true,
-                    readOnly: _isOnline,
-                    hunttext: "Agency cannot be empty",
-                  ),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                    controller: promoter,
-                    label: "Promoter Name",
-                    need: true,
-                    hunttext: "Promoter cannot be empty",
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: date(
-                          needed: true,
-                          Dcontroller: datecontroller,
-                          date: "Date",
-                          inputType: TextInputType.datetime,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: date(
-                          needed: true,
-                          Dcontroller: timecontroller,
-                          date: "Time",
-                          inputType: TextInputType.datetime,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 15),
-                  const Text(
-                    "Family Details",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 5),
-                  textformfeild(
-                    controller: familyhead,
-                    label: "Name",
-                    hunttext: "Family head name cannot be empty",
-                  ),
-                  const SizedBox(height: 5),
-                  textformfeild(
-                    controller: age,
-                    label: "Age",
-                    hunttext: "Age cannot be empty",
-                    keyboardType: TextInputType.number,
-                  ),
-                  const SizedBox(height: 5),
-                  const Text(
-                    "Address Details",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: textformfeild(
-                          controller: hno,
-                          label: "House Number",
-                          hunttext: "House number cannot be empty",
-                          keyboardType: TextInputType.text,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: textformfeild(
-                          controller: streetnumber,
-                          hunttext: "Street number cannot be empty",
-                          label: "Street No",
-                          keyboardType: TextInputType.text,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: textformfeild(
-                          hunttext: "City cannot be empty",
-                          controller: city,
-                          label: "City",
-                          keyboardType: TextInputType.text,
-                        ),
-                      ),
-                      const SizedBox(width: 10),
-                      Expanded(
-                        child: textformfeild(
-                          hunttext: "Pin code cannot be empty",
-                          maxvalue: 6,
-                          controller: pincode,
-                          label: "Pin Code",
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                    controller: adddress,
-                    label: "Address",
-                  ),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                    controller: streetController,
-                    label: "Street",
-                    hunttext: "Street cannot be empty",
-                    need: true,
-                    readOnly: _isOnline,
-                  ),
-                  const SizedBox(height: 10),
-                  textformfeild(
-                    controller: landmarkController,
-                    label: "Landmark",
-                    hunttext: "Landmark cannot be empty",
-                    need: true,
-                    readOnly: _isOnline,
-                  ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    "Landmark Photo",
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  GestureDetector(
-                    onTap: pickFaceImage,
-                    child: Container(
-                      height: 150,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: Colors.grey[200],
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: faceImage != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(8),
-                              child: Image.file(faceImage!, fit: BoxFit.cover),
-                            )
-                          : const Center(child: Text("Tap to select image")),
-                    ),
-                  ),
                   const SizedBox(height: 20),
-                  InkWell(
-                    onTap: () {
-                      openGoogleMaps(latitude, longitude);
-                    },
-                    child: const Text(
-                      'Open Location in Google Maps',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.blue,
-                      ),
-                    ),
-                  ),
+
+                  // Agency
+                  textformfeild(
+                      controller: agency,
+                      label: "Agency",
+                      need: true,
+                      readOnly: _isOnline,
+                      hunttext: "Agency required"),
+
                   const SizedBox(height: 10),
+                  textformfeild(
+                      controller: promoter,
+                      label: "Promoter Name",
+                      need: true,
+                      hunttext: "Promoter required"),
+
+                  // Date & Time
+                  Row(
+                    children: [
+                      Expanded(
+                          child:
+                              date(Dcontroller: datecontroller, date: "Date")),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child:
+                              date(Dcontroller: timecontroller, date: "Time")),
+                    ],
+                  ),
+
                   const SizedBox(height: 15),
-                  const Text(
-                    "Newspaper Details",
-                    style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+                  const Text("Family Details",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  textformfeild(
+                      controller: familyhead,
+                      label: "Name",
+                      hunttext: "Required"),
+                  textformfeild(
+                      controller: age,
+                      label: "Age",
+                      keyboardType: TextInputType.number,
+                      hunttext: "Required"),
+
+                  const SizedBox(height: 15),
+                  const Text("Address Details",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  Row(
+                    children: [
+                      Expanded(
+                          child: textformfeild(
+                              controller: hno, label: "House Number")),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child: textformfeild(
+                              controller: streetnumber, label: "Street No")),
+                    ],
                   ),
-                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                          child:
+                              textformfeild(controller: city, label: "City")),
+                      const SizedBox(width: 10),
+                      Expanded(
+                          child: textformfeild(
+                              controller: pincode,
+                              label: "Pin Code",
+                              maxvalue: 6,
+                              keyboardType: TextInputType.number)),
+                    ],
+                  ),
+                  textformfeild(controller: adddress, label: "Address"),
+                  textformfeild(
+                      controller: streetController,
+                      label: "Street",
+                      readOnly: _isOnline),
+                  textformfeild(
+                      controller: landmarkController,
+                      label: "Landmark",
+                      readOnly: _isOnline),
+
+                  const Text("Landmark Photo",
+                      style: TextStyle(fontWeight: FontWeight.bold)),
+                  imagePickerBox(faceImage, pickFaceImage),
+
+                  InkWell(
+                      onTap: openGoogleMaps,
+                      child: const Text('Open in Google Maps',
+                          style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold))),
+
+                  const SizedBox(height: 15),
+                  const Text("Newspaper Details",
+                      style:
+                          TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+
                   DropdownButtonFormField<String>(
                     value: _selectedCustomerType,
                     hint: const Text("Customer Type"),
-                    isExpanded: true,
-                    items: customerTypes.map((String customerType) {
-                      return DropdownMenuItem<String>(
-                        value: customerType,
-                        child: Text(customerType),
-                      );
-                    }).toList(),
-                    onChanged: (String? newValue) {
-                      setState(() {
-                        _selectedCustomerType = newValue;
-                        if (newValue != "Conversion") {
-                          _selectedPreviousNewspaper = null;
-                          otherNewspaperController.clear();
-                        }
-                      });
-                    },
-                    validator: (value) {
-                      if (value == null) {
-                        return "Please select customer type";
-                      }
-                      return null;
-                    },
+                    items: customerTypes
+                        .map((e) => DropdownMenuItem(value: e, child: Text(e)))
+                        .toList(),
+                    onChanged: (v) => setState(() => _selectedCustomerType = v),
+                    validator: (v) => v == null ? "Required" : null,
                     decoration: const InputDecoration(
-                      labelText: "Customer Type",
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                    ),
+                        labelText: "Customer Type",
+                        border: OutlineInputBorder()),
                   ),
+
                   if (_selectedCustomerType == "Conversion") ...[
-                    const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: _selectedPreviousNewspaper,
                       hint: const Text("Current Newspaper"),
-                      isExpanded: true,
-                      items: previousNewspapers.map((String newspaper) {
-                        return DropdownMenuItem<String>(
-                          value: newspaper,
-                          child: Text(newspaper),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedPreviousNewspaper = newValue;
-                          if (newValue != "Others") {
-                            otherNewspaperController.clear();
-                          }
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return "Please select a newspaper";
-                        }
-                        if (value == "Others" &&
-                            otherNewspaperController.text.isEmpty) {
-                          return "Please enter other newspaper name";
-                        }
+                      items: previousNewspapers
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) =>
+                          setState(() => _selectedPreviousNewspaper = v),
+                      validator: (v) {
+                        if (v == null) return "Required";
+                        if (v == "Others" &&
+                            otherNewspaperController.text.isEmpty)
+                          return "Enter newspaper";
                         return null;
                       },
                       decoration: const InputDecoration(
-                        labelText: "Current Newspaper",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
+                          labelText: "Current Newspaper",
+                          border: OutlineInputBorder()),
                     ),
-                    if (_selectedPreviousNewspaper == "Others") ...[
-                      const SizedBox(height: 10),
+                    if (_selectedPreviousNewspaper == "Others")
                       textformfeild(
-                        hunttext: "Please enter other newspaper name",
-                        controller: otherNewspaperController,
-                        label: "Other Newspaper",
-                        need: false,
-                        keyboardType: TextInputType.text,
-                      ),
-                    ],
+                          controller: otherNewspaperController,
+                          label: "Other Newspaper"),
                   ],
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 70,
-                    width: double.infinity,
-                    child: TextFormField(
-                      controller: startCirculationController,
-                      readOnly: true,
-                      decoration: InputDecoration(
-                        labelText: "Start Circulation",
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide: const BorderSide(color: Colors.black),
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(15),
-                          borderSide:
-                              const BorderSide(color: Colors.black, width: 4),
-                        ),
-                        suffixIcon: const Icon(Icons.calendar_today),
-                      ),
-                      onTap: _selectStartCirculationDate,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return "Start circulation date cannot be empty";
-                        }
-                        return null;
-                      },
+
+                  TextFormField(
+                    controller: startCirculationController,
+                    readOnly: true,
+                    onTap: _selectStartCirculationDate,
+                    decoration: const InputDecoration(
+                      labelText: "Start Circulation",
+                      suffixIcon: Icon(Icons.calendar_today),
+                      border: OutlineInputBorder(),
                     ),
+                    validator: (v) => v?.isEmpty ?? true ? "Required" : null,
                   ),
-                  const SizedBox(height: 5),
+
                   Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Expanded(
-                        child: Text(
-                          "Employed?",
+                      const Text("Employed?",
                           style: TextStyle(
-                              fontSize: 18, fontWeight: FontWeight.bold),
-                        ),
-                      ),
-                      Text(
-                        _isemployed ? "Yes" : "No",
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: _isemployed ? Colors.green : Colors.red,
-                        ),
-                      ),
+                              fontSize: 18, fontWeight: FontWeight.bold)),
                       Switch(
-                        inactiveThumbColor: Colors.white,
-                        activeTrackColor: Colors.green,
-                        inactiveTrackColor: Colors.red,
-                        value: _isemployed,
-                        onChanged: (value) {
-                          setState(() {
-                            _isemployed = value;
-                            _selectedJobType = null;
-                            _selectedGovDepartment = null;
-                            privateCompanyController.clear();
-                            privateProffesionController.clear();
-                            _selectedPrivateProfession = null;
-                          });
-                        },
-                      ),
+                          value: _isemployed,
+                          onChanged: (v) => setState(() => _isemployed = v)),
                     ],
                   ),
-                  const SizedBox(height: 15),
+
                   if (_isemployed)
                     DropdownButtonFormField<String>(
                       value: _selectedJobType,
                       hint: const Text("Job Type"),
-                      isExpanded: true,
-                      items: jobTypes.map((String job) {
-                        return DropdownMenuItem<String>(
-                          value: job,
-                          child: Text(job),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedJobType = newValue;
-                          _selectedGovDepartment = null;
-                          privateCompanyController.clear();
-                          privateProffesionController.clear();
-                          _selectedPrivateProfession = null;
-                        });
-                      },
+                      items: jobTypes
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedJobType = v),
                       decoration: const InputDecoration(
-                        labelText: "Job Type",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
+                          labelText: "Job Type", border: OutlineInputBorder()),
                     ),
+
                   if (_selectedJobType == "government_job") ...[
-                    const SizedBox(height: 20),
                     DropdownButtonFormField<String>(
                       value: _selectedGovDepartment,
-                      hint: const Text("Select Department"),
-                      isExpanded: true,
-                      items: govDepartments.map((String dept) {
-                        return DropdownMenuItem<String>(
-                          value: dept,
-                          child: Text(dept),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedGovDepartment = newValue;
-                        });
-                      },
+                      hint: const Text("Department"),
+                      items: govDepartments
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) =>
+                          setState(() => _selectedGovDepartment = v),
                       decoration: const InputDecoration(
-                        labelText: "Government Job",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
+                          labelText: "Govt Dept", border: OutlineInputBorder()),
                     ),
-                    if (_selectedGovDepartment != null) ...[
-                      const SizedBox(height: 10),
-                      textformfeild(
-                        hunttext: "Field cannot be empty",
-                        controller: job_designation,
-                        label: "Job Designation",
-                      ),
-                      const SizedBox(height: 10),
-                      textformfeild(
-                        hunttext: "Field cannot be empty",
-                        controller: job_proffesion,
-                        label: "Job Department",
-                      ),
-                    ],
+                    textformfeild(
+                        controller: job_designation, label: "Designation"),
+                    textformfeild(
+                        controller: job_proffesion, label: "Profession"),
                   ],
+
                   if (_selectedJobType == "private_job") ...[
-                    const SizedBox(height: 10),
                     textformfeild(
-                      hunttext: "Field cannot be empty",
-                      controller: privateCompanyController,
-                      label: "Company Name",
-                    ),
-                    const SizedBox(height: 10),
+                        controller: privateCompanyController,
+                        label: "Company Name"),
                     textformfeild(
-                      hunttext: "Field cannot be empty",
-                      controller: privatedesignationController,
-                      label: "Designation",
-                    ),
-                    const SizedBox(height: 10),
+                        controller: privatedesignationController,
+                        label: "Designation"),
                     DropdownButtonFormField<String>(
                       value: _selectedPrivateProfession,
                       hint: const Text("Profession"),
-                      isExpanded: true,
-                      items: privateJobProfessions.map((String profession) {
-                        return DropdownMenuItem<String>(
-                          value: profession,
-                          child: Text(profession),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedPrivateProfession = newValue;
-                          if (newValue != "Other") {
-                            privateProffesionController.clear();
-                          }
-                        });
-                      },
-                      validator: (value) {
-                        if (value == null) {
-                          return "Please select a profession";
-                        }
-                        if (value == "Other" &&
-                            privateProffesionController.text.isEmpty) {
-                          return "Please enter other profession";
-                        }
-                        return null;
-                      },
+                      items: privateJobProfessions
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) =>
+                          setState(() => _selectedPrivateProfession = v),
                       decoration: const InputDecoration(
-                        labelText: "Profession",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
+                          labelText: "Profession",
+                          border: OutlineInputBorder()),
                     ),
-                    if (_selectedPrivateProfession == "Other") ...[
-                      const SizedBox(height: 10),
+                    if (_selectedPrivateProfession == "Other")
                       textformfeild(
-                        hunttext: "Please enter other profession",
-                        controller: privateProffesionController,
-                        label: "Other Profession",
-                        need: false,
-                        keyboardType: TextInputType.text,
-                      ),
-                    ],
+                          controller: privateProffesionController,
+                          label: "Other Profession"),
                   ],
+
                   if (!_isemployed)
                     DropdownButtonFormField<String>(
                       value: _selectedproffesion,
                       hint: const Text("Profession"),
-                      isExpanded: true,
-                      items: proffesion.map((String item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Text(item),
-                        );
-                      }).toList(),
-                      onChanged: (String? newValue) {
-                        setState(() {
-                          _selectedproffesion = newValue;
-                        });
-                      },
+                      items: proffesion
+                          .map(
+                              (e) => DropdownMenuItem(value: e, child: Text(e)))
+                          .toList(),
+                      onChanged: (v) => setState(() => _selectedproffesion = v),
                       decoration: const InputDecoration(
-                        labelText: "Profession",
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.all(Radius.circular(10)),
-                        ),
-                      ),
+                          labelText: "Profession",
+                          border: OutlineInputBorder()),
                     ),
-                  const SizedBox(height: 20),
+
                   TextFormField(
                     controller: mobile,
                     maxLength: 10,
                     keyboardType: TextInputType.phone,
                     decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      labelText: "Mobile Number",
-                      errorText: null,
-                    ),
-                    validator: (value) {
-                      if (value == null || value.length < 10) {
-                        return "Mobile number must be 10 digits";
-                      }
-                      return null;
-                    },
+                        labelText: "Mobile Number",
+                        border: OutlineInputBorder()),
+                    validator: (v) =>
+                        v?.length != 10 ? "10 digits required" : null,
                   ),
+
                   const SizedBox(height: 20),
                   Center(
                     child: _isLoading
-                        ? const CircularProgressIndicator(
-                            valueColor:
-                                AlwaysStoppedAnimation<Color>(Colors.blue),
-                          )
-                        : GestureDetector(
-                            onTap: () async {
-                              await uploaddata();
-                            },
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.blue,
-                                borderRadius:
-                                    const BorderRadius.all(Radius.circular(50)),
-                                boxShadow: [
-                                  BoxShadow(
-                                    color: Colors.black.withOpacity(0.3),
-                                    blurRadius: 5.0,
-                                    spreadRadius: 1.0,
-                                    offset: const Offset(0, 3),
-                                  )
-                                ],
-                              ),
-                              height: MediaQuery.of(context).size.height / 18,
-                              width: MediaQuery.of(context).size.height / 5,
-                              child: Center(
-                                child: Text(
-                                  "Submit",
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize:
-                                        MediaQuery.of(context).size.height / 45,
-                                  ),
-                                ),
-                              ),
-                            ),
+                        ? const CircularProgressIndicator()
+                        : ElevatedButton(
+                            onPressed: uploaddata,
+                            child: const Text("Submit",
+                                style: TextStyle(fontSize: 18)),
                           ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 30),
                 ],
               ),
             ),
@@ -1462,54 +1041,24 @@ class _CoustmerState extends State<Coustmer> {
       ),
     );
   }
-
-  Widget imagePickerBox(File? image, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 150,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          border: Border.all(color: Colors.black),
-        ),
-        child: image != null
-            ? Image.file(image, fit: BoxFit.cover)
-            : const Center(
-                child: Text(
-                  "Tap to select image",
-                  style: TextStyle(color: Colors.black),
-                ),
-              ),
-      ),
-    );
-  }
 }
 
-SizedBox date({
-  required TextEditingController Dcontroller,
-  required String date,
-  bool needed = false,
-  required TextInputType inputType,
-}) {
-  return SizedBox(
-    height: 50,
-    width: 180,
-    child: TextFormField(
-      keyboardType: inputType,
-      controller: Dcontroller,
-      readOnly: needed,
-      decoration: InputDecoration(
-        labelText: date,
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.black),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.black, width: 4),
-        ),
+Widget imagePickerBox(File? image, VoidCallback onTap) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Container(
+      height: 150,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.grey[300],
+        border: Border.all(color: Colors.grey),
+        borderRadius: BorderRadius.circular(8),
       ),
+      child: image != null
+          ? ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.file(image, fit: BoxFit.cover))
+          : const Center(child: Text("Tap to select image")),
     ),
   );
 }
@@ -1518,39 +1067,43 @@ SizedBox textformfeild({
   required TextEditingController controller,
   required String label,
   String? hunttext,
-  String? textForCounter,
   int? maxvalue,
   bool need = false,
   bool readOnly = false,
   TextInputType keyboardType = TextInputType.text,
 }) {
   return SizedBox(
-    height: label == "Mobile Number" ? 85 : 70,
-    width: double.infinity,
+    height: 70,
     child: TextFormField(
-      validator: need
-          ? (value) {
-              if (value == null || value.isEmpty) {
-                return hunttext;
-              }
-              return null;
-            }
-          : null,
+      controller: controller,
       readOnly: readOnly,
       keyboardType: keyboardType,
-      controller: controller,
       maxLength: maxvalue,
+      validator: need ? (v) => v?.isEmpty ?? true ? hunttext : null : null,
       decoration: InputDecoration(
-        counterText: textForCounter,
         labelText: label,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
         focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.black),
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(15),
-          borderSide: const BorderSide(color: Colors.black, width: 4),
-        ),
+            borderRadius: BorderRadius.circular(15),
+            borderSide: const BorderSide(color: Colors.black)),
+      ),
+    ),
+  );
+}
+
+SizedBox date({
+  required TextEditingController Dcontroller,
+  required String date,
+}) {
+  return SizedBox(
+    width: 180,
+    height: 50,
+    child: TextFormField(
+      controller: Dcontroller,
+      readOnly: true,
+      decoration: InputDecoration(
+        labelText: date,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
       ),
     ),
   );

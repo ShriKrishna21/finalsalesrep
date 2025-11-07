@@ -6,12 +6,13 @@ import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/login/loginscreen.dart';
-import 'package:finalsalesrep/unit/circulationincharge/allcustomerforms.dart';
 import 'package:finalsalesrep/unit/noofresources.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approveagents.dart';
 import 'package:finalsalesrep/unit/segmentincharge/approvedagents.dart';
 import 'package:finalsalesrep/unit/circulationincharge/createstaff.dart';
 import 'package:finalsalesrep/unit/circulationincharge/assigntargetscreen.dart';
+import 'package:finalsalesrep/unit/circulationincharge/todayagencylist.dart';
+import 'package:finalsalesrep/unit/circulationincharge/totalagencylist.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
@@ -194,7 +195,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     } catch (e) {
       print("❌ Customer form fetch error: $e");
     }
-  }
+  } 
 
   bool? _parseBool(dynamic value) {
     if (value is bool) return value;
@@ -245,46 +246,76 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
                         _loadData();
                       },
                       child: _buildCard(
-                        title: localizations.numberOfResources,
+                        title: "",
                         rows: [
                           _InfoRow(
-                              label: "Staff Name", value: agentCount.toString())
+                              label: "Staff Count",
+                              value: agentCount.toString(),
+                              bold: true),
                         ],
                       ),
                     ),
                     const SizedBox(height: 20),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (_) => const Allcustomerforms()),
-                        );
-                      },
-                      child: _buildCard(
-                        title: localizations.viewallcustomerforms,
-                        rows: [
-                          _InfoRow(
-                              label: localizations.customerforms,
-                              value: customerFormCount.toString())
-                        ],
-                      ),
+                    _buildCard(
+                      title: "",
+                      rows: [
+                        _InfoRow(
+                            label: "All CustomerForms",
+                            value: customerFormCount.toString(),
+                            bold: true),
+                        const SizedBox(height: 8),
+                        const Divider(color: Colors.black), // Added Divider
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const todayagencylist(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Today History',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 16),
+                            Expanded(
+                              child: TextButton(
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) =>
+                                          const totalagencylist(),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Overall History',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    color: Colors.black,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 20),
-                    // _buildCard(
-                    //   title: localizations.subscriptionDetails,
-                    //   rows: [
-                    //     _InfoRow(
-                    //         label: localizations.housesVisited,
-                    //         value: customerFormCount.toString()),
-                    //     _InfoRow(
-                    //         label: localizations.eenaduSubscription,
-                    //         value: alreadySubscribedCount.toString()),
-                    //     _InfoRow(
-                    //         label: localizations.willingToChange,
-                    //         value: offerAcceptedCount.toString()),
-                    //   ],
-                    // ),
+                    // const SizedBox(height: 10),
                     const SizedBox(height: 30),
                     _buildGridButtons()
                   ],
@@ -303,7 +334,6 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
             decoration: const BoxDecoration(color: Colors.blue),
             child: Column(
               children: [
-                // Image.asset('assets/logo.png'),
                 const Icon(Icons.account_circle, size: 60, color: Colors.white),
                 const SizedBox(height: 10),
                 Text("${localizations.circulationIncharge}    ",
@@ -333,7 +363,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
     );
   }
 
-  Widget _buildCard({required String title, required List<_InfoRow> rows}) {
+  Widget _buildCard({required String title, required List<Widget> rows}) {
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -344,13 +374,15 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-                fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
-          ),
-          const Divider(color: Colors.black),
-          const SizedBox(height: 8),
+          if (title.isNotEmpty) ...[
+            Text(
+              title,
+              style: const TextStyle(
+                  fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black),
+            ),
+            const Divider(color: Colors.black),
+            const SizedBox(height: 8),
+          ],
           Column(children: rows),
         ],
       ),
@@ -376,7 +408,7 @@ class _CirculationinchargescreenState extends State<Circulationinchargescreen> {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const approvedagents()));
         }),
-        _buildBlackWhiteButton("Staff Waiting  For Approval", () {
+        _buildBlackWhiteButton("Staff Waiting For Approval", () {
           Navigator.push(context,
               MaterialPageRoute(builder: (_) => const ApproveAgents()));
         }),
@@ -448,4 +480,3 @@ class _InfoRow extends StatelessWidget {
     );
   }
 }
-//////////my code
