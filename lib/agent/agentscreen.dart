@@ -55,6 +55,7 @@ class LocalDbAgency {
         .cast<Map<String, dynamic>>();
   }
 
+  /// Clear a specific pending assignment by index
   Future<void> clearPendingAssignment(int index) async {
     final prefs = await SharedPreferences.getInstance();
     final pendingAssignments = prefs.getString('pending_assignments') ?? '[]';
