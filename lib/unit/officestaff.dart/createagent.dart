@@ -1,15 +1,15 @@
+// lib/unit/officestaff.dart/createagent.dart
 import 'dart:convert';
 import 'dart:io';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/languageprovider.dart';
+import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
+import 'package:finalsalesrep/offline/dbhelper.dart'; // Make sure path is correct
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
-
-import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
 
 class CreateAgent extends StatefulWidget {
   const CreateAgent({super.key});
@@ -19,222 +19,193 @@ class CreateAgent extends StatefulWidget {
 }
 
 class _CreateAgentState extends State<CreateAgent> {
-  createUserModel? userdata;
   final _formKey = GlobalKey<FormState>();
+  createUserModel? userdata;
 
-  final TextEditingController name = TextEditingController();
-  final TextEditingController unit = TextEditingController();
-  final TextEditingController mail = TextEditingController();
-  final TextEditingController password = TextEditingController();
-  final TextEditingController adhar = TextEditingController();
-  final TextEditingController pan = TextEditingController();
-  final TextEditingController phone = TextEditingController();
-  final TextEditingController state = TextEditingController();
+  final name = TextEditingController();
+  final unit = TextEditingController();
+  final mail = TextEditingController();
+  final password = TextEditingController();
+  final adhar = TextEditingController();
+  final pan = TextEditingController();
+  final phone = TextEditingController();
+  final state = TextEditingController();
 
   File? aadhaarImage;
   File? pancardImage;
-  final ImagePicker _picker = ImagePicker();
+  final picker = ImagePicker();
 
   @override
   void initState() {
     super.initState();
-    _loadUnitFromPrefs();
+    _loadUnit();
   }
 
-  Future<void> _loadUnitFromPrefs() async {
+  Future<void> _loadUnit() async {
     final prefs = await SharedPreferences.getInstance();
-    final String unitName = prefs.getString('unit') ?? '';
-    setState(() {
-      unit.text = unitName;
-    });
+    unit.text = prefs.getString('unit') ?? '';
   }
 
-  Future<void> pickAadhaarImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
+  Future<void> _pickImage(bool isAadhaar) async {
+    final picked = await picker.pickImage(source: ImageSource.gallery);
+    if (picked != null) {
       setState(() {
-        aadhaarImage = File(image.path);
+        if (isAadhaar) aadhaarImage = File(picked.path);
+        else pancardImage = File(picked.path);
       });
     }
   }
 
-  Future<void> pickPancardImage() async {
-    final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
-    if (image != null) {
-      setState(() {
-        pancardImage = File(image.path);
-      });
-    }
+  // FIXED: Correct way to check internet
+  Future<bool> _isOnline() async {
+    final List<ConnectivityResult> results = await Connectivity().checkConnectivity();
+    return results.any((result) =>
+        result == ConnectivityResult.wifi ||
+        result == ConnectivityResult.mobile ||
+        result == ConnectivityResult.ethernet ||
+        result == ConnectivityResult.vpn);
   }
 
-  Future<void> createuser() async {
-    final SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? userlog = prefs.getString('apikey');
-    final String? unitName = prefs.getString('unit');
+  Future<void> _saveOffline() async {
+    final aadhaar64 = aadhaarImage != null
+        ? base64Encode(await aadhaarImage!.readAsBytes())
+        : "";
+    final pan64 = pancardImage != null
+        ? base64Encode(await pancardImage!.readAsBytes())
+        : "";
 
     try {
-      final url = CommonApiClass.CreateAgent;
-      final String aadhaarBase64 = aadhaarImage != null
-          ? base64Encode(await aadhaarImage!.readAsBytes())
-          : "";
-      final String panBase64 = pancardImage != null
-          ? base64Encode(await pancardImage!.readAsBytes())
-          : "";
+      await DBHelper().insertAgent({
+        'name': name.text,
+        'unit': unit.text,
+        'email': mail.text,
+        'password': password.text,
+        'aadhar_number': adhar.text,
+        'pan_number': pan.text,
+        'state': state.text,
+        'phone': phone.text,
+        'aadhar_base64': aadhaar64,
+        'pan_base64': pan64,
+        'created_at': DateTime.now().toIso8601String(),
+      });
 
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Saved offline. Will sync when online"),
+          backgroundColor: Colors.orange,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      Navigator.pop(context);
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to save offline: $e"), backgroundColor: Colors.red),
+      );
+    }
+  }
+
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    final bool online = await _isOnline();
+
+    if (!online) {
+      await _saveOffline();
+      return;
+    }
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final unitName = prefs.getString('unit');
+
+    final aadhaar64 = aadhaarImage != null
+        ? base64Encode(await aadhaarImage!.readAsBytes())
+        : "";
+    final pan64 = pancardImage != null
+        ? base64Encode(await pancardImage!.readAsBytes())
+        : "";
+
+    try {
       final response = await http.post(
-        Uri.parse(url),
+        Uri.parse(CommonApiClass.CreateAgent),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           "params": {
-            "token": userlog.toString(),
+            "token": token,
             "name": name.text,
             "email": mail.text,
             "password": password.text,
-            "role": 'agent',
+            "role": "agent",
             "aadhar_number": adhar.text,
             "pan_number": pan.text,
             "state": state.text,
             "status": "un_activ",
             "phone": phone.text,
             "unit_name": unitName,
-            "aadhar_base64": aadhaarBase64,
-            "Pan_base64": panBase64,
+            "aadhar_base64": aadhaar64,
+            "Pan_base64": pan64,
           }
         }),
-      );
+      ).timeout(Duration(seconds: 20));
 
-      if (response.statusCode == 200) {
-        final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
-        userdata = createUserModel.fromJson(jsonResponse);
+      final json = jsonDecode(response.body);
+      userdata = createUserModel.fromJson(json);
 
-        if (userdata?.result?.success == true) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-                content: Text(userdata?.result?.message ??
-                    "✅ User created successfully")),
-          );
-          Navigator.pop(context);
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  Text(userdata?.result?.message ?? "❌ User creation failed"),
-            ),
-          );
-        }
-      } else {
+      if (userdata?.result?.success == true) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Server error: ${response.statusCode}")),
+          SnackBar(content: Text("Staff created successfully!")),
         );
+        Navigator.pop(context);
+      } else {
+        await _saveOffline(); // fallback
       }
-      print("📥 Server response: ${response.body}");
     } catch (e) {
-      print("❌ Error: $e");
+      await _saveOffline();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final localeProvider = Provider.of<LocalizationProvider>(context);
-    final localizations = AppLocalizations.of(context)!;
+    final loc = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text("Create Staff"),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
-        elevation: 1,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: SingleChildScrollView(
-          child: Form(
-            key: _formKey,
+        padding: EdgeInsets.all(12),
+        child: Form(
+          key: _formKey,
+          child: SingleChildScrollView(
             child: Column(
               children: [
-                usercredentials(
-                    controller: name,
-                    hintText: localizations.name,
-                    errorText: localizations.enteravalidname),
-                usercredentials(
-                    controller: unit,
-                    hintText: localizations.unit1,
-                    errorText: localizations.unitnotfound,
-                    readOnly: true),
-                usercredentials(
-                    controller: phone,
-                    hintText: localizations.phone,
-                    errorText: localizations.entervalidphone,
-                    keyboardType: TextInputType.phone,
-                    maxvalue: 10),
-                usercredentials(
-                    controller: mail,
-                    hintText: "UserId",
-                    errorText: localizations.entervalidemail,
-                    keyboardType: TextInputType.emailAddress),
-                usercredentials(
-                    controller: password,
-                    hintText: localizations.password,
-                    errorText: localizations.entervalidpassword,
-                    keyboardType: TextInputType.visiblePassword),
-                usercredentials(
-                    controller: state,
-                    hintText: localizations.address,
-                    errorText: localizations.addressCantBeEmpty),
-                usercredentials(
-                  controller: adhar,
-                  hintText: localizations.aadhar,
-                  errorText: localizations.invalidAadhaar,
-                  keyboardType: TextInputType.number,
-                  maxvalue: 12,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return localizations.invalidAadhaar;
-                    }
-                    return RegExp(r'^\d{12}$').hasMatch(value)
-                        ? null
-                        : localizations.aadhaarmustbe12digits;
-                  },
+                _field(name, loc.name, loc.enteravalidname),
+                _field(unit, loc.unit1, "", readOnly: true),
+                _field(phone, loc.phone, loc.entervalidphone, keyboard: TextInputType.phone, max: 10),
+                _field(mail, "UserId", loc.entervalidemail, keyboard: TextInputType.emailAddress),
+                _field(password, loc.password, loc.entervalidpassword),
+                _field(state, loc.address, loc.addressCantBeEmpty),
+                _field(
+                  adhar,
+                  loc.aadhar,
+                  loc.invalidAadhaar,
+                  keyboard: TextInputType.number,
+                  max: 12,
+                  validator: (v) => v?.length == 12 ? null : loc.aadhaarmustbe12digits,
                 ),
-                const SizedBox(height: 10),
-                // uploadImageLabel(localizations.uploadAadharPhoto),
-                // imagePickerBox(aadhaarImage, pickAadhaarImage),
-                // const SizedBox(height: 16),
-                // usercredentials(
-                //   controller: pan,
-                //   hintText: localizations.panNumber,
-                //   errorText: localizations.invalidpannumber,
-                //   maxvalue: 10,
-                //   validator: (value) {
-                //     if (value == null || value.isEmpty) {
-                //       return localizations.enterpannumber;
-                //     }
-                //     return RegExp(r'^[A-Z]{5}[0-9]{4}[A-Z]$')
-                //             .hasMatch(value.toUpperCase())
-                //         ? null
-                //         : localizations.panmustbelikeABCDE1234F;
-                //   },
-                // ),
-                // uploadImageLabel(localizations.uploadPanCardPhoto),
-                // imagePickerBox(pancardImage, pickPancardImage),
-                const SizedBox(height: 25),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.black,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      textStyle: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    onPressed: () async {
-                      if (_formKey.currentState!.validate()) {
-                        await createuser();
-                      }
-                    },
-                    child: Text(localizations.createUser),
+
+                SizedBox(height: 30),
+                ElevatedButton(
+                  onPressed: _submit,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.black,
+                    foregroundColor: Colors.white,
+                    minimumSize: Size(double.infinity, 55),
                   ),
+                  child: Text(loc.createUser, style: TextStyle(fontSize: 18)),
                 ),
               ],
             ),
@@ -244,80 +215,29 @@ class _CreateAgentState extends State<CreateAgent> {
     );
   }
 
-  Widget uploadImageLabel(String text) {
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Text(text,
-          style: const TextStyle(
-              color: Colors.black, fontWeight: FontWeight.bold, fontSize: 16)),
-    );
-  }
-
-  Widget imagePickerBox(File? image, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 150,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[300],
-          border: Border.all(color: Colors.black),
-        ),
-        child: image != null
-            ? Image.file(image, fit: BoxFit.cover)
-            : Center(
-                child: Text(AppLocalizations.of(context)!.taptoselectimage,
-                    style: const TextStyle(color: Colors.black)),
-              ),
-      ),
-    );
-  }
-}
-
-class usercredentials extends StatelessWidget {
-  final TextEditingController controller;
-  final String hintText;
-  final String errorText;
-  final int? maxvalue;
-  final TextInputType? keyboardType;
-  final String? Function(String?)? validator;
-  final bool readOnly;
-
-  const usercredentials({
-    super.key,
-    required this.controller,
-    required this.hintText,
-    required this.errorText,
-    this.maxvalue,
-    this.keyboardType,
-    this.validator,
-    this.readOnly = false,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+  Widget _field(
+    TextEditingController ctrl,
+    String hint,
+    String err, {
+    TextInputType? keyboard,
+    int? max,
+    String? Function(String?)? validator,
+    bool readOnly = false,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 6),
       child: TextFormField(
-        controller: controller,
-        maxLength: maxvalue,
-        keyboardType: keyboardType ?? TextInputType.text,
+        controller: ctrl,
         readOnly: readOnly,
-        validator: validator ??
-            (value) => (value == null || value.isEmpty) ? errorText : null,
-        style: const TextStyle(color: Colors.black),
+        keyboardType: keyboard,
+        maxLength: max,
+        validator: validator ?? (v) => v!.isEmpty ? err : null,
         decoration: InputDecoration(
-          hintText: hintText,
-          hintStyle: const TextStyle(color: Colors.black54),
+          hintText: hint,
           filled: true,
           fillColor: Colors.grey[100],
-          counterStyle: const TextStyle(color: Colors.black54),
-          contentPadding:
-              const EdgeInsets.symmetric(vertical: 20.0, horizontal: 16.0),
-          enabledBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black)),
-          focusedBorder: const OutlineInputBorder(
-              borderSide: BorderSide(color: Colors.black, width: 2)),
+          border: OutlineInputBorder(borderSide: BorderSide(color: Colors.black)),
+          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.black, width: 2)),
         ),
       ),
     );
