@@ -4,6 +4,7 @@ import 'dart:math';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:finalsalesrep/l10n/app_localization_en.dart'
     show AppLocalizationsEn;
+import 'package:finalsalesrep/locallllllllllll_db.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -29,12 +30,11 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-
 // Placeholder for LocalDbAgency
+
 class LocalDbAgency {
   static final LocalDbAgency instance = LocalDbAgency._();
   LocalDbAgency._();
-
   Future<void> insertPendingAssignment(int userId, int pinLocationId,
       {Map<String, dynamic>? extraData}) async {
     final prefs = await SharedPreferences.getInstance();
@@ -69,7 +69,6 @@ class LocalDbAgency {
 
 class Agentscreen extends StatefulWidget {
   const Agentscreen({super.key});
-
   @override
   State<Agentscreen> createState() => _AgentscreenState();
 }
@@ -77,7 +76,6 @@ class Agentscreen extends StatefulWidget {
 class _AgentscreenState extends State<Agentscreen> {
   StreamSubscription<List<ConnectivityResult>>? _connSub;
   bool _syncingActions = false;
-
   final TextEditingController dateController = TextEditingController();
   String agentname = "";
   List<Record> records = [];
@@ -94,7 +92,6 @@ class _AgentscreenState extends State<Agentscreen> {
   final Onedayagent _onedayagent = Onedayagent();
   bool _isSyncing = false;
   //bool _isSyncing = false;
-
   // Agency dropdown related variables
   List<AgencyData> _agencyList = [];
   String? _selectedAgencyId;
@@ -106,7 +103,6 @@ class _AgentscreenState extends State<Agentscreen> {
   final TextEditingController _selectedAgencyController =
       TextEditingController();
   AgencyData? _selectedAgency;
-
   @override
   void initState() {
     super.initState();
@@ -169,19 +165,16 @@ class _AgentscreenState extends State<Agentscreen> {
     try {
       final actions = await LocalDbattendance.instance.pendingActions();
       if (actions.isEmpty) return;
-
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('apikey');
       if (token == null) {
         debugPrint("Missing token for syncing actions");
         return;
       }
-
       for (final a in actions) {
         final id = a['id'] as int?;
         final action = a['action'] as String?;
         final selfie = a['selfie'] as String?;
-
         if (id == null || action == null) {
           debugPrint("Invalid action data: id=$id, action=$action");
           if (id != null) {
@@ -191,11 +184,9 @@ class _AgentscreenState extends State<Agentscreen> {
               "=====================> Failed to process action: id=$id, action=$action");
           continue;
         }
-
         final uri = action == 'startWork'
             ? Uri.parse("https://salesrep.esanchaya.com/api/start_work")
             : Uri.parse("https://salesrep.esanchaya.com/api/end_work");
-
         try {
           final resp = await http.post(
             uri,
@@ -204,7 +195,6 @@ class _AgentscreenState extends State<Agentscreen> {
               "params": {"token": token, "selfie": selfie}
             }),
           );
-
           if (resp.statusCode == 200) {
             final result = jsonDecode(resp.body)['result'];
             if (result?['success'] == true) {
@@ -249,10 +239,8 @@ class _AgentscreenState extends State<Agentscreen> {
     final cachedAgencies = await _loadCachedAgencies();
     final pendingAssignments =
         await LocalDbAgency.instance.getPendingAssignments();
-
     // Create a list to hold all agencies (cached + pending)
     final List<AgencyData> combinedAgencies = List.from(cachedAgencies);
-
     // Add pending assignments (new agencies) to the list
     for (var assignment in pendingAssignments) {
       final extraData = assignment['extraData'] as Map<String, dynamic>?;
@@ -267,7 +255,6 @@ class _AgentscreenState extends State<Agentscreen> {
         ));
       }
     }
-
     // Ensure "Other Agency" is always available
     if (!combinedAgencies.any((agency) => agency.id == 'other_agency')) {
       combinedAgencies.add(AgencyData(
@@ -278,14 +265,12 @@ class _AgentscreenState extends State<Agentscreen> {
         phone: null,
       ));
     }
-
     if (mounted) {
       setState(() {
         _agencyList = combinedAgencies;
         _isLoadingAgencies = false;
       });
     }
-
     if (combinedAgencies.length == 1 &&
         combinedAgencies.first.id == 'other_agency') {
       _showErrorSnackBar(
@@ -298,33 +283,27 @@ class _AgentscreenState extends State<Agentscreen> {
 
   Future<void> fetchAgencies() async {
     if (!mounted) return;
-
     setState(() => _isLoadingAgencies = true);
-
     final isOnline = await _isOnline();
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final storedUnit = prefs.getString('unit');
-
     if (!isOnline) {
       debugPrint(
           "Offline mode: Skipping agency fetch, using cached or default agency list");
       await _loadCachedAgenciesOrDefault();
       return;
     }
-
     if (token == null) {
       _showErrorSnackBar("Missing token");
       setState(() => _isLoadingAgencies = false);
       return;
     }
-
     if (storedUnit == null || storedUnit.isEmpty) {
       _showErrorSnackBar("No unit assigned to this user");
       await _loadCachedAgenciesOrDefault();
       return;
     }
-
     try {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/all_pin_locations"),
@@ -333,7 +312,6 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"token": token}
         }),
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final agencyModel = AgencyModel.fromJson(data);
@@ -345,7 +323,6 @@ class _AgentscreenState extends State<Agentscreen> {
               uniqueAgencies[agency.id.toString()] = agency;
             }
           }
-
           uniqueAgencies['other_agency'] = AgencyData(
             id: 'other_agency',
             locationName: 'Other Agency',
@@ -353,7 +330,6 @@ class _AgentscreenState extends State<Agentscreen> {
             unit: storedUnit,
             phone: null,
           );
-
           if (mounted) {
             setState(() {
               _agencyList = uniqueAgencies.values.toList();
@@ -381,18 +357,14 @@ class _AgentscreenState extends State<Agentscreen> {
       _showErrorSnackBar("Please select an agency first");
       return;
     }
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-
     if (token == null || userId == null) {
       _showErrorSnackBar("Missing required data");
       return;
     }
-
     final isOffline = !(await _isOnline());
-
     if (_selectedAgencyId == 'other_agency') {
       if (_agencyNameController.text.isEmpty ||
           _phoneController.text.isEmpty ||
@@ -401,7 +373,6 @@ class _AgentscreenState extends State<Agentscreen> {
         _showErrorSnackBar("Please fill all agency details");
         return;
       }
-
       try {
         await LocalDbAgency.instance.insertPendingAssignment(
           userId,
@@ -413,6 +384,14 @@ class _AgentscreenState extends State<Agentscreen> {
             "unit_name": _unitController.text,
           },
         );
+        // Save to local DB as current assigned
+        await DBHelper.instance.saveAssignedAgency(
+          agencyId: _selectedAgencyId!,
+          locationName: _agencyNameController.text,
+          code: _codeController.text,
+          unit: _unitController.text,
+          phone: _phoneController.text,
+        );
         _showSuccessSnackBar("New agency saved offline. Will sync later.");
         _clearAgencyFields();
         await _loadCachedAgenciesOrDefault(); // Refresh _agencyList
@@ -422,7 +401,6 @@ class _AgentscreenState extends State<Agentscreen> {
       }
       return;
     }
-
     if (_selectedAgencyId!.startsWith('pending_')) {
       try {
         await LocalDbAgency.instance.insertPendingAssignment(
@@ -443,6 +421,26 @@ class _AgentscreenState extends State<Agentscreen> {
                 : _selectedAgency?.unit,
           },
         );
+        // Save to local DB as current assigned
+        final locationName = _agencyNameController.text.isNotEmpty
+            ? _agencyNameController.text
+            : (_selectedAgency?.locationName ?? 'Unknown');
+        final code = _codeController.text.isNotEmpty
+            ? _codeController.text
+            : (_selectedAgency?.code ?? 'UNKNOWN');
+        final unit = _unitController.text.isNotEmpty
+            ? _unitController.text
+            : (_selectedAgency?.unit ?? 'N/A');
+        final phone = _phoneController.text.isNotEmpty
+            ? _phoneController.text
+            : _selectedAgency?.phone;
+        await DBHelper.instance.saveAssignedAgency(
+          agencyId: _selectedAgencyId!,
+          locationName: locationName,
+          code: code,
+          unit: unit,
+          phone: phone,
+        );
         _showSuccessSnackBar(
             "Pending agency assignment saved offline. Will sync later.");
         _clearAgencyFields();
@@ -453,17 +451,35 @@ class _AgentscreenState extends State<Agentscreen> {
       }
       return;
     }
-
     final pinLocationId = int.tryParse(_selectedAgencyId!);
     if (pinLocationId == null) {
       _showErrorSnackBar("Invalid agency ID");
       return;
     }
-
     if (isOffline) {
       try {
         await LocalDbAgency.instance
             .insertPendingAssignment(userId, pinLocationId);
+        // Save to local DB as current assigned
+        final locationName = _agencyNameController.text.isNotEmpty
+            ? _agencyNameController.text
+            : (_selectedAgency?.locationName ?? 'Unknown');
+        final code = _codeController.text.isNotEmpty
+            ? _codeController.text
+            : (_selectedAgency?.code ?? 'UNKNOWN');
+        final unit = _unitController.text.isNotEmpty
+            ? _unitController.text
+            : (_selectedAgency?.unit ?? 'N/A');
+        final phone = _phoneController.text.isNotEmpty
+            ? _phoneController.text
+            : _selectedAgency?.phone;
+        await DBHelper.instance.saveAssignedAgency(
+          agencyId: _selectedAgencyId!,
+          locationName: locationName,
+          code: code,
+          unit: unit,
+          phone: phone,
+        );
         _showSuccessSnackBar("Assignment saved offline. Will sync later.");
         _clearAgencyFields();
         await _loadCachedAgenciesOrDefault(); // Refresh _agencyList
@@ -473,7 +489,6 @@ class _AgentscreenState extends State<Agentscreen> {
       }
       return;
     }
-
     try {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/Pin_location_asin"),
@@ -486,10 +501,29 @@ class _AgentscreenState extends State<Agentscreen> {
           }
         }),
       );
-
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result['success'] == true) {
+          // Save to local DB as current assigned
+          final locationName = _agencyNameController.text.isNotEmpty
+              ? _agencyNameController.text
+              : (_selectedAgency?.locationName ?? 'Unknown');
+          final code = _codeController.text.isNotEmpty
+              ? _codeController.text
+              : (_selectedAgency?.code ?? 'UNKNOWN');
+          final unit = _unitController.text.isNotEmpty
+              ? _unitController.text
+              : (_selectedAgency?.unit ?? 'N/A');
+          final phone = _phoneController.text.isNotEmpty
+              ? _phoneController.text
+              : _selectedAgency?.phone;
+          await DBHelper.instance.saveAssignedAgency(
+            agencyId: _selectedAgencyId!,
+            locationName: locationName,
+            code: code,
+            unit: unit,
+            phone: phone,
+          );
           _showSuccessSnackBar("Agency successfully assigned");
           await refreshData();
         } else {
@@ -523,18 +557,15 @@ class _AgentscreenState extends State<Agentscreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-
     if (token == null || userId == null) {
       _showErrorSnackBar("Missing token or user ID");
       return;
     }
-
     if (!(await _isOnline())) {
       debugPrint("Offline mode: Skipping selfie times fetch");
       _showErrorSnackBar("Offline mode: Selfie times not fetched.");
       return;
     }
-
     try {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/user/today_selfies"),
@@ -543,7 +574,6 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"token": token, "user_id": userId}
         }),
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final selfieData = SelfieTimesResponse.fromJson(data);
@@ -596,18 +626,14 @@ class _AgentscreenState extends State<Agentscreen> {
         _showErrorSnackBar("Photo required");
         return;
       }
-
       final bytes = await photo.readAsBytes();
       _startWorkPhotoBase64 = base64Encode(bytes);
-
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('apikey');
-
       if (token == null) {
         _showErrorSnackBar("Missing or invalid API key");
         return;
       }
-
       if (!await _isOnline()) {
         await LocalDbattendance.instance.enqueueAction(
           type: PendingActionType.startWork,
@@ -618,7 +644,6 @@ class _AgentscreenState extends State<Agentscreen> {
         _showSuccessSnackBar("Work started (offline). Will sync when online.");
         return;
       }
-
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/start_work"),
         headers: {"Content-Type": "application/json"},
@@ -626,7 +651,6 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"token": token, "selfie": _startWorkPhotoBase64}
         }),
       );
-
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result['success'] == true) {
@@ -671,18 +695,14 @@ class _AgentscreenState extends State<Agentscreen> {
         _showErrorSnackBar("Photo required");
         return;
       }
-
       final bytes = await photo.readAsBytes();
       final photoBase64 = base64Encode(bytes);
-
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('apikey');
-
       if (token == null) {
         _showErrorSnackBar("Missing or invalid API key");
         return;
       }
-
       if (!await _isOnline()) {
         await LocalDbattendance.instance.enqueueAction(
           type: PendingActionType.stopWork,
@@ -696,7 +716,6 @@ class _AgentscreenState extends State<Agentscreen> {
         _showSuccessSnackBar("Work stopped (offline). Will sync when online.");
         return;
       }
-
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/end_work"),
         headers: {"Content-Type": "application/json"},
@@ -704,7 +723,6 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"token": token, "selfie": photoBase64}
         }),
       );
-
       if (response.statusCode == 200) {
         final result = jsonDecode(response.body)['result'];
         if (result['success'] == true) {
@@ -759,19 +777,15 @@ class _AgentscreenState extends State<Agentscreen> {
       debugPrint("Offline mode: Skipping token validation");
       return;
     }
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final sessionId = prefs.getString('session_id');
-
     if (token == null) {
       forceLogout("Session expired or invalid token.");
       return;
     }
-
     const maxRetries = 3;
     int retryCount = 0;
-
     while (retryCount < maxRetries) {
       if (!(await _isOnline())) {
         debugPrint("Offline during token validation, skipping retry");
@@ -788,7 +802,6 @@ class _AgentscreenState extends State<Agentscreen> {
             "params": {"token": token}
           }),
         );
-
         final result = jsonDecode(response.body)['result'];
         if (result['success'] != true) {
           forceLogout(
@@ -813,29 +826,24 @@ class _AgentscreenState extends State<Agentscreen> {
           "No internet connection. Please connect to sync forms.");
       return;
     }
-
     setState(() => _isSyncing = true);
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final pendingFormsJson = prefs.getString('pending_forms');
-
     if (token == null) {
       _showErrorSnackBar("Missing or invalid token");
       setState(() => _isSyncing = false);
       return;
     }
-
     if (pendingFormsJson == null || pendingFormsJson.isEmpty) {
       _showSuccessSnackBar("No pending forms to sync");
       await prefs.remove('pending_forms');
       setState(() => _isSyncing = false);
       return;
     }
-
     try {
       final List<dynamic> pendingForms = jsonDecode(pendingFormsJson);
       bool allSyncedSuccessfully = true;
-
       for (var form in pendingForms) {
         try {
           final response = await http.post(
@@ -848,7 +856,6 @@ class _AgentscreenState extends State<Agentscreen> {
               }
             }),
           );
-
           if (response.statusCode == 200) {
             final result = jsonDecode(response.body)['result'];
             if (result['success'] != true) {
@@ -866,14 +873,12 @@ class _AgentscreenState extends State<Agentscreen> {
           _showErrorSnackBar("Error syncing form");
         }
       }
-
       if (allSyncedSuccessfully) {
         await prefs.remove('pending_forms');
         _showSuccessSnackBar("All forms synced successfully");
       } else {
         _showErrorSnackBar("Some forms failed to sync");
       }
-
       await refreshData();
     } catch (e) {
       debugPrint("Error syncing forms: $e");
@@ -889,16 +894,13 @@ class _AgentscreenState extends State<Agentscreen> {
       _showErrorSnackBar("No internet connection. Cannot sync assignments.");
       return;
     }
-
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-
     if (token == null || userId == null) {
       _showErrorSnackBar("Missing token or user ID");
       return;
     }
-
     final pendingAssignments =
         await LocalDbAgency.instance.getPendingAssignments();
     if (pendingAssignments.isEmpty) {
@@ -906,14 +908,11 @@ class _AgentscreenState extends State<Agentscreen> {
       _showSuccessSnackBar("No pending assignments to sync");
       return;
     }
-
     bool allSyncedSuccessfully = true;
-
     for (int i = 0; i < pendingAssignments.length; i++) {
       final assignment = pendingAssignments[i];
       final pinLocationId = assignment['pinLocationId'] as int;
       final extraData = assignment['extraData'] as Map<String, dynamic>?;
-
       try {
         if (pinLocationId == -1 && extraData != null) {
           final response = await http.post(
@@ -929,7 +928,6 @@ class _AgentscreenState extends State<Agentscreen> {
               }
             }),
           );
-
           if (response.statusCode == 200) {
             final result = jsonDecode(response.body)['result'];
             if (result['success'] == true) {
@@ -956,7 +954,6 @@ class _AgentscreenState extends State<Agentscreen> {
         allSyncedSuccessfully = false;
       }
     }
-
     if (allSyncedSuccessfully) {
       _showSuccessSnackBar("All assignments synced successfully");
       await fetchAgencies();
@@ -980,7 +977,6 @@ class _AgentscreenState extends State<Agentscreen> {
         }
       }),
     );
-
     if (response.statusCode == 200) {
       final result = jsonDecode(response.body)['result'];
       if (result['success'] != true) {
@@ -1028,18 +1024,15 @@ class _AgentscreenState extends State<Agentscreen> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
     final userId = prefs.getInt('id');
-
     if (token == null || userId == null) {
       _showErrorSnackBar("Missing token or user ID");
       return;
     }
-
     if (!(await _isOnline())) {
       debugPrint("Offline mode: Skipping route map fetch");
       _showErrorSnackBar("Offline mode: Route map not fetched.");
       return;
     }
-
     try {
       final response = await http.post(
         Uri.parse("https://salesrep.esanchaya.com/api/user_root_maps_by_stage"),
@@ -1049,7 +1042,6 @@ class _AgentscreenState extends State<Agentscreen> {
           "params": {"user_id": userId, "token": token}
         }),
       );
-
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         final routeMap = RouteMap.fromJson(data);
@@ -1061,13 +1053,11 @@ class _AgentscreenState extends State<Agentscreen> {
               routeDate.month == today.month &&
               routeDate.day == today.day;
         }).toList();
-
         Assigned? latestRoute;
         if (todayOnlyRoutes != null && todayOnlyRoutes.isNotEmpty) {
           todayOnlyRoutes.sort((a, b) => (b.id ?? 0).compareTo(a.id ?? 0));
           latestRoute = todayOnlyRoutes.first;
         }
-
         setState(() {
           fullRouteMap = routeMap;
           fullRouteMap?.result?.assigned =
@@ -1114,11 +1104,9 @@ class _AgentscreenState extends State<Agentscreen> {
       _showErrorSnackBar("No selfie available");
       return;
     }
-
     final cleanBase64 = base64Image.startsWith('data:image')
         ? base64Image.split(',')[1]
         : base64Image;
-
     try {
       base64Decode(cleanBase64);
       showDialog(
@@ -1169,7 +1157,6 @@ class _AgentscreenState extends State<Agentscreen> {
   Widget build(BuildContext context) {
     final localeProvider = Provider.of<LocalizationProvider>(context);
     final localizations = AppLocalizations.of(context) ?? AppLocalizationsEn();
-
     return Scaffold(
       appBar: AppBar(
         centerTitle: true,
@@ -1543,7 +1530,6 @@ class _AgentscreenState extends State<Agentscreen> {
             fontWeight: FontWeight.bold,
             decoration: TextDecoration.underline),
       );
-
   Widget _buildInfoRow(String label, String value) => Padding(
         padding: const EdgeInsets.symmetric(vertical: 6),
         child: Row(
@@ -1554,7 +1540,6 @@ class _AgentscreenState extends State<Agentscreen> {
           ],
         ),
       );
-
   Widget _buildShiftDetails(AppLocalizations localizations) {
     final today = DateTime.now();
     final todaySessions = _selfieSessions.where((session) {
@@ -1564,7 +1549,6 @@ class _AgentscreenState extends State<Agentscreen> {
           startTime.month == today.month &&
           startTime.day == today.day;
     }).toList();
-
     if (todaySessions.isEmpty) {
       return Container(
         padding: const EdgeInsets.all(12),
@@ -1576,7 +1560,6 @@ class _AgentscreenState extends State<Agentscreen> {
             style: const TextStyle(fontSize: 16, color: Colors.grey)),
       );
     }
-
     return Column(
       children: todaySessions.asMap().entries.map((entry) {
         final index = entry.key;
@@ -1712,9 +1695,7 @@ class _AgentscreenState extends State<Agentscreen> {
 
 class AgencyModel {
   final AgencyResult? result;
-
   AgencyModel({this.result});
-
   factory AgencyModel.fromJson(Map<String, dynamic> json) {
     return AgencyModel(
       result:
@@ -1726,9 +1707,7 @@ class AgencyModel {
 class AgencyResult {
   final bool success;
   final List<AgencyData> data;
-
   AgencyResult({required this.success, required this.data});
-
   factory AgencyResult.fromJson(Map<String, dynamic> json) {
     var dataList = json['data'] as List<dynamic>? ?? [];
     return AgencyResult(

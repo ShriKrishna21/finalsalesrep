@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/locallllllllllll_db.dart' show DBHelper;
 import 'package:finalsalesrep/modelclasses/assignagency.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/offline/connecticityhelper.dart';
@@ -19,13 +20,10 @@ import 'package:url_launcher/url_launcher.dart';
 // Placeholder customerform class
 class coustmerform {
   Result? result;
-
   coustmerform({this.result});
-
   coustmerform.fromJson(Map<String, dynamic> json) {
     result = json['result'] != null ? Result.fromJson(json['result']) : null;
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     if (result != null) {
@@ -38,14 +36,11 @@ class coustmerform {
 class Result {
   String? code;
   String? message;
-
   Result({this.code, this.message});
-
   Result.fromJson(Map<String, dynamic> json) {
     code = json['code'];
     message = json['message'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['code'] = code;
@@ -59,15 +54,12 @@ class otp {
   String? jsonrpc;
   Null id;
   OtpResult? result;
-
   otp({this.jsonrpc, this.id, this.result});
-
   otp.fromJson(Map<String, dynamic> json) {
     jsonrpc = json['jsonrpc'];
     id = json['id'];
     result = json['result'] != null ? OtpResult.fromJson(json['result']) : null;
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['jsonrpc'] = jsonrpc;
@@ -82,14 +74,11 @@ class otp {
 class OtpResult {
   String? status;
   String? message;
-
   OtpResult({this.status, this.message});
-
   OtpResult.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     message = json['message'];
   }
-
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['status'] = status;
@@ -100,7 +89,6 @@ class OtpResult {
 
 class Coustmer extends StatefulWidget {
   const Coustmer({super.key});
-
   @override
   State<Coustmer> createState() => _CoustmerState();
 }
@@ -109,7 +97,6 @@ class _CoustmerState extends State<Coustmer> {
   File? faceImage;
   final ImagePicker _picker = ImagePicker();
   bool _isOnline = false;
-
   bool _isofferTogle = false;
   bool _isemployed = false;
   bool _isLoading = false;
@@ -129,7 +116,6 @@ class _CoustmerState extends State<Coustmer> {
   String? _selectedPreviousNewspaper;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _otpController = TextEditingController();
-
   TextEditingController agency = TextEditingController();
   TextEditingController streetController = TextEditingController();
   TextEditingController landmarkController = TextEditingController();
@@ -157,11 +143,9 @@ class _CoustmerState extends State<Coustmer> {
   TextEditingController faceBase64Controller = TextEditingController();
   TextEditingController otherNewspaperController = TextEditingController();
   TextEditingController startCirculationController = TextEditingController();
-  
   // NEW: Quantity Controller and Variable
   TextEditingController quantityController = TextEditingController(text: "1");
   int quantity = 1;
-
   String agents = '';
   List<String> jobTypes = ["government_job", "private_job"];
   List<String> govDepartments = ["Central", "PSU", "State"];
@@ -190,7 +174,6 @@ class _CoustmerState extends State<Coustmer> {
   ];
   List<String> customerTypes = ["New User", "Conversion"];
   coustmerform? data;
-
   @override
   void initState() {
     super.initState();
@@ -200,13 +183,13 @@ class _CoustmerState extends State<Coustmer> {
         .format(DateTime.now().add(const Duration(days: 1)));
     quantityController.text = "1";
     quantity = 1;
-
     _loadSavedData();
     getCurrentLocation();
     ConnectivityHelper().startListening((online) {
       setState(() {
         _isOnline = online;
       });
+      _loadSavedData(); // Reload agency data on connectivity change
       if (online) {
         _syncPending();
       }
@@ -229,7 +212,6 @@ class _CoustmerState extends State<Coustmer> {
       );
       return;
     }
-
     Map<String, dynamic> formMap = {
       "agent_name": agents,
       "agent_login": await SharedPreferences.getInstance()
@@ -278,7 +260,6 @@ class _CoustmerState extends State<Coustmer> {
       "Start_Circulating": startCirculationController.text,
       "quantity": quantity, // NEW: Quantity saved locally
     };
-
     if (!_isOnline) {
       await LocalDb().insertForm(formMap);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -287,7 +268,6 @@ class _CoustmerState extends State<Coustmer> {
       await _refreshForm();
       return;
     }
-
     bool otpSent = await _sendOtp();
     if (!otpSent) return;
     _showOtpDialog();
@@ -327,8 +307,7 @@ class _CoustmerState extends State<Coustmer> {
     super.dispose();
   }
 
-  // ... [All other methods like _loadSavedData, pickFaceImage, getCurrentLocation, etc. remain unchanged] ...
-
+  // ... [All other methods like pickFaceImage, getCurrentLocation, etc. remain unchanged] ...
   Future<void> _loadSavedData() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
@@ -336,7 +315,6 @@ class _CoustmerState extends State<Coustmer> {
       agents = prefs.getString('name') ?? '';
       promoter.text = agents;
     });
-
     if (_isOnline) {
       try {
         final response = await http.post(
@@ -349,11 +327,9 @@ class _CoustmerState extends State<Coustmer> {
             }
           }),
         );
-
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final agencyModel = assignagencymodel.fromJson(data);
-
           if (agencyModel.result?.success == true &&
               agencyModel.result?.data != null) {
             final agencyData = agencyModel.result!.data!;
@@ -369,9 +345,18 @@ class _CoustmerState extends State<Coustmer> {
         debugPrint("Error fetching agency: $e");
       }
     } else {
-      setState(() {
-        agency.text = '';
-      });
+      // Offline: Load from local SQLite DB
+      final assigned = await DBHelper.instance.getAssignedAgency();
+      if (assigned != null) {
+        final agencyText = "${assigned['location_name'] ?? 'Unknown'}";
+        setState(() {
+          agency.text = agencyText;
+        });
+      } else {
+        setState(() {
+          agency.text = '';
+        });
+      }
     }
   }
 
@@ -397,15 +382,12 @@ class _CoustmerState extends State<Coustmer> {
       await Geolocator.requestPermission();
       return;
     }
-
     if (!_isOnline) return;
-
     try {
       Position currentPosition = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
       String googleMapsUrl =
           "https://www.google.com/maps/search/?api=1&query=${currentPosition.latitude},${currentPosition.longitude}";
-
       setState(() {
         latitude = currentPosition.latitude.toString();
         longitude = currentPosition.longitude.toString();
@@ -414,15 +396,15 @@ class _CoustmerState extends State<Coustmer> {
           locationUrlController.text = googleMapsUrl;
         }
       });
-
       List<Placemark> placemarks = await placemarkFromCoordinates(
           currentPosition.latitude, currentPosition.longitude);
       Placemark placemark = placemarks[0];
-
       setState(() {
-        if (streetController.text.isEmpty) streetController.text = placemark.street ?? "";
+        if (streetController.text.isEmpty)
+          streetController.text = placemark.street ?? "";
         if (city.text.isEmpty) city.text = placemark.locality ?? "";
-        if (landmarkController.text.isEmpty) landmarkController.text = placemark.name ?? "";
+        if (landmarkController.text.isEmpty)
+          landmarkController.text = placemark.name ?? "";
         if (adddress.text.isEmpty) {
           final s = placemark.street ?? "";
           final l = placemark.locality ?? "";
@@ -453,28 +435,24 @@ class _CoustmerState extends State<Coustmer> {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String phone = mobile.text.trim();
-
     if (agentapi == null || phone.isEmpty || phone.length != 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid token or phone number')),
       );
       return false;
     }
-
     final requestBody = {
       "params": {
         "token": agentapi,
         "phone": int.tryParse(phone) ?? 0,
       }
     };
-
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/send_otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-
       if (response.statusCode == 200) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('OTP sent successfully')),
@@ -498,14 +476,12 @@ class _CoustmerState extends State<Coustmer> {
     final prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String phone = mobile.text.trim();
-
     if (agentapi == null || phone.isEmpty || otpCode.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Invalid token, phone, or OTP')),
       );
       return false;
     }
-
     final requestBody = {
       "params": {
         "token": agentapi,
@@ -513,32 +489,33 @@ class _CoustmerState extends State<Coustmer> {
         "otp": otpCode,
       }
     };
-
     try {
       final response = await http.post(
         Uri.parse('https://salesrep.esanchaya.com/api/verify_otp'),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
-
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body);
         final otpResponse = otp.fromJson(jsonResponse);
-
         if (otpResponse.result?.status == "success") {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(otpResponse.result?.message ?? 'OTP verified successfully')),
+            SnackBar(
+                content: Text(otpResponse.result?.message ??
+                    'OTP verified successfully')),
           );
           return true;
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
+            SnackBar(
+                content: Text(otpResponse.result?.message ?? 'Invalid OTP')),
           );
           return false;
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Failed to verify OTP: ${response.statusCode}')),
+          SnackBar(
+              content: Text('Failed to verify OTP: ${response.statusCode}')),
         );
         return false;
       }
@@ -580,7 +557,8 @@ class _CoustmerState extends State<Coustmer> {
                   : () async {
                       if (_otpController.text.isNotEmpty) {
                         setState(() => _isLoading = true);
-                        final isVerified = await _verifyOtp(_otpController.text);
+                        final isVerified =
+                            await _verifyOtp(_otpController.text);
                         setState(() => _isLoading = false);
                         Navigator.of(context).pop();
                         _otpController.clear();
@@ -606,7 +584,8 @@ class _CoustmerState extends State<Coustmer> {
                       setState(() => _isLoading = false);
                       if (success) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('OTP resent successfully')),
+                          const SnackBar(
+                              content: Text('OTP resent successfully')),
                         );
                       }
                     },
@@ -622,12 +601,10 @@ class _CoustmerState extends State<Coustmer> {
     setState(() {
       _isLoading = true;
     });
-
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     final String? agentapi = prefs.getString('apikey');
     final String? agentlog = prefs.getString('agentlogin');
     final String? unit = prefs.getString('unit');
-
     try {
       const url = 'https://salesrep.esanchaya.com/api/customer_form';
       final response = await http.post(
@@ -685,23 +662,19 @@ class _CoustmerState extends State<Coustmer> {
           }
         }),
       );
-
       if (response.statusCode == 200) {
         final jsonResponse = jsonDecode(response.body) as Map<String, dynamic>;
         setState(() {
           data = coustmerform.fromJson(jsonResponse);
         });
-
         if (data?.result?.code == "200") {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text("Form submitted successfully")),
           );
-
           int houseVisited = prefs.getInt("house_visited") ?? 0;
           int targetLeft = prefs.getInt("target_left") ?? 0;
           int offerAccepted = prefs.getInt("offer_accepted") ?? 0;
           int offerRejected = prefs.getInt("offer_rejected") ?? 0;
-
           houseVisited += 1;
           if (targetLeft > 0) targetLeft -= 1;
           if (_isofferTogle) {
@@ -709,12 +682,10 @@ class _CoustmerState extends State<Coustmer> {
           } else {
             offerRejected += 1;
           }
-
           await prefs.setInt("house_visited", houseVisited);
           await prefs.setInt("target_left", targetLeft);
           await prefs.setInt("offer_accepted", offerAccepted);
           await prefs.setInt("offer_rejected", offerRejected);
-
           Navigator.pushReplacement(
             context,
             MaterialPageRoute(builder: (context) => const Agentscreen()),
@@ -747,7 +718,6 @@ class _CoustmerState extends State<Coustmer> {
       setState(() {
         _isLoading = true;
       });
-
       if (_isOnline) {
         final success = await _sendOtp();
         setState(() {
@@ -820,10 +790,8 @@ class _CoustmerState extends State<Coustmer> {
       quantity = 1;
       quantityController.text = "1";
     });
-
     await _loadSavedData();
     await getCurrentLocation();
-
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text("Form refreshed successfully")),
     );
@@ -1041,7 +1009,6 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   ),
                   const SizedBox(height: 15),
-
                   // NEWSPAPER DETAILS WITH QUANTITY
                   const Text(
                     "Newspaper Details",
@@ -1052,14 +1019,14 @@ class _CoustmerState extends State<Coustmer> {
                     ),
                   ),
                   const SizedBox(height: 10),
-
                   // QUANTITY ROW (RIGHT CORNER)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text(
                         "Quantity",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.w500),
                       ),
                       Row(
                         children: [
@@ -1101,7 +1068,6 @@ class _CoustmerState extends State<Coustmer> {
                     ],
                   ),
                   const SizedBox(height: 10),
-
                   DropdownButtonFormField<String>(
                     value: _selectedCustomerType,
                     hint: const Text("Customer Type"),
@@ -1211,9 +1177,7 @@ class _CoustmerState extends State<Coustmer> {
                       },
                     ),
                   ),
-
                   // ... [Rest of the form (Employed?, Job details, Mobile, Submit button) remains exactly the same] ...
-
                   const SizedBox(height: 5),
                   Row(
                     children: [
