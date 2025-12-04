@@ -1315,7 +1315,7 @@ class _AgentscreenState extends State<Agentscreen> {
                             labelText: localizations.agency,
                             hintText: _isLoadingAgencies
                                 ? localizations.loadingagencies
-                                : 'localizations.searchorselectagency',
+                                : localizations.searchOrSelectAgency,
                             border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(8)),
                             prefixIcon: const Icon(Icons.search),
@@ -1536,7 +1536,6 @@ class _AgentscreenState extends State<Agentscreen> {
         child: const Text(
           "Total History",
           style: TextStyle(
-            decoration: TextDecoration.underline,
             color: Colors.blue,
           ),
         ),

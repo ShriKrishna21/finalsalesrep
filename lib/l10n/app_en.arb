@@ -252,7 +252,9 @@
 "workinprogressendtimenotset":"Work In Progress  End Time Not Set",
 "noshiftdataavailable":"No Shift Data Available",
   "viewOfflineAttendance": "View offline attendance",
-  "viewOfflineForms": "View offline forms"
+  "viewOfflineForms": "View offline forms",
+  "searchOrSelectAgency":"Search Or Select Agency"
+
 
 
 
