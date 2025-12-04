@@ -239,16 +239,20 @@ class _SegmentinchargescreenState extends State<Segmentinchargescreen> {
                   Row(
                     children: [
                       const Text('English'),
-                      Switch(
-                        value: localeProvider.locale.languageCode == 'te',
-                        onChanged: (value) {
-                          localeProvider.toggleLocale();
-                        },
-                        activeColor: Colors.green,
-                        inactiveThumbColor: Colors.blue,
-                        activeTrackColor: Colors.green.shade200,
-                        inactiveTrackColor: Colors.blue.shade200,
-                      ),
+                     Switch(
+        value: Provider.of<LocalizationProvider>(context).locale.languageCode == 'te',
+        onChanged: (value) {
+          final provider = Provider.of<LocalizationProvider>(context, listen: false);
+
+          if (value) {
+            provider.changeLocale('te'); // Switch ON → Telugu
+          } else {
+            provider.changeLocale('en'); // Switch OFF → English
+          }
+        },
+        activeColor: Colors.green,
+        inactiveThumbColor: Colors.blue,
+      ),
                       const Text('తెలుగు'),
                     ],
                   ),

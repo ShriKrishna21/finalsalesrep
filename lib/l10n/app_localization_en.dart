@@ -729,4 +729,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get noshiftdataavailable => 'No Shift Data Available';
+
+  @override
+  String get viewOfflineAttendance => 'View offline attendance';
+
+  @override
+  String get viewOfflineForms => 'View offline forms';
 }

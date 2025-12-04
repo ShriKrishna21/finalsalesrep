@@ -321,25 +321,47 @@ class _OfficeStaffScreenState extends State<OfficeStaffScreen>
                 ],
               ),
             ),
-            ListTile(
-              title: Row(
-                children: [
-                  const Text('English'),
-                  Switch(
-                    value: Provider.of<LocalizationProvider>(context)
-                            .locale
-                            .languageCode ==
-                        'te',
-                    onChanged: (_) =>
-                        Provider.of<LocalizationProvider>(context, listen: false)
-                            .toggleLocale(),
-                    activeColor: Colors.green,
-                    inactiveThumbColor: Colors.blue,
-                  ),
-                  const Text('తెలుగు'),
-                ],
-              ),
-            ),
+
+
+
+
+
+
+
+
+          ListTile(
+  title: Row(
+    children: [
+      const Text('English'),
+
+      Switch(
+        value: Provider.of<LocalizationProvider>(context).locale.languageCode == 'te',
+        onChanged: (value) {
+          final provider = Provider.of<LocalizationProvider>(context, listen: false);
+
+          if (value) {
+            provider.changeLocale('te'); // Switch ON → Telugu
+          } else {
+            provider.changeLocale('en'); // Switch OFF → English
+          }
+        },
+        activeColor: Colors.green,
+        inactiveThumbColor: Colors.blue,
+      ),
+
+      const Text('తెలుగు'),
+    ],
+  ),
+),
+
+
+
+
+
+
+
+
+
           ],
         ),
       ),
