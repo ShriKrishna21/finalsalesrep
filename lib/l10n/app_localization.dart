@@ -1531,6 +1531,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'View offline forms'**
   String get viewOfflineForms;
+
+  /// No description provided for @searchOrSelectAgency.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Or Select Agency'**
+  String get searchOrSelectAgency;
 }
 
 class _AppLocalizationsDelegate

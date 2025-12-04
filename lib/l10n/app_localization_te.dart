@@ -745,4 +745,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get viewOfflineForms => 'ఆఫ్‌లైన్ ఫారమ్‌లు వీక్షించండి';
+
+  @override
+  String get searchOrSelectAgency => 'ఏజెన్సీని శోధించండి లేదా ఎంచుకోండి';
 }

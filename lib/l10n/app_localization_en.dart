@@ -735,4 +735,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get viewOfflineForms => 'View offline forms';
+
+  @override
+  String get searchOrSelectAgency => 'Search Or Select Agency';
 }
