@@ -68,6 +68,7 @@ class LocalDbAgency {
 }
 
 class Agentscreen extends StatefulWidget {
+  
   const Agentscreen({super.key});
   @override
   State<Agentscreen> createState() => _AgentscreenState();
@@ -1257,7 +1258,7 @@ class _AgentscreenState extends State<Agentscreen> {
                               MaterialPageRoute(
                                   builder: (context) => SavedFormsScreen()));
                         },
-                        child: const Text("View offline forms")),
+                        child: Text(localizations.viewOfflineForms)),
                     const SizedBox(height: 10),
                     ElevatedButton(
                         onPressed: () {
@@ -1267,7 +1268,7 @@ class _AgentscreenState extends State<Agentscreen> {
                                   builder: (context) =>
                                       OfflineAttendanceView()));
                         },
-                        child: const Text("View offline attendance")),
+                        child:  Text(localizations.viewOfflineAttendance )),
                     const SizedBox(height: 10),
                     Center(child: Text(localizations.agency)),
                     const SizedBox(height: 10),
@@ -1490,34 +1491,65 @@ class _AgentscreenState extends State<Agentscreen> {
               ],
             ),
           ),
-          ListTile(
-            title: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text('English'),
-                    Switch(
-                      value: localeProvider.locale.languageCode == 'te',
-                      onChanged: (value) => localeProvider.toggleLocale(),
-                      activeColor: Colors.green,
-                      inactiveThumbColor: Colors.blue,
-                      activeTrackColor: Colors.green.shade200,
-                      inactiveTrackColor: Colors.blue.shade200,
-                    ),
-                    const Text('తెలుగు'),
-                  ],
-                ),
-                GestureDetector(
-                  onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (_) => const Historypage()));
-                  },
-                  child: const Text("Total History"),
-                ),
-              ],
-            ),
+
+
+
+
+       ListTile(
+  title: Column(
+    children: [
+      Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Text('English'),
+
+          Switch(
+            value: localeProvider.locale.languageCode == 'te',
+            onChanged: (value) {
+              if (value) {
+                localeProvider.changeLocale('te');   // Switch ON → Telugu
+              } else {
+                localeProvider.changeLocale('en');   // Switch OFF → English
+              }
+            },
+            activeColor: Colors.green,
+            inactiveThumbColor: Colors.blue,
+            activeTrackColor: Colors.green.shade200,
+            inactiveTrackColor: Colors.blue.shade200,
           ),
+
+          const Text('తెలుగు'),
+        ],
+      ),
+
+      const SizedBox(height: 10),
+
+      GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => const Historypage(),
+            ),
+          );
+        },
+        child: const Text(
+          "Total History",
+          style: TextStyle(
+            decoration: TextDecoration.underline,
+            color: Colors.blue,
+          ),
+        ),
+      ),
+    ],
+  ),
+),
+
+
+
+
+
+
         ],
       ),
     );

@@ -247,29 +247,38 @@ class _UnitmanagerscreenState extends State<Unitmanagerscreen> {
                 ],
               ),
             ),
-            ListTile(
-              title: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Row(
-                    children: [
-                      const Text('English'),
-                      Switch(
-                        value: localeProvider.locale.languageCode == 'te',
-                        onChanged: (value) {
-                          localeProvider.toggleLocale();
-                        },
-                        activeColor: Colors.green,
-                        inactiveThumbColor: Colors.blue,
-                        activeTrackColor: Colors.green.shade200,
-                        inactiveTrackColor: Colors.blue.shade200,
-                      ),
-                      const Text('తెలుగు'),
-                    ],
-                  ),
-                ],
-              ),
-            ),
+           ListTile(
+  title: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    children: [
+      Row(
+        children: [
+          const Text('English'),
+          Switch(
+            value: localeProvider.locale.languageCode == 'te',
+            onChanged: (value) {
+              if (value) {
+                // Switch ON → Telugu
+                localeProvider.changeLocale('te');
+              } else {
+                // Switch OFF → English
+                localeProvider.changeLocale('en');
+              }
+            },
+            activeColor: Colors.green,
+            inactiveThumbColor: Colors.blue,
+            activeTrackColor: Colors.greenAccent,
+            inactiveTrackColor: Colors.blueAccent,
+          ),
+          const Text('తెలుగు'),
+        ],
+      ),
+    ],
+  ),
+          
+),
+          
+
           ],
         ),
       ),

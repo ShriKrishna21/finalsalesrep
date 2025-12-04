@@ -1519,6 +1519,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No Shift Data Available'**
   String get noshiftdataavailable;
+
+  /// No description provided for @viewOfflineAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'View offline attendance'**
+  String get viewOfflineAttendance;
+
+  /// No description provided for @viewOfflineForms.
+  ///
+  /// In en, this message translates to:
+  /// **'View offline forms'**
+  String get viewOfflineForms;
 }
 
 class _AppLocalizationsDelegate

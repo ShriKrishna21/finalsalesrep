@@ -250,7 +250,9 @@
 "totalworkinghours":"Total Working Hours",
 "sessionongoing":"Session Ongoing",
 "workinprogressendtimenotset":"Work In Progress  End Time Not Set",
-"noshiftdataavailable":"No Shift Data Available"
+"noshiftdataavailable":"No Shift Data Available",
+  "viewOfflineAttendance": "View offline attendance",
+  "viewOfflineForms": "View offline forms"
 
 
 

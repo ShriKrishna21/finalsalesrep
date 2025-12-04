@@ -254,7 +254,10 @@
 "totalworkinghours":" పని చేసిన మొత్తం సమయం",
 "sessionongoing":"సెషన్ కొనసాగుతోంది",
 "workinprogressendtimenotset":"పని జరుగుతోంది, ముగింపు సమయం సెటు చేయలేదు",
-"noshiftdataavailable":"షిఫ్ట్ సమాచారం అందుబాటులో లేదు"
+"noshiftdataavailable":"షిఫ్ట్ సమాచారం అందుబాటులో లేదు",
+  "viewOfflineAttendance": "ఆఫ్‌లైన్ హాజరు వీక్షించండి",
+  "viewOfflineForms": "ఆఫ్‌లైన్ ఫారమ్‌లు వీక్షించండి"
+
 
 
 

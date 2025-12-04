@@ -254,16 +254,20 @@ class _ReginoalheadscreenState extends State<Reginoalheadscreen> {
                   Row(
                     children: [
                       const Text('English'),
-                      Switch(
-                        value: localeProvider.locale.languageCode == 'te',
-                        onChanged: (value) {
-                          localeProvider.toggleLocale();
-                        },
-                        activeColor: Colors.green,
-                        inactiveThumbColor: Colors.blue,
-                        activeTrackColor: Colors.green.shade200,
-                        inactiveTrackColor: Colors.blue.shade200,
-                      ),
+                     Switch(
+            value: localeProvider.locale.languageCode == 'te',
+            onChanged: (value) {
+              if (value) {
+                localeProvider.changeLocale('te');   // Switch ON → Telugu
+              } else {
+                localeProvider.changeLocale('en');   // Switch OFF → English
+              }
+            },
+            activeColor: Colors.green,
+            inactiveThumbColor: Colors.blue,
+            activeTrackColor: Colors.green.shade200,
+            inactiveTrackColor: Colors.blue.shade200,
+          ),
                       const Text('తెలుగు'),
                     ],
                   ),

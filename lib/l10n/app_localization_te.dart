@@ -739,4 +739,10 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get noshiftdataavailable => 'షిఫ్ట్ సమాచారం అందుబాటులో లేదు';
+
+  @override
+  String get viewOfflineAttendance => 'ఆఫ్‌లైన్ హాజరు వీక్షించండి';
+
+  @override
+  String get viewOfflineForms => 'ఆఫ్‌లైన్ ఫారమ్‌లు వీక్షించండి';
 }
