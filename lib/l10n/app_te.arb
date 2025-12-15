@@ -257,7 +257,22 @@
 "noshiftdataavailable":"షిఫ్ట్ సమాచారం అందుబాటులో లేదు",
   "viewOfflineAttendance": "ఆఫ్‌లైన్ హాజరు వీక్షించండి",
   "viewOfflineForms": "ఆఫ్‌లైన్ ఫారమ్‌లు వీక్షించండి",
-  "searchOrSelectAgency":"ఏజెన్సీని శోధించండి లేదా ఎంచుకోండి"
+  "searchOrSelectAgency":"ఏజెన్సీని శోధించండి లేదా ఎంచుకోండి",
+  "syncOfflineAgencies":"ఆఫ్‌లైన్ ఏజెన్సీలు సింక్",
+  "totalHistory":"మొత్తం హిస్టరీ",
+  "savedForms":"సేవ్ చేసిన ఫారాలు",
+  "noSavedForms":"సేవ్ చేసిన ఫారాలు లేవు",
+  "offlineAttendance":"ఆఫ్‌లైన్ హాజరు",
+  "noOfflineAttendanceSaved":"ఆఫ్‌లైన్ హాజరు సేవ్ చేయలేదు",
+  "workStarted":"పని ప్రారంభమైంది",
+  "errorLoadingImage":"చిత్రం లోడ్ కావడం లేదు"
+
+
+
+
+
+
+
 
 
 

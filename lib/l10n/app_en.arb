@@ -253,7 +253,15 @@
 "noshiftdataavailable":"No Shift Data Available",
   "viewOfflineAttendance": "View offline attendance",
   "viewOfflineForms": "View offline forms",
-  "searchOrSelectAgency":"Search Or Select Agency"
+  "searchOrSelectAgency":"Search Or Select Agency",
+  "syncOfflineAgencies":"Sync Offline Agencies",
+  "totalHistory":"Total History",
+  "savedForms":"Saved Forms",
+  "noSavedForms":"No Saved Forms",
+  "offlineAttendance":"Offline Attendance",
+  "noOfflineAttendanceSaved":"No Offline Attendance Saved",
+  "workStarted":"Work Started",
+  "errorLoadingImage":"Error Loading Image"
 
 
 

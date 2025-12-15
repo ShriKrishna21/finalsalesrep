@@ -738,4 +738,28 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get searchOrSelectAgency => 'Search Or Select Agency';
+
+  @override
+  String get syncOfflineAgencies => 'Sync Offline Agencies';
+
+  @override
+  String get totalHistory => 'Total History';
+
+  @override
+  String get savedForms => 'Saved Forms';
+
+  @override
+  String get noSavedForms => 'No Saved Forms';
+
+  @override
+  String get offlineAttendance => 'Offline Attendance';
+
+  @override
+  String get noOfflineAttendanceSaved => 'No Offline Attendance Saved';
+
+  @override
+  String get workStarted => 'Work Started';
+
+  @override
+  String get errorLoadingImage => 'Error Loading Image';
 }
