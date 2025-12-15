@@ -748,4 +748,28 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get searchOrSelectAgency => 'ఏజెన్సీని శోధించండి లేదా ఎంచుకోండి';
+
+  @override
+  String get syncOfflineAgencies => 'ఆఫ్‌లైన్ ఏజెన్సీలు సింక్';
+
+  @override
+  String get totalHistory => 'మొత్తం హిస్టరీ';
+
+  @override
+  String get savedForms => 'సేవ్ చేసిన ఫారాలు';
+
+  @override
+  String get noSavedForms => 'సేవ్ చేసిన ఫారాలు లేవు';
+
+  @override
+  String get offlineAttendance => 'ఆఫ్‌లైన్ హాజరు';
+
+  @override
+  String get noOfflineAttendanceSaved => 'ఆఫ్‌లైన్ హాజరు సేవ్ చేయలేదు';
+
+  @override
+  String get workStarted => 'పని ప్రారంభమైంది';
+
+  @override
+  String get errorLoadingImage => 'చిత్రం లోడ్ కావడం లేదు';
 }

@@ -5,6 +5,7 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:finalsalesrep/l10n/app_localization_en.dart'
     show AppLocalizationsEn;
 import 'package:finalsalesrep/locallllllllllll_db.dart';
+import 'package:finalsalesrep/total_history.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:intl/intl.dart';
@@ -1205,7 +1206,7 @@ class _AgentscreenState extends State<Agentscreen> {
             backgroundColor: _isSyncing ? Colors.grey : Colors.blue,
             onPressed: _isSyncing ? null : syncPendingForms,
             label: Text(
-              _isSyncing ? "Syncing..." : "Sync Offline Agencies",
+              _isSyncing ? "Syncing..." : localizations.syncOfflineAgencies,
               style: const TextStyle(color: Colors.white),
             ),
             icon: Icon(_isSyncing ? Icons.hourglass_empty : Icons.sync,
@@ -1533,8 +1534,8 @@ class _AgentscreenState extends State<Agentscreen> {
             ),
           );
         },
-        child: const Text(
-          "Total History",
+        child:  Text(
+        localizations.totalHistory,
           style: TextStyle(
             color: Colors.blue,
           ),

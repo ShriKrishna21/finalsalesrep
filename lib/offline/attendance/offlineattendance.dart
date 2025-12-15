@@ -1,5 +1,9 @@
+import 'package:finalsalesrep/l10n/app_localization.dart';
+import 'package:finalsalesrep/l10n/app_localization_en.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/offline/attendance/localdbattendance.dart';
+import 'package:provider/provider.dart';
 
 class OfflineAttendanceView extends StatefulWidget {
   const OfflineAttendanceView({super.key});
@@ -56,12 +60,14 @@ class _OfflineAttendanceViewState extends State<OfflineAttendanceView> {
 
   @override
   Widget build(BuildContext context) {
+    final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return Scaffold(
-      appBar: AppBar(title: const Text("Offline Attendance")),
+      appBar: AppBar(title:  Center(child: Text(localizations.offlineAttendance))),
       body: _loading
           ? const Center(child: CircularProgressIndicator())
           : _items.isEmpty
-              ? const Center(child: Text("No offline attendance saved"))
+              ?  Center(child: Text(localizations.noOfflineAttendanceSaved))
               : RefreshIndicator(
                   onRefresh: _load,
                   child: ListView.separated(

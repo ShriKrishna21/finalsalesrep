@@ -1,6 +1,10 @@
+import 'package:finalsalesrep/l10n/app_localization.dart' show AppLocalizations;
+import 'package:finalsalesrep/l10n/app_localization_en.dart';
+import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/offline/offlineformmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:finalsalesrep/offline/localdb.dart';
+import 'package:provider/provider.dart';
 
 class SavedFormsScreen extends StatefulWidget {
   const SavedFormsScreen({super.key});
@@ -35,8 +39,10 @@ class _SavedFormsScreenState extends State<SavedFormsScreen> {
 
   @override
   Widget build(BuildContext context) {
+   final localeProvider = Provider.of<LocalizationProvider>(context);
+    final localizations = AppLocalizations.of(context) ?? AppLocalizationsEn();
     return Scaffold(
-      appBar: AppBar(title: const Text('Saved Forms')),
+      appBar: AppBar(title: Center(child:  Text(localizations.savedForms))),
       body: FutureBuilder<List<LocalCustomerForm>>(
         future: _formsFuture,
         builder: (context, snapshot) {
@@ -45,7 +51,7 @@ class _SavedFormsScreenState extends State<SavedFormsScreen> {
           }
           final forms = snapshot.data ?? [];
           if (forms.isEmpty) {
-            return const Center(child: Text('No saved forms'));
+            return  Center(child: Text(localizations.noSavedForms));
           }
 
           return ListView.builder(

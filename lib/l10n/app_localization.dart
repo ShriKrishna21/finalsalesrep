@@ -1537,6 +1537,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search Or Select Agency'**
   String get searchOrSelectAgency;
+
+  /// No description provided for @syncOfflineAgencies.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Offline Agencies'**
+  String get syncOfflineAgencies;
+
+  /// No description provided for @totalHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Total History'**
+  String get totalHistory;
+
+  /// No description provided for @savedForms.
+  ///
+  /// In en, this message translates to:
+  /// **'Saved Forms'**
+  String get savedForms;
+
+  /// No description provided for @noSavedForms.
+  ///
+  /// In en, this message translates to:
+  /// **'No Saved Forms'**
+  String get noSavedForms;
+
+  /// No description provided for @offlineAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Offline Attendance'**
+  String get offlineAttendance;
+
+  /// No description provided for @noOfflineAttendanceSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'No Offline Attendance Saved'**
+  String get noOfflineAttendanceSaved;
+
+  /// No description provided for @workStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'Work Started'**
+  String get workStarted;
+
+  /// No description provided for @errorLoadingImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error Loading Image'**
+  String get errorLoadingImage;
 }
 
 class _AppLocalizationsDelegate
