@@ -762,4 +762,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorLoadingImage => 'Error Loading Image';
+
+  @override
+  String get enrollments => 'Enrollments';
 }

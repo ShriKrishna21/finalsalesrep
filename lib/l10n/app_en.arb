@@ -261,7 +261,8 @@
   "offlineAttendance":"Offline Attendance",
   "noOfflineAttendanceSaved":"No Offline Attendance Saved",
   "workStarted":"Work Started",
-  "errorLoadingImage":"Error Loading Image"
+  "errorLoadingImage":"Error Loading Image",
+  "enrollments": "Enrollments"
 
 
 

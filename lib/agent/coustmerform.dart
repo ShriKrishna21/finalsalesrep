@@ -172,7 +172,7 @@ class _CoustmerState extends State<Coustmer> {
     "The Hindu",
     "Others"
   ];
-  List<String> customerTypes = ["New User", "Conversion"];
+  List<String> customerTypes = ["New User", "Conversion","Old Eenadu User"];
   coustmerform? data;
   @override
   void initState() {
@@ -876,7 +876,7 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   const SizedBox(height: 15),
                   const Text(
-                    "Family Details",
+                    "Subscriber Details",
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18,

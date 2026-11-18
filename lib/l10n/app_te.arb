@@ -265,7 +265,8 @@
   "offlineAttendance":"ఆఫ్‌లైన్ హాజరు",
   "noOfflineAttendanceSaved":"ఆఫ్‌లైన్ హాజరు సేవ్ చేయలేదు",
   "workStarted":"పని ప్రారంభమైంది",
-  "errorLoadingImage":"చిత్రం లోడ్ కావడం లేదు"
+  "errorLoadingImage":"చిత్రం లోడ్ కావడం లేదు",
+  "enrollments": "నమోదులు"
 
 
 

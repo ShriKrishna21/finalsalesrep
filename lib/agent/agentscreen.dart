@@ -147,6 +147,7 @@ class _AgentscreenState extends State<Agentscreen> {
       ]);
     } finally {
       if (mounted) setState(() => _isLoading = false);
+      
     }
   }
 
@@ -1168,8 +1169,8 @@ class _AgentscreenState extends State<Agentscreen> {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Text(localizations.salesrepresentative),
-            Text("${localizations.welcome} $agentname",
-                style: const TextStyle(fontSize: 16)),
+            // Text("${localizations.welcome} $agentname",
+            //     style: const TextStyle(fontSize: 16)),
           ],
         ),
         actions: [
@@ -1188,7 +1189,8 @@ class _AgentscreenState extends State<Agentscreen> {
             heroTag: "customer_form",
             backgroundColor: Colors.white,
             onPressed: isWorking
-                ? () async {
+                ? () async
+                  {
                     await Navigator.push(
                         context, MaterialPageRoute(builder: (_) => Coustmer()));
                     await refreshData();
@@ -1200,18 +1202,18 @@ class _AgentscreenState extends State<Agentscreen> {
             icon: Icon(Icons.add_box_outlined,
                 color: isWorking ? Colors.black : Colors.grey),
           ),
-          const SizedBox(height: 12),
-          FloatingActionButton.extended(
-            heroTag: "sync_offline_forms",
-            backgroundColor: _isSyncing ? Colors.grey : Colors.blue,
-            onPressed: _isSyncing ? null : syncPendingForms,
-            label: Text(
-              _isSyncing ? "Syncing..." : localizations.syncOfflineAgencies,
-              style: const TextStyle(color: Colors.white),
-            ),
-            icon: Icon(_isSyncing ? Icons.hourglass_empty : Icons.sync,
-                color: Colors.white),
-          ),
+          // const SizedBox(height: 12),
+          // FloatingActionButton.extended(
+          //   heroTag: "sync_offline_forms",
+          //   backgroundColor: _isSyncing ? Colors.grey : Colors.blue,
+          //   onPressed: _isSyncing ? null : syncPendingForms,
+          //   label: Text(
+          //     _isSyncing ? "Syncing..." : localizations.syncOfflineAgencies,
+          //     style: const TextStyle(color: Colors.white),
+          //   ),
+          //   icon: Icon(_isSyncing ? Icons.hourglass_empty : Icons.sync,
+          //       color: Colors.white),
+          // ),
           const SizedBox(height: 12),
           FloatingActionButton.extended(
             heroTag: "work_status",
@@ -1249,27 +1251,27 @@ class _AgentscreenState extends State<Agentscreen> {
                           context,
                           MaterialPageRoute(
                               builder: (_) => const Onedayhistory())),
-                      child: _buildInfoRow(localizations.houseVisited,
-                          "${records.length} House${records.length == 1 ? '' : 's'} Visited"),
+                      child: _buildInfoRow(localizations.enrollments,
+                          "${records.length} ${records.length == 1 ? '' : 's'} "),
                     ),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) => SavedFormsScreen()));
-                        },
-                        child: Text(localizations.viewOfflineForms)),
-                    const SizedBox(height: 10),
-                    ElevatedButton(
-                        onPressed: () {
-                          Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                  builder: (context) =>
-                                      OfflineAttendanceView()));
-                        },
-                        child:  Text(localizations.viewOfflineAttendance )),
+                    // ElevatedButton(
+                    //     onPressed: () {
+                    //       Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //               builder: (context) => SavedFormsScreen()));
+                    //     },
+                    //     child: Text(localizations.viewOfflineForms)),
+                    // const SizedBox(height: 10),
+                    // ElevatedButton(
+                    //     onPressed: () {
+                    //       Navigator.push(
+                    //           context,
+                    //           MaterialPageRoute(
+                    //               builder: (context) =>
+                    //                   OfflineAttendanceView()));
+                    //     },
+                    //     child:  Text(localizations.viewOfflineAttendance )),
                     const SizedBox(height: 10),
                     Center(child: Text(localizations.agency)),
                     const SizedBox(height: 10),

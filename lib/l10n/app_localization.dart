@@ -1585,6 +1585,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Error Loading Image'**
   String get errorLoadingImage;
+
+  /// No description provided for @enrollments.
+  ///
+  /// In en, this message translates to:
+  /// **'Enrollments'**
+  String get enrollments;
 }
 
 class _AppLocalizationsDelegate

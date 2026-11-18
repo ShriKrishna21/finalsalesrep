@@ -772,4 +772,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get errorLoadingImage => 'చిత్రం లోడ్ కావడం లేదు';
+
+  @override
+  String get enrollments => 'నమోదులు';
 }
