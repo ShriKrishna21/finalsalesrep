@@ -3,6 +3,7 @@ import 'package:finalsalesrep/admin/adminscreen.dart';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/circulationhead/circulationhead.dart';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/database/masters.dart';
 import 'package:finalsalesrep/modelclasses/loginmodel.dart';
 import 'package:finalsalesrep/regionalhead/reginoalheadscreen.dart';
 import 'package:finalsalesrep/unit/circulationincharge/circulationinchargescreen.dart';
@@ -161,6 +162,34 @@ class _LoginscreenState extends State<Loginscreen> {
         setState(() => _isLoading = false);
         return;
       }
+      // Save the image_1920 field
+await prefs.setString(
+    'profile_image_base64', safeToString(result.image1920));
+
+// Load Agency Master
+final masterService = MasterService();
+
+try {
+  await masterService.fetchAndSaveAgencyMaster();
+
+  final agencies = await masterService.loadAgencyMaster();
+
+  debugPrint('========== AGENCY MASTER ==========');
+  debugPrint('Total Agencies: ${agencies.length}');
+
+  for (final agency in agencies) {
+    debugPrint(
+      'ID: ${agency.id}, '
+      'Name: ${agency.name}, '
+      'Code: ${agency.code}, '
+      'Location: ${agency.locationName}, '
+      'Phone: ${agency.phone}, '
+      'Unit: ${agency.unitName}',
+    );
+  }
+} catch (e) {
+  debugPrint('Agency Master Error: $e');
+}
 
       Widget? screen;
       switch (result.role) {

@@ -2,6 +2,27 @@ class CommonApiClass {
   // ✅ Fixed: Removed trailing slash to avoid `//` in final URLs
   static String subDomain = "https://salesrep.esanchaya.com";
 
+
+
+// agent screen
+
+//agencies related apis
+static String agentagencies = "$subDomain/api/all_pin_locations";
+static String createagency = "$subDomain/api/create_pin_location";
+static String assignagency = "$subDomain/api/Pin_location_asin";
+//agencies related apis
+
+//selfies 
+static String todayselfies = "$subDomain/api/user/today_selfies";
+static String startwork = "$subDomain/api/start_work";
+static String endwork = "$subDomain/api/end_work";
+
+
+
+
+
+
+
   // Agent Total History API to see agent-collected data
   static String totalHistory = "$subDomain/customer_forms_info_id";
 

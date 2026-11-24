@@ -1,11 +1,9 @@
 // lib/unit/officestaff.dart/createagent.dart
 import 'dart:convert';
 import 'dart:io';
-import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:finalsalesrep/common_api_class.dart';
 import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/modelclasses/createagentmodel.dart';
-import 'package:finalsalesrep/offline/dbhelper.dart'; // Make sure path is correct
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -56,115 +54,92 @@ class _CreateAgentState extends State<CreateAgent> {
     }
   }
 
-  // FIXED: Correct way to check internet
-  Future<bool> _isOnline() async {
-    final List<ConnectivityResult> results = await Connectivity().checkConnectivity();
-    return results.any((result) =>
-        result == ConnectivityResult.wifi ||
-        result == ConnectivityResult.mobile ||
-        result == ConnectivityResult.ethernet ||
-        result == ConnectivityResult.vpn);
-  }
 
-  Future<void> _saveOffline() async {
-    final aadhaar64 = aadhaarImage != null
-        ? base64Encode(await aadhaarImage!.readAsBytes())
-        : "";
-    final pan64 = pancardImage != null
-        ? base64Encode(await pancardImage!.readAsBytes())
-        : "";
+  
+Future<void> _submit() async {
+  if (!_formKey.currentState!.validate()) return;
 
-    try {
-      await DBHelper().insertAgent({
-        'name': name.text,
-        'unit': unit.text,
-        'email': mail.text,
-        'password': password.text,
-        'aadhar_number': adhar.text,
-        'pan_number': pan.text,
-        'state': state.text,
-        'phone': phone.text,
-        'aadhar_base64': aadhaar64,
-        'pan_base64': pan64,
-        'created_at': DateTime.now().toIso8601String(),
-      });
+  final prefs = await SharedPreferences.getInstance();
+  final token = prefs.getString('apikey');
+  final unitName = prefs.getString('unit');
 
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Saved offline. Will sync when online"),
-          backgroundColor: Colors.orange,
-          duration: Duration(seconds: 3),
-        ),
-      );
-      Navigator.pop(context);
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Failed to save offline: $e"), backgroundColor: Colors.red),
-      );
-    }
-  }
+  final aadhaar64 = aadhaarImage != null
+      ? base64Encode(await aadhaarImage!.readAsBytes())
+      : "";
 
-  Future<void> _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+  final pan64 = pancardImage != null
+      ? base64Encode(await pancardImage!.readAsBytes())
+      : "";
 
-    final bool online = await _isOnline();
+  try {
+    final response = await http.post(
+      Uri.parse(CommonApiClass.CreateAgent),
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        "params": {
+          "token": token,
+          "name": name.text,
+          "email": mail.text,
+          "password": password.text,
+          "role": "agent",
+          "aadhar_number": adhar.text,
+          "pan_number": pan.text,
+          "state": state.text,
+          "status": "un_activ",
+          "phone": phone.text,
+          "unit_name": unitName,
+          "aadhar_base64": aadhaar64,
+          "Pan_base64": pan64,
+        }
+      }),
+    ).timeout(const Duration(seconds: 20));
 
-    if (!online) {
-      await _saveOffline();
-      return;
-    }
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-    final unitName = prefs.getString('unit');
-
-    final aadhaar64 = aadhaarImage != null
-        ? base64Encode(await aadhaarImage!.readAsBytes())
-        : "";
-    final pan64 = pancardImage != null
-        ? base64Encode(await pancardImage!.readAsBytes())
-        : "";
-
-    try {
-      final response = await http.post(
-        Uri.parse(CommonApiClass.CreateAgent),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          "params": {
-            "token": token,
-            "name": name.text,
-            "email": mail.text,
-            "password": password.text,
-            "role": "agent",
-            "aadhar_number": adhar.text,
-            "pan_number": pan.text,
-            "state": state.text,
-            "status": "un_activ",
-            "phone": phone.text,
-            "unit_name": unitName,
-            "aadhar_base64": aadhaar64,
-            "Pan_base64": pan64,
-          }
-        }),
-      ).timeout(Duration(seconds: 20));
-
+    if (response.statusCode == 200) {
       final json = jsonDecode(response.body);
       userdata = createUserModel.fromJson(json);
 
       if (userdata?.result?.success == true) {
+        if (!mounted) return;
+
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Staff created successfully!")),
+          const SnackBar(
+            content: Text("Staff created successfully!"),
+          ),
         );
+
         Navigator.pop(context);
       } else {
-        await _saveOffline(); // fallback
-      }
-    } catch (e) {
-      await _saveOffline();
-    }
-  }
+        if (!mounted) return;
 
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              userdata?.result?.message ?? "Failed to create staff",
+            ),
+          ),
+        );
+      }
+    } else {
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Server error: ${response.statusCode}"),
+        ),
+      );
+    }
+  } catch (e) {
+    if (!mounted) return;
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text("Error creating staff: $e"),
+      ),
+    );
+  }
+}
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context)!;

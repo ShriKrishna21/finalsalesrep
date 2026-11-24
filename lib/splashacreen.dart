@@ -12,6 +12,8 @@ class SplashScreen extends StatelessWidget {
   const SplashScreen({super.key});
 
   Future<Widget> _getHomeScreen() async {
+
+    
     await Future.delayed(const Duration(seconds: 1));
     final prefs = await SharedPreferences.getInstance();
     final bool isLoggedIn = prefs.getBool("isLoggedIn") ?? false;

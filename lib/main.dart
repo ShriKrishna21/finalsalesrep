@@ -1,6 +1,4 @@
 import 'package:finalsalesrep/l10n/app_localization.dart';
-import 'package:finalsalesrep/l10n/app_localization_en.dart';
-import 'package:finalsalesrep/l10n/l10n.dart';
 import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/splashacreen.dart';
 import 'package:flutter/material.dart';

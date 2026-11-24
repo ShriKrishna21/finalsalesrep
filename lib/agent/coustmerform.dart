@@ -2,12 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
-import 'package:finalsalesrep/locallllllllllll_db.dart' show DBHelper;
 import 'package:finalsalesrep/modelclasses/assignagency.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
-import 'package:finalsalesrep/offline/connecticityhelper.dart';
-import 'package:finalsalesrep/offline/localdb.dart';
-import 'package:finalsalesrep/offline/syncmanager.dart';
+
 import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:http/http.dart' as http;
@@ -96,7 +93,7 @@ class Coustmer extends StatefulWidget {
 class _CoustmerState extends State<Coustmer> {
   File? faceImage;
   final ImagePicker _picker = ImagePicker();
-  bool _isOnline = false;
+  // bool _isOnline = false;
   bool _isofferTogle = false;
   bool _isemployed = false;
   bool _isLoading = false;
@@ -174,104 +171,98 @@ class _CoustmerState extends State<Coustmer> {
   ];
   List<String> customerTypes = ["New User", "Conversion","Old Eenadu User"];
   coustmerform? data;
-  @override
-  void initState() {
-    super.initState();
-    datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
-    startCirculationController.text = DateFormat('yyyy-MM-dd')
-        .format(DateTime.now().add(const Duration(days: 1)));
-    quantityController.text = "1";
-    quantity = 1;
-    _loadSavedData();
-    getCurrentLocation();
-    ConnectivityHelper().startListening((online) {
-      setState(() {
-        _isOnline = online;
-      });
-      _loadSavedData(); // Reload agency data on connectivity change
-      if (online) {
-        _syncPending();
-      }
-    });
-  }
+@override
+void initState() {
+  super.initState();
 
-  Future<void> _syncPending() async {
-    final prefs = await SharedPreferences.getInstance();
-    final agentapi = prefs.getString('apikey');
-    if (agentapi != null) {
-      await SyncManager().syncPendingForms(agentapi);
-    }
-  }
+  datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
 
-  Future<void> handleSubmit() async {
-    final isValid = _formKey.currentState?.validate() ?? false;
-    if (!isValid) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
-      return;
-    }
-    Map<String, dynamic> formMap = {
-      "agent_name": agents,
-      "agent_login": await SharedPreferences.getInstance()
-          .then((p) => p.getString('agentlogin')),
-      "unit_name": await SharedPreferences.getInstance()
-          .then((p) => p.getString('unit')),
-      "Agency": agency.text,
-      "promoter": promoter.text,
-      "date": datecontroller.text,
-      "time": timecontroller.text,
-      "family_head_name": familyhead.text,
-      "father_name": fathersname.text,
-      "mother_name": mothername.text,
-      "spouse_name": spousename.text,
-      "age": age.text,
-      "house_number": hno.text,
-      "street_number": streetnumber.text,
-      "city": city.text,
-      "pin_code": pincode.text,
-      "address": adddress.text,
-      "mobile_number": mobile.text,
-      "reason_for_not_taking_eenadu_newsPaper":
-          reason_for_not_taking_eenadu.text,
-      "customer_type": _selectedCustomerType,
-      "current_newspaper": _selectedCustomerType == "Conversion"
-          ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
-          : null,
-      "free_offer_15_days": _isofferTogle,
-      "employed": _isemployed,
-      "job_type": _selectedJobType,
-      "job_type_one": _selectedGovDepartment,
-      "job_profession": job_proffesion.text,
-      "job_designation": job_designation.text,
-      "company_name": privateCompanyController.text,
-      "profession": _selectedPrivateProfession == "Other"
-          ? privateProffesionController.text
-          : _selectedPrivateProfession ?? "",
-      "job_designation_one": privatedesignationController.text,
-      "latitude": latitude,
-      "longitude": longitude,
-      "street": streetController.text,
-      "place": city.text,
-      "location_address": landmarkController.text,
-      "location_url": locationUrlController.text,
-      "face_base64": faceBase64Controller.text,
-      "Start_Circulating": startCirculationController.text,
-      "quantity": quantity, // NEW: Quantity saved locally
-    };
-    if (!_isOnline) {
-      await LocalDb().insertForm(formMap);
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('No internet: Form saved locally')),
-      );
-      await _refreshForm();
-      return;
-    }
-    bool otpSent = await _sendOtp();
-    if (!otpSent) return;
-    _showOtpDialog();
-  }
+  startCirculationController.text = DateFormat('yyyy-MM-dd')
+      .format(DateTime.now().add(const Duration(days: 1)));
+
+  quantityController.text = "1";
+  quantity = 1;
+
+  _loadSavedData();
+  getCurrentLocation();
+}
+  // Future<void> _syncPending() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   final agentapi = prefs.getString('apikey');
+  //   if (agentapi != null) {
+  //     await SyncManager().syncPendingForms(agentapi);
+  //   }
+  // }
+
+  // Future<void> handleSubmit() async {
+  //   final isValid = _formKey.currentState?.validate() ?? false;
+  //   if (!isValid) {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('Please fill all required fields')),
+  //     );
+  //     return;
+  //   }
+  //   Map<String, dynamic> formMap = {
+  //     "agent_name": agents,
+  //     "agent_login": await SharedPreferences.getInstance()
+  //         .then((p) => p.getString('agentlogin')),
+  //     "unit_name": await SharedPreferences.getInstance()
+  //         .then((p) => p.getString('unit')),
+  //     "Agency": agency.text,
+  //     "promoter": promoter.text,
+  //     "date": datecontroller.text,
+  //     "time": timecontroller.text,
+  //     "family_head_name": familyhead.text,
+  //     "father_name": fathersname.text,
+  //     "mother_name": mothername.text,
+  //     "spouse_name": spousename.text,
+  //     "age": age.text,
+  //     "house_number": hno.text,
+  //     "street_number": streetnumber.text,
+  //     "city": city.text,
+  //     "pin_code": pincode.text,
+  //     "address": adddress.text,
+  //     "mobile_number": mobile.text,
+  //     "reason_for_not_taking_eenadu_newsPaper":
+  //         reason_for_not_taking_eenadu.text,
+  //     "customer_type": _selectedCustomerType,
+  //     "current_newspaper": _selectedCustomerType == "Conversion"
+  //         ? (_selectedPreviousNewspaper ?? otherNewspaperController.text)
+  //         : null,
+  //     "free_offer_15_days": _isofferTogle,
+  //     "employed": _isemployed,
+  //     "job_type": _selectedJobType,
+  //     "job_type_one": _selectedGovDepartment,
+  //     "job_profession": job_proffesion.text,
+  //     "job_designation": job_designation.text,
+  //     "company_name": privateCompanyController.text,
+  //     "profession": _selectedPrivateProfession == "Other"
+  //         ? privateProffesionController.text
+  //         : _selectedPrivateProfession ?? "",
+  //     "job_designation_one": privatedesignationController.text,
+  //     "latitude": latitude,
+  //     "longitude": longitude,
+  //     "street": streetController.text,
+  //     "place": city.text,
+  //     "location_address": landmarkController.text,
+  //     "location_url": locationUrlController.text,
+  //     "face_base64": faceBase64Controller.text,
+  //     "Start_Circulating": startCirculationController.text,
+  //     "quantity": quantity, // NEW: Quantity saved locally
+  //   };
+  //   if (!_isOnline) {
+  //     await LocalDb().insertForm(formMap);
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(content: Text('No internet: Form saved locally')),
+  //     );
+  //     await _refreshForm();
+  //     return;
+  //   }
+  //   bool otpSent = await _sendOtp();
+  //   if (!otpSent) return;
+  //   _showOtpDialog();
+  // }
 
   @override
   void dispose() {
@@ -309,57 +300,48 @@ class _CoustmerState extends State<Coustmer> {
 
   // ... [All other methods like pickFaceImage, getCurrentLocation, etc. remain unchanged] ...
   Future<void> _loadSavedData() async {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
-    final String? agentapi = prefs.getString('apikey');
-    setState(() {
-      agents = prefs.getString('name') ?? '';
-      promoter.text = agents;
-    });
-    if (_isOnline) {
-      try {
-        final response = await http.post(
-          Uri.parse(
-              "https://salesrep.esanchaya.com/api/get_current_pin_location"),
-          headers: {"Content-Type": "application/json"},
-          body: jsonEncode({
-            "params": {
-              "token": agentapi,
-            }
-          }),
-        );
-        if (response.statusCode == 200) {
-          final data = jsonDecode(response.body);
-          final agencyModel = assignagencymodel.fromJson(data);
-          if (agencyModel.result?.success == true &&
-              agencyModel.result?.data != null) {
-            final agencyData = agencyModel.result!.data!;
-            final agencyText = "${agencyData.locationName ?? 'Unknown'} ";
-            setState(() {
-              if (agency.text.isEmpty) {
-                agency.text = agencyText;
-              }
-            });
-          }
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+
+  final String? agentapi = prefs.getString('apikey');
+
+  setState(() {
+    agents = prefs.getString('name') ?? '';
+    promoter.text = agents;
+  });
+
+  try {
+    final response = await http.post(
+      Uri.parse(
+        "https://salesrep.esanchaya.com/api/get_current_pin_location",
+      ),
+      headers: {"Content-Type": "application/json"},
+      body: jsonEncode({
+        "params": {
+          "token": agentapi,
         }
-      } catch (e) {
-        debugPrint("Error fetching agency: $e");
-      }
-    } else {
-      // Offline: Load from local SQLite DB
-      final assigned = await DBHelper.instance.getAssignedAgency();
-      if (assigned != null) {
-        final agencyText = "${assigned['location_name'] ?? 'Unknown'}";
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final agencyModel = assignagencymodel.fromJson(data);
+
+      if (agencyModel.result?.success == true &&
+          agencyModel.result?.data != null) {
+        final agencyData = agencyModel.result!.data!;
+        final agencyText = "${agencyData.locationName ?? 'Unknown'}";
+
         setState(() {
-          agency.text = agencyText;
-        });
-      } else {
-        setState(() {
-          agency.text = '';
+          if (agency.text.isEmpty) {
+            agency.text = agencyText;
+          }
         });
       }
     }
+  } catch (e) {
+    debugPrint("Error fetching agency: $e");
   }
-
+}
   Future<void> pickFaceImage() async {
     final XFile? img = await _picker.pickImage(
       source: ImageSource.camera,
@@ -382,7 +364,7 @@ class _CoustmerState extends State<Coustmer> {
       await Geolocator.requestPermission();
       return;
     }
-    if (!_isOnline) return;
+    // if (!_isOnline) return;
     try {
       Position currentPosition = await Geolocator.getCurrentPosition(
           desiredAccuracy: LocationAccuracy.high);
@@ -713,32 +695,31 @@ class _CoustmerState extends State<Coustmer> {
     }
   }
 
-  Future<void> uploaddata() async {
-    if (_formKey.currentState?.validate() ?? false) {
-      setState(() {
-        _isLoading = true;
-      });
-      if (_isOnline) {
-        final success = await _sendOtp();
-        setState(() {
-          _isLoading = false;
-        });
-        if (success) {
-          _showOtpDialog();
-        }
-      } else {
-        await handleSubmit();
-        setState(() {
-          _isLoading = false;
-        });
-      }
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please fill all required fields')),
-      );
-    }
-  }
+Future<void> uploaddata() async {
+  if (_formKey.currentState?.validate() ?? false) {
 
+    setState(() {
+      _isLoading = true;
+    });
+
+    final success = await _sendOtp();
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      _showOtpDialog();
+    }
+
+  } else {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Please fill all required fields'),
+      ),
+    );
+  }
+}
   void openGoogleMaps(String? latitude, String? longitude) {
     final Uri url = Uri.parse(
         'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
@@ -842,8 +823,7 @@ class _CoustmerState extends State<Coustmer> {
                     controller: agency,
                     label: "Agency",
                     need: true,
-                    readOnly: _isOnline,
-                    hunttext: "Agency cannot be empty",
+readOnly: true,                    hunttext: "Agency cannot be empty",
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
@@ -961,16 +941,14 @@ class _CoustmerState extends State<Coustmer> {
                     label: "Street",
                     hunttext: "Street cannot be empty",
                     need: true,
-                    readOnly: _isOnline,
-                  ),
+readOnly: true,                  ),
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: landmarkController,
                     label: "Landmark",
                     hunttext: "Landmark cannot be empty",
                     need: true,
-                    readOnly: _isOnline,
-                  ),
+readOnly: true,                  ),
                   const SizedBox(height: 10),
                   const Text(
                     "Landmark Photo",
