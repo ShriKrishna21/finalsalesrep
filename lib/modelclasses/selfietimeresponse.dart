@@ -1,15 +1,30 @@
-
 class SelfieSession {
   final String? startTime;
   final String? endTime;
   final String? startSelfie;
   final String? endSelfie;
 
+  // Start work location
+  final String? startLatitude;
+  final String? startLongitude;
+  final String? startLocationUrl;
+
+  // End work location
+  final String? endLatitude;
+  final String? endLongitude;
+  final String? endLocationUrl;
+
   SelfieSession({
     this.startTime,
     this.endTime,
     this.startSelfie,
     this.endSelfie,
+    this.startLatitude,
+    this.startLongitude,
+    this.startLocationUrl,
+    this.endLatitude,
+    this.endLongitude,
+    this.endLocationUrl,
   });
 }
 
@@ -23,37 +38,52 @@ class SelfieTimesResponse {
   });
 
   factory SelfieTimesResponse.fromJson(Map<String, dynamic> json) {
-    final result = json['result'];
-    // Handle String-to-bool conversion for 'success'
+    final result = json['result'] ?? {};
+
     final successValue = result['success'];
+
     bool parsedSuccess;
     if (successValue is bool) {
       parsedSuccess = successValue;
     } else if (successValue is String) {
       parsedSuccess = successValue.toLowerCase() == 'true';
     } else {
-      parsedSuccess = false; // Fallback for unexpected types
+      parsedSuccess = false;
     }
 
-    // Extract all start_time, end_time, start_selfie, and end_selfie from the selfies array
     final List<SelfieSession> sessions = [];
     final selfies = result['selfies'] as List<dynamic>?;
+
     if (selfies != null && selfies.isNotEmpty) {
       sessions.addAll(selfies.map((selfie) {
-        final startTime = selfie['start_time']?.toString();
-        final endTime = selfie['end_time'] is String && selfie['end_time'] != 'false'
-            ? selfie['end_time'].toString()
-            : null;
-        final startSelfie = selfie['start_selfie']?.toString();
-        final endSelfie = selfie['end_selfie']?.toString();
+        String? parseValue(dynamic value) {
+          if (value == null ||
+              value == false ||
+              value == 'false' ||
+              value == '') {
+            return null;
+          }
+          return value.toString();
+        }
+
         return SelfieSession(
-          startTime: startTime,
-          endTime: endTime,
-          startSelfie: startSelfie,
-          endSelfie: endSelfie,
+          startTime: parseValue(selfie['start_time']),
+          endTime: parseValue(selfie['end_time']),
+          startSelfie: parseValue(selfie['start_selfie']),
+          endSelfie: parseValue(selfie['end_selfie']),
+
+          // Start location
+          startLatitude: parseValue(selfie['start_latitude']),
+          startLongitude: parseValue(selfie['start_longitude']),
+          startLocationUrl: parseValue(selfie['start_location_url']),
+
+          // End location
+          endLatitude: parseValue(selfie['end_latitude']),
+          endLongitude: parseValue(selfie['end_longitude']),
+          endLocationUrl: parseValue(selfie['end_location_url']),
         );
       }).toList());
-      // Sort sessions by start_time in descending order (latest first)
+
       sessions.sort((a, b) {
         final aTime = DateTime.tryParse(a.startTime ?? '') ?? DateTime(0);
         final bTime = DateTime.tryParse(b.startTime ?? '') ?? DateTime(0);

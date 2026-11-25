@@ -19,7 +19,7 @@ import 'package:finalsalesrep/languageprovider.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 import 'package:finalsalesrep/modelclasses/selfietimeresponse.dart'
     show SelfieTimesResponse, SelfieSession;
-
+import 'package:geolocator/geolocator.dart';
 import 'package:finalsalesrep/modelclasses/routemap.dart';
 import 'package:finalsalesrep/modelclasses/onedayhistorymodel.dart';
 import 'package:finalsalesrep/commonclasses/onedayagent.dart';
@@ -29,8 +29,7 @@ import 'package:finalsalesrep/agent/agentprofie.dart';
 import 'package:finalsalesrep/agent/coustmerform.dart';
 import 'package:finalsalesrep/agent/historypage.dart';
 import 'package:finalsalesrep/agent/onedayhistory.dart';
-
-
+import 'package:url_launcher/url_launcher.dart';
 
 // Placeholder for LocalDbAgency
 
@@ -70,24 +69,18 @@ import 'package:finalsalesrep/agent/onedayhistory.dart';
 // }
 
 class Agentscreen extends StatefulWidget {
-  
   const Agentscreen({super.key});
   @override
   State<Agentscreen> createState() => _AgentscreenState();
 }
 
 class _AgentscreenState extends State<Agentscreen> {
-
-
-
-
-
   //offline
   // StreamSubscription<List<ConnectivityResult>>? _connSub;
   //  bool _syncingActions = false;
-    // bool _isSyncing = false;
+  // bool _isSyncing = false;
 //ofline
- 
+
   final TextEditingController dateController = TextEditingController();
   String agentname = "";
   List<Record> records = [];
@@ -101,16 +94,16 @@ class _AgentscreenState extends State<Agentscreen> {
   int offerRejectedCount = 0;
   int alreadySubscribedCount = 0;
   List<SelfieSession> _selfieSessions = [];
+  bool _isLoadingSelfieSessions = false;
+  bool _isFetchingSelfieTimes = false;
   final Onedayagent _onedayagent = Onedayagent();
 
- 
   // Agency dropdown related variables
   List<Agencyy> _agencyList = [];
-Agencyy? _selectedAgency;
-String? _selectedAgencyId;
-bool _isLoadingAgencies = false;
-bool _isOtherAgencySelected = false;
-
+  Agencyy? _selectedAgency;
+  String? _selectedAgencyId;
+  bool _isLoadingAgencies = false;
+  bool _isOtherAgencySelected = false;
 
   final TextEditingController _agencyNameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
@@ -118,7 +111,7 @@ bool _isOtherAgencySelected = false;
   final TextEditingController _unitController = TextEditingController();
   final TextEditingController _selectedAgencyController =
       TextEditingController();
-  
+
   @override
   void initState() {
     super.initState();
@@ -127,10 +120,6 @@ bool _isOtherAgencySelected = false;
     // _setupConnectivityListener(); offlien
     startTokenValidation();
   }
-
-
-
-
 
   // void _setupConnectivityListener() {
   //   _connSub = Connectivity()
@@ -152,48 +141,69 @@ bool _isOtherAgencySelected = false;
   //   });
   // }
 
-Future<void> _initializeData() async {
-  if (mounted) {
-    setState(() => _isLoading = true);
-  }
+// Promoter Location With Selfie
+  Future<Position> getCurrentLocation() async {
+    bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
 
-  try {
-    await Future.wait([
-      checkApiTime("Agent Data", loadAgentData),
-      checkApiTime("Work Status", loadWorkStatus),
-      checkApiTime("One Day History", loadOnedayHistory),
-      // checkApiTime("Selfie Times", fetchSelfieTimes),
-checkApiTime("Agency SQLite", fetchAgencies),
-    ]);
-  } finally {
-    if (mounted) {
-      setState(() => _isLoading = false);
+    if (!serviceEnabled) {
+      throw Exception("Please enable GPS location");
     }
-  }
-}
-Future<void> checkApiTime(
-  String name,
-  Future<void> Function() apiCall,
-) async {
-  final stopwatch = Stopwatch()..start();
 
-  try {
-    await apiCall();
-  } catch (e) {
-    debugPrint("$name Error: $e");
-  } finally {
-    stopwatch.stop();
+    LocationPermission permission = await Geolocator.checkPermission();
 
-    debugPrint(
-      "$name Loading Time: ${stopwatch.elapsedMilliseconds} ms",
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+    }
+
+    if (permission == LocationPermission.denied ||
+        permission == LocationPermission.deniedForever) {
+      throw Exception("Location permission required");
+    }
+
+    return await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
     );
   }
-}
- 
- 
- 
- 
- 
+
+  Future<void> _initializeData() async {
+    if (mounted) {
+      setState(() => _isLoading = true);
+    }
+
+    try {
+      await Future.wait([
+        checkApiTime("Agent Data", loadAgentData),
+        checkApiTime("Work Status", loadWorkStatus),
+        checkApiTime("One Day History", loadOnedayHistory),
+        // checkApiTime("Selfie Times", fetchSelfieTimes),
+        checkApiTime("Agency SQLite", fetchAgencies),
+      ]);
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Future<void> checkApiTime(
+    String name,
+    Future<void> Function() apiCall,
+  ) async {
+    final stopwatch = Stopwatch()..start();
+
+    try {
+      await apiCall();
+    } catch (e) {
+      debugPrint("$name Error: $e");
+    } finally {
+      stopwatch.stop();
+
+      debugPrint(
+        "$name Loading Time: ${stopwatch.elapsedMilliseconds} ms",
+      );
+    }
+  }
+
   // Future<bool> _isOnline() async {
   //   try {
   //     final result = await Connectivity().checkConnectivity();
@@ -327,232 +337,215 @@ Future<void> checkApiTime(
   //   }
   // }
 
+  Future<void> fetchAgencies() async {
+    if (!mounted) return;
 
-
-
-Future<void> fetchAgencies() async {
-  if (!mounted) return;
-
-  setState(() {
-    _isLoadingAgencies = true;
-  });
-
-  try {
-    final prefs = await SharedPreferences.getInstance();
-    final storedUnit = prefs.getString('unit');
-
-    // Initialize MasterService
-    final masterService = MasterService();
-
-    // Load agencies from SQLite
-    final agencies = await masterService.loadAgencyMaster();
-
-    // Filter agencies based on logged-in user's unit
-    final List<Agencyy> filteredAgencies =
-    storedUnit == null || storedUnit.isEmpty
-        ? List<Agencyy>.from(agencies)
-        : agencies.where((agency) {
-            final isOther =
-                (agency.code ?? '').toUpperCase() == 'OTHER' ||
-                (agency.locationName ?? '').toLowerCase() == 'other agency';
-
-            final matchesUnit =
-                (agency.unitName ?? '').toLowerCase() ==
-                    storedUnit.toLowerCase();
-
-            return isOther || matchesUnit;
-          }).toList();
-
-    // Ensure Other Agency is available
-    final bool hasOtherAgency = filteredAgencies.any((agency) {
-      return (agency.code ?? '').toUpperCase() == 'OTHER' ||
-          (agency.locationName ?? '').toLowerCase() == 'other agency';
+    setState(() {
+      _isLoadingAgencies = true;
     });
 
-    if (!hasOtherAgency) {
-      filteredAgencies.add(
-        Agencyy(
-          id: -1,
-          locationName: 'Other Agency',
-          code: 'OTHER',
-          unitName: storedUnit,
-        ),
-      );
-    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final storedUnit = prefs.getString('unit');
 
-    // Update dropdown list
-    if (mounted) {
-      setState(() {
-        _agencyList = filteredAgencies;
+      // Initialize MasterService
+      final masterService = MasterService();
+
+      // Load agencies from SQLite
+      final agencies = await masterService.loadAgencyMaster();
+
+      // Filter agencies based on logged-in user's unit
+      final List<Agencyy> filteredAgencies = storedUnit == null ||
+              storedUnit.isEmpty
+          ? List<Agencyy>.from(agencies)
+          : agencies.where((agency) {
+              final isOther = (agency.code ?? '').toUpperCase() == 'OTHER' ||
+                  (agency.locationName ?? '').toLowerCase() == 'other agency';
+
+              final matchesUnit = (agency.unitName ?? '').toLowerCase() ==
+                  storedUnit.toLowerCase();
+
+              return isOther || matchesUnit;
+            }).toList();
+
+      // Ensure Other Agency is available
+      final bool hasOtherAgency = filteredAgencies.any((agency) {
+        return (agency.code ?? '').toUpperCase() == 'OTHER' ||
+            (agency.locationName ?? '').toLowerCase() == 'other agency';
       });
-    }
 
-    // Debug logs
-    debugPrint('========== AGENCY MASTER FROM SQLITE ==========');
-    debugPrint('Stored Unit: $storedUnit');
-    debugPrint('Total Agencies: ${filteredAgencies.length}');
-
-    for (final agency in filteredAgencies) {
-      debugPrint(
-        'ID: ${agency.id}, '
-        'Location: ${agency.locationName}, '
-        'Code: ${agency.code}, '
-        'Unit: ${agency.unitName}',
-      );
-    }
-  } catch (e) {
-    debugPrint('Error loading agencies from SQLite: $e');
-
-    if (mounted) {
-      _showErrorSnackBar('Error loading agency master');
-    }
-  } finally {
-    if (mounted) {
-      setState(() {
-        _isLoadingAgencies = false;
-      });
-    }
-  }
-}
-
-
-
-Future<void> assignPinLocation() async {
-  if (_selectedAgency == null) {
-    _showErrorSnackBar("Please select an agency first");
-    return;
-  }
-
-  // Preserve selected agency before making API calls.
-  final Agencyy assignedAgency = _selectedAgency!;
-  final bool wasOtherAgency = _isOtherAgencySelected;
-
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('apikey');
-  final userId = prefs.getInt('id');
-
-  if (token == null || userId == null) {
-    _showErrorSnackBar("Missing required data");
-    return;
-  }
-
-  try {
-    int pinLocationId;
-
-    if (wasOtherAgency) {
-      if (_agencyNameController.text.trim().isEmpty ||
-          _phoneController.text.trim().isEmpty ||
-          _codeController.text.trim().isEmpty ||
-          _unitController.text.trim().isEmpty) {
-        _showErrorSnackBar("Please fill all agency details");
-        return;
+      if (!hasOtherAgency) {
+        filteredAgencies.add(
+          Agencyy(
+            id: -1,
+            locationName: 'Other Agency',
+            code: 'OTHER',
+            unitName: storedUnit,
+          ),
+        );
       }
 
-      final createResponse = await http.post(
-        Uri.parse(CommonApiClass.createagency),
+      // Update dropdown list
+      if (mounted) {
+        setState(() {
+          _agencyList = filteredAgencies;
+        });
+      }
+
+      // Debug logs
+      debugPrint('========== AGENCY MASTER FROM SQLITE ==========');
+      debugPrint('Stored Unit: $storedUnit');
+      debugPrint('Total Agencies: ${filteredAgencies.length}');
+
+      for (final agency in filteredAgencies) {
+        debugPrint(
+          'ID: ${agency.id}, '
+          'Location: ${agency.locationName}, '
+          'Code: ${agency.code}, '
+          'Unit: ${agency.unitName}',
+        );
+      }
+    } catch (e) {
+      debugPrint('Error loading agencies from SQLite: $e');
+
+      if (mounted) {
+        _showErrorSnackBar('Error loading agency master');
+      }
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingAgencies = false;
+        });
+      }
+    }
+  }
+
+  Future<void> assignPinLocation() async {
+    if (_selectedAgency == null) {
+      _showErrorSnackBar("Please select an agency first");
+      return;
+    }
+
+    // Preserve selected agency before making API calls.
+    final Agencyy assignedAgency = _selectedAgency!;
+    final bool wasOtherAgency = _isOtherAgencySelected;
+
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final userId = prefs.getInt('id');
+
+    if (token == null || userId == null) {
+      _showErrorSnackBar("Missing required data");
+      return;
+    }
+
+    try {
+      int pinLocationId;
+
+      if (wasOtherAgency) {
+        if (_agencyNameController.text.trim().isEmpty ||
+            _phoneController.text.trim().isEmpty ||
+            _codeController.text.trim().isEmpty ||
+            _unitController.text.trim().isEmpty) {
+          _showErrorSnackBar("Please fill all agency details");
+          return;
+        }
+
+        final createResponse = await http.post(
+          Uri.parse(CommonApiClass.createagency),
+          headers: {"Content-Type": "application/json"},
+          body: jsonEncode({
+            "params": {
+              "token": token,
+              "code": _codeController.text.trim(),
+              "location_name": _agencyNameController.text.trim(),
+              "phone": _phoneController.text.trim(),
+              "unit_name": _unitController.text.trim(),
+            }
+          }),
+        );
+
+        if (createResponse.statusCode != 200) {
+          _showErrorSnackBar("Failed to create agency");
+          return;
+        }
+
+        final createResult = jsonDecode(createResponse.body)['result'];
+
+        if (createResult == null || createResult['success'] != true) {
+          _showErrorSnackBar(
+            createResult?['message'] ?? "Failed to create agency",
+          );
+          return;
+        }
+
+        pinLocationId = int.parse(createResult['pin_location_id'].toString());
+      } else {
+        pinLocationId = assignedAgency.id;
+      }
+
+      final response = await http.post(
+        Uri.parse(CommonApiClass.assignagency),
         headers: {"Content-Type": "application/json"},
         body: jsonEncode({
           "params": {
             "token": token,
-            "code": _codeController.text.trim(),
-            "location_name": _agencyNameController.text.trim(),
-            "phone": _phoneController.text.trim(),
-            "unit_name": _unitController.text.trim(),
+            "user_id": userId,
+            "pin_lo_id": pinLocationId,
           }
         }),
       );
 
-      if (createResponse.statusCode != 200) {
-        _showErrorSnackBar("Failed to create agency");
-        return;
-      }
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
 
-      final createResult =
-          jsonDecode(createResponse.body)['result'];
+        if (result['success'] == true) {
+          _showSuccessSnackBar("Agency successfully assigned");
 
-      if (createResult == null || createResult['success'] != true) {
-        _showErrorSnackBar(
-          createResult?['message'] ?? "Failed to create agency",
-        );
-        return;
-      }
+          // Reload other screen data without clearing agency selection.
+          await loadOnedayHistory();
 
-      pinLocationId =
-          int.parse(createResult['pin_location_id'].toString());
-    } else {
-      pinLocationId = assignedAgency.id;
-    }
-
-    final response = await http.post(
-      Uri.parse(CommonApiClass.assignagency),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "params": {
-          "token": token,
-          "user_id": userId,
-          "pin_lo_id": pinLocationId,
-        }
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body)['result'];
-
-      if (result['success'] == true) {
-        _showSuccessSnackBar("Agency successfully assigned");
-
-        // Reload other screen data without clearing agency selection.
-        await loadOnedayHistory();
-
-        if (mounted && !wasOtherAgency) {
-          setState(() {
-            _selectedAgency = assignedAgency;
-            _selectedAgencyId = assignedAgency.id.toString();
-            _isOtherAgencySelected = false;
-            _selectedAgencyController.text =
-                assignedAgency.locationName ?? '';
-          });
+          if (mounted && !wasOtherAgency) {
+            setState(() {
+              _selectedAgency = assignedAgency;
+              _selectedAgencyId = assignedAgency.id.toString();
+              _isOtherAgencySelected = false;
+              _selectedAgencyController.text =
+                  assignedAgency.locationName ?? '';
+            });
+          }
+        } else {
+          _showErrorSnackBar(
+            "Failed to assign agency: ${result['message'] ?? 'Unknown error'}",
+          );
         }
       } else {
         _showErrorSnackBar(
-          "Failed to assign agency: ${result['message'] ?? 'Unknown error'}",
+          "Failed to assign agency: ${response.statusCode}",
         );
       }
-    } else {
-      _showErrorSnackBar(
-        "Failed to assign agency: ${response.statusCode}",
-      );
+    } catch (e) {
+      debugPrint("Error assigning agency: $e");
+      _showErrorSnackBar("Error assigning agency");
     }
-  } catch (e) {
-    debugPrint("Error assigning agency: $e");
-    _showErrorSnackBar("Error assigning agency");
   }
-}
 
+  void _clearAgencyFields() {
+    if (!mounted) return;
 
+    setState(() {
+      _selectedAgencyId = null;
+      _isOtherAgencySelected = false;
+      _selectedAgency = null;
 
+      _agencyNameController.clear();
+      _phoneController.clear();
+      _codeController.clear();
+      _unitController.clear();
+      _selectedAgencyController.clear();
+    });
+  }
 
-
-
-
-
-
-
-void _clearAgencyFields() {
-  if (!mounted) return;
-
-  setState(() {
-    _selectedAgencyId = null;
-    _isOtherAgencySelected = false;
-    _selectedAgency = null;
-
-    _agencyNameController.clear();
-    _phoneController.clear();
-    _codeController.clear();
-    _unitController.clear();
-    _selectedAgencyController.clear();
-  });
-}
   Future<void> fetchSelfieTimes() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('apikey');
@@ -615,120 +608,274 @@ void _clearAgencyFields() {
     }
   }
 
-Future<void> startWork() async {
-  try {
-    final XFile? photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 800,
-      imageQuality: 80,
-    );
+  Future<void> startWork() async {
+    try {
+      // 1. Capture selfie
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
 
-    if (photo == null) {
-      _showErrorSnackBar("Photo required");
-      return;
-    }
-
-    final bytes = await photo.readAsBytes();
-    final photoBase64 = base64Encode(bytes);
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
-
-    if (token == null) {
-      _showErrorSnackBar("Missing or invalid API key");
-      return;
-    }
-
-    final response = await http.post(
-      Uri.parse(CommonApiClass.startwork),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "params": {
-          "token": token,
-          "selfie": photoBase64,
-        }
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body)['result'];
-
-      if (result['success'] == true) {
-        setState(() => isWorking = true);
-        await saveWorkStatus(true);
-
-        _showSuccessSnackBar("Work started");
-        await fetchSelfieTimes();
-      } else {
-        _showErrorSnackBar(
-          "Failed to start work: ${result['message'] ?? 'Unknown error'}",
-        );
+      if (photo == null) {
+        _showErrorSnackBar("Photo required");
+        return;
       }
-    } else {
-      _showErrorSnackBar("Server error: ${response.statusCode}");
-    }
-  } catch (e) {
-    debugPrint("Error starting work: $e");
-    _showErrorSnackBar("Unable to start work. Please try again.");
-  }
-}
-Future<void> stopWork() async {
-  try {
-    final XFile? photo = await _picker.pickImage(
-      source: ImageSource.camera,
-      maxWidth: 800,
-      imageQuality: 80,
-    );
 
-    if (photo == null) {
-      _showErrorSnackBar("Photo required");
-      return;
-    }
+      final bytes = await photo.readAsBytes();
+      final photoBase64 = base64Encode(bytes);
 
-    final bytes = await photo.readAsBytes();
-    final photoBase64 = base64Encode(bytes);
+      // 2. Fetch current location after selfie capture
+      _showSuccessSnackBar("Fetching current location...");
 
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('apikey');
+      final Position position = await getCurrentLocation();
 
-    if (token == null) {
-      _showErrorSnackBar("Missing or invalid API key");
-      return;
-    }
+      final String latitude = position.latitude.toString();
+      final String longitude = position.longitude.toString();
 
-    final response = await http.post(
-      Uri.parse(CommonApiClass.endwork),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "params": {
-          "token": token,
-          "selfie": photoBase64,
-        }
-      }),
-    );
+      debugPrint("START WORK LATITUDE: $latitude");
+      debugPrint("START WORK LONGITUDE: $longitude");
 
-    if (response.statusCode == 200) {
-      final result = jsonDecode(response.body)['result'];
+      // 3. Get API token
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
 
-      if (result['success'] == true) {
-        setState(() => isWorking = false);
-        await saveWorkStatus(false);
-
-        _showSuccessSnackBar("Work stopped");
-        await fetchSelfieTimes();
-      } else {
-        _showErrorSnackBar(
-          "Failed to stop work: ${result['message'] ?? 'Unknown error'}",
-        );
+      if (token == null || token.isEmpty) {
+        _showErrorSnackBar("Missing or invalid API key");
+        return;
       }
-    } else {
-      _showErrorSnackBar("Server error: ${response.statusCode}");
+
+      // 4. Send selfie and location to backend
+      final response = await http.post(
+        Uri.parse(CommonApiClass.startwork),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": photoBase64,
+            "latitude": latitude,
+            "longitude": longitude,
+          }
+        }),
+      );
+
+      debugPrint("START WORK RESPONSE: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+
+        if (result['success'] == true) {
+          setState(() => isWorking = true);
+
+          await saveWorkStatus(true);
+
+          _showSuccessSnackBar("Work started successfully");
+
+          await fetchSelfieTimes();
+        } else {
+          _showErrorSnackBar(
+            "Failed to start work: ${result['message'] ?? 'Unknown error'}",
+          );
+        }
+      } else {
+        _showErrorSnackBar("Server error: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Error starting work: $e");
+      _showErrorSnackBar("Unable to start work: $e");
     }
-  } catch (e) {
-    debugPrint("Error stopping work: $e");
-    _showErrorSnackBar("Unable to stop work. Please try again.");
   }
-}
+// Future<void> startWork() async {
+//   try {
+//     final XFile? photo = await _picker.pickImage(
+//       source: ImageSource.camera,
+//       maxWidth: 800,
+//       imageQuality: 80,
+//     );
+
+//     if (photo == null) {
+//       _showErrorSnackBar("Photo required");
+//       return;
+//     }
+
+//     final bytes = await photo.readAsBytes();
+//     final photoBase64 = base64Encode(bytes);
+
+//     final prefs = await SharedPreferences.getInstance();
+//     final token = prefs.getString('apikey');
+
+//     if (token == null) {
+//       _showErrorSnackBar("Missing or invalid API key");
+//       return;
+//     }
+
+//     final response = await http.post(
+//       Uri.parse(CommonApiClass.startwork),
+//       headers: {"Content-Type": "application/json"},
+//       body: jsonEncode({
+//         "params": {
+//           "token": token,
+//           "selfie": photoBase64,
+//         }
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final result = jsonDecode(response.body)['result'];
+
+//       if (result['success'] == true) {
+//         setState(() => isWorking = true);
+//         await saveWorkStatus(true);
+
+//         _showSuccessSnackBar("Work started");
+//         await fetchSelfieTimes();
+//       } else {
+//         _showErrorSnackBar(
+//           "Failed to start work: ${result['message'] ?? 'Unknown error'}",
+//         );
+//       }
+//     } else {
+//       _showErrorSnackBar("Server error: ${response.statusCode}");
+//     }
+//   } catch (e) {
+//     debugPrint("Error starting work: $e");
+//     _showErrorSnackBar("Unable to start work. Please try again.");
+//   }
+// }
+  Future<void> stopWork() async {
+    try {
+      // 1. Capture logout selfie
+      final XFile? photo = await _picker.pickImage(
+        source: ImageSource.camera,
+        maxWidth: 800,
+        imageQuality: 80,
+      );
+
+      if (photo == null) {
+        _showErrorSnackBar("Photo required");
+        return;
+      }
+
+      final bytes = await photo.readAsBytes();
+      final photoBase64 = base64Encode(bytes);
+
+      // 2. Fetch fresh logout location
+      _showSuccessSnackBar("Fetching logout location...");
+
+      final Position position = await getCurrentLocation();
+
+      final String latitude = position.latitude.toString();
+      final String longitude = position.longitude.toString();
+
+      debugPrint("END WORK LATITUDE: $latitude");
+      debugPrint("END WORK LONGITUDE: $longitude");
+
+      // 3. Get API token
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('apikey');
+
+      if (token == null || token.isEmpty) {
+        _showErrorSnackBar("Missing or invalid API key");
+        return;
+      }
+
+      // 4. Send logout selfie and location
+      final response = await http.post(
+        Uri.parse(CommonApiClass.endwork),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": token,
+            "selfie": photoBase64,
+            "latitude": latitude,
+            "longitude": longitude,
+          }
+        }),
+      );
+
+      debugPrint("END WORK RESPONSE: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final result = jsonDecode(response.body)['result'];
+
+        if (result['success'] == true) {
+          setState(() => isWorking = false);
+
+          await saveWorkStatus(false);
+
+          _showSuccessSnackBar("Work stopped successfully");
+
+          await fetchSelfieTimes();
+        } else {
+          _showErrorSnackBar(
+            "Failed to stop work: ${result['message'] ?? 'Unknown error'}",
+          );
+        }
+      } else {
+        _showErrorSnackBar("Server error: ${response.statusCode}");
+      }
+    } catch (e) {
+      debugPrint("Error stopping work: $e");
+      _showErrorSnackBar("Unable to stop work: $e");
+    }
+  }
+// Future<void> stopWork() async {
+//   try {
+//     final XFile? photo = await _picker.pickImage(
+//       source: ImageSource.camera,
+//       maxWidth: 800,
+//       imageQuality: 80,
+//     );
+
+//     if (photo == null) {
+//       _showErrorSnackBar("Photo required");
+//       return;
+//     }
+
+//     final bytes = await photo.readAsBytes();
+//     final photoBase64 = base64Encode(bytes);
+
+//     final prefs = await SharedPreferences.getInstance();
+//     final token = prefs.getString('apikey');
+
+//     if (token == null) {
+//       _showErrorSnackBar("Missing or invalid API key");
+//       return;
+//     }
+
+//     final response = await http.post(
+//       Uri.parse(CommonApiClass.endwork),
+//       headers: {"Content-Type": "application/json"},
+//       body: jsonEncode({
+//         "params": {
+//           "token": token,
+//           "selfie": photoBase64,
+//         }
+//       }),
+//     );
+
+//     if (response.statusCode == 200) {
+//       final result = jsonDecode(response.body)['result'];
+
+//       if (result['success'] == true) {
+//         setState(() => isWorking = false);
+//         await saveWorkStatus(false);
+
+//         _showSuccessSnackBar("Work stopped");
+//         await fetchSelfieTimes();
+//       } else {
+//         _showErrorSnackBar(
+//           "Failed to stop work: ${result['message'] ?? 'Unknown error'}",
+//         );
+//       }
+//     } else {
+//       _showErrorSnackBar("Server error: ${response.statusCode}");
+//     }
+//   } catch (e) {
+//     debugPrint("Error stopping work: $e");
+//     _showErrorSnackBar("Unable to stop work. Please try again.");
+//   }
+// }
   void startTokenValidation() {
     _sessionCheckTimer?.cancel();
     validateToken();
@@ -736,59 +883,58 @@ Future<void> stopWork() async {
         Timer.periodic(const Duration(minutes: 5), (_) => validateToken());
   }
 
+  Future<void> validateToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('apikey');
+    final sessionId = prefs.getString('session_id');
 
-Future<void> validateToken() async {
-  final prefs = await SharedPreferences.getInstance();
-  final token = prefs.getString('apikey');
-  final sessionId = prefs.getString('session_id');
+    if (token == null || token.isEmpty) {
+      forceLogout("Session expired or invalid token.");
+      return;
+    }
 
-  if (token == null || token.isEmpty) {
-    forceLogout("Session expired or invalid token.");
-    return;
-  }
+    const maxRetries = 3;
+    int retryCount = 0;
 
-  const maxRetries = 3;
-  int retryCount = 0;
-
-  while (retryCount < maxRetries) {
-    try {
-      final response = await http.post(
-        Uri.parse("https://salesrep.esanchaya.com/token_validation"),
-        headers: {
-          "Content-Type": "application/json",
-          "Cookie": "session_id=${sessionId ?? ''}",
-        },
-        body: jsonEncode({
-          "params": {"token": token}
-        }),
-      );
-
-      if (response.statusCode == 200) {
-        final result = jsonDecode(response.body)['result'];
-
-        if (result['success'] != true) {
-          forceLogout(
-            "Session expired. You may have logged in on another device.",
-          );
-        }
-        return;
-      } else {
-        throw Exception("Server error: ${response.statusCode}");
-      }
-    } catch (e) {
-      retryCount++;
-      debugPrint("Token validation failed (attempt $retryCount): $e");
-
-      if (retryCount >= maxRetries) {
-        forceLogout(
-          "Error validating session after $maxRetries attempts.",
+    while (retryCount < maxRetries) {
+      try {
+        final response = await http.post(
+          Uri.parse("https://salesrep.esanchaya.com/token_validation"),
+          headers: {
+            "Content-Type": "application/json",
+            "Cookie": "session_id=${sessionId ?? ''}",
+          },
+          body: jsonEncode({
+            "params": {"token": token}
+          }),
         );
-      } else {
-        await Future.delayed(const Duration(seconds: 5));
+
+        if (response.statusCode == 200) {
+          final result = jsonDecode(response.body)['result'];
+
+          if (result['success'] != true) {
+            forceLogout(
+              "Session expired. You may have logged in on another device.",
+            );
+          }
+          return;
+        } else {
+          throw Exception("Server error: ${response.statusCode}");
+        }
+      } catch (e) {
+        retryCount++;
+        debugPrint("Token validation failed (attempt $retryCount): $e");
+
+        if (retryCount >= maxRetries) {
+          forceLogout(
+            "Error validating session after $maxRetries attempts.",
+          );
+        } else {
+          await Future.delayed(const Duration(seconds: 5));
+        }
       }
     }
   }
-}
 
   // Future<void> syncPendingForms() async {
   //   if (!(await _isOnline())) {
@@ -972,32 +1118,29 @@ Future<void> validateToken() async {
     }
   }
 
- Future<void> refreshData() async {
-  if (mounted) {
-    setState(() => _isLoading = true);
-  }
-
-  try {
-    await Future.wait([
-      loadOnedayHistory(),
-      // fetchFullRouteMap(),
-      // fetchSelfieTimes(),
-      fetchAgencies(),
-    ]);
-  } catch (e) {
-    debugPrint("Error refreshing data: $e");
-    _showErrorSnackBar("Error refreshing data");
-  } finally {
+  Future<void> refreshData() async {
     if (mounted) {
-      setState(() => _isLoading = false);
+      setState(() => _isLoading = true);
+    }
+
+    try {
+      await Future.wait([
+        loadOnedayHistory(),
+        // fetchFullRouteMap(),
+        // fetchSelfieTimes(),
+        fetchAgencies(),
+      ]);
+    } catch (e) {
+      debugPrint("Error refreshing data: $e");
+      _showErrorSnackBar("Error refreshing data");
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
     }
   }
-}
   // Future<void> fetchFullRouteMap() async {
- 
- 
- 
- 
+
   //   final prefs = await SharedPreferences.getInstance();
   //   final token = prefs.getString('apikey');
   //   final userId = prefs.getInt('id');
@@ -1076,40 +1219,112 @@ Future<void> validateToken() async {
     }
   }
 
-  void _showSelfieDialog(String? base64Image, String title) {
+  Future<void> _showSelfieDialog(
+    String? base64Image,
+    String title, {
+    String? latitude,
+    String? longitude,
+  }) async {
     if (base64Image == null || base64Image.isEmpty) {
       _showErrorSnackBar("No selfie available");
       return;
     }
+
     final cleanBase64 = base64Image.startsWith('data:image')
         ? base64Image.split(',')[1]
         : base64Image;
+
     try {
-      base64Decode(cleanBase64);
+      final imageBytes = base64Decode(cleanBase64);
+
       showDialog(
         context: context,
-        builder: (context) => AlertDialog(
+        builder: (dialogContext) => AlertDialog(
           title: Text(title),
           content: SingleChildScrollView(
-            child: Image.memory(
-              base64Decode(cleanBase64),
-              width: 300,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) => const Text(
-                  "Error loading image",
-                  style: TextStyle(color: Colors.red)),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Image.memory(
+                  imageBytes,
+                  width: 300,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) =>
+                      const Text("Error loading image"),
+                ),
+                const SizedBox(height: 16),
+                const Divider(),
+                const Text(
+                  "Capture Location",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                Text("Latitude: ${latitude ?? 'Not Available'}"),
+                const SizedBox(height: 6),
+                Text("Longitude: ${longitude ?? 'Not Available'}"),
+                const SizedBox(height: 12),
+                if (latitude != null &&
+                    longitude != null &&
+                    latitude.isNotEmpty &&
+                    longitude.isNotEmpty)
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () async {
+                        final lat = double.tryParse(latitude);
+                        final lng = double.tryParse(longitude);
+
+                        if (lat == null ||
+                            lng == null ||
+                            lat < -90 ||
+                            lat > 90 ||
+                            lng < -180 ||
+                            lng > 180) {
+                          _showErrorSnackBar("Invalid location coordinates");
+                          return;
+                        }
+
+                        final url = Uri.parse(
+                          'https://www.google.com/maps/search/?api=1&query=$lat,$lng',
+                        );
+
+                        final opened = await launchUrl(
+                          url,
+                          mode: LaunchMode.externalApplication,
+                        );
+
+                        if (!opened && mounted) {
+                          _showErrorSnackBar(
+                            "Unable to open Google Maps",
+                          );
+                        }
+                      },
+                      icon: const Icon(Icons.location_on),
+                      label: const Text("View Location on Google Maps"),
+                    ),
+                  )
+                else
+                  const Text(
+                    "Location information not available",
+                    style: TextStyle(color: Colors.red),
+                  ),
+              ],
             ),
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.pop(dialogContext),
               child: const Text("Close"),
             ),
           ],
         ),
       );
     } catch (e) {
-      debugPrint("Error decoding base64 image: $e");
+      debugPrint("Error decoding selfie: $e");
       _showErrorSnackBar("Invalid image data");
     }
   }
@@ -1163,8 +1378,7 @@ Future<void> validateToken() async {
             heroTag: "customer_form",
             backgroundColor: Colors.white,
             onPressed: isWorking
-                ? () async
-                  {
+                ? () async {
                     await Navigator.push(
                         context, MaterialPageRoute(builder: (_) => Coustmer()));
                     await refreshData();
@@ -1249,131 +1463,135 @@ Future<void> validateToken() async {
                     const SizedBox(height: 10),
                     Center(child: Text(localizations.agency)),
                     const SizedBox(height: 10),
-                  Autocomplete<Agencyy>(
-  optionsBuilder: (TextEditingValue textEditingValue) {
-    if (textEditingValue.text.isEmpty) {
-      return _agencyList;
-    }
+                    Autocomplete<Agencyy>(
+                      optionsBuilder: (TextEditingValue textEditingValue) {
+                        if (textEditingValue.text.isEmpty) {
+                          return _agencyList;
+                        }
 
-    final query = textEditingValue.text.toLowerCase();
+                        final query = textEditingValue.text.toLowerCase();
 
-    return _agencyList.where((agency) {
-      return (agency.locationName ?? '')
-              .toLowerCase()
-              .contains(query) ||
-          (agency.code ?? '').toLowerCase().contains(query);
-    });
-  },
+                        return _agencyList.where((agency) {
+                          return (agency.locationName ?? '')
+                                  .toLowerCase()
+                                  .contains(query) ||
+                              (agency.code ?? '').toLowerCase().contains(query);
+                        });
+                      },
+                      displayStringForOption: (Agencyy agency) {
+                        return agency.locationName ?? agency.code ?? 'Unknown';
+                      },
+                      fieldViewBuilder: (
+                        BuildContext context,
+                        TextEditingController fieldTextEditingController,
+                        FocusNode fieldFocusNode,
+                        VoidCallback onFieldSubmitted,
+                      ) {
+                        if (fieldTextEditingController.text.isEmpty &&
+                            _selectedAgencyController.text.isNotEmpty) {
+                          fieldTextEditingController.text =
+                              _selectedAgencyController.text;
+                        }
 
-  displayStringForOption: (Agencyy agency) {
-    return agency.locationName ?? agency.code ?? 'Unknown';
-  },
+                        return TextFormField(
+                          controller: fieldTextEditingController,
+                          focusNode: fieldFocusNode,
+                          decoration: InputDecoration(
+                            labelText: localizations.agency,
+                            hintText: _isLoadingAgencies
+                                ? localizations.loadingagencies
+                                : localizations.searchOrSelectAgency,
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            prefixIcon: const Icon(Icons.search),
+                          ),
+                          onChanged: (value) {
+                            setState(() {
+                              _selectedAgencyId = null;
+                              _selectedAgency = null;
+                              _isOtherAgencySelected = false;
+                              _selectedAgencyController.text = value;
+                            });
+                          },
+                        );
+                      },
+                      onSelected: (Agencyy selection) {
+                        setState(() {
+                          _selectedAgency = selection;
 
-  fieldViewBuilder: (
-    BuildContext context,
-    TextEditingController fieldTextEditingController,
-    FocusNode fieldFocusNode,
-    VoidCallback onFieldSubmitted,
-  ) {
-    if (fieldTextEditingController.text.isEmpty &&
-        _selectedAgencyController.text.isNotEmpty) {
-      fieldTextEditingController.text = _selectedAgencyController.text;
-    }
+                          _selectedAgencyController.text =
+                              selection.locationName ??
+                                  selection.code ??
+                                  'Unknown';
 
-    return TextFormField(
-      controller: fieldTextEditingController,
-      focusNode: fieldFocusNode,
-      decoration: InputDecoration(
-        labelText: localizations.agency,
-        hintText: _isLoadingAgencies
-            ? localizations.loadingagencies
-            : localizations.searchOrSelectAgency,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        prefixIcon: const Icon(Icons.search),
-      ),
-    onChanged: (value) {
-  setState(() {
-    _selectedAgencyId = null;
-    _selectedAgency = null;
-    _isOtherAgencySelected = false;
-    _selectedAgencyController.text = value;
-  });
-},
-    );
-  },
+                          _isOtherAgencySelected =
+                              (selection.code ?? '').toUpperCase() == 'OTHER' ||
+                                  (selection.locationName ?? '')
+                                          .toLowerCase() ==
+                                      'other agency';
 
- onSelected: (Agencyy selection) {
-  setState(() {
-    _selectedAgency = selection;
+                          if (_isOtherAgencySelected) {
+                            _selectedAgencyId = null;
 
-    _selectedAgencyController.text =
-        selection.locationName ?? selection.code ?? 'Unknown';
+                            _agencyNameController.clear();
+                            _phoneController.clear();
+                            _codeController.clear();
 
-    _isOtherAgencySelected =
-        (selection.code ?? '').toUpperCase() == 'OTHER' ||
-        (selection.locationName ?? '').toLowerCase() == 'other agency';
+                            _unitController.text = selection.unitName ?? '';
+                          } else {
+                            _selectedAgencyId = selection.id.toString();
 
-    if (_isOtherAgencySelected) {
-      _selectedAgencyId = null;
+                            _agencyNameController.text =
+                                selection.locationName ?? '';
+                            _phoneController.text = selection.phone ?? '';
+                            _codeController.text = selection.code ?? '';
+                            _unitController.text = selection.unitName ?? '';
+                          }
+                        });
+                      },
+                      optionsViewBuilder: (
+                        BuildContext context,
+                        AutocompleteOnSelected<Agencyy> onSelected,
+                        Iterable<Agencyy> options,
+                      ) {
+                        return Align(
+                          alignment: Alignment.topLeft,
+                          child: Material(
+                            elevation: 4.0,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: 200,
+                                maxWidth:
+                                    MediaQuery.of(context).size.width * 0.9,
+                              ),
+                              child: ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: options.length,
+                                itemBuilder: (BuildContext context, int index) {
+                                  final Agencyy option =
+                                      options.elementAt(index);
 
-      _agencyNameController.clear();
-      _phoneController.clear();
-      _codeController.clear();
-
-      _unitController.text = selection.unitName ?? '';
-    } else {
-      _selectedAgencyId = selection.id.toString();
-
-      _agencyNameController.text = selection.locationName ?? '';
-      _phoneController.text = selection.phone ?? '';
-      _codeController.text = selection.code ?? '';
-      _unitController.text = selection.unitName ?? '';
-    }
-  });
-},
-
-
-
-
-  optionsViewBuilder: (
-    BuildContext context,
-    AutocompleteOnSelected<Agencyy> onSelected,
-    Iterable<Agencyy> options,
-  ) {
-    return Align(
-      alignment: Alignment.topLeft,
-      child: Material(
-        elevation: 4.0,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(
-            maxHeight: 200,
-            maxWidth: MediaQuery.of(context).size.width * 0.9,
-          ),
-          child: ListView.builder(
-            shrinkWrap: true,
-            itemCount: options.length,
-            itemBuilder: (BuildContext context, int index) {
-              final Agencyy option = options.elementAt(index);
-
-              return GestureDetector(
-                onTap: () => onSelected(option),
-                child: ListTile(
-                  title: Text(
-                    option.locationName ?? option.code ?? 'Unknown',
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                  subtitle: Text('[${option.code ?? ''}]'),
-                ),
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  },
-),
+                                  return GestureDetector(
+                                    onTap: () => onSelected(option),
+                                    child: ListTile(
+                                      title: Text(
+                                        option.locationName ??
+                                            option.code ??
+                                            'Unknown',
+                                        style: const TextStyle(
+                                            color: Colors.black),
+                                      ),
+                                      subtitle: Text('[${option.code ?? ''}]'),
+                                    ),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                     if (_isOtherAgencySelected) ...[
                       const SizedBox(height: 10),
                       TextFormField(
@@ -1475,64 +1693,52 @@ Future<void> validateToken() async {
               ],
             ),
           ),
-
-
-
-
-       ListTile(
-  title: Column(
-    children: [
-      Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text('English'),
-
-          Switch(
-            value: localeProvider.locale.languageCode == 'te',
-            onChanged: (value) {
-              if (value) {
-                localeProvider.changeLocale('te');   // Switch ON → Telugu
-              } else {
-                localeProvider.changeLocale('en');   // Switch OFF → English
-              }
-            },
-            activeColor: Colors.green,
-            inactiveThumbColor: Colors.blue,
-            activeTrackColor: Colors.green.shade200,
-            inactiveTrackColor: Colors.blue.shade200,
-          ),
-
-          const Text('తెలుగు'),
-        ],
-      ),
-
-      const SizedBox(height: 10),
-
-      GestureDetector(
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => const Historypage(),
+          ListTile(
+            title: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text('English'),
+                    Switch(
+                      value: localeProvider.locale.languageCode == 'te',
+                      onChanged: (value) {
+                        if (value) {
+                          localeProvider
+                              .changeLocale('te'); // Switch ON → Telugu
+                        } else {
+                          localeProvider
+                              .changeLocale('en'); // Switch OFF → English
+                        }
+                      },
+                      activeColor: Colors.green,
+                      inactiveThumbColor: Colors.blue,
+                      activeTrackColor: Colors.green.shade200,
+                      inactiveTrackColor: Colors.blue.shade200,
+                    ),
+                    const Text('తెలుగు'),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const Historypage(),
+                      ),
+                    );
+                  },
+                  child: Text(
+                    localizations.totalHistory,
+                    style: TextStyle(
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          );
-        },
-        child:  Text(
-        localizations.totalHistory,
-          style: TextStyle(
-            color: Colors.blue,
           ),
-        ),
-      ),
-    ],
-  ),
-),
-
-
-
-
-
-
         ],
       ),
     );
@@ -1594,7 +1800,11 @@ Future<void> validateToken() async {
                     Expanded(
                       child: GestureDetector(
                         onTap: () => _showSelfieDialog(
-                            session.startSelfie, localizations.startselfie),
+                          session.startSelfie,
+                          localizations.startselfie,
+                          latitude: session.startLatitude,
+                          longitude: session.startLongitude,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -1621,7 +1831,11 @@ Future<void> validateToken() async {
                     Expanded(
                       child: GestureDetector(
                         onTap: () => _showSelfieDialog(
-                            session.endSelfie, localizations.endselfie),
+                          session.endSelfie,
+                          localizations.endselfie,
+                          latitude: session.endLatitude,
+                          longitude: session.endLongitude,
+                        ),
                         child: Container(
                           padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
@@ -1695,19 +1909,19 @@ Future<void> validateToken() async {
   }
 
   @override
- @override
-void dispose() {
-  _sessionCheckTimer?.cancel();
+  @override
+  void dispose() {
+    _sessionCheckTimer?.cancel();
 
-  dateController.dispose();
-  _agencyNameController.dispose();
-  _phoneController.dispose();
-  _codeController.dispose();
-  _unitController.dispose();
-  _selectedAgencyController.dispose();
+    dateController.dispose();
+    _agencyNameController.dispose();
+    _phoneController.dispose();
+    _codeController.dispose();
+    _unitController.dispose();
+    _selectedAgencyController.dispose();
 
-  super.dispose();
-}
+    super.dispose();
+  }
 }
 
 class AgencyModel {
