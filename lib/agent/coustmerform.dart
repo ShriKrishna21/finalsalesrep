@@ -169,24 +169,24 @@ class _CoustmerState extends State<Coustmer> {
     "The Hindu",
     "Others"
   ];
-  List<String> customerTypes = ["New User", "Conversion","Old Eenadu User"];
+  List<String> customerTypes = ["New User", "Conversion", "Old Eenadu User"];
   coustmerform? data;
-@override
-void initState() {
-  super.initState();
+  @override
+  void initState() {
+    super.initState();
 
-  datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
-  timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
+    datecontroller.text = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    timecontroller.text = DateFormat('hh:mm a').format(DateTime.now());
 
-  startCirculationController.text = DateFormat('yyyy-MM-dd')
-      .format(DateTime.now().add(const Duration(days: 1)));
+    startCirculationController.text = DateFormat('yyyy-MM-dd')
+        .format(DateTime.now().add(const Duration(days: 1)));
 
-  quantityController.text = "1";
-  quantity = 1;
+    quantityController.text = "1";
+    quantity = 1;
 
-  _loadSavedData();
-  getCurrentLocation();
-}
+    _loadSavedData();
+    getCurrentLocation();
+  }
   // Future<void> _syncPending() async {
   //   final prefs = await SharedPreferences.getInstance();
   //   final agentapi = prefs.getString('apikey');
@@ -300,48 +300,49 @@ void initState() {
 
   // ... [All other methods like pickFaceImage, getCurrentLocation, etc. remain unchanged] ...
   Future<void> _loadSavedData() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
+    SharedPreferences prefs = await SharedPreferences.getInstance();
 
-  final String? agentapi = prefs.getString('apikey');
+    final String? agentapi = prefs.getString('apikey');
 
-  setState(() {
-    agents = prefs.getString('name') ?? '';
-    promoter.text = agents;
-  });
+    setState(() {
+      agents = prefs.getString('name') ?? '';
+      promoter.text = agents;
+    });
 
-  try {
-    final response = await http.post(
-      Uri.parse(
-        "https://salesrep.esanchaya.com/api/get_current_pin_location",
-      ),
-      headers: {"Content-Type": "application/json"},
-      body: jsonEncode({
-        "params": {
-          "token": agentapi,
-        }
-      }),
-    );
-
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final agencyModel = assignagencymodel.fromJson(data);
-
-      if (agencyModel.result?.success == true &&
-          agencyModel.result?.data != null) {
-        final agencyData = agencyModel.result!.data!;
-        final agencyText = "${agencyData.locationName ?? 'Unknown'}";
-
-        setState(() {
-          if (agency.text.isEmpty) {
-            agency.text = agencyText;
+    try {
+      final response = await http.post(
+        Uri.parse(
+          "https://salesrep.esanchaya.com/api/get_current_pin_location",
+        ),
+        headers: {"Content-Type": "application/json"},
+        body: jsonEncode({
+          "params": {
+            "token": agentapi,
           }
-        });
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final agencyModel = assignagencymodel.fromJson(data);
+
+        if (agencyModel.result?.success == true &&
+            agencyModel.result?.data != null) {
+          final agencyData = agencyModel.result!.data!;
+          final agencyText = "${agencyData.locationName ?? 'Unknown'}";
+
+          setState(() {
+            if (agency.text.isEmpty) {
+              agency.text = agencyText;
+            }
+          });
+        }
       }
+    } catch (e) {
+      debugPrint("Error fetching agency: $e");
     }
-  } catch (e) {
-    debugPrint("Error fetching agency: $e");
   }
-}
+
   Future<void> pickFaceImage() async {
     final XFile? img = await _picker.pickImage(
       source: ImageSource.camera,
@@ -695,31 +696,96 @@ void initState() {
     }
   }
 
-Future<void> uploaddata() async {
-  if (_formKey.currentState?.validate() ?? false) {
+  // Future<void> uploaddata() async {
+  //   if (_formKey.currentState?.validate() ?? false) {
+  //     setState(() {
+  //       _isLoading = true;
+  //     });
 
-    setState(() {
-      _isLoading = true;
-    });
+  //     final success = await _sendOtp();
 
+  //     setState(() {
+  //       _isLoading = false;
+  //     });
+
+  //     if (success) {
+  //       _showOtpDialog();
+  //     }
+  //   } else {
+  //     ScaffoldMessenger.of(context).showSnackBar(
+  //       const SnackBar(
+  //         content: Text('Please fill all required fields'),
+  //       ),
+  //     );
+  //   }
+  // }
+
+
+  void _showMissingFieldsDialog(List<String> missing) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Missing Fields'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('Please fill the following required fields:'),
+            const SizedBox(height: 10),
+            ...missing.map((f) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text('• $f',
+                      style: const TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold)),
+                )),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> uploaddata() async {
+    // Shows inline red errors under empty fields
+    final formValid = _formKey.currentState?.validate() ?? false;
+
+    // Collect missing mandatory fields for the popup
+    final List<String> missing = [];
+    if (familyhead.text.trim().isEmpty) missing.add("Name");
+    if (age.text.trim().isEmpty) missing.add("Age");
+    if (hno.text.trim().isEmpty) missing.add("House Number");
+    if (streetnumber.text.trim().isEmpty) missing.add("Street Number");
+    if (faceImage == null) missing.add("Landmark Photo");
+
+    if (missing.isNotEmpty) {
+      _showMissingFieldsDialog(missing);
+      return;
+    }
+
+    if (!formValid) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please fill all required fields')),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
     final success = await _sendOtp();
-
-    setState(() {
-      _isLoading = false;
-    });
+    setState(() => _isLoading = false);
 
     if (success) {
       _showOtpDialog();
     }
-
-  } else {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Please fill all required fields'),
-      ),
-    );
   }
-}
+
+
+
+
   void openGoogleMaps(String? latitude, String? longitude) {
     final Uri url = Uri.parse(
         'https://www.google.com/maps/search/?api=1&query=$latitude,$longitude');
@@ -823,7 +889,8 @@ Future<void> uploaddata() async {
                     controller: agency,
                     label: "Agency",
                     need: true,
-readOnly: true,                    hunttext: "Agency cannot be empty",
+                    readOnly: true,
+                    hunttext: "Agency cannot be empty",
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
@@ -867,12 +934,14 @@ readOnly: true,                    hunttext: "Agency cannot be empty",
                   textformfeild(
                     controller: familyhead,
                     label: "Name",
-                    hunttext: "Family head name cannot be empty",
+                    need: true,
+                    hunttext: "Name cannot be empty",
                   ),
                   const SizedBox(height: 5),
                   textformfeild(
                     controller: age,
                     label: "Age",
+                    need: true,
                     hunttext: "Age cannot be empty",
                     keyboardType: TextInputType.number,
                   ),
@@ -892,6 +961,7 @@ readOnly: true,                    hunttext: "Agency cannot be empty",
                         child: textformfeild(
                           controller: hno,
                           label: "House Number",
+                          need: true,
                           hunttext: "House number cannot be empty",
                           keyboardType: TextInputType.text,
                         ),
@@ -902,6 +972,7 @@ readOnly: true,                    hunttext: "Agency cannot be empty",
                           controller: streetnumber,
                           hunttext: "Street number cannot be empty",
                           label: "Street No",
+                          need: true,
                           keyboardType: TextInputType.text,
                         ),
                       ),
@@ -941,18 +1012,29 @@ readOnly: true,                    hunttext: "Agency cannot be empty",
                     label: "Street",
                     hunttext: "Street cannot be empty",
                     need: true,
-readOnly: true,                  ),
+                    readOnly: true,
+                  ),
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: landmarkController,
                     label: "Landmark",
                     hunttext: "Landmark cannot be empty",
                     need: true,
-readOnly: true,                  ),
+                    readOnly: true,
+                  ),
                   const SizedBox(height: 10),
-                  const Text(
-                    "Landmark Photo",
-                    style: TextStyle(fontWeight: FontWeight.bold),
+                  const Text.rich(
+                    TextSpan(
+                      text: "Landmark Photo",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                      children: [
+                        TextSpan(
+                          text: ' *',
+                          style: TextStyle(
+                              color: Colors.red, fontWeight: FontWeight.bold),
+                        ),
+                      ],
+                    ),
                   ),
                   const SizedBox(height: 8),
                   GestureDetector(
@@ -1479,8 +1561,8 @@ SizedBox textformfeild({
     child: TextFormField(
       validator: need
           ? (value) {
-              if (value == null || value.isEmpty) {
-                return hunttext;
+              if (value == null || value.trim().isEmpty) {
+                return hunttext ?? "$label is required";
               }
               return null;
             }
@@ -1491,7 +1573,20 @@ SizedBox textformfeild({
       maxLength: maxvalue,
       decoration: InputDecoration(
         counterText: textForCounter,
-        labelText: label,
+        label: need
+            ? Text.rich(
+                TextSpan(
+                  text: label,
+                  children: const [
+                    TextSpan(
+                      text: ' *',
+                      style: TextStyle(
+                          color: Colors.red, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
+              )
+            : Text(label),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(15),
           borderSide: const BorderSide(color: Colors.black),
