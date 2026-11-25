@@ -134,6 +134,12 @@ abstract class AppLocalizations {
   /// **'Date'**
   String get date;
 
+  /// No description provided for @customertype.
+  ///
+  /// In en, this message translates to:
+  /// **'Customer Type'**
+  String get customertype;
+
   /// No description provided for @eenadunewspaper.
   ///
   /// In en, this message translates to:
@@ -146,11 +152,71 @@ abstract class AppLocalizations {
   /// **'Yes'**
   String get yes;
 
+  /// No description provided for @ok.
+  ///
+  /// In en, this message translates to:
+  /// **'OK'**
+  String get ok;
+
+  /// No description provided for @pleasefillrequiredfields.
+  ///
+  /// In en, this message translates to:
+  /// **'Please fill the following required fields:'**
+  String get pleasefillrequiredfields;
+
+  /// No description provided for @startcirculation.
+  ///
+  /// In en, this message translates to:
+  /// **'Start Circulation'**
+  String get startcirculation;
+
+  /// No description provided for @quantity.
+  ///
+  /// In en, this message translates to:
+  /// **'Quantity'**
+  String get quantity;
+
+  /// No description provided for @openlocationingooglemaps.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Location in Google Maps'**
+  String get openlocationingooglemaps;
+
   /// No description provided for @no.
   ///
   /// In en, this message translates to:
   /// **'No'**
   String get no;
+
+  /// No description provided for @startcirculationdatecannotbeempty.
+  ///
+  /// In en, this message translates to:
+  /// **'Start circulation date cannot be empty'**
+  String get startcirculationdatecannotbeempty;
+
+  /// No description provided for @landmarkphoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Landmark Photo'**
+  String get landmarkphoto;
+
+  /// No description provided for @age.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get age;
+
+  /// No description provided for @missingfields.
+  ///
+  /// In en, this message translates to:
+  /// **'Missing Fields'**
+  String get missingfields;
+
+  /// No description provided for @promotername.
+  ///
+  /// In en, this message translates to:
+  /// **'Promoter Name'**
+  String get promotername;
 
   /// No description provided for @feedbacktoimprovepaper.
   ///

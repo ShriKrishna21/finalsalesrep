@@ -76,17 +76,26 @@
   "plannedDetails": "ప్లాన్ చేసిన వివరాలు",
   "reports": "రిపోర్టులు",
   "today": "ఈరోజు",
+  "ok": "సరే",
+  "pleasefillrequiredfields": "దయచేసి కింది తప్పనిసరి వివరాలను నమోదు చేయండి:",
   "routeDetailsWillComeHere": "రోట్ వివరాలు ఇక్కడ రాబోతున్నాయి...",
   "plannedDetailsWillComeHere": "యోచించిన వివరాలు ఇక్కడ వస్తాయి...",
   "alreadySubscribed": "ఇప్పటికే సబ్స్క్రైబ్ చేశారు",
   "daysOfferAccepted15": "ఆఫర్ ఆమోదించబడింది",
   "daysOfferRejected15": "ఆఫర్ తిరస్కరించబడింది",
   "welcome": "స్వాగతం",
-
+"landmarkphoto": "ల్యాండ్‌మార్క్ ఫోటో",
+"quantity": "పరిమాణం",
+"age": "వయస్సు",
+"startcirculationdatecannotbeempty": "పంపిణీ ప్రారంభ తేదీ ఖాళీగా ఉండకూడదు",
+"startcirculation": "పంపిణీ ప్రారంభం",
+"customertype": "కస్టమర్ రకం",
+"missingfields": "తప్పిపోయిన వివరాలు",
   "circulationInchargeScreen": "ప్రచారంఇంచార్జి స్క్రీన్",
   "circulationIncharge": "ప్రచారం ఇంచార్జి",
   "numberOfResources": "వనరుల సంఖ్య",
   "agents": "ఏజెంట్లు",
+  "openlocationingooglemaps": "గూగుల్ మ్యాప్స్‌లో లొకేషన్‌ను తెరవండి",
   "subscriptionDetails": "సభ్యత్వ వివరాలు",
   "housesCount": "ఇళ్ల సంఖ్య",
   "housesVisited": "సందర్శించిన ఇళ్ళు",
@@ -266,99 +275,142 @@
   "noOfflineAttendanceSaved":"ఆఫ్‌లైన్ హాజరు సేవ్ చేయలేదు",
   "workStarted":"పని ప్రారంభమైంది",
   "errorLoadingImage":"చిత్రం లోడ్ కావడం లేదు",
-  "enrollments": "నమోదులు"
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+  "enrollments": "నమోదులు",
+
+
+"customerform": "కస్టమర్ ఫారం",
+
+"promotername": "ప్రమోటర్ పేరు",
+
+
+
+
+
+  "familyheadname": "కుటుంబ పెద్ద పేరు",
+  "name": "పేరు",
+  "fathersname": "తండ్రి పేరు",
+  "mothername": "తల్లి పేరు",
+  "spousename": "భర్త / భార్య పేరు",
+  "houseNumber": "ఇంటి నంబర్",
+  "streetNo": "వీధి నంబర్",
+  "city": "నగరం",
+  "pinCode": "పిన్ కోడ్",
+  "place": "ప్రదేశం",
+  "landmark": "గుర్తింపు ప్రదేశం",
+  "address": "చిరునామా",
+  "mobilenumber": "మొబైల్ నంబర్",
+  "agencyname": "ఏజెన్సీ పేరు",
+  "feedbacktoimprovepaper": "ఈనాడు పత్రికను మెరుగుపరచడానికి మీ అభిప్రాయం",
+  "currentnewpaper": "ప్రస్తుత వార్తాపత్రిక",
+  "reasonfornottakingeenadunewspaper": "ఈనాడు వార్తాపత్రిక తీసుకోకపోవడానికి కారణం",
+  "reasonfornotreadingnewspaper": "వార్తాపత్రిక చదవకపోవడానికి కారణం",
+  "reasonfornottakingoffer": "ఉచిత ఆఫర్ తీసుకోకపోవడానికి కారణం",
+  "jobtype": "ఉద్యోగ రకం",
+  "profession": "వృత్తి",
+  "jobdesignation": "ఉద్యోగ హోదా",
+  "companyname": "కంపెనీ పేరు",
+  "selectdepartment": "శాఖను ఎంచుకోండి",
+  "pleaseEnterName": "దయచేసి పేరు నమోదు చేయండి",
+  "fathersnamecannotbeempty": "తండ్రి పేరు ఖాళీగా ఉండకూడదు",
+  "mothersnamecannotbeempty": "తల్లి పేరు ఖాళీగా ఉండకూడదు",
+  "spousenamecannotbeempty": "భర్త లేదా భార్య పేరు ఖాళీగా ఉండకూడదు",
+  "housenumbercannotbeempty": "ఇంటి నంబర్ ఖాళీగా ఉండకూడదు",
+  "streetnumbercannotbeempty": "వీధి నంబర్ ఖాళీగా ఉండకూడదు",
+  "citycannotbeempty": "నగరం ఖాళీగా ఉండకూడదు",
+  "pincodecannotbeempty": "పిన్ కోడ్ ఖాళీగా ఉండకూడదు",
+  "placecannotbeempty": "ప్రదేశం ఖాళీగా ఉండకూడదు",
+  "landmarkcannotbeempty": "గుర్తింపు ప్రదేశం ఖాళీగా ఉండకూడదు",
+  "mobilenumbercannotbeempty": "మొబైల్ నంబర్ ఖాళీగా ఉండకూడదు",
+  "feedbackcannotbeempty": "అభిప్రాయం ఖాళీగా ఉండకూడదు",
+  "currentnewspapercannotbeempty": "ప్రస్తుత వార్తాపత్రిక పేరు ఖాళీగా ఉండకూడదు",
+  "reasonfornottakingcannotbeempty": "తీసుకోకపోవడానికి కారణం ఖాళీగా ఉండకూడదు",
+  "reasonfornotreadingcannotbeempty": "చదవకపోవడానికి కారణం ఖాళీగా ఉండకూడదు",
+  "fieldcannotbeempty": "ఈ ఫీల్డ్ ఖాళీగా ఉండకూడదు",
+  "pleaseselectanagency": "దయచేసి ఏజెన్సీని ఎంచుకోండి"
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

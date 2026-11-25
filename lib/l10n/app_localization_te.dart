@@ -18,7 +18,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get customerform => 'కస్టమర్ ఫారం';
 
   @override
-  String get familyheadname => ' కుటుంబ అధిపతి పేరు ఖాళీగా ఉండకూడదు';
+  String get familyheadname => 'కుటుంబ పెద్ద పేరు';
 
   @override
   String get name => 'పేరు';
@@ -27,17 +27,53 @@ class AppLocalizationsTe extends AppLocalizations {
   String get date => 'తేదీ';
 
   @override
+  String get customertype => 'కస్టమర్ రకం';
+
+  @override
   String get eenadunewspaper => 'ఈనాడు దినపత్రిక : ';
 
   @override
   String get yes => 'అవును';
 
   @override
+  String get ok => 'సరే';
+
+  @override
+  String get pleasefillrequiredfields =>
+      'దయచేసి కింది తప్పనిసరి వివరాలను నమోదు చేయండి:';
+
+  @override
+  String get startcirculation => 'పంపిణీ ప్రారంభం';
+
+  @override
+  String get quantity => 'పరిమాణం';
+
+  @override
+  String get openlocationingooglemaps =>
+      'గూగుల్ మ్యాప్స్‌లో లొకేషన్‌ను తెరవండి';
+
+  @override
   String get no => 'కాదు';
 
   @override
+  String get startcirculationdatecannotbeempty =>
+      'పంపిణీ ప్రారంభ తేదీ ఖాళీగా ఉండకూడదు';
+
+  @override
+  String get landmarkphoto => 'ల్యాండ్‌మార్క్ ఫోటో';
+
+  @override
+  String get age => 'వయస్సు';
+
+  @override
+  String get missingfields => 'తప్పిపోయిన వివరాలు';
+
+  @override
+  String get promotername => 'ప్రమోటర్ పేరు';
+
+  @override
   String get feedbacktoimprovepaper =>
-      'ఈనాడు పేపర్‌ని మెరుగుపరచడానికి అభిప్రాయం';
+      'ఈనాడు పత్రికను మెరుగుపరచడానికి మీ అభిప్రాయం';
 
   @override
   String get pleaseenterfeedback =>
@@ -55,7 +91,7 @@ class AppLocalizationsTe extends AppLocalizations {
 
   @override
   String get reasonfornottakingeenadunewspaper =>
-      'ఈనాడు దినపత్రిక తీసుకోకపోవడానికి కారణం';
+      'ఈనాడు వార్తాపత్రిక తీసుకోకపోవడానికి కారణం';
 
   @override
   String get reasonfornotreadingnewspaper => 'వార్తాపత్రిక చదవకపోవడానికి కారణం';
@@ -94,7 +130,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get jobprofession => 'ఉద్యోగ వృత్తి';
 
   @override
-  String get jobdesignation => 'ఉద్యోగ పదవి';
+  String get jobdesignation => 'ఉద్యోగ హోదా';
 
   @override
   String get companyname => 'కంపెనీ పేరు';
@@ -106,13 +142,13 @@ class AppLocalizationsTe extends AppLocalizations {
   String get mothername => 'తల్లి పేరు';
 
   @override
-  String get spousename => 'జీవిత భాగస్వామి పేరు';
+  String get spousename => 'భర్త / భార్య పేరు';
 
   @override
   String get address => 'చిరునామా';
 
   @override
-  String get mobilenumber => '  మొబైల్ నంబర్';
+  String get mobilenumber => 'మొబైల్ నంబర్';
 
   @override
   String get submit => 'సబ్మిట్';
@@ -133,10 +169,10 @@ class AppLocalizationsTe extends AppLocalizations {
   String get home => 'హోమ్';
 
   @override
-  String get houseNumber => 'ఇల్లు నంబరు';
+  String get houseNumber => 'ఇంటి నంబర్';
 
   @override
-  String get streetNo => 'వీధి నంబరు';
+  String get streetNo => 'వీధి నంబర్';
 
   @override
   String get city => 'నగరం';
@@ -427,11 +463,10 @@ class AppLocalizationsTe extends AppLocalizations {
   String get mothersnamecannotbeempty => 'తల్లి పేరు ఖాళీగా ఉండకూడదు';
 
   @override
-  String get spousenamecannotbeempty =>
-      ' భర్త లేదా భార్య పేరు ఖాళీగా ఉండకూడదు ';
+  String get spousenamecannotbeempty => 'భర్త లేదా భార్య పేరు ఖాళీగా ఉండకూడదు';
 
   @override
-  String get housenumbercannotbeempty => ' ఇల్లు నంబర్ ఖాళీగా ఉండకూడదు';
+  String get housenumbercannotbeempty => 'ఇంటి నంబర్ ఖాళీగా ఉండకూడదు';
 
   @override
   String get streetnumbercannotbeempty => 'వీధి నంబర్ ఖాళీగా ఉండకూడదు';
@@ -440,38 +475,37 @@ class AppLocalizationsTe extends AppLocalizations {
   String get citycannotbeempty => 'నగరం ఖాళీగా ఉండకూడదు';
 
   @override
-  String get pincodecannotbeempty => 'పిన్‌కోడ్ ఖాళీగా ఉండకూడదు';
+  String get pincodecannotbeempty => 'పిన్ కోడ్ ఖాళీగా ఉండకూడదు';
 
   @override
-  String get placecannotbeempty => '   ప్రదేశం ఖాళీగా ఉండకూడదు';
+  String get placecannotbeempty => 'ప్రదేశం ఖాళీగా ఉండకూడదు';
 
   @override
-  String get landmark => ' ల్యాండ్‌మార్క్/సూచిక ప్రదేశం';
+  String get landmark => 'గుర్తింపు ప్రదేశం';
 
   @override
-  String get landmarkcannotbeempty =>
-      '  ల్యాండ్‌మార్క్/సూచిక ప్రదేశం ఖాళీగా ఉండకూడదు';
+  String get landmarkcannotbeempty => 'గుర్తింపు ప్రదేశం ఖాళీగా ఉండకూడదు';
 
   @override
-  String get mobilenumbercannotbeempty => 'మొబైల్ నంబర్ ఖాళీగా ఉండకూడదు ';
+  String get mobilenumbercannotbeempty => 'మొబైల్ నంబర్ ఖాళీగా ఉండకూడదు';
 
   @override
-  String get feedbackcannotbeempty => 'ఫీడ్‌బ్యాక్ ఖాళీగా ఉండకూడదు';
+  String get feedbackcannotbeempty => 'అభిప్రాయం ఖాళీగా ఉండకూడదు';
 
   @override
   String get currentnewspapercannotbeempty =>
-      '  ప్రస్తుత పత్రిక ఖాళీగా ఉండకూడదు';
+      'ప్రస్తుత వార్తాపత్రిక పేరు ఖాళీగా ఉండకూడదు';
 
   @override
   String get reasonfornottakingcannotbeempty =>
-      '  తీసుకోకపోవడానికి కారణం ఖాళీగా ఉండకూడదు';
+      'తీసుకోకపోవడానికి కారణం ఖాళీగా ఉండకూడదు';
 
   @override
   String get reasonfornotreadingcannotbeempty =>
-      'చదవకపోవడానికి  కారణం ఖాళీగా  ఉండకూడదు';
+      'చదవకపోవడానికి కారణం ఖాళీగా ఉండకూడదు';
 
   @override
-  String get fieldcannotbeempty => 'ఫీల్డ్ ఖాళీగా ఉండకూడదు';
+  String get fieldcannotbeempty => 'ఈ ఫీల్డ్ ఖాళీగా ఉండకూడదు';
 
   @override
   String get selectdepartment => 'శాఖను ఎంచుకోండి';
@@ -695,7 +729,7 @@ class AppLocalizationsTe extends AppLocalizations {
   String get selectanagency => 'ఏజెన్సీ ఎంచుకోండి';
 
   @override
-  String get pleaseselectanagency => ' దయచేసి ఏజెన్సీ ఎంచుకోండి';
+  String get pleaseselectanagency => 'దయచేసి ఏజెన్సీని ఎంచుకోండి';
 
   @override
   String get assignagency => ' ఏజెన్సీని అప్పగించండి';

@@ -27,13 +27,48 @@ class AppLocalizationsEn extends AppLocalizations {
   String get date => 'Date';
 
   @override
+  String get customertype => 'Customer Type';
+
+  @override
   String get eenadunewspaper => 'Eenadu newspaper : ';
 
   @override
   String get yes => 'Yes';
 
   @override
+  String get ok => 'OK';
+
+  @override
+  String get pleasefillrequiredfields =>
+      'Please fill the following required fields:';
+
+  @override
+  String get startcirculation => 'Start Circulation';
+
+  @override
+  String get quantity => 'Quantity';
+
+  @override
+  String get openlocationingooglemaps => 'Open Location in Google Maps';
+
+  @override
   String get no => 'No';
+
+  @override
+  String get startcirculationdatecannotbeempty =>
+      'Start circulation date cannot be empty';
+
+  @override
+  String get landmarkphoto => 'Landmark Photo';
+
+  @override
+  String get age => 'Age';
+
+  @override
+  String get missingfields => 'Missing Fields';
+
+  @override
+  String get promotername => 'Promoter Name';
 
   @override
   String get feedbacktoimprovepaper => 'Feedback to improve Eenadu paper';

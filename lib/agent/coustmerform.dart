@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:finalsalesrep/agent/agentscreen.dart';
 import 'package:finalsalesrep/common_api_class.dart';
+import 'package:finalsalesrep/l10n/app_localization.dart';
 import 'package:finalsalesrep/modelclasses/assignagency.dart';
 import 'package:finalsalesrep/modelclasses/agencymodel.dart';
 
@@ -720,18 +721,19 @@ class _CoustmerState extends State<Coustmer> {
   //   }
   // }
 
-
   void _showMissingFieldsDialog(List<String> missing) {
+    final localizations = AppLocalizations.of(context)!;
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Missing Fields'),
+        title: Text(localizations.missingfields),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Please fill the following required fields:'),
-            const SizedBox(height: 10),
+            Text(localizations.pleasefillrequiredfields),
+            SizedBox(height: 10),
             ...missing.map((f) => Padding(
                   padding: const EdgeInsets.symmetric(vertical: 2),
                   child: Text('• $f',
@@ -743,7 +745,7 @@ class _CoustmerState extends State<Coustmer> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: const Text('OK'),
+            child: Text(localizations.ok),
           ),
         ],
       ),
@@ -751,16 +753,18 @@ class _CoustmerState extends State<Coustmer> {
   }
 
   Future<void> uploaddata() async {
+    final localizations = AppLocalizations.of(context)!;
+
     // Shows inline red errors under empty fields
     final formValid = _formKey.currentState?.validate() ?? false;
 
     // Collect missing mandatory fields for the popup
     final List<String> missing = [];
-    if (familyhead.text.trim().isEmpty) missing.add("Name");
-    if (age.text.trim().isEmpty) missing.add("Age");
-    if (hno.text.trim().isEmpty) missing.add("House Number");
-    if (streetnumber.text.trim().isEmpty) missing.add("Street Number");
-    if (faceImage == null) missing.add("Landmark Photo");
+    if (familyhead.text.trim().isEmpty) missing.add(localizations.name);
+    if (age.text.trim().isEmpty) missing.add(localizations.name);
+    if (hno.text.trim().isEmpty) missing.add(localizations.name);
+    if (streetnumber.text.trim().isEmpty) missing.add(localizations.streetNo);
+    if (faceImage == null) missing.add(localizations.landmarkphoto);
 
     if (missing.isNotEmpty) {
       _showMissingFieldsDialog(missing);
@@ -782,9 +786,6 @@ class _CoustmerState extends State<Coustmer> {
       _showOtpDialog();
     }
   }
-
-
-
 
   void openGoogleMaps(String? latitude, String? longitude) {
     final Uri url = Uri.parse(
@@ -861,12 +862,15 @@ class _CoustmerState extends State<Coustmer> {
 
   @override
   Widget build(BuildContext context) {
+    final localizations = AppLocalizations.of(context)!;
+
     return Scaffold(
       appBar: AppBar(
+        centerTitle: true,
         foregroundColor: Colors.black,
         backgroundColor: Colors.white,
-        title: const Text(
-          "Customer Form",
+        title: Text(
+          localizations.customerform,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             fontSize: 30,
@@ -887,7 +891,7 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 30),
                   textformfeild(
                     controller: agency,
-                    label: "Agency",
+                    label: localizations.agencyname,
                     need: true,
                     readOnly: true,
                     hunttext: "Agency cannot be empty",
@@ -895,7 +899,7 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: promoter,
-                    label: "Promoter Name",
+                    label: localizations.promotername,
                     need: true,
                     hunttext: "Promoter cannot be empty",
                   ),
@@ -906,7 +910,7 @@ class _CoustmerState extends State<Coustmer> {
                         child: date(
                           needed: true,
                           Dcontroller: datecontroller,
-                          date: "Date",
+                          date: localizations.date,
                           inputType: TextInputType.datetime,
                         ),
                       ),
@@ -915,16 +919,16 @@ class _CoustmerState extends State<Coustmer> {
                         child: date(
                           needed: true,
                           Dcontroller: timecontroller,
-                          date: "Time",
+                          date: localizations.time,
                           inputType: TextInputType.datetime,
                         ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 15),
-                  const Text(
-                    "Subscriber Details",
-                    style: TextStyle(
+                  Text(
+                    localizations.subscriptionDetails,
+                    style: const TextStyle(
                       color: Colors.black,
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -933,21 +937,21 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 5),
                   textformfeild(
                     controller: familyhead,
-                    label: "Name",
+                    label: localizations.name,
                     need: true,
                     hunttext: "Name cannot be empty",
                   ),
                   const SizedBox(height: 5),
                   textformfeild(
                     controller: age,
-                    label: "Age",
+                    label: localizations.age,
                     need: true,
                     hunttext: "Age cannot be empty",
                     keyboardType: TextInputType.number,
                   ),
                   const SizedBox(height: 5),
-                  const Text(
-                    "Address Details",
+                  Text(
+                    localizations.addressDetails,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18,
@@ -960,7 +964,7 @@ class _CoustmerState extends State<Coustmer> {
                       Expanded(
                         child: textformfeild(
                           controller: hno,
-                          label: "House Number",
+                          label: localizations.houseNumber,
                           need: true,
                           hunttext: "House number cannot be empty",
                           keyboardType: TextInputType.text,
@@ -970,7 +974,7 @@ class _CoustmerState extends State<Coustmer> {
                       Expanded(
                         child: textformfeild(
                           controller: streetnumber,
-                          hunttext: "Street number cannot be empty",
+                          hunttext: localizations.streetnumbercannotbeempty,
                           label: "Street No",
                           need: true,
                           keyboardType: TextInputType.text,
@@ -983,9 +987,9 @@ class _CoustmerState extends State<Coustmer> {
                     children: [
                       Expanded(
                         child: textformfeild(
-                          hunttext: "City cannot be empty",
+                          hunttext: localizations.citycannotbeempty,
                           controller: city,
-                          label: "City",
+                          label: localizations.city,
                           keyboardType: TextInputType.text,
                         ),
                       ),
@@ -995,7 +999,7 @@ class _CoustmerState extends State<Coustmer> {
                           hunttext: "Pin code cannot be empty",
                           maxvalue: 6,
                           controller: pincode,
-                          label: "Pin Code",
+                          label: localizations.pinCode,
                           keyboardType: TextInputType.number,
                         ),
                       ),
@@ -1004,28 +1008,28 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: adddress,
-                    label: "Address",
+                    label: localizations.address,
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: streetController,
-                    label: "Street",
-                    hunttext: "Street cannot be empty",
+                    label: localizations.streetNo,
+                    hunttext: localizations.streetnumbercannotbeempty,
                     need: true,
                     readOnly: true,
                   ),
                   const SizedBox(height: 10),
                   textformfeild(
                     controller: landmarkController,
-                    label: "Landmark",
-                    hunttext: "Landmark cannot be empty",
+                    label: localizations.landmark,
+                    hunttext: localizations.landmarkcannotbeempty,
                     need: true,
                     readOnly: true,
                   ),
-                  const SizedBox(height: 10),
-                  const Text.rich(
+                  SizedBox(height: 10),
+                  Text.rich(
                     TextSpan(
-                      text: "Landmark Photo",
+                      text: localizations.landmarkphoto,
                       style: TextStyle(fontWeight: FontWeight.bold),
                       children: [
                         TextSpan(
@@ -1052,7 +1056,7 @@ class _CoustmerState extends State<Coustmer> {
                               borderRadius: BorderRadius.circular(8),
                               child: Image.file(faceImage!, fit: BoxFit.cover),
                             )
-                          : const Center(child: Text("Tap to select image")),
+                          : Center(child: Text(localizations.taptoselectimage)),
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -1060,8 +1064,8 @@ class _CoustmerState extends State<Coustmer> {
                     onTap: () {
                       openGoogleMaps(latitude, longitude);
                     },
-                    child: const Text(
-                      'Open Location in Google Maps',
+                    child: Text(
+                      localizations.openlocationingooglemaps,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
                         color: Colors.blue,
@@ -1070,8 +1074,8 @@ class _CoustmerState extends State<Coustmer> {
                   ),
                   const SizedBox(height: 15),
                   // NEWSPAPER DETAILS WITH QUANTITY
-                  const Text(
-                    "Newspaper Details",
+                  Text(
+                    localizations.newsPaperDetails,
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 18,
@@ -1083,8 +1087,8 @@ class _CoustmerState extends State<Coustmer> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        "Quantity",
+                      Text(
+                        localizations.quantity,
                         style: TextStyle(
                             fontSize: 16, fontWeight: FontWeight.w500),
                       ),
@@ -1130,7 +1134,7 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 10),
                   DropdownButtonFormField<String>(
                     value: _selectedCustomerType,
-                    hint: const Text("Customer Type"),
+                    hint: Text(localizations.customertype),
                     isExpanded: true,
                     items: customerTypes.map((String customerType) {
                       return DropdownMenuItem<String>(
@@ -1153,8 +1157,8 @@ class _CoustmerState extends State<Coustmer> {
                       }
                       return null;
                     },
-                    decoration: const InputDecoration(
-                      labelText: "Customer Type",
+                    decoration: InputDecoration(
+                      labelText: localizations.customertype,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
@@ -1216,7 +1220,7 @@ class _CoustmerState extends State<Coustmer> {
                       controller: startCirculationController,
                       readOnly: true,
                       decoration: InputDecoration(
-                        labelText: "Start Circulation",
+                        labelText: localizations.startcirculation,
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(15),
                           borderSide: const BorderSide(color: Colors.black),
@@ -1231,7 +1235,8 @@ class _CoustmerState extends State<Coustmer> {
                       onTap: _selectStartCirculationDate,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return "Start circulation date cannot be empty";
+                          return localizations
+                              .startcirculationdatecannotbeempty;
                         }
                         return null;
                       },
@@ -1241,15 +1246,15 @@ class _CoustmerState extends State<Coustmer> {
                   const SizedBox(height: 5),
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: Text(
-                          "Employed?",
+                          localizations.employed,
                           style: TextStyle(
                               fontSize: 18, fontWeight: FontWeight.bold),
                         ),
                       ),
                       Text(
-                        _isemployed ? "Yes" : "No",
+                        _isemployed ? localizations.yes : localizations.no,
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -1357,7 +1362,7 @@ class _CoustmerState extends State<Coustmer> {
                     const SizedBox(height: 10),
                     DropdownButtonFormField<String>(
                       value: _selectedPrivateProfession,
-                      hint: const Text("Profession"),
+                      hint: Text(localizations.profession),
                       isExpanded: true,
                       items: privateJobProfessions.map((String profession) {
                         return DropdownMenuItem<String>(
@@ -1404,7 +1409,7 @@ class _CoustmerState extends State<Coustmer> {
                   if (!_isemployed)
                     DropdownButtonFormField<String>(
                       value: _selectedproffesion,
-                      hint: const Text("Profession"),
+                      hint: Text(localizations.profession),
                       isExpanded: true,
                       items: proffesion.map((String item) {
                         return DropdownMenuItem<String>(
@@ -1417,8 +1422,8 @@ class _CoustmerState extends State<Coustmer> {
                           _selectedproffesion = newValue;
                         });
                       },
-                      decoration: const InputDecoration(
-                        labelText: "Profession",
+                      decoration: InputDecoration(
+                        labelText: localizations.profession,
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.all(Radius.circular(10)),
                         ),
@@ -1429,11 +1434,11 @@ class _CoustmerState extends State<Coustmer> {
                     controller: mobile,
                     maxLength: 10,
                     keyboardType: TextInputType.phone,
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.all(Radius.circular(10)),
                       ),
-                      labelText: "Mobile Number",
+                      labelText: localizations.mobilenumber,
                       errorText: null,
                     ),
                     validator: (value) {
@@ -1472,7 +1477,7 @@ class _CoustmerState extends State<Coustmer> {
                               width: MediaQuery.of(context).size.height / 5,
                               child: Center(
                                 child: Text(
-                                  "Submit",
+                                  localizations.submit,
                                   style: TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
