@@ -34,7 +34,6 @@ class _OnedayhistoryState extends State<Onedayhistory> {
     loadOnedayHistory();
   }
 
-// 8566682
   Future<void> loadOnedayHistory() async {
     setState(() => _isLoading = true);
     final result = await _onedayagent.fetchOnedayHistory();
@@ -236,6 +235,7 @@ class _OnedayhistoryState extends State<Onedayhistory> {
                    
                     _detailRow(" previous newspaper", r.currentNewspaper),
                        _detailRow("Start circulating", r.startCirculating),
+                       _detailRow("Quantity", r.quantity),
                     // _detailRow(" Start Circulation", r.startCirculating),
                   
 

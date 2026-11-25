@@ -90,7 +90,8 @@ class Record {
   String? age;
   String? customerType;
   String? faceBase64;
-  String? startCirculating; // Added new field
+  String? startCirculating; 
+  String? quantity;
 
   Record({
     this.id,
@@ -135,7 +136,8 @@ class Record {
     this.age,
     this.customerType,
     this.faceBase64,
-    this.startCirculating, // Include in constructor
+    this.startCirculating, 
+    this.quantity,
   });
 
   factory Record.fromJson(Map<String, dynamic> json) {
@@ -185,6 +187,7 @@ class Record {
       customerType: _parseString(json['customer_type']),
       faceBase64: _parseString(json['face_base64']),
       startCirculating: _parseString(json['Start_Circulating']), // Parse new field
+      quantity: json['quantity']?.toString(),
     );
   }
 
